@@ -1,4 +1,6 @@
-﻿namespace BonusService.Service.Model
+﻿using System;
+
+namespace BonusService.Service.Model
 {
     public class BonusCashBack
     {
@@ -16,7 +18,7 @@
     public class BonusCashBackGames
     {
         public int CashbackId { set; get; }
-        public int TpId { set; get; }
+        public int GameId { set; get; }
         public int SiteId { set; get; }
         public decimal Percentage { set; get; }
         public int Status { set; get; }
@@ -31,5 +33,36 @@
         public decimal MaxPay { set; get; }
         public decimal MinBet { set; get; }
         public decimal MaxBet { set; get; }
+    }
+    public class TpBetRecord
+    {
+        public int TpId { set; get; }
+        public string TransId { set; get; }
+        public int GameType { set; get; }
+        public int CustId { set; get; }
+        public string UserName { set; get; }
+        public int CurrencyId { set; get; }
+        public int SiteId { set; get; }
+        public string TpUserName { set; get; }
+        public DateTime TransTime { set; get; }
+        public DateTime SettledTime { set; get; }
+        public decimal Stake { set; get; }
+        public decimal WinlostAmount { set; get; }
+        public string Betdetails { set; get; }
+        public int SettlementType { set; get; }
+        public int TicketStatus { set; get; }
+        public string OriginalState { set; get; }
+        public long TicketKey { set; get; }
+        public long StartDate { set; get; }
+        public long EndDate { set; get; }
+        public decimal StakeCount { set; get; }
+        public decimal WinlostAmountCount { set; get; }
+    }
+    public class BonusCashBackInfoListDetail
+    {
+        public int GameType { set; get; }
+        public decimal StakeCount { set; get; }
+        public decimal WinlostAmountCount { set; get; }
+        public decimal WinlostAmountCountCalculation { set; get; }
     }
 }

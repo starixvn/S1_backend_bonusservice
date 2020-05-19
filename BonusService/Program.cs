@@ -17,8 +17,11 @@ namespace BonusService
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.AddHostedService<Worker>();
-                    services.AddSingleton<BonusCashBackBLL>();
+
+                    services.AddSingleton<WalletService>();
                     services.AddSingleton<BonusCashBackService>();
+
+                    services.AddSingleton<BonusCashBackBLL>();
                 });
     }
 }
