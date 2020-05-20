@@ -1,9 +1,10 @@
-﻿using Dapper;
+﻿using BonusService.Service.Model;
+using Dapper;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
+using System;
 using System.Collections.Generic;
 using System.Data;
-using BonusService.Service.Model;
 
 namespace BonusService.Service.DAL
 {
@@ -49,38 +50,105 @@ namespace BonusService.Service.DAL
                 return conn.Query<TpBetRecord>("Service_BonusCashBackTpBetRecord_Get", new { StartDate, EndDate, SiteId, GameType }, commandType: CommandType.StoredProcedure);
             }
         }
-        public int SetBonusCashBackLogoInfo(int GameType, string CustId, string UserName, int CurrencyId, int SiteId, string TpUserName, decimal StakeTotal, decimal WinlostAmountTotal)
+        public void SetBonusCashBackLogoInfo(int BonusInfoId, int GameId, int CustId, string UserName, int CurrencyId, int SiteId, decimal StakeCount, decimal WinlostAmountCount, decimal Percentage)
         {
 
+            using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString")))
+            {
+                conn.Execute("Service_BonusCashBackLogoInfo_Ins", new { BonusInfoId, CustId, GameId, UserName, CurrencyId, SiteId, StakeCount, WinlostAmountCount, Percentage }, commandType: CommandType.StoredProcedure);
+            }
 
-            return 0;
+        }
+        public void SetBonusInfoCashBack(int PromotionType, string BonusCode, int CustId, string UserName, int CurrencyId, int SiteId, decimal LockedAmount, decimal BonusAmount, decimal ExpiryDays)
+        {
 
-            //using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString")))
-            //{
-            //   return conn.Execute("Service_BonusCashBackLogoInfo_Ins", new { GameType, CustId, UserName, CurrencyId, SiteId, TpUserName, StakeTotal, WinlostAmountTotal }, commandType: CommandType.StoredProcedure);
-            //}
+            using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString")))
+            {
+                string BonusInfo = "";
+                string Memo = "";
+                string Prefix = "BD";
+
+                var p = new DynamicParameters(new { PromotionType, BonusCode, CustId, UserName, CurrencyId, SiteId, BonusInfo, LockedAmount, BonusAmount, ExpiryDays, Memo, Prefix });
+                p.Add("BonusId", dbType: DbType.String, direction: ParameterDirection.Output);
+
+                conn.Execute("Service_BonusInfoCashBack_Ins", p, commandType: CommandType.StoredProcedure);
+            }
 
         }
 
-        public void InsBonusCashBack(int CustId, int SiteId, string UserName, decimal WinlostAmountTotal, int type)
+        public int InsBonusCashBack(BonusCashBackInfoList BonusCashBackInfoList)
         {
             int result = 0;
             byte is1stDepoist = 0;
             decimal afterAmount = 0;
-
-            using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString")))
+            try
             {
-                conn.Open();
-                using var trans = conn.BeginTransaction();
-                result = walletService.SetBalance(CustId, SiteId, UserName, WinlostAmountTotal, type,null,null, out afterAmount, out is1stDepoist, conn, trans);
-                if (result > 0)
+                using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString")))
                 {
-                    trans.Commit();
-                }
-                else {
-                    System.Console.WriteLine(12312312);
+                    conn.Open();
+                    using var trans = conn.BeginTransaction();
+                    result = walletService.SetBalance(BonusCashBackInfoList.CustId, BonusCashBackInfoList.SiteId, BonusCashBackInfoList.UserName, BonusCashBackInfoList.WinlostAmountCountCalculationTotal, 7, null, null, out afterAmount, out is1stDepoist, conn, trans);
+                    if (result > 0)
+                    {
+                        string BonusInfo = null;
+                        string Memo = null;
+                        string Prefix = "BD";
+                        int ExpiryDays = 3;
+
+                        //Console.WriteLine(
+                        //    $"{BonusCashBackInfoList.CustId}  " +
+                        //    $"{BonusCashBackInfoList.UserName}  " +
+                        //    $"{BonusCashBackInfoList.CurrencyId}  " +
+                        //    $"{BonusCashBackInfoList.SiteId}  " +
+                        //    $"{BonusInfo}  " +
+                        //    $"{afterAmount}  " +
+                        //    $"{BonusCashBackInfoList.WinlostAmountCountCalculationTotal}  " +
+                        //    $"{ExpiryDays}  " +
+                        //    $"{Memo}  " +
+                        //    $"{Prefix} "
+                        //);
+
+                        var p = new DynamicParameters(new { PromotionType = 4, BonusCode = "CashBack", BonusCashBackInfoList.CustId, BonusCashBackInfoList.UserName, BonusCashBackInfoList.CurrencyId, BonusCashBackInfoList.SiteId, BonusInfo, LockedAmount = afterAmount, BonusAmount = BonusCashBackInfoList.WinlostAmountCountCalculationTotal, ExpiryDays, Memo, Prefix });
+                        p.Add("BonusId", dbType: DbType.Int32, direction: ParameterDirection.Output);
+                        conn.Execute("Service_BonusInfoCashBack_Ins", p, transaction: trans, commandType: CommandType.StoredProcedure);
+                        var BonusId = p.Get<int>("BonusId");
+                        foreach (var BonusCashBackInfoListdetail in BonusCashBackInfoList.BonusCashBackInfoListDetails)
+                        {
+
+                            //Console.WriteLine(
+                            //    $"{BonusId}  " +
+                            //    $"{BonusCashBackInfoList.CustId}  " +
+                            //    $"{BonusCashBackInfoListdetail.GameType}  " +
+                            //    $"{BonusCashBackInfoList.UserName}  " +
+                            //    $"{BonusCashBackInfoList.CurrencyId}  " +
+                            //    $"{BonusCashBackInfoList.SiteId}  " +
+                            //    $"{BonusCashBackInfoListdetail.StakeCount}  " +
+                            //    $"{BonusCashBackInfoListdetail.WinlostAmountCount}  " +
+                            //    $"{BonusCashBackInfoListdetail.WinlostAmountCountCalculation}  " +
+                            //    $"{BonusCashBackInfoListdetail.Percentage}  "
+
+                            //);
+                            conn.Execute("Service_BonusCashBackInfo_Ins", new { BonusInfoId = BonusId, BonusCashBackInfoList.CustId, GameId = BonusCashBackInfoListdetail.GameType, BonusCashBackInfoList.UserName, BonusCashBackInfoList.CurrencyId, BonusCashBackInfoList.SiteId, BonusCashBackInfoListdetail.StakeCount, BonusCashBackInfoListdetail.WinlostAmountCount, BonusCashBackInfoListdetail.WinlostAmountCountCalculation, BonusCashBackInfoListdetail.Percentage }, transaction: trans, commandType: CommandType.StoredProcedure);
+                        }
+
+                        trans.Commit();
+                        //Console.WriteLine(
+                        //    $"{BonusCashBackInfoList.CustId}  " +
+                        //    $"{BonusCashBackInfoList.SiteId}  " +
+                        //    $"{BonusCashBackInfoList.UserName}  " +
+                        //    $"{BonusCashBackInfoList.WinlostAmountCountCalculationTotal}  " +
+                        //    $"{afterAmount}  " +
+                        //    $"{is1stDepoist} "
+                        //);
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+
+            return result;
         }
     }
 }

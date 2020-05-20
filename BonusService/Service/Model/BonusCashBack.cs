@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace BonusService.Service.Model
 {
@@ -64,5 +65,17 @@ namespace BonusService.Service.Model
         public decimal StakeCount { set; get; }
         public decimal WinlostAmountCount { set; get; }
         public decimal WinlostAmountCountCalculation { set; get; }
+        public decimal Percentage { set; get; }
+    }
+
+    public class BonusCashBackInfoList
+    {
+        public int CustId { get; set; }
+        public string UserName { set; get; }
+        public int CurrencyId { set; get; }
+        public int SiteId { set; get; }
+        public string TpUserName { set; get; }
+        public decimal WinlostAmountCountCalculationTotal { set; get; }
+        public List<BonusCashBackInfoListDetail> BonusCashBackInfoListDetails { get; set; }
     }
 }

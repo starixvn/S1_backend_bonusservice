@@ -15,19 +15,7 @@ namespace BonusService.Service.BLL
             this.GetBonusCashBackInfo = bonusCashBackService;
         }
 
-        public class BonusCashBackInfoList
-        {
-            public int CustId { get; set; }
-            public string UserName { set; get; }
-            public int CurrencyId { set; get; }
-            public int SiteId { set; get; }
-            public string TpUserName { set; get; }
-            public decimal WinlostAmountCountCalculationTotal { set; get; }
-            public List<BonusCashBackInfoListDetail> BonusCashBackInfoListDetails { get; set; }
-
-        }
-
-        public IEnumerable<BonusCashBack> BonusCashBackInfo()
+        public void BonusCashBackInfo()
         {
 
             var CashBackdataInfo = GetBonusCashBackInfo.GetBonusCashBackInfo();
@@ -35,7 +23,7 @@ namespace BonusService.Service.BLL
 
             foreach (var CashBackdata in CashBackdataInfo)
             {
-                Console.WriteLine($"{DateTimeOffset.Now} Id:{CashBackdata.Id} SiteId:{CashBackdata.SiteId} Period:{CashBackdata.Period} DayOfWeek:{CashBackdata.DayOfWeek} PayHour:{CashBackdata.PayHour} PayMinute:{CashBackdata.PayMinute} WithdrawCondition:{CashBackdata.WithdrawCondition} DefaultPercentage:{CashBackdata.DefaultPercentage} TimeZone:{CashBackdata.TimeZone}");
+                //Console.WriteLine($"{DateTimeOffset.Now} Id:{CashBackdata.Id} SiteId:{CashBackdata.SiteId} Period:{CashBackdata.Period} DayOfWeek:{CashBackdata.DayOfWeek} PayHour:{CashBackdata.PayHour} PayMinute:{CashBackdata.PayMinute} WithdrawCondition:{CashBackdata.WithdrawCondition} DefaultPercentage:{CashBackdata.DefaultPercentage} TimeZone:{CashBackdata.TimeZone}");
 
                 DateTimeOffset trigerTime = new DateTimeOffset(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, CashBackdata.PayHour, CashBackdata.PayMinute, 0, new TimeSpan(0, Convert.ToInt32(CashBackdata.TimeZone * 60m), 0));
                 //long StartDay = new DateTimeOffset(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day - 1, 0, 0, 0, new TimeSpan(0, Convert.ToInt32(CashBackdata.TimeZone * 60m), 0)).ToUnixTimeSeconds();
@@ -67,17 +55,17 @@ namespace BonusService.Service.BLL
                                 {
                                     if (TpBetRecord.WinlostAmountCount < 0)
                                     {
-
+                                        decimal Percentage = (BonusCashBackGames.Percentage == null) ? CashBackdata.DefaultPercentage : BonusCashBackGames.Percentage;
                                         long value = (long)Math.Pow(10.0, 2);
-                                        decimal Calculation = Convert.ToDecimal(Math.Floor(TpBetRecord.WinlostAmountCount * BonusCashBackGames.Percentage * (decimal)value) / (decimal)value) * -1;
-                                        Console.WriteLine(
-                                            $"{TpBetRecord.CustId}  " +
-                                            $"{TpBetRecord.UserName}  " +
-                                            $"{TpBetRecord.StakeCount}  " +
-                                            $"{TpBetRecord.WinlostAmountCount}  " +
-                                            $"{BonusCashBackGames.Percentage}  " +
-                                            $"{Calculation} "
-                                        );
+                                        decimal Calculation = Convert.ToDecimal(Math.Floor(TpBetRecord.WinlostAmountCount * Percentage / 100 * (decimal)value) / (decimal)value) * -1;
+                                        //Console.WriteLine(
+                                        //    $"{TpBetRecord.CustId}  " +
+                                        //    $"{TpBetRecord.UserName}  " +
+                                        //    $"{TpBetRecord.StakeCount}  " +
+                                        //    $"{TpBetRecord.WinlostAmountCount}  " +
+                                        //    $"{BonusCashBackGames.Percentage}  " +
+                                        //    $"{Calculation} "
+                                        //);
 
                                         var get = bonusCashBackInfoLists.FirstOrDefault(x => x.CustId == TpBetRecord.CustId);
                                         if (get != null)
@@ -88,7 +76,7 @@ namespace BonusService.Service.BLL
                                         else
                                         {
                                             var gameInfo = new List<BonusCashBackInfoListDetail>();
-                                            gameInfo.Add(new BonusCashBackInfoListDetail() { GameType = BonusCashBackGames.GameId, StakeCount = TpBetRecord.StakeCount, WinlostAmountCount = TpBetRecord.WinlostAmountCount, WinlostAmountCountCalculation = Calculation });
+                                            gameInfo.Add(new BonusCashBackInfoListDetail() { GameType = BonusCashBackGames.GameId, StakeCount = TpBetRecord.StakeCount, WinlostAmountCount = TpBetRecord.WinlostAmountCount, WinlostAmountCountCalculation = Calculation, Percentage = Percentage });
                                             bonusCashBackInfoLists.Add(new BonusCashBackInfoList()
                                             {
                                                 CustId = TpBetRecord.CustId,
@@ -123,23 +111,12 @@ namespace BonusService.Service.BLL
 
                 if (bonusCashBackInfoLists != null)
                 {
-                    try
+                    foreach (var bonusCashBackInfoList in bonusCashBackInfoLists)
                     {
-                        foreach (var bonusCashBackInfoList in bonusCashBackInfoLists)
-                        {
-                            Console.WriteLine(bonusCashBackInfoList.CustId);
-                            Console.WriteLine(bonusCashBackInfoList.UserName);
-                            Console.WriteLine(bonusCashBackInfoList.SiteId);
-                            Console.WriteLine(bonusCashBackInfoList.WinlostAmountCountCalculationTotal);
-                            GetBonusCashBackInfo.InsBonusCashBack(bonusCashBackInfoList.CustId, bonusCashBackInfoList.SiteId, bonusCashBackInfoList.UserName, bonusCashBackInfoList.WinlostAmountCountCalculationTotal, 7);
-                        }
-                    }
-                    catch (Exception ex) {
-                        Console.WriteLine(ex.Message);
+                        GetBonusCashBackInfo.InsBonusCashBack(bonusCashBackInfoList);
                     }
                 }
             }
-            return GetBonusCashBackInfo.GetBonusCashBackInfo();
         }
     }
 }
