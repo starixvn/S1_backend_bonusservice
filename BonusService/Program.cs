@@ -16,6 +16,7 @@ namespace BonusService
             Host.CreateDefaultBuilder(args)
                 .ConfigureServices((hostContext, services) =>
                 {
+                    services.AddMemoryCache();
                     services.AddHostedService<Worker>();
 
                     services.AddSingleton<WalletService>();

@@ -21,7 +21,7 @@ namespace BonusService.Service.DAL
 
         public IEnumerable<BonusCashBack> GetBonusCashBackInfo()
         {
-            using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString")))
+            using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString_Report")))
             {
                 return conn.Query<BonusCashBack>("Service_BonusCashBack_Get", commandType: CommandType.StoredProcedure);
             }
@@ -29,7 +29,7 @@ namespace BonusService.Service.DAL
 
         public IEnumerable<BonusCashBackGames> GetBonusCashBackGamesInfo(int CashbackId, int SiteId)
         {
-            using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString")))
+            using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString_Report")))
             {
                 return conn.Query<BonusCashBackGames>("Service_BonusCashBackGames_Get", new { CashbackId, SiteId }, commandType: CommandType.StoredProcedure);
             }
@@ -37,7 +37,7 @@ namespace BonusService.Service.DAL
 
         public IEnumerable<BonusCashBackMinMax> GetBonusCashBackMinMaxInfo(int CashbackId, int SiteId)
         {
-            using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString")))
+            using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString_Report")))
             {
                 return conn.Query<BonusCashBackMinMax>("Service_BonusCashBackMinMax_Get", new { CashbackId, SiteId }, commandType: CommandType.StoredProcedure);
             }
@@ -45,7 +45,7 @@ namespace BonusService.Service.DAL
 
         public IEnumerable<TpBetRecord> GetTpBetRecordInfo(long StartDate, long EndDate, int SiteId, int GameType)
         {
-            using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString")))
+            using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString_Report")))
             {
                 return conn.Query<TpBetRecord>("Service_BonusCashBackTpBetRecord_Get", new { StartDate, EndDate, SiteId, GameType }, commandType: CommandType.StoredProcedure);
             }

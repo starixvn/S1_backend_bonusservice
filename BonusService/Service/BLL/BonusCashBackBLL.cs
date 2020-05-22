@@ -1,5 +1,6 @@
 ﻿using BonusService.Service.DAL;
 using BonusService.Service.Model;
+using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,18 +9,57 @@ namespace BonusService.Service.BLL
 {
     public class BonusCashBackBLL
     {
-        private readonly BonusCashBackService GetBonusCashBackInfo;
+        private readonly BonusCashBackService bonusCashBackService;
+        private readonly IMemoryCache cache;
 
-        public BonusCashBackBLL(BonusCashBackService bonusCashBackService)
+        public BonusCashBackBLL(IMemoryCache cache, BonusCashBackService bonusCashBackService)
         {
-            this.GetBonusCashBackInfo = bonusCashBackService;
+            this.bonusCashBackService = bonusCashBackService;
+            this.cache = cache;
         }
 
+        public IEnumerable<BonusCashBack> GetBonusCashBackInfo()
+        {
+            string key = $"GetBonusCashBackInfo";
+
+            var GetBonusCashBackInfo = cache.Get<IEnumerable<BonusCashBack>>(key);
+            if (GetBonusCashBackInfo == null)
+            {
+                GetBonusCashBackInfo = bonusCashBackService.GetBonusCashBackInfo();
+
+                if (GetBonusCashBackInfo != null)
+                {
+                    cache.Set(key, GetBonusCashBackInfo, new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(1)));
+                }
+            }
+
+            return GetBonusCashBackInfo;
+        }
+        public IEnumerable<BonusCashBackGames> GetBonusCashBackGamesInfo(int CashbackId, int SiteId)
+        {
+            string key = $"GetBonusCashBackGamesInfo_{CashbackId}_{SiteId}";
+
+            var GetBonusCashBackGamesInfo = cache.Get<IEnumerable<BonusCashBackGames>>(key);
+            if (GetBonusCashBackGamesInfo == null)
+            {
+                GetBonusCashBackGamesInfo = bonusCashBackService.GetBonusCashBackGamesInfo(CashbackId, SiteId);
+
+                if (GetBonusCashBackGamesInfo != null)
+                {
+                    cache.Set(key, GetBonusCashBackGamesInfo, new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(1)));
+                }
+            }
+
+            return GetBonusCashBackGamesInfo;
+        }
+        public IEnumerable<TpBetRecord> GetTpBetRecordInfo(long StartDate, long EndDate, int SiteId, int GameType)
+        {
+            return bonusCashBackService.GetTpBetRecordInfo(StartDate, EndDate, SiteId, GameType);
+        }
         public void BonusCashBackInfo()
         {
 
-            var CashBackdataInfo = GetBonusCashBackInfo.GetBonusCashBackInfo();
-
+            var CashBackdataInfo = GetBonusCashBackInfo();
 
             foreach (var CashBackdata in CashBackdataInfo)
             {
@@ -44,12 +84,12 @@ namespace BonusService.Service.BLL
                     }
                     else if (CashBackdata.Period == 2 && LocalDayOfWeek == CashBackdata.DayOfWeek || true)
                     {
-                        var BonusCashBackGamesInfo = GetBonusCashBackInfo.GetBonusCashBackGamesInfo(CashbackId: CashBackdata.Id, SiteId: CashBackdata.SiteId);
+                        var BonusCashBackGamesInfo = bonusCashBackService.GetBonusCashBackGamesInfo(CashbackId: CashBackdata.Id, SiteId: CashBackdata.SiteId);
                         foreach (var BonusCashBackGames in BonusCashBackGamesInfo)
                         {
                             if (BonusCashBackGames.Status == 1)
                             {
-                                var TpBetRecordInfo = GetBonusCashBackInfo.GetTpBetRecordInfo(StartDay, EndDay, SiteId: CashBackdata.SiteId, GameType: BonusCashBackGames.GameId);
+                                var TpBetRecordInfo = bonusCashBackService.GetTpBetRecordInfo(StartDay, EndDay, SiteId: CashBackdata.SiteId, GameType: BonusCashBackGames.GameId);
 
                                 foreach (var TpBetRecord in TpBetRecordInfo)
                                 {
@@ -113,7 +153,7 @@ namespace BonusService.Service.BLL
                 {
                     foreach (var bonusCashBackInfoList in bonusCashBackInfoLists)
                     {
-                        GetBonusCashBackInfo.InsBonusCashBack(bonusCashBackInfoList);
+                        bonusCashBackService.InsBonusCashBack(bonusCashBackInfoList);
                     }
                 }
             }
