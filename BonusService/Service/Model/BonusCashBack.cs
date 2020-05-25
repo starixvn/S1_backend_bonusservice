@@ -21,7 +21,7 @@ namespace BonusService.Service.Model
         public int CashbackId { set; get; }
         public int GameId { set; get; }
         public int SiteId { set; get; }
-        public decimal Percentage { set; get; }
+        public decimal? Percentage { set; get; }
         public int Status { set; get; }
     }
 

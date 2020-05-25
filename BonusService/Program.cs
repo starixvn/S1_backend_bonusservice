@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using BonusService.Service.BLL;
 using BonusService.Service.DAL;
+using BonusService.Service.Library;
 
 namespace BonusService
 {
@@ -17,7 +18,9 @@ namespace BonusService
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.AddMemoryCache();
-                    services.AddHostedService<Worker>();
+                    services.AddSingleton<Common>();
+
+                    services.AddHostedService<BonusCashBackWorker>();
 
                     services.AddSingleton<WalletService>();
                     services.AddSingleton<BonusCashBackService>();
