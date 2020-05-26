@@ -23,6 +23,7 @@ namespace BonusService
                     services.AddHostedService<BonusCashBackWorker>();
 
                     services.AddSingleton<WalletService>();
+                    services.AddSingleton<WithdrawalLimitService>();
                     services.AddSingleton<BonusCashBackService>();
 
                     services.AddSingleton<BonusCashBackBLL>();

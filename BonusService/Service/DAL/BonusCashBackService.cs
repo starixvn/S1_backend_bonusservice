@@ -17,10 +17,11 @@ namespace BonusService.Service.DAL
         private readonly WithdrawalLimitService withdrawalLimitService;
         private readonly Common common;
 
-        public BonusCashBackService(IConfiguration configuration, WalletService walletService, Common common, ILogger<BonusCashBackWorker> logger)
+        public BonusCashBackService(IConfiguration configuration, WalletService walletService, Common common, ILogger<BonusCashBackWorker> logger,WithdrawalLimitService withdrawalLimitService)
         {
             this.configuration = configuration;
             this.walletService = walletService;
+            this.withdrawalLimitService = withdrawalLimitService;
             this.common = common;
             _logger = logger;
         }
@@ -81,13 +82,13 @@ namespace BonusService.Service.DAL
 
         }
 
-        public decimal GetBonusCashBack(BonusCashBackInfoList bonusCashBackInfo, MySqlConnection conn, MySqlTransaction trans)
+        public int GetBonusCashBack(BonusCashBackInfoList bonusCashBackInfo, out decimal WinlostAmount, MySqlConnection conn, MySqlTransaction trans)
         {
             var p = new DynamicParameters(new { bonusCashBackInfo.CustId, bonusCashBackInfo.CalculationDay, bonusCashBackInfo.WinlostAmountCountCalculationTotal });
             p.Add("WinlostAmount", dbType: DbType.Decimal, direction: ParameterDirection.Output);
-            conn.QuerySingleOrDefault<decimal>("Service_BonusInfoCashBack_Set", p, transaction: trans, commandType: CommandType.StoredProcedure);
-            var WinlostAmount = p.Get<decimal>("WinlostAmount");
-            return WinlostAmount;
+            int result = conn.Execute("Service_BonusInfoCashBack_Set", p, transaction: trans, commandType: CommandType.StoredProcedure);
+            WinlostAmount = p.Get<decimal>("WinlostAmount");
+            return result;
         }
 
         public int InsBonusCashBack(BonusCashBackInfoList bonusCashBackInfo)
@@ -101,11 +102,33 @@ namespace BonusService.Service.DAL
                 conn.Open();
                 using var trans = conn.BeginTransaction();
                 string memo = null;
-                decimal WinlostAmountCountCalculationTotal = GetBonusCashBack(bonusCashBackInfo, conn, trans);
+                decimal WinlostAmountCountCalculationTotal = 0;
 
-
-                if (WinlostAmountCountCalculationTotal != bonusCashBackInfo.WinlostAmountCountCalculationTotal)
+                try
                 {
+                    result = GetBonusCashBack(bonusCashBackInfo, out WinlostAmountCountCalculationTotal, conn, trans);
+                }
+                catch (MySqlException mySqlEx)
+                {
+                    if (mySqlEx.Number == 3572)
+                    {
+                        return 1;
+                    }
+                    else
+                    {
+                        throw mySqlEx;
+                    }
+                }
+
+               
+
+                if (WinlostAmountCountCalculationTotal != bonusCashBackInfo.WinlostAmountCountCalculationTotal && result > 0)
+                {
+                    _logger.LogInformation(
+                   $" WinlostAmountCountCalculationTotal:{WinlostAmountCountCalculationTotal}" +
+                   $" bonusCashBackInfo WinlostAmountCountCalculationTotal:{bonusCashBackInfo.WinlostAmountCountCalculationTotal}" +
+                   $" result:{result}"
+               );
                     if (WinlostAmountCountCalculationTotal > 0)
                     {
                         memo = "ReCalculationTotal";
@@ -127,7 +150,7 @@ namespace BonusService.Service.DAL
                         p.Add("BonusId", dbType: DbType.Int32, direction: ParameterDirection.Output);
                         p.Add("TransId", dbType: DbType.String, direction: ParameterDirection.Output);
                         result = conn.Execute("Service_BonusInfoCashBack_Ins", p, transaction: trans, commandType: CommandType.StoredProcedure);
-                        
+
                         if (result > 0)
                         {
                             var TransId = p.Get<string>("TransId");
@@ -146,6 +169,7 @@ namespace BonusService.Service.DAL
                     }
                 }
             }
+
             return result;
         }
     }

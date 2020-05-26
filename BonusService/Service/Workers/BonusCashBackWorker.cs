@@ -27,43 +27,51 @@ namespace BonusService
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                foreach (var cashBack in bonusCashBackBLL.GetBonusCashBackInfo())
+                try
                 {
-                    DateTime utcDate = DateTime.Now.ToUniversalTime();
-                    var settleTime1 = utcDate.Add(new TimeSpan(0, Convert.ToInt32(60 * cashBack.TimeZone), 0));
-                    DateTimeOffset calTime = new DateTimeOffset(settleTime1.Year, settleTime1.Month, settleTime1.Day, cashBack.PayHour, cashBack.PayMinute, 0, new TimeSpan(0, Convert.ToInt32(60 * cashBack.TimeZone), 0));
-                    _logger.LogCritical("Worker running at: {time}", calTime);
-
-                    if (calTime.LocalDateTime.ToString("yyyyMMddHHmm") == DateTime.Now.ToString("yyyyMMddHHmm"))
+                    foreach (var cashBack in bonusCashBackBLL.GetBonusCashBackInfo())
                     {
-                        if (cashBack.Period == 1)
-                        {
-                            DateTime dateTime = calTime.AddDays(-1).DateTime;
-                            var StartTime = new DateTimeOffset(dateTime.Year, dateTime.Month, dateTime.Day, 0, 0, 0, new TimeSpan(0, Convert.ToInt32(60 * cashBack.TimeZone), 0));
-                            long StartDay = StartTime.ToUnixTimeSeconds();
-                            long EndDay = StartTime.AddDays(1).ToUnixTimeSeconds() - 1;
+                        DateTime utcDate = DateTime.Now.ToUniversalTime();
+                        var settleTime1 = utcDate.Add(new TimeSpan(0, Convert.ToInt32(60 * cashBack.TimeZone), 0));
+                        DateTimeOffset calTime = new DateTimeOffset(settleTime1.Year, settleTime1.Month, settleTime1.Day, cashBack.PayHour, cashBack.PayMinute, 0, new TimeSpan(0, Convert.ToInt32(60 * cashBack.TimeZone), 0));
+                        //DateTimeOffset calTime = new DateTimeOffset(2020, 02, 11, 16, 0, 0, new TimeSpan(0, Convert.ToInt32(60 * cashBack.TimeZone), 0));
+                        _logger.LogCritical("Worker running at: {time}", calTime);
 
-                            Cashback(StartDay, EndDay, cashBack);
-                        }
-                        else if (cashBack.Period == 2 && (int)calTime.LocalDateTime.DayOfWeek == cashBack.DayOfWeek)
+                        if (calTime.LocalDateTime.ToString("yyyyMMddHHmm") == DateTime.Now.ToString("yyyyMMddHHmm") || true)
                         {
-
-                            for (var stepDay = 7; stepDay > 0; stepDay--)
+                            if (cashBack.Period == 1)
                             {
-                                DateTime dateTime = calTime.AddDays(-1 * stepDay).DateTime;
+                                DateTime dateTime = calTime.AddDays(-1).DateTime;
                                 var StartTime = new DateTimeOffset(dateTime.Year, dateTime.Month, dateTime.Day, 0, 0, 0, new TimeSpan(0, Convert.ToInt32(60 * cashBack.TimeZone), 0));
                                 long StartDay = StartTime.ToUnixTimeSeconds();
                                 long EndDay = StartTime.AddDays(1).ToUnixTimeSeconds() - 1;
 
                                 Cashback(StartDay, EndDay, cashBack);
                             }
+                            else if (cashBack.Period == 2 && (int)calTime.LocalDateTime.DayOfWeek == cashBack.DayOfWeek)
+                            {
+                                for (var stepDay = 7; stepDay > 0; stepDay--)
+                                {
+                                    DateTime dateTime = calTime.AddDays(-1 * stepDay).DateTime;
+                                    var StartTime = new DateTimeOffset(dateTime.Year, dateTime.Month, dateTime.Day, 0, 0, 0, new TimeSpan(0, Convert.ToInt32(60 * cashBack.TimeZone), 0));
+                                    long StartDay = StartTime.ToUnixTimeSeconds();
+                                    long EndDay = StartTime.AddDays(1).ToUnixTimeSeconds() - 1;
+
+                                    Cashback(StartDay, EndDay, cashBack);
+                                }
+                            }
                         }
                     }
                 }
+                catch (Exception ex)
+                {
+                    _logger.LogInformation(ex.Message.ToString());
+                }
+
+                //_logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                await Task.Delay(10000, stoppingToken);
             }
 
-            //_logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-            await Task.Delay(1000, stoppingToken);
         }
 
         void Cashback(long StartDay, long EndDay, BonusCashBack bonusCashBack)
@@ -83,17 +91,17 @@ namespace BonusService
                         {
                             decimal Percentage = bonusCashBackGames.Percentage ?? bonusCashBack.DefaultPercentage;
                             decimal Calculation = tools.Floor(Math.Abs(TpBetRecord.WinlostAmountCount) * Percentage / 100m, 2);
-
                             if (!bonusCashBackInfoList.ContainsKey(TpBetRecord.CustId))
                             {
                                 var bonusCashBackInfoLists = new BonusCashBackInfoList();
                                 bonusCashBackInfoLists.CurrencyId = TpBetRecord.CurrencyId;
                                 bonusCashBackInfoLists.CustId = TpBetRecord.CustId;
-                                bonusCashBackInfoLists.SiteId = TpBetRecord.SiteId;
+                                bonusCashBackInfoLists.SiteId = bonusCashBack.SiteId;
                                 bonusCashBackInfoLists.TpUserName = TpBetRecord.TpUserName;
                                 bonusCashBackInfoLists.UserName = TpBetRecord.UserName;
                                 bonusCashBackInfoLists.WithdrawCondition = bonusCashBack.WithdrawCondition;
                                 bonusCashBackInfoLists.WinlostAmountCountCalculationTotal = Calculation;
+                                bonusCashBackInfoLists.CalculationDay = StartDay;
                                 bonusCashBackInfoList.Add(TpBetRecord.CustId, bonusCashBackInfoLists);
 
                                 bonusCashBackInfoLists.BonusCashBackInfoListDetails = new List<BonusCashBackInfoListDetail>();
@@ -102,7 +110,7 @@ namespace BonusService
                             else
                             {
                                 var bonusCashBackInfoLists = bonusCashBackInfoList[TpBetRecord.CustId];
-                                bonusCashBackInfoLists.WinlostAmountCountCalculationTotal = Calculation;
+                                bonusCashBackInfoLists.WinlostAmountCountCalculationTotal += Calculation;
                                 bonusCashBackInfoLists.BonusCashBackInfoListDetails.Add(new BonusCashBackInfoListDetail() { GameType = bonusCashBackGames.GameId, StakeCount = TpBetRecord.StakeCount, WinlostAmountCount = TpBetRecord.WinlostAmountCount, WinlostAmountCountCalculation = Calculation });
                             }
                         }
@@ -114,7 +122,10 @@ namespace BonusService
             {
                 foreach (var list in bonusCashBackInfoList)
                 {
-                    bonusCashBackBLL.InsBonusCashBack(list);
+                    if (bonusCashBackBLL.InsBonusCashBack(list) > 0)
+                    {
+                        continue;
+                    }
                 }
             }
         }
