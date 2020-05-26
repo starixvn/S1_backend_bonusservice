@@ -2,8 +2,8 @@
 using BonusService.Service.Model;
 using Dapper;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
-using System;
 using System.Collections.Generic;
 using System.Data;
 
@@ -12,14 +12,17 @@ namespace BonusService.Service.DAL
     public class BonusCashBackService
     {
         private IConfiguration configuration;
+        private readonly ILogger<BonusCashBackWorker> _logger;
         private readonly WalletService walletService;
+        private readonly WithdrawalLimitService withdrawalLimitService;
         private readonly Common common;
 
-        public BonusCashBackService(IConfiguration configuration, WalletService walletService,Common common)
+        public BonusCashBackService(IConfiguration configuration, WalletService walletService, Common common, ILogger<BonusCashBackWorker> logger)
         {
             this.configuration = configuration;
             this.walletService = walletService;
             this.common = common;
+            _logger = logger;
         }
 
         public IEnumerable<BonusCashBack> GetBonusCashBackInfo()
@@ -77,6 +80,16 @@ namespace BonusService.Service.DAL
             }
 
         }
+
+        public decimal GetBonusCashBack(BonusCashBackInfoList bonusCashBackInfo, MySqlConnection conn, MySqlTransaction trans)
+        {
+            var p = new DynamicParameters(new { bonusCashBackInfo.CustId, bonusCashBackInfo.CalculationDay, bonusCashBackInfo.WinlostAmountCountCalculationTotal });
+            p.Add("WinlostAmount", dbType: DbType.Decimal, direction: ParameterDirection.Output);
+            conn.QuerySingleOrDefault<decimal>("Service_BonusInfoCashBack_Set", p, transaction: trans, commandType: CommandType.StoredProcedure);
+            var WinlostAmount = p.Get<decimal>("WinlostAmount");
+            return WinlostAmount;
+        }
+
         public int InsBonusCashBack(BonusCashBackInfoList bonusCashBackInfo)
         {
             int result = 0;
@@ -87,66 +100,52 @@ namespace BonusService.Service.DAL
             {
                 conn.Open();
                 using var trans = conn.BeginTransaction();
-                result = walletService.SetBalance(bonusCashBackInfo.CustId, bonusCashBackInfo.SiteId, bonusCashBackInfo.UserName, bonusCashBackInfo.WinlostAmountCountCalculationTotal, 7, null, null, out afterAmount, out is1stDepoist, conn, trans);
-                if (result > 0)
+                string memo = null;
+                decimal WinlostAmountCountCalculationTotal = GetBonusCashBack(bonusCashBackInfo, conn, trans);
+
+
+                if (WinlostAmountCountCalculationTotal != bonusCashBackInfo.WinlostAmountCountCalculationTotal)
                 {
-                    string BonusInfo = null;
-                    string Memo = null;
-                    string Prefix = $"B{common.GetEnv()}";
-                    int ExpiryDays = 3;
+                    if (WinlostAmountCountCalculationTotal > 0)
+                    {
+                        memo = "ReCalculationTotal";
+                    }
+                    WinlostAmountCountCalculationTotal = bonusCashBackInfo.WinlostAmountCountCalculationTotal - WinlostAmountCountCalculationTotal;
+                    decimal WithdrawBonusCashBack = WinlostAmountCountCalculationTotal * bonusCashBackInfo.WithdrawCondition;
 
-                    //Console.WriteLine(
-                    //    $"{BonusCashBackInfoList.CustId}  " +
-                    //    $"{BonusCashBackInfoList.UserName}  " +
-                    //    $"{BonusCashBackInfoList.CurrencyId}  " +
-                    //    $"{BonusCashBackInfoList.SiteId}  " +
-                    //    $"{BonusInfo}  " +
-                    //    $"{afterAmount}  " +
-                    //    $"{BonusCashBackInfoList.WinlostAmountCountCalculationTotal}  " +
-                    //    $"{ExpiryDays}  " +
-                    //    $"{Memo}  " +
-                    //    $"{Prefix} "
-                    //);
+                    result = walletService.SetBalance(bonusCashBackInfo.CustId, bonusCashBackInfo.SiteId, bonusCashBackInfo.UserName, WinlostAmountCountCalculationTotal, 7, memo, null, out afterAmount, out is1stDepoist, conn, trans);
+                    _logger.LogInformation(result.ToString());
 
-                    var p = new DynamicParameters(new { PromotionType = 4, BonusCode = "CashBack", bonusCashBackInfo.CustId, bonusCashBackInfo.UserName, bonusCashBackInfo.CurrencyId, bonusCashBackInfo.SiteId, BonusInfo, LockedAmount = afterAmount, BonusAmount = bonusCashBackInfo.WinlostAmountCountCalculationTotal, ExpiryDays, Memo, Prefix });
-                    p.Add("BonusId", dbType: DbType.Int32, direction: ParameterDirection.Output);
-                    result = conn.Execute("Service_BonusInfoCashBack_Ins", p, transaction: trans, commandType: CommandType.StoredProcedure);
                     if (result > 0)
                     {
-                        var BonusId = p.Get<int>("BonusId");
-                        foreach (var BonusCashBackInfoListdetail in bonusCashBackInfo.BonusCashBackInfoListDetails)
+                        string BonusInfo = null;
+                        string Memo = null;
+                        string Prefix = $"B{common.GetEnv()}";
+                        int ExpiryDays = 3;
+
+                        var p = new DynamicParameters(new { PromotionType = 4, BonusCode = "CashBack", bonusCashBackInfo.CustId, bonusCashBackInfo.UserName, bonusCashBackInfo.CurrencyId, bonusCashBackInfo.SiteId, BonusInfo, LockedAmount = afterAmount, BonusAmount = bonusCashBackInfo.WinlostAmountCountCalculationTotal, ExpiryDays, Memo, bonusCashBackInfo.CalculationDay, Prefix });
+                        p.Add("BonusId", dbType: DbType.Int32, direction: ParameterDirection.Output);
+                        p.Add("TransId", dbType: DbType.String, direction: ParameterDirection.Output);
+                        result = conn.Execute("Service_BonusInfoCashBack_Ins", p, transaction: trans, commandType: CommandType.StoredProcedure);
+                        
+                        if (result > 0)
                         {
-
-                            //Console.WriteLine(
-                            //    $"{BonusId}  " +
-                            //    $"{BonusCashBackInfoList.CustId}  " +
-                            //    $"{BonusCashBackInfoListdetail.GameType}  " +
-                            //    $"{BonusCashBackInfoList.UserName}  " +
-                            //    $"{BonusCashBackInfoList.CurrencyId}  " +
-                            //    $"{BonusCashBackInfoList.SiteId}  " +
-                            //    $"{BonusCashBackInfoListdetail.StakeCount}  " +
-                            //    $"{BonusCashBackInfoListdetail.WinlostAmountCount}  " +
-                            //    $"{BonusCashBackInfoListdetail.WinlostAmountCountCalculation}  " +
-                            //    $"{BonusCashBackInfoListdetail.Percentage}  "
-
-                            //);
-                            conn.Execute("Service_BonusCashBackInfo_Ins", new { BonusInfoId = BonusId, bonusCashBackInfo.CustId, GameId = BonusCashBackInfoListdetail.GameType, bonusCashBackInfo.UserName, bonusCashBackInfo.CurrencyId, bonusCashBackInfo.SiteId, BonusCashBackInfoListdetail.StakeCount, BonusCashBackInfoListdetail.WinlostAmountCount, BonusCashBackInfoListdetail.WinlostAmountCountCalculation, BonusCashBackInfoListdetail.Percentage }, transaction: trans, commandType: CommandType.StoredProcedure);
+                            var TransId = p.Get<string>("TransId");
+                            decimal withdrawalLimit = 0;
+                            result = withdrawalLimitService.SetWithdrawalLimit(bonusCashBackInfo.CustId, bonusCashBackInfo.UserName, bonusCashBackInfo.SiteId, WithdrawBonusCashBack, $"BonusCashBack: {WithdrawBonusCashBack}", TransId, out withdrawalLimit, conn, trans);
                         }
-
-                        trans.Commit();
+                        if (result > 0)
+                        {
+                            var BonusId = p.Get<int>("BonusId");
+                            foreach (var BonusCashBackInfoListdetail in bonusCashBackInfo.BonusCashBackInfoListDetails)
+                            {
+                                conn.Execute("Service_BonusCashBackInfo_Ins", new { BonusInfoId = BonusId, bonusCashBackInfo.CustId, GameId = BonusCashBackInfoListdetail.GameType, bonusCashBackInfo.UserName, bonusCashBackInfo.CurrencyId, bonusCashBackInfo.SiteId, BonusCashBackInfoListdetail.StakeCount, BonusCashBackInfoListdetail.WinlostAmountCount, BonusCashBackInfoListdetail.WinlostAmountCountCalculation, BonusCashBackInfoListdetail.Percentage }, transaction: trans, commandType: CommandType.StoredProcedure);
+                            }
+                            trans.Commit();
+                        }
                     }
-                    //Console.WriteLine(
-                    //    $"{BonusCashBackInfoList.CustId}  " +
-                    //    $"{BonusCashBackInfoList.SiteId}  " +
-                    //    $"{BonusCashBackInfoList.UserName}  " +
-                    //    $"{BonusCashBackInfoList.WinlostAmountCountCalculationTotal}  " +
-                    //    $"{afterAmount}  " +
-                    //    $"{is1stDepoist} "
-                    //);
                 }
             }
-
-
             return result;
         }
     }

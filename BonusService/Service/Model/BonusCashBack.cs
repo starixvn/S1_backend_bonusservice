@@ -75,7 +75,9 @@ namespace BonusService.Service.Model
         public int CurrencyId { set; get; }
         public int SiteId { set; get; }
         public string TpUserName { set; get; }
+        public int WithdrawCondition {set;get;}
         public decimal WinlostAmountCountCalculationTotal { set; get; }
+        public long CalculationDay { set; get; }
         public List<BonusCashBackInfoListDetail> BonusCashBackInfoListDetails { get; set; }
     }
 }

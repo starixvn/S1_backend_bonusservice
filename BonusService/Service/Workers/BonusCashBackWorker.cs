@@ -1,13 +1,12 @@
+using BonusService.Service.BLL;
+using BonusService.Service.Library;
+using BonusService.Service.Model;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using BonusService.Service.BLL;
-using BonusService.Service.DAL;
-using System;
-using BonusService.Service.Library;
-using System.Collections.Generic;
-using BonusService.Service.Model;
 
 namespace BonusService
 {
@@ -47,31 +46,18 @@ namespace BonusService
                             Cashback(StartDay, EndDay, cashBack);
                         }
                         else if (cashBack.Period == 2 && (int)calTime.LocalDateTime.DayOfWeek == cashBack.DayOfWeek)
+                        {
 
                             for (var stepDay = 7; stepDay > 0; stepDay--)
                             {
-                                DateTime dateTime = calTime.AddDays(-1 * 7).DateTime;
+                                DateTime dateTime = calTime.AddDays(-1 * stepDay).DateTime;
                                 var StartTime = new DateTimeOffset(dateTime.Year, dateTime.Month, dateTime.Day, 0, 0, 0, new TimeSpan(0, Convert.ToInt32(60 * cashBack.TimeZone), 0));
                                 long StartDay = StartTime.ToUnixTimeSeconds();
                                 long EndDay = StartTime.AddDays(1).ToUnixTimeSeconds() - 1;
 
                                 Cashback(StartDay, EndDay, cashBack);
                             }
-
-
-                        //var BonusCashBackMinMaxInfo = GetBonusCashBackInfo.GetBonusCashBackMinMaxInfo(CashbackId: CashBackdata.Id, SiteId: CashBackdata.SiteId);
-
-                        //foreach (var BonusCashBackMinMax in BonusCashBackMinMaxInfo)
-                        //{
-                        //    Console.WriteLine("--MinMax--");
-                        //    Console.WriteLine(BonusCashBackMinMax.SiteId);
-                        //    Console.WriteLine(BonusCashBackMinMax.CurrencyId);
-                        //    Console.WriteLine(BonusCashBackMinMax.MinPay);
-                        //    Console.WriteLine(BonusCashBackMinMax.MaxPay);
-                        //    Console.WriteLine(BonusCashBackMinMax.MinBet);
-                        //    Console.WriteLine(BonusCashBackMinMax.MaxBet);
-                        //    Console.WriteLine("--MinMax--");
-                        //}
+                        }
                     }
                 }
             }
@@ -106,6 +92,7 @@ namespace BonusService
                                 bonusCashBackInfoLists.SiteId = TpBetRecord.SiteId;
                                 bonusCashBackInfoLists.TpUserName = TpBetRecord.TpUserName;
                                 bonusCashBackInfoLists.UserName = TpBetRecord.UserName;
+                                bonusCashBackInfoLists.WithdrawCondition = bonusCashBack.WithdrawCondition;
                                 bonusCashBackInfoLists.WinlostAmountCountCalculationTotal = Calculation;
                                 bonusCashBackInfoList.Add(TpBetRecord.CustId, bonusCashBackInfoLists);
 

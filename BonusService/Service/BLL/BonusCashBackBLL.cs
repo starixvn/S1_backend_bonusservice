@@ -3,7 +3,6 @@ using BonusService.Service.Model;
 using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace BonusService.Service.BLL
 {
