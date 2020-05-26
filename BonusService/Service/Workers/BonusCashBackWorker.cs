@@ -65,7 +65,7 @@ namespace BonusService
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogInformation(ex.Message.ToString());
+                    _logger.LogError(ex.ToString());
                 }
 
                 //_logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
