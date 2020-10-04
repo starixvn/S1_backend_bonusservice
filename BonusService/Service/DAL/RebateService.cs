@@ -9,15 +9,15 @@ using System.Data;
 
 namespace BonusService.Service.DAL
 {
-    public class BonusCashBackService
+    public class RebateService
     {
-        private IConfiguration configuration;
-        private readonly ILogger<BonusCashBackWorker> _logger;
+        private readonly IConfiguration configuration;
+        private readonly ILogger<RebateWorker> _logger;
         private readonly WalletService walletService;
         private readonly WithdrawalLimitService withdrawalLimitService;
         private readonly Common common;
 
-        public BonusCashBackService(IConfiguration configuration, WalletService walletService, Common common, ILogger<BonusCashBackWorker> logger,WithdrawalLimitService withdrawalLimitService)
+        public RebateService(IConfiguration configuration, WalletService walletService, Common common, ILogger<RebateWorker> logger, WithdrawalLimitService withdrawalLimitService)
         {
             this.configuration = configuration;
             this.walletService = walletService;
@@ -26,9 +26,19 @@ namespace BonusService.Service.DAL
             _logger = logger;
         }
 
+        public IEnumerable<RebateTask> GetRebateTask()
+        {
+            using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
+            return conn.Query<RebateTask>("Service_RebateTask_Get", commandType: CommandType.StoredProcedure);
+        }
+        public IEnumerable<RebateInfo> GetRebateInfo(string bonusCode, int siteId, int pageSize, int pageNumber)
+        {
+            using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
+            return conn.Query<RebateInfo>("Service_RebateInfo_Get", new { BonusCode = bonusCode, SiteId = siteId, PageSize = pageSize, PageNumber = pageNumber }, commandType: CommandType.StoredProcedure);
+        }
         public IEnumerable<BonusCashBack> GetBonusCashBackInfo()
         {
-            using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString_Report")))
+            using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport")))
             {
                 return conn.Query<BonusCashBack>("Service_BonusCashBack_Get", commandType: CommandType.StoredProcedure);
             }
@@ -36,7 +46,7 @@ namespace BonusService.Service.DAL
 
         public IEnumerable<BonusCashBackGames> GetBonusCashBackGamesInfo(int CashbackId, int SiteId)
         {
-            using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString_Report")))
+            using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport")))
             {
                 return conn.Query<BonusCashBackGames>("Service_BonusCashBackGames_Get", new { CashbackId, SiteId }, commandType: CommandType.StoredProcedure);
             }
@@ -44,7 +54,7 @@ namespace BonusService.Service.DAL
 
         public IEnumerable<BonusCashBackMinMax> GetBonusCashBackMinMaxInfo(int CashbackId, int SiteId)
         {
-            using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString_Report")))
+            using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport")))
             {
                 return conn.Query<BonusCashBackMinMax>("Service_BonusCashBackMinMax_Get", new { CashbackId, SiteId }, commandType: CommandType.StoredProcedure);
             }
@@ -52,7 +62,7 @@ namespace BonusService.Service.DAL
 
         public IEnumerable<TpBetRecord> GetTpBetRecordInfo(long StartDate, long EndDate, int SiteId, int GameType)
         {
-            using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString_Report")))
+            using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport")))
             {
                 return conn.Query<TpBetRecord>("Service_BonusCashBackTpBetRecord_Get", new { StartDate, EndDate, SiteId, GameType }, commandType: CommandType.StoredProcedure);
             }
@@ -120,7 +130,7 @@ namespace BonusService.Service.DAL
                     }
                 }
 
-               
+
 
                 if (WinlostAmountCountCalculationTotal != bonusCashBackInfo.WinlostAmountCountCalculationTotal && result > 0)
                 {

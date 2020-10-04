@@ -3,6 +3,24 @@ using System.Collections.Generic;
 
 namespace BonusService.Service.Model
 {
+    public class RebateTask
+    {
+        public string BonusCode { set; get; }
+        public int SiteId { set; get; }
+        public int PromotionType { set; get; }
+        public int PeriodType { set; get; }
+        public int PeriodDay { set; get; }
+        public int CurrencyId { set; get; }
+        public int GameType { set; get; }
+        public decimal Percentage { set; get; }
+    }
+
+    public class RebateInfo
+    {
+        public int CustId { set; get; }
+        public int CurrencyId { set; get; }
+    }
+
     public class BonusCashBack
     {
         public int Id { set; get; }

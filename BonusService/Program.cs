@@ -19,14 +19,14 @@ namespace BonusService
                 {
                     services.AddMemoryCache();
                     services.AddSingleton<Common>();
-
-                    services.AddHostedService<BonusCashBackWorker>();
+                    services.AddSingleton<Log2File>();
 
                     services.AddSingleton<WalletService>();
                     services.AddSingleton<WithdrawalLimitService>();
-                    services.AddSingleton<BonusCashBackService>();
+                    services.AddSingleton<RebateService>();
+                    services.AddSingleton<RebateBLL>();
 
-                    services.AddSingleton<BonusCashBackBLL>();
+                    services.AddHostedService<RebateWorker>();
                 });
     }
 }

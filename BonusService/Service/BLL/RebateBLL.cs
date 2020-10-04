@@ -6,17 +6,25 @@ using System.Collections.Generic;
 
 namespace BonusService.Service.BLL
 {
-    public class BonusCashBackBLL
+    public class RebateBLL
     {
-        private readonly BonusCashBackService bonusCashBackService;
+        private readonly RebateService rebateService;
         private readonly IMemoryCache cache;
 
-        public BonusCashBackBLL(IMemoryCache cache, BonusCashBackService bonusCashBackService)
+        public RebateBLL(IMemoryCache cache, RebateService rebateService)
         {
-            this.bonusCashBackService = bonusCashBackService;
+            this.rebateService = rebateService;
             this.cache = cache;
         }
 
+        public IEnumerable<RebateTask> GetRebateTask()
+        {
+            return rebateService.GetRebateTask();
+        }
+        public IEnumerable<RebateInfo> GetRebateInfo(string bonusCode, int siteId, int pageSize, int pageNumber)
+        {
+            return rebateService.GetRebateInfo(bonusCode, siteId, pageSize, pageNumber);
+        }
         public IEnumerable<BonusCashBack> GetBonusCashBackInfo()
         {
             string key = $"GetBonusCashBackInfo";
@@ -24,7 +32,7 @@ namespace BonusService.Service.BLL
             var GetBonusCashBackInfo = cache.Get<IEnumerable<BonusCashBack>>(key);
             if (GetBonusCashBackInfo == null)
             {
-                GetBonusCashBackInfo = bonusCashBackService.GetBonusCashBackInfo();
+                GetBonusCashBackInfo = rebateService.GetBonusCashBackInfo();
 
                 if (GetBonusCashBackInfo != null)
                 {
@@ -41,7 +49,7 @@ namespace BonusService.Service.BLL
             var GetBonusCashBackGamesInfo = cache.Get<IEnumerable<BonusCashBackGames>>(key);
             if (GetBonusCashBackGamesInfo == null)
             {
-                GetBonusCashBackGamesInfo = bonusCashBackService.GetBonusCashBackGamesInfo(CashbackId, SiteId);
+                GetBonusCashBackGamesInfo = rebateService.GetBonusCashBackGamesInfo(CashbackId, SiteId);
 
                 if (GetBonusCashBackGamesInfo != null)
                 {
@@ -53,12 +61,12 @@ namespace BonusService.Service.BLL
         }
         public IEnumerable<TpBetRecord> GetTpBetRecordInfo(long StartDate, long EndDate, int SiteId, int GameType)
         {
-            return bonusCashBackService.GetTpBetRecordInfo(StartDate, EndDate, SiteId, GameType);
+            return rebateService.GetTpBetRecordInfo(StartDate, EndDate, SiteId, GameType);
         }
 
         public int InsBonusCashBack(KeyValuePair<int, BonusCashBackInfoList> keyValuePair)
         {
-            return bonusCashBackService.InsBonusCashBack(keyValuePair.Value);
+            return rebateService.InsBonusCashBack(keyValuePair.Value);
         }
     }
 }
