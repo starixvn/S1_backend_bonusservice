@@ -49,22 +49,29 @@ namespace BonusService.Service.DAL
             conn.Open();
             using var trans = conn.BeginTransaction();
             decimal payAmount = 0m;
-
+            int promotionType = 0;
             foreach (var rr in rebateTpBetRecords)
             {
                 var rebateSetting = rebateTasks.Where(x => x.BonusCode == bonusCode && x.CurrencyId == rebateInfo.CurrencyId && x.GameType == rr.GameType).FirstOrDefault();
 
                 if (rebateSetting != null)
                 {
-                    var amount = rebateSetting.PromotionType == 6 ? rr.ValidBet / 100 * rebateSetting.Percentage : rr.WinlostAmount / 100 * rebateSetting.Percentage;
-                    payAmount += amount;
+                    var rebateRecord = GetRebateRecord(custId, int.Parse(rr.SettledDate.ToString("yyyyMMdd")), rr.GameType, bonusCode, rebateSetting.PromotionType, conn, trans);
+                    if (rebateRecord == null)
+                    {
+                        promotionType = rebateSetting.PromotionType;
+                        var sum = rebateSetting.PromotionType == 6 ? rr.ValidBet : rr.WinlostAmount;
+                        SetRebateRecord(custId, int.Parse(rr.SettledDate.ToString("yyyyMMdd")), rr.GameType, bonusCode, sum, rebateSetting.PromotionType, conn, trans);
+                        var amount = sum / 100 * rebateSetting.Percentage;
+                        payAmount += amount;
+                    }
                 }
             }
 
-            result = walletService.SetBalance(custId, siteId, userName, payAmount, 8, $"{payAmount:#,##0.##}", bonusCode, out _, out _, conn, trans);
+            result = walletService.SetBalance(custId, siteId, userName, payAmount, 8, $"{(promotionType == 6 ? "Rebate" : "Cashback")}: {payAmount:#,##0.##}", bonusCode, out _, out _, conn, trans);
             if (result > 0)
             {
-                result = withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, payAmount, $"{payAmount:#,##0.##}", bonusCode, out _, conn, trans);
+                result = withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, payAmount, $"{(promotionType == 6 ? "Rebate" : "Cashback")}: {payAmount:#,##0.##}", bonusCode, out _, conn, trans);
                 if (result > 0)
                 {
                     trans.Commit();
@@ -72,6 +79,15 @@ namespace BonusService.Service.DAL
             }
 
             return result;
+        }
+
+        public RebateRecord GetRebateRecord(int CustId, int SettledDate, int GameType, string BonusCode, int PromotionType, MySqlConnection conn, MySqlTransaction trans)
+        {
+            return conn.Query<RebateRecord>("Service_RebateRecord_Get", new { CustId, SettledDate, GameType, BonusCode, PromotionType }, transaction: trans, commandType: CommandType.StoredProcedure).FirstOrDefault();
+        }
+        public int SetRebateRecord(int CustId, int SettledDate, int GameType, string BonusCode, decimal Sum, int PromotionType, MySqlConnection conn, MySqlTransaction trans)
+        {
+            return conn.Execute("Service_RebateRecord_Set", new { CustId, SettledDate, GameType, BonusCode, Sum, PromotionType }, transaction: trans, commandType: CommandType.StoredProcedure);
         }
         public IEnumerable<BonusCashBack> GetBonusCashBackInfo()
         {

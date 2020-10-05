@@ -30,6 +30,12 @@ namespace BonusService.Service.Model
         public decimal ValidBet { set; get; }
         public decimal WinlostAmount { set; get; }
     }
+    public class RebateRecord
+    {
+        public int SettledDate { set; get; }
+        public int GameType { set; get; }
+        public decimal Sum { set; get; }
+    }
     public class BonusCashBack
     {
         public int Id { set; get; }
