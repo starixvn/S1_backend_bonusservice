@@ -25,6 +25,14 @@ namespace BonusService.Service.BLL
         {
             return rebateService.GetRebateInfo(bonusCode, siteId, pageSize, pageNumber);
         }
+        public IEnumerable<RebateTpBetRecord> GetRebateTpBetRecord(string bonusCode, int siteId, int custId, int currencyId, int is14)
+        {
+            return rebateService.GetRebateTpBetRecord(bonusCode, siteId, custId, currencyId, is14);
+        }
+        public int PayoutRebate(int siteId, int custId, string userName, decimal payAmount, string bonusCode)
+        {
+            return rebateService.PayoutRebate(siteId, custId, userName, payAmount, bonusCode);
+        }
         public IEnumerable<BonusCashBack> GetBonusCashBackInfo()
         {
             string key = $"GetBonusCashBackInfo";

@@ -36,6 +36,31 @@ namespace BonusService.Service.DAL
             using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
             return conn.Query<RebateInfo>("Service_RebateInfo_Get", new { BonusCode = bonusCode, SiteId = siteId, PageSize = pageSize, PageNumber = pageNumber }, commandType: CommandType.StoredProcedure);
         }
+        public IEnumerable<RebateTpBetRecord> GetRebateTpBetRecord(string bonusCode, int siteId, int custId, int currencyId, int is14)
+        {
+            using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
+            return conn.Query<RebateTpBetRecord>("Service_RebateTpBetRecord_Get", new { BonusCode = bonusCode, SiteId = siteId, CustId = custId, Is14 = is14 }, commandType: CommandType.StoredProcedure);
+        }
+        public int PayoutRebate(int siteId, int custId, string userName, decimal payAmount, string bonusCode)
+        {
+            int result = 0;
+            using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
+            conn.Open();
+            using var trans = conn.BeginTransaction();
+            result = walletService.SetBalance(custId, siteId, userName, payAmount, 8, $"{payAmount:#,##0.##}", bonusCode, out _, out _, conn, trans);
+            if (result > 0)
+            {
+                result = withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, payAmount, $"{payAmount:#,##0.##}", bonusCode, out _, conn, trans);
+                if (result > 0)
+                {
+                    trans.Commit();
+                }
+            }
+
+            return result;
+        }
+
+        //                    result = walletService.SetBalance(bonusCashBackInfo.CustId, bonusCashBackInfo.SiteId, bonusCashBackInfo.UserName, WinlostAmountCountCalculationTotal, 7, memo, null, out afterAmount, out is1stDepoist, conn, trans);
         public IEnumerable<BonusCashBack> GetBonusCashBackInfo()
         {
             using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport")))
@@ -43,7 +68,6 @@ namespace BonusService.Service.DAL
                 return conn.Query<BonusCashBack>("Service_BonusCashBack_Get", commandType: CommandType.StoredProcedure);
             }
         }
-
         public IEnumerable<BonusCashBackGames> GetBonusCashBackGamesInfo(int CashbackId, int SiteId)
         {
             using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport")))

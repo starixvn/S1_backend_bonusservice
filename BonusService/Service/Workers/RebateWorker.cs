@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
 using Newtonsoft.Json;
+using System.Net;
 
 namespace BonusService
 {
@@ -43,7 +44,7 @@ namespace BonusService
             {
                 var rebateTaskList = rebateBLL.GetRebateTask();
                 foreach (var rebateTask in (from p in rebateTaskList
-                                            select new { p.BonusCode, p.SiteId }).Distinct())
+                                            select new { p.BonusCode, p.SiteId, p.PromotionType, p.PeriodType }).Distinct())
                 {
                     _logger.LogCritical($"Worker running at: {JsonConvert.SerializeObject(rebateTask)}");
 
@@ -51,44 +52,51 @@ namespace BonusService
                     int listCnt = 0;
                     do
                     {
-
                         var rebateInfoList = rebateBLL.GetRebateInfo(rebateTask.BonusCode, rebateTask.SiteId, pageSize, pageNumber);
+                        foreach(var rebateInfo in rebateInfoList)
+                        {
+                            var rebateTpBetRecordList = rebateBLL.GetRebateTpBetRecord(rebateTask.BonusCode, rebateTask.SiteId, rebateInfo.CustId, rebateInfo.CurrencyId, 0).ToList();//.ToDictionary<string, RebateTpBetRecord>(x => $"{x.SettledDate:yyyyMMdd}_{x.GameType}", x => x);
 
+                            if (rebateTask.PeriodType == 3)
+                            {
+                                var dd = rebateTpBetRecordList.ToDictionary(x => $"{x.SettledDate:yyyyMMdd}_{x.GameType}", x => x);
 
+                                foreach (var rebateTpBetRecord14 in rebateBLL.GetRebateTpBetRecord(rebateTask.BonusCode, rebateTask.SiteId, rebateInfo.CustId, rebateInfo.CurrencyId, 1))
+                                {
+                                    if (dd.ContainsKey($"{rebateTpBetRecord14.SettledDate:yyyyMMdd}_{rebateTpBetRecord14.GameType}"))
+                                    {
+                                        dd[$"{rebateTpBetRecord14.SettledDate:yyyyMMdd}_{rebateTpBetRecord14.GameType}"].ValidBet += rebateTpBetRecord14.ValidBet;
+                                        dd[$"{rebateTpBetRecord14.SettledDate:yyyyMMdd}_{rebateTpBetRecord14.GameType}"].WinlostAmount += rebateTpBetRecord14.WinlostAmount;
+                                    }
+                                    else
+                                    {
+                                        rebateTpBetRecordList.Add(rebateTpBetRecord14);
+                                    }
+                                }
+                            }
+
+                            if (rebateTpBetRecordList.Count() > 0)
+                            {
+                                decimal payAmount = 0m;
+
+                                foreach (var rr in rebateTpBetRecordList)
+                                {
+                                    var rebateSetting = rebateTaskList.Where(x => x.BonusCode == rebateTask.BonusCode && x.CurrencyId == rebateInfo.CurrencyId && x.GameType == rr.GameType).FirstOrDefault();
+                                    if (rebateSetting != null)
+                                    {
+                                        var amount = rebateSetting.PromotionType == 6 ? rr.ValidBet / 100 * rebateSetting.Percentage : rr.WinlostAmount / 100 * rebateSetting.Percentage;
+                                        payAmount += amount;
+                                    }
+                                }
+
+                                rebateBLL.PayoutRebate(rebateTask.SiteId, rebateInfo.CustId, rebateTpBetRecordList.FirstOrDefault()?.UserName, payAmount, rebateTask.BonusCode);
+                            }
+                        }
 
                         listCnt = rebateInfoList.Count();
                         pageNumber++;
                     }
                     while (listCnt == pageSize);
-                    //DateTime utcDate = DateTime.Now.ToUniversalTime();
-                    //var settleTime1 = utcDate.Add(new TimeSpan(0, Convert.ToInt32(60 * rebateTask.TimeZone), 0));
-                    //DateTimeOffset calTime = new DateTimeOffset(settleTime1.Year, settleTime1.Month, settleTime1.Day, rebateTask.PayHour, rebateTask.PayMinute, 0, new TimeSpan(0, Convert.ToInt32(60 * rebateTask.TimeZone), 0));
-                    ////DateTimeOffset calTime = new DateTimeOffset(2020, 02, 11, 16, 0, 0, new TimeSpan(0, Convert.ToInt32(60 * cashBack.TimeZone), 0));
-
-                    //if (calTime.LocalDateTime.ToString("yyyyMMddHHmm") == DateTime.Now.ToString("yyyyMMddHHmm") || true)
-                    //{
-                    //    if (rebateTask.Period == 1)
-                    //    {
-                    //        DateTime dateTime = calTime.AddDays(-1).DateTime;
-                    //        var StartTime = new DateTimeOffset(dateTime.Year, dateTime.Month, dateTime.Day, 0, 0, 0, new TimeSpan(0, Convert.ToInt32(60 * rebateTask.TimeZone), 0));
-                    //        long StartDay = StartTime.ToUnixTimeSeconds();
-                    //        long EndDay = StartTime.AddDays(1).ToUnixTimeSeconds() - 1;
-
-                    //        Cashback(StartDay, EndDay, rebateTask);
-                    //    }
-                    //    else if (rebateTask.Period == 2 && (int)calTime.LocalDateTime.DayOfWeek == rebateTask.DayOfWeek)
-                    //    {
-                    //        for (var stepDay = 7; stepDay > 0; stepDay--)
-                    //        {
-                    //            DateTime dateTime = calTime.AddDays(-1 * stepDay).DateTime;
-                    //            var StartTime = new DateTimeOffset(dateTime.Year, dateTime.Month, dateTime.Day, 0, 0, 0, new TimeSpan(0, Convert.ToInt32(60 * rebateTask.TimeZone), 0));
-                    //            long StartDay = StartTime.ToUnixTimeSeconds();
-                    //            long EndDay = StartTime.AddDays(1).ToUnixTimeSeconds() - 1;
-
-                    //            Cashback(StartDay, EndDay, rebateTask);
-                    //        }
-                    //    }
-                    //}
                 }
             }
             catch (Exception ex)
