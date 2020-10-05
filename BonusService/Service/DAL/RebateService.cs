@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 
 namespace BonusService.Service.DAL
 {
@@ -41,12 +42,25 @@ namespace BonusService.Service.DAL
             using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
             return conn.Query<RebateTpBetRecord>("Service_RebateTpBetRecord_Get", new { BonusCode = bonusCode, SiteId = siteId, CustId = custId, Is14 = is14 }, commandType: CommandType.StoredProcedure);
         }
-        public int PayoutRebate(int siteId, int custId, string userName, decimal payAmount, string bonusCode)
+        public int PayoutRebate(int siteId, int custId, string userName, string bonusCode, RebateInfo rebateInfo, IEnumerable<RebateTpBetRecord> rebateTpBetRecords, IEnumerable<RebateTask> rebateTasks)
         {
             int result = 0;
             using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
             conn.Open();
             using var trans = conn.BeginTransaction();
+            decimal payAmount = 0m;
+
+            foreach (var rr in rebateTpBetRecords)
+            {
+                var rebateSetting = rebateTasks.Where(x => x.BonusCode == bonusCode && x.CurrencyId == rebateInfo.CurrencyId && x.GameType == rr.GameType).FirstOrDefault();
+
+                if (rebateSetting != null)
+                {
+                    var amount = rebateSetting.PromotionType == 6 ? rr.ValidBet / 100 * rebateSetting.Percentage : rr.WinlostAmount / 100 * rebateSetting.Percentage;
+                    payAmount += amount;
+                }
+            }
+
             result = walletService.SetBalance(custId, siteId, userName, payAmount, 8, $"{payAmount:#,##0.##}", bonusCode, out _, out _, conn, trans);
             if (result > 0)
             {
@@ -59,8 +73,6 @@ namespace BonusService.Service.DAL
 
             return result;
         }
-
-        //                    result = walletService.SetBalance(bonusCashBackInfo.CustId, bonusCashBackInfo.SiteId, bonusCashBackInfo.UserName, WinlostAmountCountCalculationTotal, 7, memo, null, out afterAmount, out is1stDepoist, conn, trans);
         public IEnumerable<BonusCashBack> GetBonusCashBackInfo()
         {
             using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport")))

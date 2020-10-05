@@ -77,19 +77,8 @@ namespace BonusService
 
                             if (rebateTpBetRecordList.Count() > 0)
                             {
-                                decimal payAmount = 0m;
-
-                                foreach (var rr in rebateTpBetRecordList)
-                                {
-                                    var rebateSetting = rebateTaskList.Where(x => x.BonusCode == rebateTask.BonusCode && x.CurrencyId == rebateInfo.CurrencyId && x.GameType == rr.GameType).FirstOrDefault();
-                                    if (rebateSetting != null)
-                                    {
-                                        var amount = rebateSetting.PromotionType == 6 ? rr.ValidBet / 100 * rebateSetting.Percentage : rr.WinlostAmount / 100 * rebateSetting.Percentage;
-                                        payAmount += amount;
-                                    }
-                                }
-
-                                rebateBLL.PayoutRebate(rebateTask.SiteId, rebateInfo.CustId, rebateTpBetRecordList.FirstOrDefault()?.UserName, payAmount, rebateTask.BonusCode);
+                                //RebateTpBetRecord
+                                rebateBLL.PayoutRebate(rebateTask.SiteId, rebateInfo.CustId, rebateTpBetRecordList.FirstOrDefault()?.UserName, rebateTask.BonusCode, rebateInfo, rebateTpBetRecordList, rebateTaskList);
                             }
                         }
 

@@ -29,9 +29,9 @@ namespace BonusService.Service.BLL
         {
             return rebateService.GetRebateTpBetRecord(bonusCode, siteId, custId, currencyId, is14);
         }
-        public int PayoutRebate(int siteId, int custId, string userName, decimal payAmount, string bonusCode)
+        public int PayoutRebate(int siteId, int custId, string userName, string bonusCode, RebateInfo rebateInfo, IEnumerable<RebateTpBetRecord> rebateTpBetRecords, IEnumerable<RebateTask> rebateTasks)
         {
-            return rebateService.PayoutRebate(siteId, custId, userName, payAmount, bonusCode);
+            return rebateService.PayoutRebate(siteId, custId, userName, bonusCode, rebateInfo, rebateTpBetRecords, rebateTasks);
         }
         public IEnumerable<BonusCashBack> GetBonusCashBackInfo()
         {
