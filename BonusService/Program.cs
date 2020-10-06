@@ -27,6 +27,8 @@ namespace BonusService
                     services.AddSingleton<RebateBLL>();
 
                     services.AddHostedService<RebateWorker>();
+
+                    services.AddSingleton<SelLangBLL>();
                 });
     }
 }
