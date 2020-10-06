@@ -32,6 +32,11 @@ namespace BonusService.Service.DAL
             using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
             return conn.Query<RebateTask>("Service_RebateTask_Get", commandType: CommandType.StoredProcedure);
         }
+        public int SetRebateTaskDone(string bonusCode, int siteId)
+        {
+            using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
+            return conn.Execute("Service_RebateTaskDone_Set", new { BonusCode = bonusCode, SiteId = siteId }, commandType: CommandType.StoredProcedure);
+        }
         public IEnumerable<RebateInfo> GetRebateInfo(string bonusCode, int siteId, int pageSize, int pageNumber)
         {
             using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
@@ -40,7 +45,7 @@ namespace BonusService.Service.DAL
         public IEnumerable<RebateTpBetRecord> GetRebateTpBetRecord(string bonusCode, int siteId, int custId, int currencyId, int is14)
         {
             using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
-            return conn.Query<RebateTpBetRecord>("Service_RebateTpBetRecord_Get", new { BonusCode = bonusCode, SiteId = siteId, CustId = custId, Is14 = is14 }, commandType: CommandType.StoredProcedure);
+            return conn.Query<RebateTpBetRecord>("Service_RebateTpBetRecord_Get", new { BonusCode = bonusCode, SiteId = siteId, CurrencyId = currencyId, CustId = custId, Is14 = is14 }, commandType: CommandType.StoredProcedure);
         }
         public int PayoutRebate(int siteId, int custId, string userName, string bonusCode, RebateInfo rebateInfo, IEnumerable<RebateTpBetRecord> rebateTpBetRecords, IEnumerable<RebateTask> rebateTasks)
         {
@@ -53,27 +58,32 @@ namespace BonusService.Service.DAL
             foreach (var rr in rebateTpBetRecords)
             {
                 var rebateSetting = rebateTasks.Where(x => x.BonusCode == bonusCode && x.CurrencyId == rebateInfo.CurrencyId && x.GameType == rr.GameType).FirstOrDefault();
-
                 if (rebateSetting != null)
                 {
-                    var rebateRecord = GetRebateRecord(custId, int.Parse(rr.SettledDate.ToString("yyyyMMdd")), rr.GameType, bonusCode, rebateSetting.PromotionType, conn, trans);
-                    if (rebateRecord == null)
+                    var sum = rebateSetting.PromotionType == 6 ? rr.ValidBet : rr.WinlostAmount;
+                    if (sum != 0)
                     {
-                        promotionType = rebateSetting.PromotionType;
-                        var sum = rebateSetting.PromotionType == 6 ? rr.ValidBet : rr.WinlostAmount;
-                        SetRebateRecord(custId, int.Parse(rr.SettledDate.ToString("yyyyMMdd")), rr.GameType, bonusCode, sum, rebateSetting.PromotionType, conn, trans);
-                        var amount = sum / 100 * rebateSetting.Percentage;
-                        payAmount += amount;
+                        var rebateRecord = GetRebateRecord(custId, int.Parse(rr.SettledDate.ToString("yyyyMMdd")), rr.GameType, bonusCode, rebateSetting.PromotionType, conn, trans);
+                        if (rebateRecord == null)
+                        {
+                            promotionType = rebateSetting.PromotionType;
+                            SetRebateRecord(custId, int.Parse(rr.SettledDate.ToString("yyyyMMdd")), rr.GameType, bonusCode, sum, rebateSetting.PromotionType, conn, trans);
+                            var amount = sum / 100 * rebateSetting.Percentage;
+                            payAmount += amount;
+                        }
                     }
                 }
             }
+            payAmount = common.Floor(payAmount, 2);
 
             result = walletService.SetBalance(custId, siteId, userName, payAmount, 8, $"{(promotionType == 6 ? "Rebate" : "Cashback")}: {payAmount:#,##0.##}", bonusCode, out _, out _, conn, trans);
             if (result > 0)
             {
                 result = withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, payAmount, $"{(promotionType == 6 ? "Rebate" : "Cashback")}: {payAmount:#,##0.##}", bonusCode, out _, conn, trans);
+
                 if (result > 0)
                 {
+                    conn.Execute("Common_RebateLog_Ins", new { CustId = custId, RebateType = promotionType - 5, UserName = userName, SiteId = siteId, RedeemAmount = payAmount, Memo = "", BonusCode = bonusCode }, transaction: trans, commandType: CommandType.StoredProcedure);
                     trans.Commit();
                 }
             }

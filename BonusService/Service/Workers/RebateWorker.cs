@@ -86,6 +86,8 @@ namespace BonusService
                         pageNumber++;
                     }
                     while (listCnt == pageSize);
+
+                    rebateBLL.SetRebateTaskDone(rebateTask.BonusCode, rebateTask.SiteId);
                 }
             }
             catch (Exception ex)

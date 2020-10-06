@@ -21,6 +21,11 @@ namespace BonusService.Service.BLL
         {
             return rebateService.GetRebateTask();
         }
+
+        public int SetRebateTaskDone(string bonusCode, int siteId)
+        {
+            return rebateService.SetRebateTaskDone(bonusCode, siteId);
+        }
         public IEnumerable<RebateInfo> GetRebateInfo(string bonusCode, int siteId, int pageSize, int pageNumber)
         {
             return rebateService.GetRebateInfo(bonusCode, siteId, pageSize, pageNumber);
