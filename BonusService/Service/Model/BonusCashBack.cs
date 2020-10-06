@@ -36,6 +36,11 @@ namespace BonusService.Service.Model
         public int GameType { set; get; }
         public decimal Sum { set; get; }
     }
+    public class TpGameType
+    {
+        public int Type { get; set; }
+        public string TypeName { get; set; }
+    }
     public class BonusCashBack
     {
         public int Id { set; get; }

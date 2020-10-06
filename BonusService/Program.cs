@@ -24,11 +24,11 @@ namespace BonusService
                     services.AddSingleton<WalletService>();
                     services.AddSingleton<WithdrawalLimitService>();
                     services.AddSingleton<RebateService>();
+
                     services.AddSingleton<RebateBLL>();
+                    services.AddSingleton<SelLangBLL>();
 
                     services.AddHostedService<RebateWorker>();
-
-                    services.AddSingleton<SelLangBLL>();
                 });
     }
 }

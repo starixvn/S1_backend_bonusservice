@@ -1,6 +1,7 @@
 ﻿using BonusService.Service.Library;
 using BonusService.Service.Model;
 using Dapper;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
@@ -19,7 +20,7 @@ namespace BonusService.Service.DAL
         private readonly WithdrawalLimitService withdrawalLimitService;
         private readonly Common common;
 
-        public RebateService(IConfiguration configuration, WalletService walletService, Common common, ILogger<RebateWorker> logger, WithdrawalLimitService withdrawalLimitService)
+        public RebateService(IMemoryCache cache, IConfiguration configuration, WalletService walletService, Common common, ILogger<RebateWorker> logger, WithdrawalLimitService withdrawalLimitService)
         {
             this.configuration = configuration;
             this.walletService = walletService;
@@ -48,15 +49,16 @@ namespace BonusService.Service.DAL
             using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
             return conn.Query<RebateTpBetRecord>("Service_RebateTpBetRecord_Get", new { BonusCode = bonusCode, SiteId = siteId, CurrencyId = currencyId, CustId = custId, Is14 = is14 }, commandType: CommandType.StoredProcedure);
         }
-        public int PayoutRebate(int siteId, int custId, string userName, string bonusCode, RebateInfo rebateInfo, IEnumerable<RebateTpBetRecord> rebateTpBetRecords, IEnumerable<RebateTask> rebateTasks)
+        public int PayoutRebate(int siteId, int custId, string userName, string bonusCode, RebateInfo rebateInfo, IEnumerable<RebateTpBetRecord> rebateTpBetRecords, IEnumerable<RebateTask> rebateTasks, out decimal payAmount, out Dictionary<int, decimal> rebateLogList)
         {
             int result = 0;
             using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
             conn.Open();
             using var trans = conn.BeginTransaction();
-            decimal payAmount = 0m;
+            payAmount = 0m;
             int promotionType = 0;
-            Dictionary<int, decimal> rebateLogList = new Dictionary<int, decimal>();
+            rebateLogList = new Dictionary<int, decimal>();
+
             long tc = DateTime.Now.Ticks;
 
             foreach (var rr in rebateTpBetRecords)
@@ -99,7 +101,7 @@ namespace BonusService.Service.DAL
                 {
                     foreach (var rebateLog in rebateLogList)
                     {
-                        conn.Execute("Common_RebateLog_Ins", new { CustId = custId, GameType = rebateLog.Key, RebateType = promotionType - 5, UserName = userName, SiteId = siteId, RedeemAmount = rebateLog.Value, Memo = "", BonusCode = bonusCode, tc }, transaction: trans, commandType: CommandType.StoredProcedure);
+                        conn.Execute("Common_RebateLog_Ins", new { CustId = custId, GameType = rebateLog.Key, RebateType = promotionType - 5, UserName = userName, SiteId = siteId, RedeemAmount = rebateLog.Value, Memo = "", BonusCode = bonusCode, RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
                     }
 
                     trans.Commit();
@@ -108,14 +110,28 @@ namespace BonusService.Service.DAL
 
             return result;
         }
-
         public RebateRecord GetRebateRecord(int CustId, int SettledDate, int GameType, string BonusCode, int PromotionType, MySqlConnection conn, MySqlTransaction trans)
         {
             return conn.Query<RebateRecord>("Service_RebateRecord_Get", new { CustId, SettledDate, GameType, BonusCode, PromotionType }, transaction: trans, commandType: CommandType.StoredProcedure).FirstOrDefault();
         }
-        public int SetRebateRecord(int CustId, int SettledDate, int GameType, string BonusCode, decimal Sum, int PromotionType,long RelId, MySqlConnection conn, MySqlTransaction trans)
+        public int SetRebateRecord(int CustId, int SettledDate, int GameType, string BonusCode, decimal Sum, int PromotionType, long RelId, MySqlConnection conn, MySqlTransaction trans)
         {
             return conn.Execute("Service_RebateRecord_Set", new { CustId, SettledDate, GameType, BonusCode, Sum, PromotionType, RelId }, transaction: trans, commandType: CommandType.StoredProcedure);
+        }
+        public IEnumerable<TpGameType> GetTpGameList()
+        {
+            using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
+            return conn.Query<TpGameType>("Common_TpGameType_Get", commandType: CommandType.StoredProcedure);
+        }
+        public Customer GetCustInfo(int custId)
+        {
+            using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
+            return conn.QueryFirstOrDefault<Customer>("Customer_Get", new { CustId = custId }, commandType: CommandType.StoredProcedure);
+        }
+        public int SendMessage(int siteId, string sender, string title, string content, int custId, string CustUserName, string lang)
+        {
+            using var conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
+            return conn.Execute("Msg_Ins", new { Type = 99, SiteId = siteId, LangId = lang, RecipientCustId = custId, Recipient = CustUserName, SenderCustId = siteId, Sender = sender, Title = title, Content = content, MainId = 0 }, commandType: CommandType.StoredProcedure);
         }
         public IEnumerable<BonusCashBack> GetBonusCashBackInfo()
         {
