@@ -4,6 +4,7 @@ using Dapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -55,6 +56,9 @@ namespace BonusService.Service.DAL
             using var trans = conn.BeginTransaction();
             decimal payAmount = 0m;
             int promotionType = 0;
+            Dictionary<int, decimal> rebateLogList = new Dictionary<int, decimal>();
+            long tc = DateTime.Now.Ticks;
+
             foreach (var rr in rebateTpBetRecords)
             {
                 var rebateSetting = rebateTasks.Where(x => x.BonusCode == bonusCode && x.CurrencyId == rebateInfo.CurrencyId && x.GameType == rr.GameType).FirstOrDefault();
@@ -67,8 +71,18 @@ namespace BonusService.Service.DAL
                         if (rebateRecord == null)
                         {
                             promotionType = rebateSetting.PromotionType;
-                            SetRebateRecord(custId, int.Parse(rr.SettledDate.ToString("yyyyMMdd")), rr.GameType, bonusCode, sum, rebateSetting.PromotionType, conn, trans);
+                            SetRebateRecord(custId, int.Parse(rr.SettledDate.ToString("yyyyMMdd")), rr.GameType, bonusCode, sum, rebateSetting.PromotionType, tc, conn, trans);
                             var amount = sum / 100 * rebateSetting.Percentage;
+
+                            if (rebateLogList.ContainsKey(rr.GameType))
+                            {
+                                rebateLogList[rr.GameType] += amount;
+                            }
+                            else
+                            {
+                                rebateLogList.Add(rr.GameType, amount);
+                            }
+
                             payAmount += amount;
                         }
                     }
@@ -83,7 +97,11 @@ namespace BonusService.Service.DAL
 
                 if (result > 0)
                 {
-                    conn.Execute("Common_RebateLog_Ins", new { CustId = custId, RebateType = promotionType - 5, UserName = userName, SiteId = siteId, RedeemAmount = payAmount, Memo = "", BonusCode = bonusCode }, transaction: trans, commandType: CommandType.StoredProcedure);
+                    foreach (var rebateLog in rebateLogList)
+                    {
+                        conn.Execute("Common_RebateLog_Ins", new { CustId = custId, GameType = rebateLog.Key, RebateType = promotionType - 5, UserName = userName, SiteId = siteId, RedeemAmount = rebateLog.Value, Memo = "", BonusCode = bonusCode, tc }, transaction: trans, commandType: CommandType.StoredProcedure);
+                    }
+
                     trans.Commit();
                 }
             }
@@ -95,9 +113,9 @@ namespace BonusService.Service.DAL
         {
             return conn.Query<RebateRecord>("Service_RebateRecord_Get", new { CustId, SettledDate, GameType, BonusCode, PromotionType }, transaction: trans, commandType: CommandType.StoredProcedure).FirstOrDefault();
         }
-        public int SetRebateRecord(int CustId, int SettledDate, int GameType, string BonusCode, decimal Sum, int PromotionType, MySqlConnection conn, MySqlTransaction trans)
+        public int SetRebateRecord(int CustId, int SettledDate, int GameType, string BonusCode, decimal Sum, int PromotionType,long RelId, MySqlConnection conn, MySqlTransaction trans)
         {
-            return conn.Execute("Service_RebateRecord_Set", new { CustId, SettledDate, GameType, BonusCode, Sum, PromotionType }, transaction: trans, commandType: CommandType.StoredProcedure);
+            return conn.Execute("Service_RebateRecord_Set", new { CustId, SettledDate, GameType, BonusCode, Sum, PromotionType, RelId }, transaction: trans, commandType: CommandType.StoredProcedure);
         }
         public IEnumerable<BonusCashBack> GetBonusCashBackInfo()
         {

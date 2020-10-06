@@ -10,7 +10,7 @@ namespace BonusService.Service.BLL
 {
     public class SelLangBLL
     {
-        private ConcurrentDictionary<string, ResourceManager> rm = new ConcurrentDictionary<string, ResourceManager>();
+        private readonly ConcurrentDictionary<string, ResourceManager> rm = new ConcurrentDictionary<string, ResourceManager>();
         public SelLangBLL()
         { }
         public string GetResourceValue(string key, string langId)
