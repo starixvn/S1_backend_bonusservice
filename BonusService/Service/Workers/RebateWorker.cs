@@ -20,19 +20,23 @@ namespace BonusService
         private readonly Common tools;
         private readonly Log2File log2File;
         private readonly IHostEnvironment environment;
+        private readonly SelLangBLL selLangBLL;
         private Timer timer;
 
-        public RebateWorker(ILogger<RebateWorker> logger, IHostEnvironment environment, RebateBLL rebateBLL, Common tools, Log2File log2File)
+        public RebateWorker(ILogger<RebateWorker> logger, IHostEnvironment environment, RebateBLL rebateBLL, Common tools, Log2File log2File, SelLangBLL selLangBLL)
         {
             _logger = logger;
             this.rebateBLL = rebateBLL;
             this.tools = tools;
             this.log2File = log2File;
             this.environment = environment;
+            this.selLangBLL = selLangBLL;
+            
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
+          //  Console.WriteLine(selLangBLL.GetResourceValue("lbl_HelloWorld", "en"));
             timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.Zero);
             return Task.CompletedTask;
         }
