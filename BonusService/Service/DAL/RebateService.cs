@@ -75,6 +75,7 @@ namespace BonusService.Service.DAL
                             promotionType = rebateSetting.PromotionType;
                             SetRebateRecord(custId, int.Parse(rr.SettledDate.ToString("yyyyMMdd")), rr.GameType, bonusCode, sum, rebateSetting.PromotionType, tc, conn, trans);
                             var amount = sum / 100 * rebateSetting.Percentage;
+                            amount = common.Floor(amount, 2);
 
                             if (rebateLogList.ContainsKey(rr.GameType))
                             {
@@ -90,7 +91,6 @@ namespace BonusService.Service.DAL
                     }
                 }
             }
-            payAmount = common.Floor(payAmount, 2);
 
             result = walletService.SetBalance(custId, siteId, userName, payAmount, 8, $"{(promotionType == 6 ? "Rebate" : "Cashback")}: {payAmount:#,##0.##}", bonusCode, out _, out _, conn, trans);
             if (result > 0)
