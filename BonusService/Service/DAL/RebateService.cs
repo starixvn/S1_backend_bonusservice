@@ -92,19 +92,31 @@ namespace BonusService.Service.DAL
                 }
             }
 
-            result = walletService.SetBalance(custId, siteId, userName, payAmount, 8, $"{(promotionType == 6 ? "Rebate" : "Cashback")}: {payAmount:#,##0.##}", bonusCode, out _, out _, conn, trans);
-            if (result > 0)
-            {
-                result = withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, payAmount, $"{(promotionType == 6 ? "Rebate" : "Cashback")}: {payAmount:#,##0.##}", bonusCode, out _, conn, trans);
+            var rebateSetting1 = rebateTasks.Where(x => x.BonusCode == bonusCode && x.CurrencyId == rebateInfo.CurrencyId).FirstOrDefault();
 
+            if (payAmount >= rebateSetting1.MinPayout)
+            {
+                if (rebateSetting1.MaxBonus > 0 && payAmount > rebateSetting1.MaxBonus)
+                {
+                    payAmount = rebateSetting1.MaxBonus;
+                }
+
+                result = walletService.SetBalance(custId, siteId, userName, payAmount, 8, $"{(promotionType == 6 ? "Rebate" : "Cashback")}: {payAmount:#,##0.##}", bonusCode, out _, out _, conn, trans);
                 if (result > 0)
                 {
-                    foreach (var rebateLog in rebateLogList)
-                    {
-                        conn.Execute("Common_RebateLog_Ins", new { CustId = custId, GameType = rebateLog.Key, RebateType = promotionType - 5, UserName = userName, SiteId = siteId, RedeemAmount = rebateLog.Value, Memo = "", BonusCode = bonusCode, RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
-                    }
+                    var rollOver = rebateSetting1.RollOver * payAmount;
 
-                    trans.Commit();
+                    result = withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, rollOver, $"{(promotionType == 6 ? "Rebate" : "Cashback")}: {rollOver:#,##0.##}", bonusCode, out _, conn, trans);
+
+                    if (result > 0)
+                    {
+                        foreach (var rebateLog in rebateLogList)
+                        {
+                            conn.Execute("Common_RebateLog_Ins", new { CustId = custId, GameType = rebateLog.Key, RebateType = promotionType - 5, UserName = userName, SiteId = siteId, RedeemAmount = rebateLog.Value, Memo = "", BonusCode = bonusCode, RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
+                        }
+
+                        trans.Commit();
+                    }
                 }
             }
 

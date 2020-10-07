@@ -13,6 +13,9 @@ namespace BonusService.Service.Model
         public int CurrencyId { set; get; }
         public int GameType { set; get; }
         public decimal Percentage { set; get; }
+        public decimal MaxBonus { set; get; }
+        public decimal RollOver { set; get; }
+        public decimal MinPayout { set; get; }
     }
 
     public class RebateInfo
