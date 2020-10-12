@@ -77,6 +77,12 @@ namespace BonusService.Service.DAL
                             var amount = sum / 100 * rebateSetting.Percentage;
                             amount = common.Floor(amount, 2);
 
+
+                            if (promotionType == 7)
+                            {
+                                amount *= -1;
+                            }
+
                             if (rebateLogList.ContainsKey(rr.GameType))
                             {
                                 rebateLogList[rr.GameType] += amount;
@@ -94,7 +100,7 @@ namespace BonusService.Service.DAL
 
             var rebateSetting1 = rebateTasks.Where(x => x.BonusCode == bonusCode && x.CurrencyId == rebateInfo.CurrencyId).FirstOrDefault();
 
-            if (payAmount >= rebateSetting1.MinPayout)
+            if (payAmount >= rebateSetting1.MinPayout && payAmount > 0)
             {
                 if (rebateSetting1.MaxBonus > 0 && payAmount > rebateSetting1.MaxBonus)
                 {
