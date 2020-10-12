@@ -107,7 +107,7 @@ namespace BonusService.Service.DAL
                     payAmount = rebateSetting1.MaxBonus;
                 }
 
-                result = walletService.SetBalance(custId, siteId, userName, payAmount, 8, $"{(promotionType == 6 ? "Rebate" : "Cashback")}: {payAmount:#,##0.##}", bonusCode, out _, out _, conn, trans);
+                result = walletService.SetBalance(custId, siteId, userName, payAmount, 17 - promotionType, $"{(promotionType == 6 ? "Rebate" : "Cashback")}: {payAmount:#,##0.##}", bonusCode, out _, out _, conn, trans);
                 if (result > 0)
                 {
                     var rollOver = rebateSetting1.RollOver * payAmount;
