@@ -111,8 +111,8 @@ namespace BonusService.Service.DAL
                 if (result > 0)
                 {
                     var rollOver = rebateSetting1.RollOver * payAmount;
-
-                    result = withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, rollOver, $"{(promotionType == 6 ? "Rebate" : "Cashback")}: {rollOver:#,##0.##}", bonusCode, out _, conn, trans);
+                    if (rollOver > 0)
+                        result = withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, rollOver, $"{(promotionType == 6 ? "Rebate" : "Cashback")}: {rollOver:#,##0.##}", bonusCode, out _, conn, trans);
 
                     if (result > 0)
                     {
