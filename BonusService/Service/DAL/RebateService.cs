@@ -108,8 +108,11 @@ namespace BonusService.Service.DAL
                 }
 
                 result = walletService.SetBalance(custId, siteId, userName, payAmount, 17 - promotionType, $"{(promotionType == 6 ? "Rebate" : "Cashback")}: {payAmount:#,##0.##}", bonusCode, out _, out _, conn, trans);
+
                 if (result > 0)
                 {
+                    conn.Execute("Common_Rebate1Log_Ins", new { CustId = custId, RebateType = promotionType - 5, UserName = userName, SiteId = siteId, RedeemAmount = 17 - promotionType, Memo = "", BonusCode = bonusCode, RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
+
                     var rollOver = rebateSetting1.RollOver * payAmount;
                     if (rollOver > 0)
                         result = withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, rollOver, $"{(promotionType == 6 ? "Rebate" : "Cashback")}: {rollOver:#,##0.##}", bonusCode, out _, conn, trans);
