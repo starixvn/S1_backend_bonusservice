@@ -111,7 +111,7 @@ namespace BonusService.Service.DAL
 
                 if (result > 0)
                 {
-                    conn.Execute("Common_Rebate1Log_Ins", new { CustId = custId, RebateType = promotionType - 5, UserName = userName, SiteId = siteId, RedeemAmount = 17 - promotionType, Memo = "", BonusCode = bonusCode, RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
+                    conn.Execute("Common_RebateMLog_Ins", new { CustId = custId, RebateType = promotionType - 5, UserName = userName, SiteId = siteId, RedeemAmount = payAmount, Memo = "", BonusCode = bonusCode, RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
 
                     var rollOver = rebateSetting1.RollOver * payAmount;
                     if (rollOver > 0)
