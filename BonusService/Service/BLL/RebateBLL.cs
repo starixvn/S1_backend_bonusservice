@@ -59,7 +59,7 @@ namespace BonusService.Service.BLL
                 var dpayAmount = payAmount.ToString("#,##0.##");
                 if (IsConvertRequired(custInfo.CurrencyId))
                 {
-                    dpayAmount = $"{payAmount / 1000:#,##0.##} ('000)";
+                    dpayAmount = $"{payAmount / 1000:#,##0.##}";
                 }
 
                 var title = string.Format($"{custInfo.UserName} {selLangBLL.GetResourceValue(promotionType == 6 ? "lbl_RebateMsg" : "lbl_CashbackMsg", custInfo.UserLang)}", dpayAmount);
@@ -72,7 +72,7 @@ namespace BonusService.Service.BLL
                         var dAmount = rebateLog.Value.ToString("#,##0.##");
                         if (IsConvertRequired(custInfo.CurrencyId))
                         {
-                            dAmount = $"{rebateLog.Value / 1000:#,##0.##} ('000)";
+                            dAmount = $"{rebateLog.Value / 1000:#,##0.##}";
                         }
 
                         msg.AppendLine($"{GetTpGameList()[rebateLog.Key]}: {dAmount}");
