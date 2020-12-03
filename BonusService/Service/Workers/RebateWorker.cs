@@ -44,14 +44,14 @@ namespace BonusService
         {
             bool isError = false;
 
+            _logger.LogCritical($"Worker running at: {environment.EnvironmentName}");
             try
             {
                 var rebateTaskList = rebateBLL.GetRebateTask();
                 foreach (var rebateTask in (from p in rebateTaskList
                                             select new { p.BonusCode, p.SiteId, p.PromotionType, p.PeriodType }).Distinct())
                 {
-                    _logger.LogCritical($"Worker running at: {JsonConvert.SerializeObject(rebateTask)}");
-
+                    log2File.Info(JsonConvert.SerializeObject(rebateTask), "rebateTask");
                     int pageSize = 1000, pageNumber = 1;
                     int listCnt = 0;
                     do
@@ -81,6 +81,7 @@ namespace BonusService
 
                             if (rebateTpBetRecordList.Count() > 0)
                             {
+                                log2File.Info(JsonConvert.SerializeObject(rebateTpBetRecordList), "rebateTpBetRecordList");
                                 //RebateTpBetRecord
                                 rebateBLL.PayoutRebate(rebateTask.SiteId, rebateInfo.CustId, rebateTpBetRecordList.FirstOrDefault()?.UserName, rebateTask.BonusCode, rebateInfo, rebateTpBetRecordList, rebateTaskList);
                             }
