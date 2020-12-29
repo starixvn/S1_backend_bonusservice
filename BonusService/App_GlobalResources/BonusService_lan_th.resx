@@ -123,4 +123,7 @@
   <data name="lbl_RebateMsg" xml:space="preserve">
     <value>ขอแสดงความยินดีเงินคืนของคุณ {0} ได้รับการบันทึกเครดิตเข้าบัญชีของคุณแล้ว!</value>
   </data>
+  <data name="lbl_ReferralBonusCreditedMsg" xml:space="preserve">
+    <value>ขอแสดงความยินดี! โบนัสแนะนำเพื่อนเป็นจำนวนเงิน {0} ได้โอนเครดิตเข้าบัญชีของคุณแล้ว</value>
+  </data>
 </root>

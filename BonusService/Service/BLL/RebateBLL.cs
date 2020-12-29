@@ -13,25 +13,20 @@ namespace BonusService.Service.BLL
         private readonly RebateService rebateService;
         private readonly IMemoryCache cache;
         private readonly SelLangBLL selLangBLL;
-        private readonly Dictionary<int, bool> isConvert = new Dictionary<int, bool>()
-            {
-                {51,false },{15,false }
-            };
-
-        public RebateBLL(IMemoryCache cache, RebateService rebateService, SelLangBLL selLangBLL)
+        private readonly MessageService messageService;
+        private readonly CustInfoService custInfoService;
+        public RebateBLL(IMemoryCache cache, RebateService rebateService, SelLangBLL selLangBLL, CustInfoService custInfoService, MessageService messageService)
         {
             this.rebateService = rebateService;
             this.cache = cache;
             this.selLangBLL = selLangBLL;
+            this.messageService = messageService;
+            this.custInfoService = custInfoService;
         }
 
         public IEnumerable<RebateTask> GetRebateTask()
         {
             return rebateService.GetRebateTask();
-        }
-        public bool IsConvertRequired(int CurrencyId)
-        {
-            return isConvert.ContainsKey(CurrencyId);
         }
         public int SetRebateTaskDone(string bonusCode, int siteId)
         {
@@ -53,11 +48,11 @@ namespace BonusService.Service.BLL
             if (result > 0)
             {
                 var promotionType = rebateTasks.Where(x => x.BonusCode == bonusCode).FirstOrDefault()?.PromotionType ?? 6;
-                var custInfo = rebateService.GetCustInfo(custId);
+                var custInfo = custInfoService.GetCustInfo(custId);
                 var msg = new StringBuilder();
 
                 var dpayAmount = payAmount.ToString("#,##0.##");
-                if (IsConvertRequired(custInfo.CurrencyId))
+                if (custInfoService.IsConvertRequired(custInfo.CurrencyId))
                 {
                     dpayAmount = $"{payAmount / 1000:#,##0.##}";
                 }
@@ -70,7 +65,7 @@ namespace BonusService.Service.BLL
                     foreach (var rebateLog in rebateLogList)
                     {
                         var dAmount = rebateLog.Value.ToString("#,##0.##");
-                        if (IsConvertRequired(custInfo.CurrencyId))
+                        if (custInfoService.IsConvertRequired(custInfo.CurrencyId))
                         {
                             dAmount = $"{rebateLog.Value / 1000:#,##0.##}";
                         }
@@ -79,7 +74,7 @@ namespace BonusService.Service.BLL
                     }
                 }
 
-                rebateService.SendMessage(custInfo.SiteId, "Bonus Service", title, msg.ToString(), custInfo.CustId, custInfo.UserName, custInfo.UserLang);
+                messageService.SendMessage(custInfo.SiteId, "Bonus Service", title, msg.ToString(), custInfo.CustId, custInfo.UserName, custInfo.UserLang);
             }
 
             return result;

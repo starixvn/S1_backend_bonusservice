@@ -123,4 +123,7 @@
   <data name="lbl_RebateMsg" xml:space="preserve">
     <value>Congratulations, your rebate {0} has been credited to your account!</value>
   </data>
+  <data name="lbl_ReferralBonusCreditedMsg" xml:space="preserve">
+    <value>[Refer &amp; Earn] Congratulations! Your referral bonus {0} has been credited to your account!</value>
+  </data>
 </root>

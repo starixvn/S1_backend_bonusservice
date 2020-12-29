@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using BonusService.Service.BLL;
 using BonusService.Service.DAL;
 using BonusService.Service.Library;
+using BonusService.Service.Workers;
 
 namespace BonusService
 {
@@ -21,14 +22,19 @@ namespace BonusService
                     services.AddSingleton<Common>();
                     services.AddSingleton<Log2File>();
 
+                    services.AddSingleton<MessageService>();
+                    services.AddSingleton<CustInfoService>();
                     services.AddSingleton<WalletService>();
                     services.AddSingleton<WithdrawalLimitService>();
                     services.AddSingleton<RebateService>();
+                    services.AddSingleton<ReferralService>();
 
                     services.AddSingleton<RebateBLL>();
+                    services.AddSingleton<ReferralBLL>();
                     services.AddSingleton<SelLangBLL>();
 
                     services.AddHostedService<RebateWorker>();
+                    services.AddHostedService<ReferralWorker>();
                 });
     }
 }
