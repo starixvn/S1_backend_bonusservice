@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using BonusService.Service.Model;
+using Newtonsoft.Json;
 
 namespace BonusService.Service.Workers
 {
@@ -58,7 +59,7 @@ namespace BonusService.Service.Workers
                 {
                     if(referralBLL.PayoutReferral(rr.Value, out decimal payAmount, out List<ReferralInfo> paidReferralList) > 0)
                     {
-
+                        log2File.Info(JsonConvert.SerializeObject(paidReferralList), "Referral");
                     }
                 }
             }
