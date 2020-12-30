@@ -46,8 +46,11 @@ namespace BonusService.Service.BLL
                     dpayAmount = $"{payAmount / 1000:#,##0.##}";
                 }
 
-                var title = string.Format($"{custInfo.UserName} {selLangBLL.GetResourceValue("lbl_ReferralBonusCreditedMsg", custInfo.UserLang)}", dpayAmount);
-                msg.AppendLine(title);
+                var title = selLangBLL.GetResourceValue("lbl_ReferralBonusCreditedTitle", custInfo.UserLang);
+                var message =
+                    string.Format($" {selLangBLL.GetResourceValue("lbl_ReferralBonusCreditedMsg", custInfo.UserLang)}",
+                        dpayAmount);
+                msg.AppendLine(message);
 
 
                 foreach (var paidReferral in paidReferralList)
