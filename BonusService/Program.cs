@@ -28,13 +28,16 @@ namespace BonusService
                     services.AddSingleton<WithdrawalLimitService>();
                     services.AddSingleton<RebateService>();
                     services.AddSingleton<ReferralService>();
+                    services.AddSingleton<VipService>();
 
                     services.AddSingleton<RebateBLL>();
                     services.AddSingleton<ReferralBLL>();
                     services.AddSingleton<SelLangBLL>();
+                    services.AddSingleton<VipBLL>();
 
                     services.AddHostedService<RebateWorker>();
                     services.AddHostedService<ReferralWorker>();
+                    services.AddHostedService<VipWorker>();
                 });
     }
 }
