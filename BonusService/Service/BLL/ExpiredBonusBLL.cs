@@ -11,16 +11,16 @@ namespace BonusService.Service.BLL
     public class ExpiredBonusBLL
     {
         private readonly ExpiredBonusService expiredBonusService;
-        private readonly RebateBLL rebateBLL;
+        private readonly CustInfoService custInfoService;
         private readonly SelLangBLL selLangBLL;
-        private readonly RebateService rebateService;
+        private readonly MessageService messageService;
 
-        public ExpiredBonusBLL(ExpiredBonusService expiredBonusService, RebateBLL rebateBLL, SelLangBLL selLangBLL, RebateService rebateService)
+        public ExpiredBonusBLL(ExpiredBonusService expiredBonusService, CustInfoService custInfoService, SelLangBLL selLangBLL, MessageService messageService)
         {
             this.expiredBonusService = expiredBonusService;
-            this.rebateBLL = rebateBLL;
+            this.custInfoService = custInfoService;
             this.selLangBLL = selLangBLL;
-            this.rebateService = rebateService;
+            this.messageService = messageService;
 
         }
         public IEnumerable<ExpiredBonus> GetBonusExpired(int limit)
@@ -34,7 +34,7 @@ namespace BonusService.Service.BLL
             {
                 var msg = new StringBuilder();
                 var Refund = expiredBonus.Refund.ToString("#,##0.##");
-                if (rebateBLL.IsConvertRequired(expiredBonus.CurrencyId))
+                if (custInfoService.IsConvertRequired(expiredBonus.CurrencyId))
                 {
                     Refund = $"{expiredBonus.Refund / 1000:#,##0.##}";
                 }
@@ -42,7 +42,7 @@ namespace BonusService.Service.BLL
                 var title = string.Format($"{expiredBonus.UserName} {selLangBLL.GetResourceValue("lbl_CancelBonus", expiredBonus.UserLang)}", Refund);
                 msg.AppendLine(title);
 
-                rebateService.SendMessage(expiredBonus.SiteId, "Bonus Service", title, msg.ToString(), expiredBonus.CustId, expiredBonus.UserName, expiredBonus.UserLang);
+                messageService.SendMessage(expiredBonus.SiteId, "Bonus Service", title, msg.ToString(), expiredBonus.CustId, expiredBonus.UserName, expiredBonus.UserLang);
             }
             return rtn;
 

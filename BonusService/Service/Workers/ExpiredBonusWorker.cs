@@ -50,7 +50,7 @@ namespace BonusService.Service.Workers
                     do
                     {
                         nCount = 0;
-                        var data = expiredBonusBLL.GetBonusExpired(10);
+                        var data = expiredBonusBLL.GetBonusExpired(LimitNum);
                         foreach (var item in data)
                         {
                             allTasks.Add(Task.Run(() => expiredBonusBLL.RefundExpiredBonus(item)));
