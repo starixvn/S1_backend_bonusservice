@@ -11,7 +11,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using System.Net;
 
-namespace BonusService
+namespace BonusService.Service.Workers
 {
     public class RebateWorker : BackgroundService
     {
@@ -31,7 +31,6 @@ namespace BonusService
             this.log2File = log2File;
             this.environment = environment;
             this.selLangBLL = selLangBLL;
-            
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)

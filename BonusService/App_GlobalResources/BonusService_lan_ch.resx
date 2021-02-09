@@ -126,4 +126,10 @@
   <data name="lbl_RebateMsg" xml:space="preserve">
     <value>恭喜，您的返水 {0} 已匯入您的戶口！</value>
   </data>
+  <data name="lbl_ReferralBonusCreditedMsg" xml:space="preserve">
+    <value>恭喜您！您的推薦獎金{0}已匯入您的帳戶</value>
+  </data>
+  <data name="lbl_ReferralBonusCreditedTitle" xml:space="preserve">
+    <value>推薦獎金[推薦&amp;獎勵]</value>
+  </data>
 </root>

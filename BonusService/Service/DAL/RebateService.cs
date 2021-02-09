@@ -15,12 +15,12 @@ namespace BonusService.Service.DAL
     public class RebateService
     {
         private readonly IConfiguration configuration;
-        private readonly ILogger<RebateWorker> _logger;
+        private readonly ILogger<RebateService> _logger;
         private readonly WalletService walletService;
         private readonly WithdrawalLimitService withdrawalLimitService;
         private readonly Common common;
 
-        public RebateService(IMemoryCache cache, IConfiguration configuration, WalletService walletService, Common common, ILogger<RebateWorker> logger, WithdrawalLimitService withdrawalLimitService)
+        public RebateService(IConfiguration configuration, ILogger<RebateService> logger, WalletService walletService, Common common, WithdrawalLimitService withdrawalLimitService)
         {
             this.configuration = configuration;
             this.walletService = walletService;
@@ -144,16 +144,6 @@ namespace BonusService.Service.DAL
             using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
             return conn.Query<TpGameType>("Common_TpGameType_Get", commandType: CommandType.StoredProcedure);
         }
-        public Customer GetCustInfo(int custId)
-        {
-            using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
-            return conn.QueryFirstOrDefault<Customer>("Customer_Get", new { CustId = custId }, commandType: CommandType.StoredProcedure);
-        }
-        public int SendMessage(int siteId, string sender, string title, string content, int custId, string CustUserName, string lang)
-        {
-            using var conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
-            return conn.Execute("Msg_Ins", new { Type = 99, SiteId = siteId, LangId = lang, RecipientCustId = custId, Recipient = CustUserName, SenderCustId = siteId, Sender = sender, Title = title, Content = content, MainId = 0 }, commandType: CommandType.StoredProcedure);
-        }
         public IEnumerable<BonusCashBack> GetBonusCashBackInfo()
         {
             using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport")))
@@ -251,11 +241,6 @@ namespace BonusService.Service.DAL
 
                 if (WinlostAmountCountCalculationTotal != bonusCashBackInfo.WinlostAmountCountCalculationTotal && result > 0)
                 {
-                    _logger.LogInformation(
-                   $" WinlostAmountCountCalculationTotal:{WinlostAmountCountCalculationTotal}" +
-                   $" bonusCashBackInfo WinlostAmountCountCalculationTotal:{bonusCashBackInfo.WinlostAmountCountCalculationTotal}" +
-                   $" result:{result}"
-               );
                     if (WinlostAmountCountCalculationTotal > 0)
                     {
                         memo = "ReCalculationTotal";
@@ -264,7 +249,6 @@ namespace BonusService.Service.DAL
                     decimal WithdrawBonusCashBack = WinlostAmountCountCalculationTotal * bonusCashBackInfo.WithdrawCondition;
 
                     result = walletService.SetBalance(bonusCashBackInfo.CustId, bonusCashBackInfo.SiteId, bonusCashBackInfo.UserName, WinlostAmountCountCalculationTotal, 7, memo, null, out afterAmount, out is1stDepoist, conn, trans);
-                    _logger.LogInformation(result.ToString());
 
                     if (result > 0)
                     {

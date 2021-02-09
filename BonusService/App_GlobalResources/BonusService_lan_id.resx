@@ -123,4 +123,10 @@
   <data name="lbl_RebateMsg" xml:space="preserve">
     <value>Selamat, Bonus rebate Anda {0} telah dikreditkan ke akun Anda!</value>
   </data>
+  <data name="lbl_ReferralBonusCreditedMsg" xml:space="preserve">
+    <value>SELAMAT! Bonus referal Anda {0} telah di kreditkan ke dalam akun Anda</value>
+  </data>
+  <data name="lbl_ReferralBonusCreditedTitle" xml:space="preserve">
+    <value>Hadiah Referensikan Teman [Ajak &amp; Dapatkan]</value>
+  </data>
 </root>
