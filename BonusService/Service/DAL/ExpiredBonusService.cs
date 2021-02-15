@@ -25,21 +25,21 @@ namespace BonusService.Service.DAL
         public IEnumerable<ExpiredBonus> GetBonusExpired(int limit)
         {
             using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
-            return conn.Query<ExpiredBonus>("Service_BonusExpired_Get",new{ Limit = limit }, commandType: CommandType.StoredProcedure);
+            return conn.Query<ExpiredBonus>("Service_BonusExpired_Get", new { Limit = limit }, commandType: CommandType.StoredProcedure);
         }
         public int RefundExpiredBonus(ExpiredBonus expiredBonus)
         {
             using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
             conn.Open();
-           using var trans = conn.BeginTransaction();
+            using var trans = conn.BeginTransaction();
             int rtn = 0;
             if (expiredBonus.Refund > 0) //money
             {
-                rtn = walletService.SetBalance(expiredBonus.CustId, expiredBonus.SiteId, expiredBonus.UserName, expiredBonus.Refund, 7, $"CancelBonus: {expiredBonus.Refund.ToString("#,##0.##")}", null, out _, out _, conn, trans);
+                rtn = walletService.SetBalance(expiredBonus.CustId, expiredBonus.SiteId, expiredBonus.UserName, expiredBonus.Refund, 7, $"CancelBonus: {expiredBonus.Refund:#,##0.##}", null, out _, out _, conn, trans);
                 rtn = withdrawalLimitService.SetWithdrawalLimit(expiredBonus.CustId, expiredBonus.UserName, expiredBonus.SiteId, expiredBonus.Refund, "CancelBonus", null, out decimal afterWithdrawalLimit, conn, trans);
             }
             conn.Query<ExpiredBonus>("Service_BonusExpired_Set", new { BonusId = expiredBonus.BonusId }, commandType: CommandType.StoredProcedure);
-           trans.Commit();
+            trans.Commit();
             return rtn;
         }
     }

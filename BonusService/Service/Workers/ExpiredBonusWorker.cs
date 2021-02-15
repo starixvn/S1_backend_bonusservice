@@ -1,4 +1,5 @@
 ﻿using BonusService.Service.BLL;
+using BonusService.Service.Library;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
@@ -13,14 +14,15 @@ namespace BonusService.Service.Workers
     {
         private readonly ILogger<ExpiredBonusWorker> logger;
         private readonly ExpiredBonusBLL expiredBonusBLL;
+        private readonly Log2File log2File;
         private Timer timerExpiredBonus;
         private DateTime NextChickTime;
 
-        public ExpiredBonusWorker(ILogger<ExpiredBonusWorker> logger, ExpiredBonusBLL expiredBonusBLL)
+        public ExpiredBonusWorker(ILogger<ExpiredBonusWorker> logger, ExpiredBonusBLL expiredBonusBLL, Log2File log2File)
         {
             this.logger = logger;
             this.expiredBonusBLL = expiredBonusBLL;
-
+            this.log2File = log2File;
         }
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -60,6 +62,13 @@ namespace BonusService.Service.Workers
                                 allTasks.Clear();
                             }
                         }
+
+                        if (allTasks.Count > 0)
+                        {
+                            await Task.WhenAll(allTasks);
+                            allTasks.Clear();
+                        }
+
                         nCount = data.Count();
                     } while (nCount >= LimitNum);
 
@@ -68,10 +77,10 @@ namespace BonusService.Service.Workers
             catch (Exception ex)
             {
                 logger.LogError(ex.Message);
+                log2File.Error(ex.ToString(), "ExpiredBonus");
             }
             finally
             {
-               
                 timerExpiredBonus.Change(TimeSpan.FromHours(1), TimeSpan.Zero);
             }
 
