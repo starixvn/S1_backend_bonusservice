@@ -27,13 +27,16 @@ namespace BonusService
                     services.AddSingleton<WalletService>();
                     services.AddSingleton<WithdrawalLimitService>();
                     services.AddSingleton<RebateService>();
+                    services.AddSingleton<ExpiredBonusService>();
                     services.AddSingleton<ReferralService>();
 
                     services.AddSingleton<RebateBLL>();
                     services.AddSingleton<ReferralBLL>();
                     services.AddSingleton<SelLangBLL>();
-
+                    services.AddSingleton<ExpiredBonusBLL>();
+                    
                     services.AddHostedService<RebateWorker>();
+                    services.AddHostedService<ExpiredBonusWorker>();
                     services.AddHostedService<ReferralWorker>();
                 });
     }
