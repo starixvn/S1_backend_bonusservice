@@ -2,6 +2,7 @@
 using BonusService.Service.Library;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -55,7 +56,19 @@ namespace BonusService.Service.Workers
                         var data = expiredBonusBLL.GetBonusExpired(LimitNum);
                         foreach (var item in data)
                         {
-                            allTasks.Add(Task.Run(() => expiredBonusBLL.RefundExpiredBonus(item)));
+                            allTasks.Add(Task.Run(() =>
+                            {
+                                try
+                                {
+                                    expiredBonusBLL.RefundExpiredBonus(item);
+                                    log2File.Info(JsonConvert.SerializeObject(item), "ExpiredBonus");
+                                }
+                                catch (Exception ex1)
+                                {
+                                    log2File.Error(ex1.ToString(), "ExpiredBonus");
+                                }
+                            }));
+
                             if (allTasks.Count >= 4)
                             {
                                 await Task.WhenAll(allTasks);

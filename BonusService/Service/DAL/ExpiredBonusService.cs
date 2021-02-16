@@ -38,8 +38,14 @@ namespace BonusService.Service.DAL
                 rtn = walletService.SetBalance(expiredBonus.CustId, expiredBonus.SiteId, expiredBonus.UserName, expiredBonus.Refund, 7, $"CancelBonus: {expiredBonus.Refund:#,##0.##}", null, out _, out _, conn, trans);
                 rtn = withdrawalLimitService.SetWithdrawalLimit(expiredBonus.CustId, expiredBonus.UserName, expiredBonus.SiteId, expiredBonus.Refund, "CancelBonus", null, out decimal afterWithdrawalLimit, conn, trans);
             }
-            conn.Query<ExpiredBonus>("Service_BonusExpired_Set", new { BonusId = expiredBonus.BonusId }, commandType: CommandType.StoredProcedure);
-            trans.Commit();
+
+            rtn = conn.Execute("Service_BonusExpired_Set", new { BonusId = expiredBonus.BonusId }, commandType: CommandType.StoredProcedure);
+
+            if (rtn > 0)
+            {
+                trans.Commit();
+            }
+
             return rtn;
         }
     }

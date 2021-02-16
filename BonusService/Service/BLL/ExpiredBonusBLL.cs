@@ -39,8 +39,15 @@ namespace BonusService.Service.BLL
                     Refund = $"{expiredBonus.Refund / 1000:#,##0.##}";
                 }
 
-                var title = string.Format($"{expiredBonus.UserName} {selLangBLL.GetResourceValue("lbl_CancelBonus", expiredBonus.UserLang)}", Refund);
-                msg.AppendLine(title);
+                var title = selLangBLL.GetResourceValue("lbl_CancelBonusTitle", expiredBonus.UserLang);
+                if (expiredBonus.Refund == 0)
+                {
+                    msg.AppendLine(selLangBLL.GetResourceValue("lbl_CancelBonus1", expiredBonus.UserLang));
+                }
+                else
+                {
+                    msg.AppendLine(string.Format(selLangBLL.GetResourceValue("lbl_CancelBonus1", expiredBonus.UserLang), Refund));
+                }
 
                 messageService.SendMessage(expiredBonus.SiteId, "Bonus Service", title, msg.ToString(), expiredBonus.CustId, expiredBonus.UserName, expiredBonus.UserLang);
             }

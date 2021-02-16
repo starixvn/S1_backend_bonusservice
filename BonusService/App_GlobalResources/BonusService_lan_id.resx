@@ -117,6 +117,15 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="lbl_CancelBonus1" xml:space="preserve">
+    <value>Bonus promosi Anda telah dibatalkan.</value>
+  </data>
+  <data name="lbl_CancelBonus2" xml:space="preserve">
+    <value>Bonus promosi Anda telah dibatalkan, jumlah pengembalian dana yang memenuhi syarat adalah {0}.</value>
+  </data>
+  <data name="lbl_CancelBonusTitle" xml:space="preserve">
+    <value>Pemberitahuan kedaluwarsa promosi.</value>
+  </data>
   <data name="lbl_CashbackMsg" xml:space="preserve">
     <value>Selamat, Bonus cashback Anda {0} telah dikreditkan ke akun Anda!</value>
   </data>

@@ -117,8 +117,14 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="lbl_CancelBonus" xml:space="preserve">
-    <value>恭喜，您的取消獎金 {0} 已匯入您的戶口！</value>
+  <data name="lbl_CancelBonus1" xml:space="preserve">
+    <value>您的優惠紅利已被取消。</value>
+  </data>
+  <data name="lbl_CancelBonus2" xml:space="preserve">
+    <value>您的優惠紅利已被取消，結算後可退還本金為{0}。</value>
+  </data>
+  <data name="lbl_CancelBonusTitle" xml:space="preserve">
+    <value>優惠活動過期通知</value>
   </data>
   <data name="lbl_CashbackMsg" xml:space="preserve">
     <value>恭喜，您的現金返還 {0} 已匯入您的戶口！</value>

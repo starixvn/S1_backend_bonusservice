@@ -117,6 +117,15 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="lbl_CancelBonus1" xml:space="preserve">
+    <value>โปรโมชั่นโบนัสของคุณถูกยกเลิก</value>
+  </data>
+  <data name="lbl_CancelBonus2" xml:space="preserve">
+    <value>โปรโมชั่นโบนัสของคุณถูกยกเลิก  จำนวนเงินคืนที่มีสิทธิ์คือ {0} บาท</value>
+  </data>
+  <data name="lbl_CancelBonusTitle" xml:space="preserve">
+    <value>ประกาศการหมดอายุของโปรโมชั่น</value>
+  </data>
   <data name="lbl_CashbackMsg" xml:space="preserve">
     <value>ขอแสดงความยินดีเครดิตเงินคืน {0} ของคุณเข้าบัญชีของคุณแล้ว!</value>
   </data>

@@ -117,6 +117,15 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="lbl_CancelBonus1" xml:space="preserve">
+    <value>Phần thưởng khuyến mãi của bạn đã bị hủy.</value>
+  </data>
+  <data name="lbl_CancelBonus2" xml:space="preserve">
+    <value>Phần thưởng khuyến mãi của bạn đã bị hủy, số tiền được hoàn là {0}</value>
+  </data>
+  <data name="lbl_CancelBonusTitle" xml:space="preserve">
+    <value>Thông báo khuyến mãi hết hạn</value>
+  </data>
   <data name="lbl_CashbackMsg" xml:space="preserve">
     <value>Xin chúc mừng, khoản tiền hoàn lại {0} của bạn đã được ghi có vào tài khoản của bạn!</value>
   </data>
