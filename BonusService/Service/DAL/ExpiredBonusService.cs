@@ -35,8 +35,8 @@ namespace BonusService.Service.DAL
             int rtn = 0;
             if (expiredBonus.Refund > 0) //money
             {
-                rtn = walletService.SetBalance(expiredBonus.CustId, expiredBonus.SiteId, expiredBonus.UserName, expiredBonus.Refund, 7, $"CancelBonus: {expiredBonus.Refund:#,##0.##}", null, out _, out _, conn, trans);
-                rtn = withdrawalLimitService.SetWithdrawalLimit(expiredBonus.CustId, expiredBonus.UserName, expiredBonus.SiteId, expiredBonus.Refund, "CancelBonus", null, out decimal afterWithdrawalLimit, conn, trans);
+                rtn = walletService.SetBalance(expiredBonus.CustId, expiredBonus.SiteId, expiredBonus.UserName, expiredBonus.Refund, 7, $"CancelBonus: {expiredBonus.Refund:#,##0.##}", expiredBonus.BonusId.ToString(), out _, out _, conn, trans);
+                rtn = withdrawalLimitService.SetWithdrawalLimit(expiredBonus.CustId, expiredBonus.UserName, expiredBonus.SiteId, expiredBonus.Refund, "CancelBonus", expiredBonus.BonusId.ToString(), out decimal afterWithdrawalLimit, conn, trans);
             }
 
             rtn = conn.Execute("Service_BonusExpired_Set", new { BonusId = expiredBonus.BonusId, CustId = expiredBonus.CustId, UserName = expiredBonus.UserName, SiteId = expiredBonus.SiteId, TYPE = 7, PromoCategoryId = expiredBonus.PromoCategoryId, Bonus = expiredBonus.Bonus }, commandType: CommandType.StoredProcedure);
