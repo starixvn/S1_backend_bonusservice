@@ -29,15 +29,18 @@ namespace BonusService
                     services.AddSingleton<RebateService>();
                     services.AddSingleton<ExpiredBonusService>();
                     services.AddSingleton<ReferralService>();
+                    services.AddSingleton<VipService>();
 
                     services.AddSingleton<RebateBLL>();
                     services.AddSingleton<ReferralBLL>();
                     services.AddSingleton<SelLangBLL>();
                     services.AddSingleton<ExpiredBonusBLL>();
-                    
+                    services.AddSingleton<VipBLL>();
+
                     services.AddHostedService<RebateWorker>();
-                    services.AddHostedService<ExpiredBonusWorker>();
+                    //services.AddHostedService<ExpiredBonusWorker>();
                     services.AddHostedService<ReferralWorker>();
+                    services.AddHostedService<VipWorker>();
                 });
     }
 }
