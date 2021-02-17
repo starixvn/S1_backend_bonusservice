@@ -38,7 +38,7 @@ namespace BonusService
                     services.AddSingleton<VipBLL>();
 
                     services.AddHostedService<RebateWorker>();
-                    //services.AddHostedService<ExpiredBonusWorker>();
+                    services.AddHostedService<ExpiredBonusWorker>();
                     services.AddHostedService<ReferralWorker>();
                     services.AddHostedService<VipWorker>();
                 });
