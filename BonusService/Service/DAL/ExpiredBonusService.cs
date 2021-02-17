@@ -39,7 +39,7 @@ namespace BonusService.Service.DAL
                 rtn = withdrawalLimitService.SetWithdrawalLimit(expiredBonus.CustId, expiredBonus.UserName, expiredBonus.SiteId, expiredBonus.Refund, "CancelBonus", null, out decimal afterWithdrawalLimit, conn, trans);
             }
 
-            rtn = conn.Execute("Service_BonusExpired_Set", new { BonusId = expiredBonus.BonusId }, commandType: CommandType.StoredProcedure);
+            rtn = conn.Execute("Service_BonusExpired_Set", new { BonusId = expiredBonus.BonusId, CustId = expiredBonus.CustId, UserName = expiredBonus.UserName, SiteId = expiredBonus.SiteId, TYPE = 7, PromoCategoryId = expiredBonus.PromoCategoryId, Bonus = expiredBonus.Bonus }, commandType: CommandType.StoredProcedure);
 
             if (rtn > 0)
             {
