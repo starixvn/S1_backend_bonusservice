@@ -14,6 +14,8 @@ namespace BonusService.Service.Model
         public string UserLang { set; get; }
         public int CurrencyId { set; get; }
         public int Refund { set; get; }
+        public int PromoCategoryId { get; set; }
+        public decimal Bonus { set; get; }
 
     }
 }
