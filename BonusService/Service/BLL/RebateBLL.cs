@@ -11,22 +11,27 @@ namespace BonusService.Service.BLL
     public class RebateBLL
     {
         private readonly RebateService rebateService;
+        private readonly VipRebateService vipRebateService;
         private readonly IMemoryCache cache;
         private readonly SelLangBLL selLangBLL;
         private readonly MessageService messageService;
         private readonly CustInfoService custInfoService;
-        public RebateBLL(IMemoryCache cache, RebateService rebateService, SelLangBLL selLangBLL, CustInfoService custInfoService, MessageService messageService)
+        public RebateBLL(IMemoryCache cache, VipRebateService vipRebateService, RebateService rebateService, SelLangBLL selLangBLL, CustInfoService custInfoService, MessageService messageService)
         {
             this.rebateService = rebateService;
+            this.vipRebateService = vipRebateService;
             this.cache = cache;
             this.selLangBLL = selLangBLL;
             this.messageService = messageService;
             this.custInfoService = custInfoService;
         }
-
         public IEnumerable<RebateTask> GetRebateTask()
         {
             return rebateService.GetRebateTask();
+        }
+        public IEnumerable<RebateTask> GetVipRebateTask()
+        {
+            return vipRebateService.GetVipRebateTask();
         }
         public int SetRebateTaskDone(string bonusCode, int siteId)
         {
@@ -42,7 +47,6 @@ namespace BonusService.Service.BLL
         }
         public int PayoutRebate(int siteId, int custId, string userName, string bonusCode, RebateInfo rebateInfo, IEnumerable<RebateTpBetRecord> rebateTpBetRecords, IEnumerable<RebateTask> rebateTasks)
         {
-
             var result = rebateService.PayoutRebate(siteId, custId, userName, bonusCode, rebateInfo, rebateTpBetRecords, rebateTasks, out decimal payAmount, out Dictionary<int, decimal> rebateLogList);
 
             if (result > 0)
@@ -79,7 +83,56 @@ namespace BonusService.Service.BLL
 
             return result;
         }
+        public IEnumerable<VipRebateTpBetRecord> GetVipRebateTpBetRecord(int siteId, int custId, int is14)
+        {
+            return vipRebateService.GetVipRebateTpBetRecord(siteId, custId, is14);
+        }
+        public IEnumerable<VipRebateInfo> GetVipRebateCustList(int siteId, int pageSize, int pageNumber)
+        {
+            return vipRebateService.GetVipRebateCustList(siteId, pageSize, pageNumber);
+        }
+        public int PayoutVipRebate(int siteId, int custId, string userName, VipRebateInfo vipRebateInfo, IEnumerable<VipRebateTpBetRecord> vipRebateTpBetRecords, IEnumerable<RebatePayoutLimit> rebatePayoutLimits)
+        {
+            var result = vipRebateService.PayoutVipRebate(siteId, custId, userName, vipRebateInfo, vipRebateTpBetRecords, out decimal payAmount, out Dictionary<int, decimal> rebateLogList, out Dictionary<int, decimal> rebateCLogList, rebatePayoutLimits);
 
+            if (result > 0)
+            {
+                var promotionType = 6;
+                var custInfo = custInfoService.GetCustInfo(custId);
+                var msg = new StringBuilder();
+
+                var dpayAmount = payAmount.ToString("#,##0.##");
+                if (custInfoService.IsConvertRequired(custInfo.CurrencyId))
+                {
+                    dpayAmount = $"{payAmount / 1000:#,##0.##}";
+                }
+
+                var title = string.Format($"{custInfo.UserName} {selLangBLL.GetResourceValue(promotionType == 6 ? "lbl_RebateMsg" : "lbl_CashbackMsg", custInfo.UserLang)}", dpayAmount);
+                msg.AppendLine(title);
+
+                if (promotionType == 6)
+                {
+                    foreach (var rebateLog in rebateCLogList)
+                    {
+                        var dAmount = rebateLog.Value.ToString("#,##0.##");
+                        if (custInfoService.IsConvertRequired(custInfo.CurrencyId))
+                        {
+                            dAmount = $"{rebateLog.Value / 1000:#,##0.##}";
+                        }
+
+                        msg.AppendLine($"{GetTpCategoryList()[rebateLog.Key]}: {dAmount}");
+                    }
+                }
+
+                messageService.SendMessage(custInfo.SiteId, "Bonus Service", title, msg.ToString(), custInfo.CustId, custInfo.UserName, custInfo.UserLang);
+            }
+
+            return result;
+        }
+        public IEnumerable<RebatePayoutLimit> GetRebatePayoutLimit()
+        {
+            return vipRebateService.GetRebatePayoutLimit();
+        }
         public Dictionary<int, string> GetTpGameList()
         {
             string key = $"TpGameList";
@@ -90,6 +143,25 @@ namespace BonusService.Service.BLL
             }
 
             tpGameList = rebateService.GetTpGameList().ToDictionary(x => x.Type, x => x.TypeName);
+            if (tpGameList != null)
+            {
+                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                .SetSlidingExpiration(TimeSpan.FromMinutes(10));
+                cache.Set(key, tpGameList, cacheEntryOptions);
+            }
+
+            return tpGameList;
+        }
+        public Dictionary<int, string> GetTpCategoryList()
+        {
+            string key = $"TpCategory";
+            var tpGameList = cache.Get<Dictionary<int, string>>(key);
+            if (tpGameList != null)
+            {
+                return tpGameList;
+            }
+
+            tpGameList = rebateService.GetTpCategoryList().ToDictionary(x => x.Id, x => x.Name);
             if (tpGameList != null)
             {
                 var cacheEntryOptions = new MemoryCacheEntryOptions()

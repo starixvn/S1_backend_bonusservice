@@ -17,11 +17,46 @@ namespace BonusService.Service.Model
         public decimal RollOver { set; get; }
         public decimal MinPayout { set; get; }
     }
+    public class RebatePeriod
+    {
+        public string BonusCode { set; get; }
+        public int SiteId { set; get; }
+        public int PromotionType { set; get; }
+        public int PeriodType { set; get; }
+        public int PeriodDay { set; get; }
+        public int CurrencyId { set; get; }
+        public int GameType { set; get; }
+        public decimal Percentage { set; get; }
+        public decimal MaxBonus { set; get; }
+        public decimal RollOver { set; get; }
+        public decimal MinPayout { set; get; }
+    }
 
     public class RebateInfo
     {
         public int CustId { set; get; }
         public int CurrencyId { set; get; }
+    }
+    public class VipRebateInfo : RebateInfo
+    {
+        public string UserName { set; get; }
+        public string TpUserName { set; get; }
+    }
+    public class VipRebateTpBetRecord
+    {
+        public DateTime SettledDate { set; get; }
+        public int CategoryId { set; get; }
+        public int GameType { set; get; }
+        public decimal ValidBet { set; get; }
+        public decimal WinlostAmount { set; get; }
+    }
+    public class RebatePayoutLimit
+    {
+        public int SiteId { set; get; }
+        public int CurrencyId { set; get; }
+        public int CategoryId { set; get; }
+        public decimal MaxPayout { set; get; }
+        public decimal MinPayout { set; get; }
     }
     public class RebateTpBetRecord
     {
@@ -43,6 +78,11 @@ namespace BonusService.Service.Model
     {
         public int Type { get; set; }
         public string TypeName { get; set; }
+    }
+    public class TpCategory
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
     }
     public class BonusCashBack
     {

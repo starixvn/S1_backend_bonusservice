@@ -144,6 +144,11 @@ namespace BonusService.Service.DAL
             using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
             return conn.Query<TpGameType>("Common_TpGameType_Get", commandType: CommandType.StoredProcedure);
         }
+        public IEnumerable<TpCategory> GetTpCategoryList()
+        {
+            using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
+            return conn.Query<TpCategory>("Common_TpCategory_Get", commandType: CommandType.StoredProcedure);
+        }
         public IEnumerable<BonusCashBack> GetBonusCashBackInfo()
         {
             using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport")))

@@ -27,6 +27,7 @@ namespace BonusService
                     services.AddSingleton<WalletService>();
                     services.AddSingleton<WithdrawalLimitService>();
                     services.AddSingleton<RebateService>();
+                    services.AddSingleton<VipRebateService>();
                     services.AddSingleton<ExpiredBonusService>();
                     services.AddSingleton<ReferralService>();
                     services.AddSingleton<VipService>();
