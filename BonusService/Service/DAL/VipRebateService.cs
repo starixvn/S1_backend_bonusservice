@@ -147,5 +147,10 @@ namespace BonusService.Service.DAL
             using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
             return conn.Query<RebatePayoutLimit>("Service_RebatePayoutLimit_Get", commandType: CommandType.StoredProcedure);
         }
+        public int SetVipRebateTaskDone(int siteId)
+        {
+            using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
+            return conn.Execute("Service_VipRebateTaskDone_Set", new { SiteId = siteId }, commandType: CommandType.StoredProcedure);
+        }
     }
 }

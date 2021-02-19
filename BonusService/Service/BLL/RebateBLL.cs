@@ -33,6 +33,11 @@ namespace BonusService.Service.BLL
         {
             return vipRebateService.GetVipRebateTask();
         }
+        public int SetVipRebateTaskDone(int siteId)
+        {
+            return vipRebateService.SetVipRebateTaskDone(siteId);
+        }
+
         public int SetRebateTaskDone(string bonusCode, int siteId)
         {
             return rebateService.SetRebateTaskDone(bonusCode, siteId);

@@ -42,7 +42,7 @@ namespace BonusService.Service.Workers
 
             try
             {
-                var rebateTaskList = rebateBLL.GetRebateTask();
+                var rebateTaskList = rebateBLL.GetVipRebateTask();
                 foreach (var rebateTask in rebateTaskList)
                 {
                     log2File.Info(JsonConvert.SerializeObject(rebateTask), "VipRebateTask");
@@ -87,7 +87,7 @@ namespace BonusService.Service.Workers
                     }
                     while (listCnt == pageSize);
 
-                    rebateBLL.SetRebateTaskDone(rebateTask.BonusCode, rebateTask.SiteId);
+                    rebateBLL.SetVipRebateTaskDone(rebateTask.SiteId);
                 }
             }
             catch (Exception ex)
