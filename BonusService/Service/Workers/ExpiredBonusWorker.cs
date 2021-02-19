@@ -61,7 +61,6 @@ namespace BonusService.Service.Workers
                                 try
                                 {
                                     expiredBonusBLL.RefundExpiredBonus(item);
-                                    log2File.Info(JsonConvert.SerializeObject(item), "ExpiredBonus");
                                 }
                                 catch (Exception ex1)
                                 {

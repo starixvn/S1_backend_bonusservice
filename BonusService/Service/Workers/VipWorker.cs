@@ -39,7 +39,7 @@ namespace BonusService.Service.Workers
 
             try
             {
-                foreach(var vipSystem in vipBLL.GetVipSystem().OrderByDescending(x => x.Level))
+                foreach(var vipSystem in vipBLL.GetVipSystem().OrderBy(x => x.Level))
                 {
                     foreach (var custVip in vipBLL.GetCustUpgrade(vipSystem.Level, vipSystem.UpDeposit, vipSystem.SiteId, vipSystem.CurrencyId))
                     {

@@ -38,10 +38,11 @@ namespace BonusService
                     services.AddSingleton<ExpiredBonusBLL>();
                     services.AddSingleton<VipBLL>();
 
-                    services.AddHostedService<RebateWorker>();
+                    //services.AddHostedService<RebateWorker>();
                     services.AddHostedService<ExpiredBonusWorker>();
                     services.AddHostedService<ReferralWorker>();
                     services.AddHostedService<VipWorker>();
+                    services.AddHostedService<VipRebateWorker>();
                 });
     }
 }
