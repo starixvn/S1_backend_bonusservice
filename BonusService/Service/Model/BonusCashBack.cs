@@ -47,6 +47,7 @@ namespace BonusService.Service.Model
         public DateTime SettledDate { set; get; }
         public int CategoryId { set; get; }
         public int GameType { set; get; }
+        public decimal Percentage { set; get; }
         public decimal ValidBet { set; get; }
         public decimal WinlostAmount { set; get; }
     }

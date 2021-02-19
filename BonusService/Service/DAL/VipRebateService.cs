@@ -127,6 +127,11 @@ namespace BonusService.Service.DAL
                             conn.Execute("Common_RebateLog_Ins", new { CustId = custId, CurrencyId = rebateInfo.CurrencyId, GameType = rebateLog.Key, RebateType = promotionType - 5, UserName = userName, SiteId = siteId, RedeemAmount = rebateLog.Value, Memo = "", BonusCode = (string)null, RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
                         }
 
+                        foreach (var rebateLog in rebateCLogList)
+                        {
+                            conn.Execute("Common_RebateCLog_Ins", new { CustId = custId, CurrencyId = rebateInfo.CurrencyId, CategoryId = rebateLog.Key, RebateType = promotionType - 5, UserName = userName, SiteId = siteId, RedeemAmount = rebateLog.Value, Memo = "", RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
+                        }
+
                         trans.Commit();
                     }
                 }
