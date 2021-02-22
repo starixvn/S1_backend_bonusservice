@@ -53,6 +53,7 @@ namespace BonusService.Service.Workers
                     do
                     {
                         var rebateInfoList = rebateBLL.GetVipRebateCustList(rebateTask.SiteId, pageSize, pageNumber);
+                        int ncount = 0;
                         foreach (var rebateInfo in rebateInfoList)
                         {
                             var rebateTpBetRecordList = rebateBLL.GetVipRebateTpBetRecord(rebateTask.SiteId, rebateInfo.CustId, 0).ToList();//.ToDictionary<string, RebateTpBetRecord>(x => $"{x.SettledDate:yyyyMMdd}_{x.GameType}", x => x);
@@ -97,16 +98,16 @@ namespace BonusService.Service.Workers
             }
             finally
             {
-                TimeSpan dueTimeSpan = TimeSpan.FromMinutes(30);
+                TimeSpan dueTimeSpan = TimeSpan.FromMinutes(60);
                 if (environment.IsDevelopment())
                 {
                     dueTimeSpan = TimeSpan.FromMinutes(1);
                 }
 
-                if (isError)
-                {
-                    dueTimeSpan = TimeSpan.FromSeconds(5);
-                }
+               // if (isError)
+              //  {
+              //      dueTimeSpan = TimeSpan.FromSeconds(5);
+              //  }
 
                 timer.Change(dueTimeSpan, TimeSpan.Zero);
             }
