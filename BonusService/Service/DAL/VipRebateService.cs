@@ -50,6 +50,7 @@ namespace BonusService.Service.DAL
             int promotionType = 0;
             rebateLogList = new Dictionary<int, decimal>();
             rebateCLogList = new Dictionary<int, decimal>();
+            
 
             long tc = DateTime.Now.Ticks;
 
@@ -58,10 +59,10 @@ namespace BonusService.Service.DAL
                 var sum = rr.ValidBet;
                 if (sum != 0)
                 {
-                    var rebateRecord = GetRebateRecord(custId, int.Parse(rr.SettledDate.ToString("yyyyMMdd")), rr.GameType, 6, conn, trans);
+                    promotionType = 6;
+                    var rebateRecord = GetRebateRecord(custId, int.Parse(rr.SettledDate.ToString("yyyyMMdd")), rr.GameType, promotionType, conn, trans);
                     if (rebateRecord == null)
                     {
-                        promotionType = 6;
                         SetRebateRecord(custId, int.Parse(rr.SettledDate.ToString("yyyyMMdd")), rr.GameType, sum, promotionType, tc, conn, trans);
                         var amount = sum;
                         amount = common.Floor(amount, 2);
@@ -86,13 +87,13 @@ namespace BonusService.Service.DAL
                     }
                 }
             }
-
-            foreach (var rebateKey in rebateCLogList.Keys)
+            var newRebateCLogList = new Dictionary<int, decimal>(rebateCLogList);
+            foreach (var rebateKey in newRebateCLogList.Keys)
             {
                 var rebatePayoutLimit = rebatePayoutLimits.Where(x => x.CurrencyId == rebateInfo.CurrencyId && x.SiteId == siteId && x.CategoryId == rebateKey).FirstOrDefault();
-                if (rebatePayoutLimit == null)
+                if (rebatePayoutLimit != null)
                 {
-                    if (rebateCLogList[rebateKey] > rebatePayoutLimit.MinPayout)
+                    if (rebateCLogList[rebateKey] >= rebatePayoutLimit.MinPayout)
                     {
                         if (rebatePayoutLimit.MaxPayout != 0 && rebatePayoutLimit.MaxPayout < rebateCLogList[rebateKey])
                         {
@@ -114,8 +115,8 @@ namespace BonusService.Service.DAL
 
                 if (result > 0)
                 {
-                    conn.Execute("Common_RebateMLog_Ins", new { CustId = custId, CurrencyId = rebateInfo.CurrencyId, RebateType = promotionType - 5, UserName = userName, SiteId = siteId, RedeemAmount = payAmount, Memo = "", BonusCode = (string)null, RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
-                    int rebateSetting1_RollOver = 0;
+                    conn.Execute("Common_RebateMLog_Ins", new { CustId = custId, CurrencyId = rebateInfo.CurrencyId, RebateType = promotionType - 5, UserName = userName, SiteId = siteId, RedeemAmount = payAmount, Memo = "", BonusCode = "VipRebate", RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
+                    int rebateSetting1_RollOver = 1;
                     var rollOver = rebateSetting1_RollOver * payAmount;
                     if (rollOver > 0)
                         result = withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, rollOver, $"{(promotionType == 6 ? "Rebate" : "Cashback")}: {rollOver:#,##0.##}", "", out _, conn, trans);
@@ -124,7 +125,7 @@ namespace BonusService.Service.DAL
                     {
                         foreach (var rebateLog in rebateLogList)
                         {
-                            conn.Execute("Common_RebateLog_Ins", new { CustId = custId, CurrencyId = rebateInfo.CurrencyId, GameType = rebateLog.Key, RebateType = promotionType - 5, UserName = userName, SiteId = siteId, RedeemAmount = rebateLog.Value, Memo = "", BonusCode = (string)null, RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
+                            conn.Execute("Common_RebateLog_Ins", new { CustId = custId, CurrencyId = rebateInfo.CurrencyId, GameType = rebateLog.Key, RebateType = promotionType - 5, UserName = userName, SiteId = siteId, RedeemAmount = rebateLog.Value, Memo = "", BonusCode = "VipRebate", RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
                         }
 
                         foreach (var rebateLog in rebateCLogList)
@@ -141,11 +142,11 @@ namespace BonusService.Service.DAL
         }
         public RebateRecord GetRebateRecord(int CustId, int SettledDate, int GameType, int PromotionType, MySqlConnection conn, MySqlTransaction trans)
         {
-            return conn.Query<RebateRecord>("Service_RebateRecord_Get", new { CustId, SettledDate, GameType, BonusCode = (string)null, PromotionType }, transaction: trans, commandType: CommandType.StoredProcedure).FirstOrDefault();
+            return conn.Query<RebateRecord>("Service_RebateRecord_Get", new { CustId, SettledDate, GameType, BonusCode = "VipRebate", PromotionType }, transaction: trans, commandType: CommandType.StoredProcedure).FirstOrDefault();
         }
         public int SetRebateRecord(int CustId, int SettledDate, int GameType, decimal Sum, int PromotionType, long RelId, MySqlConnection conn, MySqlTransaction trans)
         {
-            return conn.Execute("Service_RebateRecord_Set", new { CustId, SettledDate, GameType, BonusCode = (string)null, Sum, PromotionType, RelId }, transaction: trans, commandType: CommandType.StoredProcedure);
+            return conn.Execute("Service_RebateRecord_Set", new { CustId, SettledDate, GameType, BonusCode = "VipRebate", Sum, PromotionType, RelId }, transaction: trans, commandType: CommandType.StoredProcedure);
         }
         public IEnumerable<RebatePayoutLimit> GetRebatePayoutLimit()
         {
