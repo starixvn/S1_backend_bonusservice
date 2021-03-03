@@ -107,7 +107,7 @@ namespace BonusService.Service.Workers
             switch (vipSetting.PeriodType)
             {
                 case (int) VipPeriodType.Monthly:
-                    taskTime = new DateTime(currentTime.Year, currentTime.Month, vipSetting.PeriodValue).Date;
+                    taskTime = new DateTime(currentTime.Year, currentTime.Month, vipSetting.PeriodInterval).Date;
                     break;
 
                 case (int) VipPeriodType.Daily:
@@ -126,7 +126,7 @@ namespace BonusService.Service.Workers
             {
                 case (int) VipPreviousDateRangeType.LastMonth:
                     currentTime = currentTime.AddMonths(-1);
-                    startTime = new DateTime(currentTime.Year, currentTime.Month, vipSetting.PeriodValue).Date;
+                    startTime = new DateTime(currentTime.Year, currentTime.Month, vipSetting.PeriodInterval).Date;
                     endTime = startTime.AddMonths(1).AddTicks(-1);
                     break;
 

@@ -24,7 +24,7 @@ namespace BonusService.Service.Model
         public int SiteId { get; set; }
         public int Status { get; set; }
         public int PeriodType { get; set; }
-        public int PeriodValue { get; set; }
+        public int PeriodInterval { get; set; }
         public int PreviousDateRangeType { get; set; }
         public int WithdrawalLimitRatio { get; set; }
         public DateTime SettleTime { get; set; }
