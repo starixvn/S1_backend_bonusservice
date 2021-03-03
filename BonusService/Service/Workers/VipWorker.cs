@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using BonusService.Service.Model;
+using BonusService.Service.Model.enums;
 
 namespace BonusService.Service.Workers
 {
@@ -39,21 +40,23 @@ namespace BonusService.Service.Workers
                     
             try
             {
-                // TODO 排程設定資料暫存到 Memory
                 var vipSettingList = _vipBll.GetVipSetting().ToList();
-                
                 foreach (var vipSetting in vipSettingList)
                 {
-                    // TODO 判斷啟動頻率是否符合設定表
-                    // TODO 改成從設定表抓上個月的區間
                     var currentTime = DateTime.UtcNow.AddHours(8);
-                    var startTime = new DateTime(currentTime.Year, currentTime.Month, 1).Date;
-                    var endTime = startTime.AddMonths(1).AddTicks(-1);
+                    if (VerifyTask(vipSetting, currentTime))
+                    {
+                        continue;
+                    }
 
-                    var vipList = _vipBll.GetVipSystem().ToList();
+                    if (CalculateTime(vipSetting, currentTime, out var startTime, out var endTime))
+                    {
+                        continue;
+                    }
+
+                    var vipList = _vipBll.GetVipSystem(vipSetting.SiteId).ToList();
                     foreach (var vipSystem in vipList.OrderByDescending(x => x.Level))
                     {
-
                         foreach (var custVip in _vipBll.GetCustUpgrade(new CustomerUpgradeInfo(vipSystem.Level,
                             vipSystem.UpDeposit, vipSystem.SiteId, vipSystem.CurrencyId, startTime, endTime)))
                         {
@@ -67,13 +70,14 @@ namespace BonusService.Service.Workers
 
                             if (result == 0)
                             {
-                                // Error Handle
+                                isError = true;
                             }
                         }
                     }
-                }
 
-                // TODO Error Handle Retry & Log
+                    vipSetting.SettleTime = DateTime.UtcNow.AddHours(8);
+                    _vipBll.SetVipSetting(vipSetting);
+                }
             }
             catch (Exception ex)
             {
@@ -82,8 +86,7 @@ namespace BonusService.Service.Workers
             }
             finally
             {
-                // TODO 需要修改觸發時間
-                var dueTimeSpan = TimeSpan.FromMinutes(30);
+                var dueTimeSpan = TimeSpan.FromHours(4);
                 if (_environment.IsDevelopment())
                 {
                     dueTimeSpan = TimeSpan.FromMinutes(1);
@@ -91,11 +94,49 @@ namespace BonusService.Service.Workers
 
                 if (isError)
                 {
-                    dueTimeSpan = TimeSpan.FromSeconds(5);
+                    dueTimeSpan = TimeSpan.FromMinutes(10);
                 }
 
                 _timer.Change(dueTimeSpan, TimeSpan.Zero);
             }
+        }
+        
+        private static bool VerifyTask(VipSetting vipSetting, DateTime currentTime)
+        {
+            DateTime taskTime;
+            switch (vipSetting.PeriodType)
+            {
+                case (int) VipPeriodType.Monthly:
+                    taskTime = new DateTime(currentTime.Year, currentTime.Month, vipSetting.PeriodValue).Date;
+                    break;
+
+                case (int) VipPeriodType.Daily:
+                case (int) VipPeriodType.Weekly:
+                default:
+                    return true;
+            }
+
+            return taskTime < vipSetting.SettleTime;
+        }
+
+        private static bool CalculateTime(VipSetting vipSetting, DateTime currentTime, out DateTime startTime,
+            out DateTime endTime)
+        {
+            switch (vipSetting.PreviousDateRangeType)
+            {
+                case (int) VipPreviousDateRangeType.LastMonth:
+                    currentTime = currentTime.AddMonths(-1);
+                    startTime = new DateTime(currentTime.Year, currentTime.Month, vipSetting.PeriodValue).Date;
+                    endTime = startTime.AddMonths(1).AddTicks(-1);
+                    break;
+
+                case (int) VipPreviousDateRangeType.LastThreeMonth:
+                default:
+                    startTime = endTime = new DateTime();
+                    return true;
+            }
+
+            return false;
         }
 
         private static VipAmount CalculateAmount(VipSystem vipSystem, CustVip custVip,

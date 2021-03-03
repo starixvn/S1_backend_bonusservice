@@ -16,15 +16,21 @@ namespace BonusService.Service.BLL
             this._vipService = vipService;
         }
 
-        public IEnumerable<VipSystem> GetVipSystem()
+        public IEnumerable<VipSystem> GetVipSystem(int siteId)
         {
-            return _vipService.GetVipSystem();
+            return _vipService.GetVipSystem(siteId);
         }
         
         public IEnumerable<VipSetting> GetVipSetting()
         {
             return _vipService.GetVipSetting();
         }
+        
+        public int SetVipSetting(VipSetting vipSetting)
+        {
+            return _vipService.SetVipSetting(vipSetting);
+        }
+
         
         public IEnumerable<CustVip> GetCustUpgrade(CustomerUpgradeInfo customerUpgradeInfo)
         {
