@@ -56,4 +56,17 @@ namespace BonusService.Service.Model.enums
         Joker = 9,
         SG = 10
     }
+
+    public enum VipPeriodType
+    {
+        Daily = 1,
+        Weekly = 2,
+        Monthly = 3
+    }
+
+    public enum VipPreviousDateRangeType
+    {
+        LastMonth = 1,
+        LastThreeMonth = 2
+    }
 }

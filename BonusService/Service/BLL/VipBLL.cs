@@ -9,24 +9,37 @@ namespace BonusService.Service.BLL
 {
     public class VipBLL
     {
-        private readonly VipService vipService;
+        private readonly VipService _vipService;
 
         public VipBLL(VipService vipService)
         {
-            this.vipService = vipService;
+            this._vipService = vipService;
         }
 
-        public IEnumerable<VipSystem> GetVipSystem()
+        public IEnumerable<VipSystem> GetVipSystem(int siteId)
         {
-            return vipService.GetVipSystem();
+            return _vipService.GetVipSystem(siteId);
         }
-        public IEnumerable<CustVip> GetCustUpgrade(int vipLevel, decimal upDeposit, int siteId, int currencyId)
+        
+        public IEnumerable<VipSetting> GetVipSetting()
         {
-            return vipService.GetCustUpgrade(vipLevel, upDeposit, siteId, currencyId);
+            return _vipService.GetVipSetting();
         }
-        public int SetCustVip(int oldLevel, int newLevel, int custId, string userName, int siteId)
+        
+        public int SetVipSetting(VipSetting vipSetting)
         {
-            return vipService.SetCustVip(oldLevel, newLevel, custId, userName, siteId);
+            return _vipService.SetVipSetting(vipSetting);
+        }
+
+        
+        public IEnumerable<CustVip> GetCustUpgrade(CustomerUpgradeInfo customerUpgradeInfo)
+        {
+            return _vipService.GetCustUpgrade(customerUpgradeInfo);
+        }
+
+        public int SetCustVip(CustomerVipInfo customerVipInfo)
+        {
+            return _vipService.SetCustVip(customerVipInfo);
         }
     }
 }
