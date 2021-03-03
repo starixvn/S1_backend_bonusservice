@@ -63,7 +63,7 @@ namespace BonusService.Service.DAL
 
             foreach (var rr in rebateTpBetRecords)
             {
-                var rebateSetting = rebateTasks.Where(x => x.BonusCode == bonusCode && x.CurrencyId == rebateInfo.CurrencyId && x.GameType == rr.GameType).FirstOrDefault();
+                var rebateSetting = rebateTasks.FirstOrDefault(x => x.BonusCode == bonusCode && x.CurrencyId == rebateInfo.CurrencyId && x.GameType == rr.GameType);
                 if (rebateSetting != null)
                 {
                     var sum = rebateSetting.PromotionType == 6 ? rr.ValidBet : rr.WinlostAmount;
@@ -98,7 +98,7 @@ namespace BonusService.Service.DAL
                 }
             }
 
-            var rebateSetting1 = rebateTasks.Where(x => x.BonusCode == bonusCode && x.CurrencyId == rebateInfo.CurrencyId).FirstOrDefault();
+            var rebateSetting1 = rebateTasks.FirstOrDefault(x => x.BonusCode == bonusCode && x.CurrencyId == rebateInfo.CurrencyId);
 
             if (payAmount >= rebateSetting1.MinPayout && payAmount > 0)
             {

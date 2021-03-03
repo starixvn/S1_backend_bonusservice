@@ -90,7 +90,7 @@ namespace BonusService.Service.DAL
             var newRebateCLogList = new Dictionary<int, decimal>(rebateCLogList);
             foreach (var rebateKey in newRebateCLogList.Keys)
             {
-                var rebatePayoutLimit = rebatePayoutLimits.Where(x => x.CurrencyId == rebateInfo.CurrencyId && x.SiteId == siteId && x.CategoryId == rebateKey).FirstOrDefault();
+                var rebatePayoutLimit = rebatePayoutLimits.FirstOrDefault(x => x.CurrencyId == rebateInfo.CurrencyId && x.SiteId == siteId && x.CategoryId == rebateKey);
                 if (rebatePayoutLimit != null)
                 {
                     if (rebateCLogList[rebateKey] >= rebatePayoutLimit.MinPayout)

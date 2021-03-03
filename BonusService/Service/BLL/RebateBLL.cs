@@ -56,7 +56,7 @@ namespace BonusService.Service.BLL
 
             if (result > 0)
             {
-                var promotionType = rebateTasks.Where(x => x.BonusCode == bonusCode).FirstOrDefault()?.PromotionType ?? 6;
+                var promotionType = rebateTasks.FirstOrDefault(x => x.BonusCode == bonusCode)?.PromotionType ?? 6;
                 var custInfo = custInfoService.GetCustInfo(custId);
                 var msg = new StringBuilder();
 
@@ -125,7 +125,7 @@ namespace BonusService.Service.BLL
                             dAmount = $"{rebateLog.Value / 1000:#,##0.##}";
                         }
 
-                        var rebateTpBetRecord = vipRebateTpBetRecords.Where(x => x.CategoryId == rebateLog.Key).FirstOrDefault();
+                        var rebateTpBetRecord = vipRebateTpBetRecords.FirstOrDefault(x => x.CategoryId == rebateLog.Key);
 
                         msg.AppendLine($"{GetTpCategoryList()[rebateLog.Key]} ({rebateTpBetRecord.Percentage}): {dAmount}");
                     }
