@@ -111,6 +111,7 @@ namespace BonusService.Service.Workers
         
         private static bool VerifyTask(VipSetting vipSetting, DateTime currentTime)
         {
+            Console.WriteLine($@"VerifyTask - PeriodType:{vipSetting.PeriodType}");
             DateTime taskTime;
             switch (vipSetting.PeriodType)
             {
@@ -124,12 +125,14 @@ namespace BonusService.Service.Workers
                     return true;
             }
 
+            Console.WriteLine($@"VerifyTask - TaskTime:{taskTime} SettleTime:{vipSetting.SettleTime}");
             return taskTime < vipSetting.SettleTime;
         }
 
         private static bool CalculateTime(VipSetting vipSetting, DateTime currentTime, out DateTime startTime,
             out DateTime endTime)
         {
+            Console.WriteLine($@"CalculateTime - PreviousDateRangeType:{vipSetting.PreviousDateRangeType}");
             switch (vipSetting.PreviousDateRangeType)
             {
                 case (int) VipPreviousDateRangeType.LastMonth:
