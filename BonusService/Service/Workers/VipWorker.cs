@@ -167,7 +167,7 @@ namespace BonusService.Service.Workers
                     item.Level == currentLevel && item.CurrencyId == vipSystem.CurrencyId &&
                     item.SiteId == vipSystem.SiteId);
                 if (currentVip == null) continue;
-                var currentBonus = currentVip.UpDeposit;
+                var currentBonus = currentVip.UpBonus;
 
                 vipAmount.UpgradeAmount += currentBonus;
             }

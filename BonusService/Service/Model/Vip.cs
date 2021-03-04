@@ -8,6 +8,7 @@ namespace BonusService.Service.Model
         public int CurrencyId { get; set;}
         public int Level { get; set;}
         public decimal UpDeposit { get; set;}
+        public decimal UpBonus { get; set;}
         public decimal? DownDeposit { get; set; }
         public decimal? DownTurnover { get; set; }
     }
