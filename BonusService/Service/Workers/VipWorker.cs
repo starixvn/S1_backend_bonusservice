@@ -31,6 +31,7 @@ namespace BonusService.Service.Workers
         }
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            Console.WriteLine(@"VIP Worker Start");
             _timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.Zero);
             return Task.CompletedTask;
         }
@@ -40,6 +41,7 @@ namespace BonusService.Service.Workers
                     
             try
             {
+                Console.WriteLine(@"GetVipSetting Start");
                 var vipSettingList = _vipBll.GetVipSetting().ToList();
                 foreach (var vipSetting in vipSettingList)
                 {
@@ -54,9 +56,12 @@ namespace BonusService.Service.Workers
                         continue;
                     }
 
+                    Console.WriteLine($@"GetVipSystem Start - SiteId:{vipSetting.SiteId}");
                     var vipList = _vipBll.GetVipSystem(vipSetting.SiteId).ToList();
                     foreach (var vipSystem in vipList.OrderByDescending(x => x.Level))
                     {
+                        Console.WriteLine(
+                            $@"GetCustUpgrade Start - Level:{vipSystem.Level} CurrencyId:{vipSystem.CurrencyId} UpDeposit:{vipSystem.UpDeposit} StartTime:{startTime} EndTime:{endTime}");
                         foreach (var custVip in _vipBll.GetCustUpgrade(new CustomerUpgradeInfo(vipSystem.Level,
                             vipSystem.UpDeposit, vipSystem.SiteId, vipSystem.CurrencyId, startTime, endTime)))
                         {
@@ -75,17 +80,20 @@ namespace BonusService.Service.Workers
                         }
                     }
 
+                    Console.WriteLine(@"SetVipSetting Start");
                     vipSetting.SettleTime = DateTime.UtcNow.AddHours(8);
                     _vipBll.SetVipSetting(vipSetting);
                 }
             }
             catch (Exception ex)
             {
+                Console.WriteLine($@"VIPWorker Exception:{ex.Message}");
                 isError = true;
                 _log2File.Error(ex.ToString(), "Vip");
             }
             finally
             {
+                Console.WriteLine(@"VIPWorker is done");
                 var dueTimeSpan = TimeSpan.FromHours(4);
                 if (_environment.IsDevelopment())
                 {
@@ -103,6 +111,7 @@ namespace BonusService.Service.Workers
         
         private static bool VerifyTask(VipSetting vipSetting, DateTime currentTime)
         {
+            Console.WriteLine($@"VerifyTask - PeriodType:{vipSetting.PeriodType}");
             DateTime taskTime;
             switch (vipSetting.PeriodType)
             {
@@ -116,12 +125,14 @@ namespace BonusService.Service.Workers
                     return true;
             }
 
+            Console.WriteLine($@"VerifyTask - TaskTime:{taskTime} SettleTime:{vipSetting.SettleTime}");
             return taskTime < vipSetting.SettleTime;
         }
 
         private static bool CalculateTime(VipSetting vipSetting, DateTime currentTime, out DateTime startTime,
             out DateTime endTime)
         {
+            Console.WriteLine($@"CalculateTime - PreviousDateRangeType:{vipSetting.PreviousDateRangeType}");
             switch (vipSetting.PreviousDateRangeType)
             {
                 case (int) VipPreviousDateRangeType.LastMonth:
@@ -156,7 +167,7 @@ namespace BonusService.Service.Workers
                     item.Level == currentLevel && item.CurrencyId == vipSystem.CurrencyId &&
                     item.SiteId == vipSystem.SiteId);
                 if (currentVip == null) continue;
-                var currentBonus = currentVip.UpDeposit;
+                var currentBonus = currentVip.UpBonus;
 
                 vipAmount.UpgradeAmount += currentBonus;
             }
