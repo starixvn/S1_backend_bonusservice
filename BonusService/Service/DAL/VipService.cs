@@ -20,20 +20,20 @@ namespace BonusService.Service.DAL
 
         public IEnumerable<VipSystem> GetVipSystem(int siteId)
         {
-            using var conn = new MySqlConnection(_configuration.GetConnectionString("ConnectionStringReport"));
+            using var conn = new MySqlConnection(_configuration.GetConnectionString("ConnectionString"));
             return conn.Query<VipSystem>("Service_VipSystem_GetV2", new {SiteId = siteId},
                 commandType: CommandType.StoredProcedure);
         }
 
         public IEnumerable<VipSetting> GetVipSetting()
         {
-            using var conn = new MySqlConnection(_configuration.GetConnectionString("ConnectionStringReport"));
+            using var conn = new MySqlConnection(_configuration.GetConnectionString("ConnectionString"));
             return conn.Query<VipSetting>("Service_VipSetting_Get", commandType: CommandType.StoredProcedure);
         }
 
         public int SetVipSetting(VipSetting vipSetting)
         {
-            using var conn = new MySqlConnection(_configuration.GetConnectionString("ConnectionStringReport"));
+            using var conn = new MySqlConnection(_configuration.GetConnectionString("ConnectionString"));
             return conn.Execute("Service_VipSetting_Set",
                 new {vipSetting.SiteId, vipSetting.SettleTime}, commandType: CommandType.StoredProcedure);
         }
