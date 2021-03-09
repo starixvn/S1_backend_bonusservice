@@ -116,7 +116,7 @@ namespace BonusService.Service.DAL
                 if (result > 0)
                 {
                     conn.Execute("Common_RebateMLog_Ins", new { CustId = custId, CurrencyId = rebateInfo.CurrencyId, RebateType = promotionType - 5, UserName = userName, SiteId = siteId, RedeemAmount = payAmount, Memo = "", BonusCode = "VipRebate", RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
-                    int rebateSetting1_RollOver = 1;
+                    int rebateSetting1_RollOver = 0;
                     var rollOver = rebateSetting1_RollOver * payAmount;
                     if (rollOver > 0)
                         result = withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, rollOver, $"{(promotionType == 6 ? "Rebate" : "Cashback")}: {rollOver:#,##0.##}", "", out _, conn, trans);
