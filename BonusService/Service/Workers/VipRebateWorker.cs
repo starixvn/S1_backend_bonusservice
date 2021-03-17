@@ -2,7 +2,6 @@
 using BonusService.Service.Library;
 using BonusService.Service.Model;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -76,7 +75,7 @@ namespace BonusService.Service.Workers
                                 }
                             }
 
-                            if (rebateTpBetRecordList.Count() > 0)
+                            if (rebateTpBetRecordList.Count > 0)
                             {
                                 log2File.Info(JsonConvert.SerializeObject(rebateTpBetRecordList), "rebateTpBetRecordList");
                                 rebateBLL.PayoutVipRebate(rebateTask.SiteId, rebateInfo.CustId, rebateInfo.UserName, rebateInfo, rebateTpBetRecordList, rebatePayoutLimit);
