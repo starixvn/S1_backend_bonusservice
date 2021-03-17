@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using BonusService.Service.Extensions;
 using BonusService.Service.Model.enums;
 using Microsoft.Extensions.Logging;
+using BonusService.Service.Library;
 
 namespace BonusService.Service.BLL
 {
@@ -15,12 +16,14 @@ namespace BonusService.Service.BLL
         private readonly VipService _vipService;
         private readonly MessageService _messageService;
         private readonly ILogger<VipBLL> _logger;
+        private readonly SelLangBLL _selLangBLL;
 
-        public VipBLL(VipService vipService, MessageService messageService, ILogger<VipBLL> logger)
+        public VipBLL(VipService vipService, MessageService messageService, ILogger<VipBLL> logger, SelLangBLL selLangBLL)
         {
             _logger = logger;
             _vipService = vipService;
             _messageService = messageService;
+            _selLangBLL = selLangBLL;
         }
 
         private IEnumerable<VipSystem> GetVipSystem(int siteId)
@@ -72,7 +75,7 @@ namespace BonusService.Service.BLL
                     }
 
                     if (!CalculateTime(vipSetting, currentTime, out var startTime, out var endTime, out var upgradeTime,
-                        out var calculateMonth))
+                        out var settleTime, out var calculateMonth))
                     {
                         continue;
                     }
@@ -89,10 +92,10 @@ namespace BonusService.Service.BLL
                         {
                             var upgradeAmount = CalculateUpgradeAmount(vipSystem, custVip.VipLevel, vipList);
 
-                            var result = SetVipUpgradeReview(new VipUpgradeInfo(custVip.CustId,
+                            success = SetVipUpgradeReview(new VipUpgradeInfo(custVip.CustId,
                                 calculateMonth, custVip.UserName, vipSystem.SiteId, custVip.VipLevel, vipSystem.Level,
                                 vipSystem.CurrencyId, custVip.DepositAmount, upgradeAmount,
-                                (int) VipUpgradeReviewStatus.Pending));
+                                (int) VipUpgradeReviewStatus.Pending, settleTime));
                         }
                     }
 
@@ -121,7 +124,7 @@ namespace BonusService.Service.BLL
                     }
 
                     if (!CalculateTime(vipSetting, currentTime, out var startTime, out var endTime, out var upgradeTime,
-                        out var calculateMonth))
+                        out var settleTime, out var calculateMonth))
                     {
                         continue;
                     }
@@ -135,17 +138,24 @@ namespace BonusService.Service.BLL
                         var withdrawalLimitAmount =
                             CalculateWithdrawalLimitAmount(customer.UpgradeAmount, vipSetting.WithdrawalLimitRatio);
 
-                        success = SetCustVip(new CustomerVipInfo(customer.CurrentVipLevel,
+                        var upgradeResult = SetCustVip(new CustomerVipInfo(customer.CurrentVipLevel,
                             customer.UpgradeVipLevel,
                             customer.CustId, customer.UserName, customer.SiteId, customer.UpgradeAmount,
                             withdrawalLimitAmount, $"VIP Upgrade Reward: {customer.UpgradeAmount:#,##0.##}",
                             $"VIP Upgrade Withdrawal Limit: {withdrawalLimitAmount:#,##0.##}", calculateMonth,
                             DateTime.UtcNow.AddHours(8)));
+
+                        if (!upgradeResult)
+                        {
+                            success = false;
+                            continue;
+                        }
+                        SendMessage(customer, vipSetting);
                     }
 
                     if (!success) continue;
                     vipSetting.SettleTime = DateTime.UtcNow.AddHours(8);
-                    SetVipSetting(vipSetting);
+                    success = SetVipSetting(vipSetting);
                 }
             }
             catch (Exception e)
@@ -178,7 +188,7 @@ namespace BonusService.Service.BLL
         }
 
         private static bool CalculateTime(VipSetting vipSetting, DateTime currentTime, out DateTime startTime,
-            out DateTime endTime, out DateTime upgradeTime, out string calculateMonth)
+            out DateTime endTime, out DateTime upgradeTime, out DateTime settleTime, out string calculateMonth)
         {
             Console.WriteLine($@"CalculateTime - PreviousDateRangeType:{vipSetting.PreviousDateRangeType}");
             switch (vipSetting.PreviousDateRangeType)
@@ -189,12 +199,13 @@ namespace BonusService.Service.BLL
                         .Date;
                     endTime = startTime.AddMonths(1).AddTicks(-1);
                     upgradeTime = new DateTime(currentTime.Year, currentTime.Month, 6);
+                    settleTime= new DateTime(currentTime.Year, currentTime.Month, 1);
                     calculateMonth = startTime.ToString("yyyyMM");
                     break;
 
                 case (int) VipPreviousDateRangeType.LastThreeMonth:
                 default:
-                    startTime = endTime = upgradeTime = new DateTime();
+                    startTime = endTime = upgradeTime = settleTime = new DateTime();
                     calculateMonth = string.Empty;
                     return false;
             }
@@ -226,6 +237,16 @@ namespace BonusService.Service.BLL
             }
 
             return upgradeAmount;
+        }
+
+        private async void SendMessage(VipUpgradeReview customer, VipSetting vipSetting)
+        {
+            Currency.GetCurrency().TryGetValue(customer.CurrencyId, out var currencyName);
+            var content = string.Format(_selLangBLL.GetResourceValue("lbl_VipUpgrade", customer.UserLang),
+                currencyName, customer.UpgradeAmount.ToString("#,##0.##"));
+            
+            await _messageService.SendMessageAsync(new Message(vipSetting.SiteId, "Sender", "Title", content, customer.CustId,
+                customer.UserName, customer.UserLang));
         }
     }
 }

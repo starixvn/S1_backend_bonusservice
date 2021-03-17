@@ -138,4 +138,7 @@
   <data name="lbl_ReferralBonusCreditedTitle" xml:space="preserve">
     <value>推薦獎金[推薦&amp;獎勵]</value>
   </data>
+  <data name="lbl_VipUpgrade" xml:space="preserve">
+    <value>恭喜！解鎖您的貴族新階段！您的貴族特權獎勵為 {0} {1}。謝謝！</value>
+  </data>
 </root>

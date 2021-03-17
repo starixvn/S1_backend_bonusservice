@@ -1,9 +1,11 @@
+using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using BonusService.Service.BLL;
 using BonusService.Service.DAL;
 using BonusService.Service.Library;
 using BonusService.Service.Workers;
+using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Exceptions;
 using Serilog.Formatting.Json;
@@ -22,6 +24,7 @@ namespace BonusService
                 .UseSerilog((hostContext, loggerConfiguration) =>
                 {
                     loggerConfiguration
+                        .ReadFrom.Configuration(Configuration())
                         .Enrich.FromLogContext()
                         .Enrich.WithExceptionDetails()
                         .MinimumLevel.Information().WriteTo.Console(new JsonFormatter());
@@ -54,5 +57,13 @@ namespace BonusService
                     services.AddHostedService<VipWorker>();
                     services.AddHostedService<VipRebateWorker>();
                 });
+
+        private static IConfigurationRoot Configuration()
+        {
+            return new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .Build();
+        }
     }
 }

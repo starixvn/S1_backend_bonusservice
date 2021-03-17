@@ -138,4 +138,7 @@
   <data name="lbl_ReferralBonusCreditedTitle" xml:space="preserve">
     <value>Refer Friends Rewards [Refer &amp; Earn]</value>
   </data>
+  <data name="lbl_VipUpgrade" xml:space="preserve">
+    <value>Congratulation! Your VIP level has been upgraded, you are awarded {0} {1} Thank You!</value>
+  </data>
 </root>

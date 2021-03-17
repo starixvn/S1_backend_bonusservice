@@ -138,4 +138,7 @@
   <data name="lbl_ReferralBonusCreditedTitle" xml:space="preserve">
     <value>รางวัลแนะนำเพื่อน [แนะนำ &amp; รับรางวัล]</value>
   </data>
+  <data name="lbl_VipUpgrade" xml:space="preserve">
+    <value>ขอแสดงความยินดีด้วยค่ะ ท่านได้รับการอัปเกรดระดับ VIP เรียบร้อยแล้ว และได้รับรางวัลมูลค่า {0} {1} สำหรับการอัปเกรด ขอบคุณค่ะ</value>
+  </data>
 </root>

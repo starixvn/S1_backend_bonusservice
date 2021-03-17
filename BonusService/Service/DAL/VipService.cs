@@ -77,6 +77,7 @@ namespace BonusService.Service.DAL
             parameter.Add("DepositAmount", vipUpgradeInfo.DepositAmount);
             parameter.Add("UpgradeAmount", vipUpgradeInfo.UpgradeAmount);
             parameter.Add("Status", vipUpgradeInfo.Status);
+            parameter.Add("SettleTime", vipUpgradeInfo.SettleTime);
             return _mainDbClient.Execute("Service_VipUpgradeReview_Ins", parameter);
         }
 

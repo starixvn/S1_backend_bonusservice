@@ -38,6 +38,8 @@ namespace BonusService.Service.Model
         public int SiteId { get; set; }
         public int CustId { get; set; }
         public string UserName { get; set; }
+        public string UserLang { get; set; }
+        public int CurrencyId { get; set; }
         public int CurrentVipLevel { get; set; }
         public int UpgradeVipLevel { get; set; }
         public decimal UpgradeAmount { get; set; }
@@ -109,7 +111,7 @@ namespace BonusService.Service.Model
         }
 
         public VipUpgradeInfo(int custId, string calculateMonth, string userName, int siteId, int currentVipLevel,
-            int upgradeVipLevel, int currencyId, decimal depositAmount, decimal upgradeAmount, int status)
+            int upgradeVipLevel, int currencyId, decimal depositAmount, decimal upgradeAmount, int status, DateTime settleTime)
         {
             CustId = custId;
             CalculateMonth = calculateMonth;
@@ -121,6 +123,7 @@ namespace BonusService.Service.Model
             DepositAmount = depositAmount;
             UpgradeAmount = upgradeAmount;
             Status = status;
+            SettleTime = settleTime;
         }
 
         public int CustId { get; }
@@ -134,5 +137,6 @@ namespace BonusService.Service.Model
         public decimal UpgradeAmount { get; }
         public int Status { get; }
         public DateTime UpgradeTime { get; }
+        public DateTime SettleTime { get; }
     }
 }
