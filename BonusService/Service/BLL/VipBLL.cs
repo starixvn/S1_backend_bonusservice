@@ -245,7 +245,7 @@ namespace BonusService.Service.BLL
             var content = string.Format(_selLangBLL.GetResourceValue("lbl_VipUpgrade", customer.UserLang),
                 currencyName, customer.UpgradeAmount.ToString("#,##0.##"));
             
-            await _messageService.SendMessageAsync(new Message(vipSetting.SiteId, "Sender", "Title", content, customer.CustId,
+            await _messageService.SendMessageAsync(new Message(vipSetting.SiteId, "System", "VIP Upgrade Reward", content, customer.CustId,
                 customer.UserName, customer.UserLang));
         }
     }
