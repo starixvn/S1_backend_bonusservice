@@ -4,6 +4,9 @@ using BonusService.Service.BLL;
 using BonusService.Service.DAL;
 using BonusService.Service.Library;
 using BonusService.Service.Workers;
+using Serilog;
+using Serilog.Exceptions;
+using Serilog.Formatting.Json;
 
 namespace BonusService
 {
@@ -16,6 +19,13 @@ namespace BonusService
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .UseSerilog((hostContext, loggerConfiguration) =>
+                {
+                    loggerConfiguration
+                        .Enrich.FromLogContext()
+                        .Enrich.WithExceptionDetails()
+                        .MinimumLevel.Information().WriteTo.Console(new JsonFormatter());
+                })
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.AddMemoryCache();
