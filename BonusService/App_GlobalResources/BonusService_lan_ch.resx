@@ -141,4 +141,7 @@
   <data name="lbl_VipUpgrade" xml:space="preserve">
     <value>恭喜！解鎖您的貴族新階段！您的貴族特權獎勵為 {0} {1}。謝謝！</value>
   </data>
+  <data name="lbl_VipUpgradeTitle" xml:space="preserve">
+    <value>貴賓等級升級</value>
+  </data>
 </root>

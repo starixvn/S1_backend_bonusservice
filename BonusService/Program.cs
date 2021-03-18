@@ -34,6 +34,7 @@ namespace BonusService
                     services.AddMemoryCache();
                     services.AddSingleton<Common>();
                     services.AddSingleton<Log2File>();
+                    services.AddSingleton<Currency>();
 
                     services.AddSingleton<MessageService>();
                     services.AddSingleton<CustInfoService>();

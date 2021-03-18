@@ -17,13 +17,15 @@ namespace BonusService.Service.BLL
         private readonly MessageService _messageService;
         private readonly ILogger<VipBLL> _logger;
         private readonly SelLangBLL _selLangBLL;
+        private readonly Currency _currency;
 
-        public VipBLL(VipService vipService, MessageService messageService, ILogger<VipBLL> logger, SelLangBLL selLangBLL)
+        public VipBLL(VipService vipService, MessageService messageService, ILogger<VipBLL> logger, SelLangBLL selLangBLL, Currency currency)
         {
             _logger = logger;
             _vipService = vipService;
             _messageService = messageService;
             _selLangBLL = selLangBLL;
+            _currency = currency;
         }
 
         private IEnumerable<VipSystem> GetVipSystem(int siteId)
@@ -241,11 +243,12 @@ namespace BonusService.Service.BLL
 
         private async void SendMessage(VipUpgradeReview customer, VipSetting vipSetting)
         {
-            Currency.GetCurrency().TryGetValue(customer.CurrencyId, out var currencyName);
+            _currency.GetCurrency().TryGetValue(customer.CurrencyId, out var currencyName);
             var content = string.Format(_selLangBLL.GetResourceValue("lbl_VipUpgrade", customer.UserLang),
                 currencyName, customer.UpgradeAmount.ToString("#,##0.##"));
+            var title = _selLangBLL.GetResourceValue("lbl_VipUpgradeTitle", customer.UserLang);
             
-            await _messageService.SendMessageAsync(new Message(vipSetting.SiteId, "System", "VIP Upgrade Reward", content, customer.CustId,
+            await _messageService.SendMessageAsync(new Message(vipSetting.SiteId, "System", title, content, customer.CustId,
                 customer.UserName, customer.UserLang));
         }
     }

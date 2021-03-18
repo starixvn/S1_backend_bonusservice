@@ -141,4 +141,7 @@
   <data name="lbl_VipUpgrade" xml:space="preserve">
     <value>ขอแสดงความยินดีด้วยค่ะ ท่านได้รับการอัปเกรดระดับ VIP เรียบร้อยแล้ว และได้รับรางวัลมูลค่า {0} {1} สำหรับการอัปเกรด ขอบคุณค่ะ</value>
   </data>
+  <data name="lbl_VipUpgradeTitle" xml:space="preserve">
+    <value>VIP อัพเกรด</value>
+  </data>
 </root>
