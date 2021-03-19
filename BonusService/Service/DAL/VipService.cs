@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Data;
 using BonusService.Service.Library;
 using BonusService.Service.Model;
 using Dapper;
@@ -61,6 +62,12 @@ namespace BonusService.Service.DAL
             parameter.Add("UserName", vipUpgradeInfo.UserName);
             parameter.Add("Status", vipUpgradeInfo.Status);
             parameter.Add("UpgradeTime", vipUpgradeInfo.UpgradeTime);
+            parameter.Add("PageSize", -1);
+            parameter.Add("PageNumber", 1, DbType.Int32, ParameterDirection.InputOutput);
+            parameter.Add("TotalPages", dbType: DbType.Int32, direction: ParameterDirection.Output);
+            parameter.Add("RowCount", dbType: DbType.Int32, direction: ParameterDirection.Output);
+            parameter.Add("StartIndex", dbType: DbType.Int32, direction: ParameterDirection.Output);
+
             return _reportDbClient.Query<VipUpgradeReview>("Service_VipUpgradeReview_Get", parameter);
         }
 
