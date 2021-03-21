@@ -138,12 +138,12 @@ namespace BonusService.Service.BLL
                     foreach (var customer in customers)
                     {
                         var withdrawalLimitAmount =
-                            CalculateWithdrawalLimitAmount(customer.UpgradeAmount, vipSetting.WithdrawalLimitRatio);
+                            CalculateWithdrawalLimitAmount(customer.UpgradeBonus, vipSetting.WithdrawalLimitRatio);
 
                         var upgradeResult = SetCustVip(new CustomerVipInfo(customer.CurrentVipLevel,
                             customer.UpgradeVipLevel,
-                            customer.CustId, customer.UserName, customer.SiteId, customer.UpgradeAmount,
-                            withdrawalLimitAmount, $"VIP Upgrade Reward: {customer.UpgradeAmount:#,##0.##}",
+                            customer.CustId, customer.UserName, customer.SiteId, customer.UpgradeBonus,
+                            withdrawalLimitAmount, $"VIP Upgrade Reward: {customer.UpgradeBonus:#,##0.##}",
                             $"VIP Upgrade Withdrawal Limit: {withdrawalLimitAmount:#,##0.##}", calculateMonth,
                             DateTime.UtcNow.AddHours(8)));
 
@@ -245,7 +245,7 @@ namespace BonusService.Service.BLL
         {
             _currency.GetCurrency().TryGetValue(customer.CurrencyId, out var currencyName);
             var content = string.Format(_selLangBLL.GetResourceValue("lbl_VipUpgrade", customer.UserLang),
-                currencyName, customer.UpgradeAmount.ToString("#,##0.##"));
+                currencyName, customer.UpgradeBonus.ToString("#,##0.##"));
             var title = _selLangBLL.GetResourceValue("lbl_VipUpgradeTitle", customer.UserLang);
             
             await _messageService.SendMessageAsync(new Message(vipSetting.SiteId, "System", title, content, customer.CustId,

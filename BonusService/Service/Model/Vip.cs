@@ -42,7 +42,7 @@ namespace BonusService.Service.Model
         public int CurrencyId { get; set; }
         public int CurrentVipLevel { get; set; }
         public int UpgradeVipLevel { get; set; }
-        public decimal UpgradeAmount { get; set; }
+        public decimal UpgradeBonus { get; set; }
     }
 
     public class CustomerUpgradeInfo
