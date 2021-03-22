@@ -1,14 +1,25 @@
+using System;
+using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using BonusService.Service.BLL;
 using BonusService.Service.DAL;
 using BonusService.Service.Library;
 using BonusService.Service.Workers;
+using Microsoft.Extensions.Configuration;
+using Serilog;
+using Serilog.Exceptions;
+using Serilog.Formatting.Json;
 
 namespace BonusService
 {
     public class Program
     {
+        private static IConfigurationRoot Configuration => new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production"}.json")
+            .Build();
+        
         public static void Main(string[] args)
         {
             CreateHostBuilder(args).Build().Run();
@@ -16,11 +27,20 @@ namespace BonusService
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .UseSerilog((hostContext, loggerConfiguration) =>
+                {
+                    loggerConfiguration
+                        .ReadFrom.Configuration(Configuration)
+                        .Enrich.FromLogContext()
+                        .Enrich.WithExceptionDetails()
+                        .MinimumLevel.Information().WriteTo.Console(new JsonFormatter());
+                })
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.AddMemoryCache();
                     services.AddSingleton<Common>();
                     services.AddSingleton<Log2File>();
+                    services.AddSingleton<Currency>();
 
                     services.AddSingleton<MessageService>();
                     services.AddSingleton<CustInfoService>();

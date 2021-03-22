@@ -138,4 +138,10 @@
   <data name="lbl_ReferralBonusCreditedTitle" xml:space="preserve">
     <value>推荐奖金[推荐&amp;奖励]</value>
   </data>
+  <data name="lbl_VipUpgrade" xml:space="preserve">
+    <value>恭喜！解锁您的贵族新阶段！您的贵族特权奖励为 {0} {1}。谢谢！</value>
+  </data>
+  <data name="lbl_VipUpgradeTitle" xml:space="preserve">
+    <value>贵宾等级升级</value>
+  </data>
 </root>

@@ -138,4 +138,10 @@
   <data name="lbl_ReferralBonusCreditedTitle" xml:space="preserve">
     <value>Hadiah Referensikan Teman [Ajak &amp; Dapatkan]</value>
   </data>
+  <data name="lbl_VipUpgrade" xml:space="preserve">
+    <value>Selamat! Level VIP Anda telah di upgrade, Anda mendapatkan {0} {1} atas upgrade level VIP. Terima Kasih!</value>
+  </data>
+  <data name="lbl_VipUpgradeTitle" xml:space="preserve">
+    <value>Upgrade VIP</value>
+  </data>
 </root>
