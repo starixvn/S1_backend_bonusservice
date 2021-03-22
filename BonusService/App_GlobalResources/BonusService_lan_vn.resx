@@ -132,4 +132,10 @@
   <data name="lbl_RebateMsg" xml:space="preserve">
     <value>Xin chúc mừng, khoản chiết khấu {0} đã được ghi có vào tài khoản của bạn!</value>
   </data>
+  <data name="lbl_VipUpgrade" xml:space="preserve">
+    <value>Xin chúc mừng! Bạn vừa được thăng hạng và nhận thưởng {0} {1}. Hãy tiếp tục chơi để nhận thêm nhiều quà tặng hấp dẫn!</value>
+  </data>
+  <data name="lbl_VipUpgradeTitle" xml:space="preserve">
+    <value>Nâng hạng VIP</value>
+  </data>
 </root>
