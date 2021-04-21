@@ -78,7 +78,7 @@ namespace BonusService.Service.Workers
                                 }
                             }
 
-                            if (rebateTpBetRecordList.Count() > 0)
+                            if (rebateTpBetRecordList.Count > 0)
                             {
                                 log2File.Info(JsonConvert.SerializeObject(rebateTpBetRecordList), "rebateTpBetRecordList");
                                 //RebateTpBetRecord
