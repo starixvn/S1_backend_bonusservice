@@ -141,14 +141,14 @@ namespace BonusService.Service.Library
             return result;
         }
 
-        public IEnumerable<T> Query<T>(string name, SqlMapper.IDynamicParameters parameters)
+        public IEnumerable<T> Query<T>(string name, SqlMapper.IDynamicParameters parameters, int? commandTimeout = null)
         {
             IEnumerable<T> result;
             var sw = Stopwatch.StartNew();
             try
             {
                 using var connection = new MySqlConnection(_connectionString);
-                result = connection.Query<T>(name, parameters, commandType: CommandType.StoredProcedure);
+                result = connection.Query<T>(name, parameters, commandTimeout: commandTimeout, commandType: CommandType.StoredProcedure);
             }
             catch (Exception e)
             {
