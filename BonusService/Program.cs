@@ -51,18 +51,21 @@ namespace BonusService
                     services.AddSingleton<ExpiredBonusService>();
                     services.AddSingleton<ReferralService>();
                     services.AddSingleton<VipService>();
+                    services.AddSingleton<VipCashBackService>();
 
                     services.AddSingleton<RebateBLL>();
                     services.AddSingleton<ReferralBLL>();
                     services.AddSingleton<SelLangBLL>();
                     services.AddSingleton<ExpiredBonusBLL>();
                     services.AddSingleton<VipBLL>();
+                    services.AddSingleton<VipCashBackBLL>();
 
                     //services.AddHostedService<RebateWorker>();
                     services.AddHostedService<ExpiredBonusWorker>();
                     services.AddHostedService<ReferralWorker>();
                     services.AddHostedService<VipWorker>();
                     services.AddHostedService<VipRebateWorker>();
+                    services.AddHostedService<VipCashBackWorker>();
                 });
     }
 }
