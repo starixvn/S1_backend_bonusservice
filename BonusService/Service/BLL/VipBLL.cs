@@ -92,7 +92,7 @@ namespace BonusService.Service.BLL
                             vipSystem.UpDeposit, vipSystem.SiteId, vipSystem.CurrencyId, startTime, endTime,
                             calculateMonth)))
                         {
-                            var upgradeAmount = CalculateUpgradeAmount(vipSystem, custVip.VipLevel, vipList);
+                            var upgradeAmount = vipSystem.UpBonus;
 
                             success = SetVipUpgradeReview(new VipUpgradeInfo(custVip.CustId,
                                 calculateMonth, custVip.UserName, vipSystem.SiteId, custVip.VipLevel, vipSystem.Level,
@@ -102,8 +102,12 @@ namespace BonusService.Service.BLL
                     }
 
                     Console.WriteLine(@"SetVipSetting Start");
-                    vipSetting.LastUpdateTime = DateTime.UtcNow.AddHours(8);
-                    SetVipSetting(vipSetting);
+                    SetVipSetting(new VipSetting
+                    {
+                        SiteId = vipSetting.SiteId,
+                        LastUpdateTime = DateTime.UtcNow.AddHours(8),
+                        SettleTime = null
+                    });
                 }
             }
             catch (Exception e)
@@ -156,8 +160,12 @@ namespace BonusService.Service.BLL
                     }
 
                     if (!success) continue;
-                    vipSetting.SettleTime = DateTime.UtcNow.AddHours(8);
-                    success = SetVipSetting(vipSetting);
+                     success = SetVipSetting(new VipSetting
+                    {
+                        SiteId = vipSetting.SiteId,
+                        LastUpdateTime = null,
+                        SettleTime = DateTime.UtcNow.AddHours(8)
+                    });
                 }
             }
             catch (Exception e)
@@ -218,27 +226,6 @@ namespace BonusService.Service.BLL
         private static decimal CalculateWithdrawalLimitAmount(decimal upgradeAmount, int withdrawalLimitRatio)
         {
             return upgradeAmount * withdrawalLimitRatio;
-        }
-
-        private static decimal CalculateUpgradeAmount(VipSystem vipSystem, int customerVipLevel,
-            IReadOnlyCollection<VipSystem> vipList)
-        {
-            var upgradeAmount = 0.0m;
-
-            var diffLevel = vipSystem.Level - customerVipLevel;
-            for (var i = 0; i < diffLevel; i++)
-            {
-                var currentLevel = vipSystem.Level - i;
-                var currentVip = vipList.FirstOrDefault(item =>
-                    item.Level == currentLevel && item.CurrencyId == vipSystem.CurrencyId &&
-                    item.SiteId == vipSystem.SiteId);
-                if (currentVip == null) continue;
-                var currentBonus = currentVip.UpBonus;
-
-                upgradeAmount += currentBonus;
-            }
-
-            return upgradeAmount;
         }
 
         private async void SendMessage(VipUpgradeReview customer, VipSetting vipSetting)
