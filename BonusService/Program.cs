@@ -52,6 +52,7 @@ namespace BonusService
                     services.AddSingleton<ReferralService>();
                     services.AddSingleton<VipService>();
                     services.AddSingleton<VipCashBackService>();
+                    services.AddSingleton<PromotionAutoExtendService>();
 
                     services.AddSingleton<RebateBLL>();
                     services.AddSingleton<ReferralBLL>();
@@ -59,6 +60,7 @@ namespace BonusService
                     services.AddSingleton<ExpiredBonusBLL>();
                     services.AddSingleton<VipBLL>();
                     services.AddSingleton<VipCashBackBLL>();
+                    services.AddSingleton<PromotionAutoExtendBLL>();
 
                     //services.AddHostedService<RebateWorker>();
                     services.AddHostedService<ExpiredBonusWorker>();
@@ -66,6 +68,7 @@ namespace BonusService
                     services.AddHostedService<VipWorker>();
                     services.AddHostedService<VipRebateWorker>();
                     services.AddHostedService<VipCashBackWorker>();
+                    services.AddHostedService<PromotionAutoExtendWorker>();
                 });
     }
 }
