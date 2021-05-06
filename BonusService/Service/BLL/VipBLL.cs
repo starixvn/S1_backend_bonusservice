@@ -188,7 +188,8 @@ namespace BonusService.Service.BLL
                     }
 
                     var firstDayOfMonth = new DateTime(currentTime.Year, currentTime.Month, 1);
-                    return vipSetting.LastUpdateTime > firstDayOfMonth && taskTime > vipSetting.SettleTime;
+                    var sixthDayOfMonth = new DateTime(currentTime.Year, currentTime.Month, 6);
+                    return vipSetting.LastUpdateTime > firstDayOfMonth && taskTime > vipSetting.SettleTime && currentTime > sixthDayOfMonth;
 
                 case (int) VipPeriodType.Daily:
                 case (int) VipPeriodType.Weekly:
