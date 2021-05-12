@@ -89,6 +89,8 @@ namespace BonusService.Service.Model
         public int TpId { get; set; }
         public int CategoryId { get; set; }
         public int Level { get; set; }
+        public decimal LossAmount { get; }
+
         public decimal Percentage { get; set; }
     }
     

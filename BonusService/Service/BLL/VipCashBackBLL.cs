@@ -154,8 +154,7 @@ namespace BonusService.Service.BLL
                             CategoryIds = $"[{string.Join(",", settings.Select(s => s.CategoryId).Distinct())}]"
                         };
 
-                        var customers =
-                            GetVipCashBackTpBetRecord(cashBackTpBetRecordInput).ToList();
+                        var customers = GetVipCashBackTpBetRecord(cashBackTpBetRecordInput).ToList();
                         var custIds = customers.Select(c => c.CustId).Distinct();
                         var vipInfos = GetCustomerVipInfo($"[{string.Join(",", custIds)}]").ToList();
 
@@ -164,10 +163,18 @@ namespace BonusService.Service.BLL
                             var vipLevel = vipInfos
                                 .FirstOrDefault(item => item.CustId == customerGroupByCustId.First().CustId)
                                 ?.VipLevel ?? 1;
-                            var percentage = settings.FirstOrDefault(item =>
-                                    item.Level == vipLevel && item.TpId == customerGroupByCustId.First().TpId &&
-                                    item.CategoryId == customerGroupByCustId.First().CategoryId)?
-                                .Percentage ?? 0;
+
+                            var percentage = settings.Where(item =>
+                                    (item.Level == 0 || item.Level == vipLevel) &&
+                                    item.TpId == customerGroupByCustId.First().TpId &&
+                                    item.CategoryId == customerGroupByCustId.First().CategoryId &&
+                                    Math.Abs(customerGroupByCustId.Sum(i => i.WinlostAmount)) >= item.LossAmount)
+                                .OrderByDescending(i => i.LossAmount).FirstOrDefault()?.Percentage ?? 0;
+
+                            if (percentage == 0)
+                            {
+                                continue;
+                            }
 
                             foreach (var customer in customerGroupByCustId)
                             {
