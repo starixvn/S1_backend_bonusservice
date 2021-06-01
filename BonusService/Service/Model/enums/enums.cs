@@ -69,4 +69,20 @@ namespace BonusService.Service.Model.enums
         LastMonth = 1,
         LastThreeMonth = 2
     }
+    
+    public enum BonusType
+    {
+        Percentage = 1,
+        Amount = 2
+    }
+    public enum LockedType
+    {
+        FromBonus = 1,
+        FromRequireAmount = 2
+    }
+    public class CustRollOver
+    {
+        public decimal RollOver { get; set; }
+        public decimal TurnOver { get; set; }
+    }
 }

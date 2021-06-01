@@ -17,7 +17,8 @@ namespace BonusService.Service.Workers
         private readonly ExpiredBonusBLL expiredBonusBLL;
         private readonly Log2File log2File;
         private Timer timerExpiredBonus;
-        private DateTime NextChickTime;
+        //private DateTime NextChickTime;
+        private int LastCheckHour;
 
         public ExpiredBonusWorker(ILogger<ExpiredBonusWorker> logger, ExpiredBonusBLL expiredBonusBLL, Log2File log2File)
         {
@@ -38,16 +39,19 @@ namespace BonusService.Service.Workers
             int nCount = 0;
             try
             {
-                if (GetUTC8Time() >= NextChickTime)
+                logger.LogInformation($"DoExpiredBonus now time{GetUTC8Time()}");
+                if (GetUTC8Time().Hour != LastCheckHour)
                 {
-                    if (GetUTC8Time().Hour < 12) // Check twice a day at 12:00 and 24:00
-                    {
-                        DateTime.TryParse($"{DateTime.Now:yyyy/MM/dd 12:00:00}", out NextChickTime);
-                    }
-                    else
-                    {
-                        DateTime.TryParse($"{DateTime.Now.AddDays(1):yyyy/MM/dd 00:00:00}", out NextChickTime);
-                    }
+                    LastCheckHour = GetUTC8Time().Hour;
+                    logger.LogInformation($"DoExpiredBonus in check LastCheckHour = {LastCheckHour}");
+                    //if (GetUTC8Time().Hour < 12) // Check twice a day at 12:00 and 24:00
+                    //{
+                    //    DateTime.TryParse($"{DateTime.Now:yyyy/MM/dd 12:00:00}", out NextChickTime);
+                    //}
+                    //else
+                    //{
+                    //    DateTime.TryParse($"{DateTime.Now.AddDays(1):yyyy/MM/dd 00:00:00}", out NextChickTime);
+                    //}
 
                     List<Task> allTasks = new List<Task>();
                     do
@@ -93,7 +97,8 @@ namespace BonusService.Service.Workers
             }
             finally
             {
-                timerExpiredBonus.Change(TimeSpan.FromHours(1), TimeSpan.Zero);
+                //timerExpiredBonus.Change(TimeSpan.FromHours(1), TimeSpan.Zero);
+                timerExpiredBonus.Change(TimeSpan.FromMinutes(10), TimeSpan.Zero);
             }
 
         }

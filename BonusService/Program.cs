@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Exceptions;
 using Serilog.Formatting.Json;
+using MemberSite.Service.Library;
 
 namespace BonusService
 {
@@ -41,6 +42,7 @@ namespace BonusService
                     services.AddSingleton<Common>();
                     services.AddSingleton<Log2File>();
                     services.AddSingleton<Currency>();
+                    services.AddSingleton<CourierAdapter>();
 
                     services.AddSingleton<MessageService>();
                     services.AddSingleton<CustInfoService>();
@@ -53,6 +55,7 @@ namespace BonusService
                     services.AddSingleton<VipService>();
                     services.AddSingleton<VipCashBackService>();
                     services.AddSingleton<PromotionAutoExtendService>();
+                    services.AddSingleton<DepositBonusService>();
 
                     services.AddSingleton<RebateBLL>();
                     services.AddSingleton<ReferralBLL>();
@@ -61,6 +64,7 @@ namespace BonusService
                     services.AddSingleton<VipBLL>();
                     services.AddSingleton<VipCashBackBLL>();
                     services.AddSingleton<PromotionAutoExtendBLL>();
+                    services.AddSingleton<DepositBonusBLL>();
 
                     //services.AddHostedService<RebateWorker>();
                     services.AddHostedService<ExpiredBonusWorker>();
@@ -69,6 +73,7 @@ namespace BonusService
                     services.AddHostedService<VipRebateWorker>();
                     services.AddHostedService<VipCashBackWorker>();
                     services.AddHostedService<PromotionAutoExtendWorker>();
+                    services.AddHostedService<DepositBonusWorker>();
                 });
     }
 }
