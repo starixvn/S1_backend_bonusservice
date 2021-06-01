@@ -11,6 +11,7 @@ using Serilog;
 using Serilog.Exceptions;
 using Serilog.Formatting.Json;
 using MemberSite.Service.Library;
+using Microsoft.AspNetCore.Hosting;
 
 namespace BonusService
 {
@@ -18,7 +19,7 @@ namespace BonusService
     {
         private static IConfigurationRoot Configuration => new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production"}.json")
+            .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json")
             .Build();
         
         public static void Main(string[] args)
@@ -28,12 +29,16 @@ namespace BonusService
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .UseSerilog((hostContext, loggerConfiguration) =>
+                .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    loggerConfiguration
-                        .ReadFrom.Configuration(Configuration)
-                        .Enrich.FromLogContext()
-                        .Enrich.WithExceptionDetails();
+                    webBuilder.UseSerilog((hostContext, loggerConfiguration) =>
+                        {
+                            loggerConfiguration
+                                .ReadFrom.Configuration(Configuration)
+                                .Enrich.FromLogContext()
+                                .Enrich.WithExceptionDetails();
+                        })
+                        .UseStartup<Startup>();
                 })
                 .ConfigureServices((hostContext, services) =>
                 {
