@@ -33,8 +33,7 @@ namespace BonusService
                     loggerConfiguration
                         .ReadFrom.Configuration(Configuration)
                         .Enrich.FromLogContext()
-                        .Enrich.WithExceptionDetails()
-                        .MinimumLevel.Information().WriteTo.Console(new JsonFormatter());
+                        .Enrich.WithExceptionDetails();
                 })
                 .ConfigureServices((hostContext, services) =>
                 {
