@@ -39,11 +39,11 @@ namespace BonusService.Service.Workers
             int nCount = 0;
             try
             {
-                logger.LogInformation($"DoExpiredBonus now time{GetUTC8Time()}");
+                //logger.LogInformation($"DoExpiredBonus now time{GetUTC8Time()}");
                 if (GetUTC8Time().Hour != LastCheckHour)
                 {
                     LastCheckHour = GetUTC8Time().Hour;
-                    logger.LogInformation($"DoExpiredBonus in check LastCheckHour = {LastCheckHour}");
+                   // logger.LogInformation($"DoExpiredBonus in check LastCheckHour = {LastCheckHour}");
                     //if (GetUTC8Time().Hour < 12) // Check twice a day at 12:00 and 24:00
                     //{
                     //    DateTime.TryParse($"{DateTime.Now:yyyy/MM/dd 12:00:00}", out NextChickTime);
