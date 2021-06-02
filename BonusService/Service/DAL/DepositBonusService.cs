@@ -43,7 +43,7 @@ namespace BonusService.Service.DAL
             conn.Open();
             using var trans = conn.BeginTransaction();
 
-            promotion = conn.QueryFirstOrDefault<Promotion>("Service_PromotionV3_Get", new { CustId = custId, SiteId = siteId, BonusCode = bonusCode, CurrencyId = currencyId, DeviceType = deviceType }, transaction: trans, commandType: CommandType.StoredProcedure);
+            promotion = conn.QueryFirstOrDefault<Promotion>("Member_PromotionV3_Get", new { CustId = custId, SiteId = siteId, BonusCode = bonusCode, CurrencyId = currencyId, DeviceType = deviceType }, transaction: trans, commandType: CommandType.StoredProcedure);
             if (promotion == null)
             {
                 return 0;
@@ -56,7 +56,7 @@ namespace BonusService.Service.DAL
             p.Add("RefId", dbType: DbType.String, direction: ParameterDirection.Output);
             p.Add("Result", dbType: DbType.Int32, direction: ParameterDirection.Output);
             p.Add("RefList", dbType: DbType.String, direction: ParameterDirection.Output);
-            conn.Execute("Service_PromotionCanJoinV6_Get", p, commandType: CommandType.StoredProcedure);
+            conn.Execute("Member_PromotionCanJoinV6_Get", p, commandType: CommandType.StoredProcedure);
 
             var jResult = p.Get<int>("Result");
             var canJoin = p.Get<byte?>("CanJoin") ?? 0;
@@ -145,7 +145,7 @@ namespace BonusService.Service.DAL
                                 Prefix = $"B{common.GetEnv()}"
                             });
                             p.Add("TransId", dbType: DbType.String, direction: ParameterDirection.Output);
-                            result = conn.Execute("Service_BonusInfo_Ins", p, trans, commandType: CommandType.StoredProcedure);
+                            result = conn.Execute("Member_BonusInfo_Ins", p, trans, commandType: CommandType.StoredProcedure);
                             var transId = p.Get<string>("TransId");
 
                             if (result > 0 && dLockedAmount > 0)
@@ -185,7 +185,7 @@ namespace BonusService.Service.DAL
 
                 if (result > 0)
                 {
-                    result = conn.Execute("Service_PromotionBeenUsedV2_Set",
+                    result = conn.Execute("Member_PromotionBeenUsedV2_Set",
                         new { SiteId = siteId, BonusCode = bonusCode, CurrencyId = currencyId }, trans,
                         commandType: CommandType.StoredProcedure);
                 }
