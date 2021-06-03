@@ -82,11 +82,10 @@ namespace BonusService.Service.BLL
                         continue;
                     }
 
-                    Console.WriteLine($@"GetVipSystem Start - SiteId:{vipSetting.SiteId}");
                     var vipList = GetVipSystem(vipSetting.SiteId).ToList();
                     foreach (var vipSystem in vipList.OrderByDescending(x => x.Level))
                     {
-                        Console.WriteLine(
+                        _logger.LogInformation(
                             $@"GetCustUpgrade Start - Level:{vipSystem.Level} CurrencyId:{vipSystem.CurrencyId} UpDeposit:{vipSystem.UpDeposit} StartTime:{startTime} EndTime:{endTime}");
                         foreach (var custVip in GetCustUpgrade(new CustomerUpgradeInfo(vipSystem.Level,
                             vipSystem.UpDeposit, vipSystem.SiteId, vipSystem.CurrencyId, startTime, endTime,
@@ -101,7 +100,6 @@ namespace BonusService.Service.BLL
                         }
                     }
 
-                    Console.WriteLine(@"SetVipSetting Start");
                     SetVipSetting(new VipSetting
                     {
                         SiteId = vipSetting.SiteId,
@@ -177,7 +175,6 @@ namespace BonusService.Service.BLL
 
         private static bool VerifyTask(VipSetting vipSetting, DateTime currentTime, TaskType taskType)
         {
-            Console.WriteLine($@"VerifyTask - PeriodType:{vipSetting.PeriodType}");
             switch (vipSetting.PeriodType)
             {
                 case (int) VipPeriodType.Monthly:
@@ -201,7 +198,6 @@ namespace BonusService.Service.BLL
         private static bool CalculateTime(VipSetting vipSetting, DateTime currentTime, out DateTime startTime,
             out DateTime endTime, out DateTime upgradeTime, out DateTime settleTime, out string calculateMonth)
         {
-            Console.WriteLine($@"CalculateTime - PreviousDateRangeType:{vipSetting.PreviousDateRangeType}");
             switch (vipSetting.PreviousDateRangeType)
             {
                 case (int) VipPreviousDateRangeType.LastMonth:

@@ -25,7 +25,6 @@ namespace BonusService.Service.Workers
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            Console.WriteLine(@"VIP Worker Start");
             _timer = new Timer(VipDoWork, null, TimeSpan.Zero, TimeSpan.Zero);
             return Task.CompletedTask;
         }
@@ -36,7 +35,6 @@ namespace BonusService.Service.Workers
                     
             try
             {
-                Console.WriteLine(@"GetVipSettings Start");
                 var vipSettings = _vipBll.GetVipSettings().ToList();
                 var currentTime = DateTime.UtcNow.AddHours(8);
                 _vipBll.UpgradeReview(vipSettings, currentTime, out var upgradeReviewSuccess);
@@ -49,13 +47,11 @@ namespace BonusService.Service.Workers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($@"VIPWorker Exception:{ex.Message}");
                 success = false;
                 _logger.LogError(ex, MethodExtension.GetCurrentMethod());
             }
             finally
             {
-                Console.WriteLine(@"VIPWorker is done");
                 var dueTimeSpan = TimeSpan.FromHours(4);
                 if (_environment.IsDevelopment())
                 {
