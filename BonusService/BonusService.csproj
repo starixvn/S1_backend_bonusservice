@@ -5,6 +5,11 @@
     <UserSecretsId>dotnet-BonusService-6D422DE2-0B92-4CF0-A116-4453ED537E06</UserSecretsId>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.0.35" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.3" />
