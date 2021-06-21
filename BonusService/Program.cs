@@ -70,7 +70,7 @@ namespace BonusService
                     services.AddSingleton<PromotionAutoExtendBLL>();
                     services.AddSingleton<DepositBonusBLL>();
 
-                    //services.AddHostedService<RebateWorker>();
+                    services.AddHostedService<RebateWorker>();
                     services.AddHostedService<ExpiredBonusWorker>();
                     services.AddHostedService<ReferralWorker>();
                     services.AddHostedService<VipWorker>();
@@ -78,6 +78,7 @@ namespace BonusService
                     services.AddHostedService<VipCashBackWorker>();
                     services.AddHostedService<PromotionAutoExtendWorker>();
                     services.AddHostedService<DepositBonusWorker>();
+                    services.AddHostedService<VipDownGradeWorker>();
                 });
     }
 }
