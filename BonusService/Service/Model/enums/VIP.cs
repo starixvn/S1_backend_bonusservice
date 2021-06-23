@@ -1,6 +1,6 @@
 ﻿namespace BonusService.Service.Model.enums
 {
-    public enum VipUpgradeReviewStatus
+    public enum VipReviewStatus
     {
         Pending = 1,
         Approved = 2,
@@ -10,6 +10,14 @@
     public enum TaskType
     {
         UpgradeReview = 1,
-        UpgradeCustomer = 2
+        UpgradeCustomer = 2,
+        DowngradeReview = 3,
+        DowngradeCustomer = 4
+    }
+
+    public enum VipTypeEnum
+    {
+        Upgrade = 1,
+        Downgrade = 2
     }
 }

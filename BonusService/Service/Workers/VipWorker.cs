@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using BonusService.Service.Extensions;
+using BonusService.Service.Model.enums;
 
 namespace BonusService.Service.Workers
 {
@@ -35,7 +36,7 @@ namespace BonusService.Service.Workers
                     
             try
             {
-                var vipSettings = _vipBll.GetVipSettings().ToList();
+                var vipSettings = _vipBll.GetVipSettings(VipTypeEnum.Upgrade);
                 var currentTime = DateTime.UtcNow.AddHours(8);
                 _vipBll.UpgradeReview(vipSettings, currentTime, out var upgradeReviewSuccess);
                 _vipBll.UpgradeCustomer(vipSettings, currentTime, out var upgradeCustomerSuccess);
@@ -52,10 +53,10 @@ namespace BonusService.Service.Workers
             }
             finally
             {
-                var dueTimeSpan = TimeSpan.FromHours(4);
-                if (_environment.IsDevelopment())
+                var dueTimeSpan = TimeSpan.FromMinutes(1);
+                if (_environment.IsProduction())
                 {
-                    dueTimeSpan = TimeSpan.FromMinutes(1);
+                    dueTimeSpan = TimeSpan.FromHours(4);
                 }
 
                 if (!success)
