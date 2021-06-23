@@ -133,10 +133,10 @@
     <value>Xin chúc mừng, khoản chiết khấu {0} đã được ghi có vào tài khoản của bạn!</value>
   </data>
   <data name="lbl_VipDowngradeContent" xml:space="preserve">
-    <value>123</value>
+    <value>Chúng tôi rất tiếc phải thông báo, bạn sẽ bị xuống hạng thành viên VIP vì không đáp ứng yêu cầu duy trì hạng. Xin cám ơn!</value>
   </data>
   <data name="lbl_VipDowngradeTitle" xml:space="preserve">
-    <value>123</value>
+    <value>Thông báo Hạng thành viên VIP</value>
   </data>
   <data name="lbl_VipUpgrade" xml:space="preserve">
     <value>Xin chúc mừng! Bạn vừa được thăng hạng và nhận thưởng {0} {1}. Hãy tiếp tục chơi để nhận thêm nhiều quà tặng hấp dẫn!</value>
