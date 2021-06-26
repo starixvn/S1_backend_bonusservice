@@ -43,7 +43,7 @@ namespace BonusService.Service.Workers
         {
             bool isError = false;
 
-            _logger.LogCritical($"Worker running at: {environment.EnvironmentName}");
+            _logger.LogInformation($"Worker running at: {environment.EnvironmentName}");
             try
             {
                 var rebateTaskList = rebateBLL.GetRebateTask();

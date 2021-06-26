@@ -72,7 +72,6 @@ namespace BonusService
                     services.AddSingleton<PromotionAutoExtendBLL>();
                     services.AddSingleton<DepositBonusBLL>();
 
-                    services.AddHostedService<RebateWorker>();
                     services.AddHostedService<ExpiredBonusWorker>();
                     services.AddHostedService<ReferralWorker>();
                     services.AddHostedService<VipWorker>();
