@@ -3,11 +3,11 @@ using BonusService.Service.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using BonusService.Service.Extensions;
 using BonusService.Service.Model.enums;
 using Microsoft.Extensions.Logging;
 using BonusService.Service.Library;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BonusService.Service.BLL
 {
@@ -19,17 +19,13 @@ namespace BonusService.Service.BLL
         private readonly SelLangBLL _selLangBLL;
         private readonly Currency _currency;
 
-        public VipBLL(VipService vipService,
-                      MessageService messageService,
-                      ILogger<VipBLL> logger,
-                      SelLangBLL selLangBLL,
-                      Currency currency)
+        public VipBLL(IServiceProvider provider)
         {
-            _logger = logger;
-            _vipService = vipService;
-            _messageService = messageService;
-            _selLangBLL = selLangBLL;
-            _currency = currency;
+            _logger = provider.GetRequiredService<ILogger<VipBLL>>();
+            _vipService = provider.GetRequiredService<VipService>();
+            _messageService = provider.GetRequiredService<MessageService>();
+            _selLangBLL = provider.GetRequiredService<SelLangBLL>();
+            _currency = provider.GetRequiredService<Currency>();
         }
 
         private IEnumerable<VipSystem> GetVipSystem(int siteId)

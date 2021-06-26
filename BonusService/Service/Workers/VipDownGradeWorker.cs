@@ -4,10 +4,9 @@ using BonusService.Service.Model.enums;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BonusService.Service.Workers
 {
@@ -16,9 +15,9 @@ namespace BonusService.Service.Workers
         #region Fields
 
         private Timer _timer;
-        private ILogger<VipDownGradeWorker> _logger;
-        private IHostEnvironment _environment;
-        private VipBLL _vipBLL;
+        private readonly ILogger<VipDownGradeWorker> _logger;
+        private readonly IHostEnvironment _environment;
+        private readonly VipBLL _vipBLL;
 
         private int execCount = 0;
 
@@ -26,13 +25,11 @@ namespace BonusService.Service.Workers
 
         #region Constructors
 
-        public VipDownGradeWorker(ILogger<VipDownGradeWorker> logger,
-                                  IHostEnvironment environment,
-                                  VipBLL vipBLL)
+        public VipDownGradeWorker(IServiceProvider provider)
         {
-            _logger = logger;
-            _environment = environment;
-            _vipBLL = vipBLL;
+            _environment = provider.GetRequiredService<IHostEnvironment>();
+            _vipBLL = provider.GetRequiredService<VipBLL>();
+            _logger = provider.GetRequiredService<ILogger<VipDownGradeWorker>>();
         }
 
         #endregion

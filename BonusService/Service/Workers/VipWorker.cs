@@ -2,11 +2,11 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using BonusService.Service.Extensions;
 using BonusService.Service.Model.enums;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BonusService.Service.Workers
 {
@@ -17,11 +17,11 @@ namespace BonusService.Service.Workers
         private readonly VipBLL _vipBll;
         private readonly ILogger<VipWorker> _logger;
 
-        public VipWorker(ILogger<VipWorker> logger, IHostEnvironment environment, VipBLL vipBll)
+        public VipWorker(IServiceProvider provider)
         {
-            _environment = environment;
-            _vipBll = vipBll;
-            _logger = logger;
+            _environment = provider.GetRequiredService<IHostEnvironment>();
+            _vipBll = provider.GetRequiredService<VipBLL>();
+            _logger = provider.GetRequiredService<ILogger<VipWorker>>();
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)

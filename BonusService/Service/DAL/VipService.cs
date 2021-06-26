@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using BonusService.Service.Library;
 using BonusService.Service.Model;
 using Dapper;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace BonusService.Service.DAL
@@ -13,8 +15,10 @@ namespace BonusService.Service.DAL
         private readonly MySqlClient _mainDbClient;
         private readonly MySqlClient _reportDbClient;
 
-        public VipService(IConfiguration configuration, ILogger<MySqlClient> logger)
+        public VipService(IServiceProvider provider)
         {
+            var configuration = provider.GetRequiredService<IConfiguration>();
+            var logger = provider.GetRequiredService<ILogger<MySqlClient>>();
             _mainDbClient = new MySqlClient(configuration.GetConnectionString("ConnectionString"), logger);
             _reportDbClient = new MySqlClient(configuration.GetConnectionString("ConnectionStringReport"), logger);
         }
