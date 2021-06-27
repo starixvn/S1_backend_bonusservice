@@ -79,7 +79,11 @@ namespace BonusService
                     services.AddHostedService<VipCashBackWorker>();
                     services.AddHostedService<PromotionAutoExtendWorker>();
                     services.AddHostedService<DepositBonusWorker>();
-                    services.AddHostedService<VipDownGradeWorker>();
+
+                    if (Configuration.GetSection("RunVipDownGradeWorker").Get<bool>())
+                    {
+                        services.AddHostedService<VipDownGradeWorker>();
+                    }
                 });
     }
 }

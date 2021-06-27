@@ -241,8 +241,8 @@ namespace BonusService.Service.BLL
                                                                  endTime,
                                                                  calculateMonth));
 
-                        var downgradeDepositAmount = vipSystem.DownDeposit == null ? 0 : (decimal)vipSystem.DownDeposit;
-                        var downgradeTurnoverAmount = vipSystem.DownTurnover == null ? 0 : (decimal)vipSystem.DownTurnover;
+                        var downgradeDepositAmount = vipSystem.DownDeposit ?? 0;
+                        var downgradeTurnoverAmount = vipSystem.DownTurnover ?? 0;
 
                         foreach (var custVip in custDowngradeList)
                         {
