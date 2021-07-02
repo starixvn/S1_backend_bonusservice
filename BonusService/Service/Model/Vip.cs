@@ -192,8 +192,8 @@ namespace BonusService.Service.Model
             string calculateMonth)
         {
             VipLevel = vipLevel;
-            DownDeposit = downDeposit == null ? 0 : (decimal) downDeposit;
-            DownTurnover = downTurnover == null ? 0 : (decimal) downTurnover;
+            DownDeposit = downDeposit ?? 0;
+            DownTurnover = downTurnover ?? 0;
             SiteId = siteId;
             CurrencyId = currencyId;
             StartTime = startTime;
