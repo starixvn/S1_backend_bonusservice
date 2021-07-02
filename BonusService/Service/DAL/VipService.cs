@@ -122,8 +122,10 @@ namespace BonusService.Service.DAL
             parameter.Add("_CurrencyId", customerDowngradeInfo.CurrencyId);
             parameter.Add("_StartTime", customerDowngradeInfo.StartTime);
             parameter.Add("_EndTime", customerDowngradeInfo.EndTime);
+            parameter.Add("_QualifiedTime", customerDowngradeInfo.QualifiedTime);
+            parameter.Add("_UpgradeMonth", customerDowngradeInfo.UpgradeMonth);
             parameter.Add("_CalculateMonth", customerDowngradeInfo.CalculateMonth);
-            return _reportDbClient.Query<CustVipForDowngrade>("Service_VIP_CustDowngrade_Get", parameter);
+            return _reportDbClient.Query<CustVipForDowngrade>("Service_VIP_CustDowngrade_GetV2", parameter);
         }
 
         public bool SetVipDowngradeReview(VipDowngradeInfo vipDowngradeInfo)
@@ -173,6 +175,5 @@ namespace BonusService.Service.DAL
             parameter.Add("_SettleTime", customerVipInfo.SettleTime);
             return _mainDbClient.Execute("Service_CustVip_Downgrade_Set", parameter);
         }
-
     }
 }
