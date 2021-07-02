@@ -4,8 +4,11 @@ using BonusService.Service.Model.enums;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using BonusService.Service.Model;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BonusService.Service.Workers
@@ -52,7 +55,7 @@ namespace BonusService.Service.Workers
 
                 try
                 {
-                    var vipSettings = _vipBLL.GetVipSettings(VipTypeEnum.Downgrade);
+                    var vipSettings = _vipBLL.GetVipSettings(VipTypeEnum.Downgrade).ToList();
                     var currentTime = DateTime.UtcNow.AddHours(8);
 
                     _vipBLL.DowngradeReview(vipSettings,

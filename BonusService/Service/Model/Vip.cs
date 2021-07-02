@@ -80,7 +80,8 @@ namespace BonusService.Service.Model
     public class CustomerVipInfo
     {
         public CustomerVipInfo(int oldLevel, int newLevel, int custId, string userName, int siteId,
-            decimal upgradeAmount, decimal withdrawalLimitAmount, string financialMemo, string withdrawalLimitMemo, string calculateMonth, DateTime settleTime)
+            decimal upgradeAmount, decimal withdrawalLimitAmount, string financialMemo, string withdrawalLimitMemo,
+            string calculateMonth, DateTime settleTime)
         {
             OldLevel = oldLevel;
             NewLevel = newLevel;
@@ -106,12 +107,12 @@ namespace BonusService.Service.Model
         /// <param name="calculateMonth">計算年月區間</param>
         /// <param name="settleTime">結算時間</param>
         public CustomerVipInfo(int oldLevel,
-                               int newLevel,
-                               int custId,
-                               string userName,
-                               int siteId,
-                               string calculateMonth, 
-                               DateTime settleTime)
+            int newLevel,
+            int custId,
+            string userName,
+            int siteId,
+            string calculateMonth,
+            DateTime settleTime)
         {
             OldLevel = oldLevel;
             NewLevel = newLevel;
@@ -147,7 +148,8 @@ namespace BonusService.Service.Model
         }
 
         public VipUpgradeInfo(int custId, string calculateMonth, string userName, int siteId, int currentVipLevel,
-            int upgradeVipLevel, int currencyId, decimal depositAmount, decimal upgradeAmount, int status, DateTime settleTime)
+            int upgradeVipLevel, int currencyId, decimal depositAmount, decimal upgradeAmount, int status,
+            DateTime settleTime)
         {
             CustId = custId;
             CalculateMonth = calculateMonth;
@@ -179,21 +181,25 @@ namespace BonusService.Service.Model
     public class CustomerDowngradeInfo
     {
         public CustomerDowngradeInfo(int vipLevel,
-                                     decimal? downDeposit,
-                                     decimal? downTurnover,
-                                     int siteId,
-                                     int currencyId,
-                                     DateTime startTime,
-                                     DateTime endTime,
-                                     string calculateMonth)
+            decimal? downDeposit,
+            decimal? downTurnover,
+            int siteId,
+            int currencyId,
+            DateTime startTime,
+            DateTime endTime,
+            DateTime qualifiedTime,
+            string upgradeMonth,
+            string calculateMonth)
         {
             VipLevel = vipLevel;
-            DownDeposit = downDeposit == null ? 0 : (decimal)downDeposit;
-            DownTurnover = downTurnover == null ? 0 : (decimal)downTurnover;
+            DownDeposit = downDeposit == null ? 0 : (decimal) downDeposit;
+            DownTurnover = downTurnover == null ? 0 : (decimal) downTurnover;
             SiteId = siteId;
             CurrencyId = currencyId;
             StartTime = startTime;
             EndTime = endTime;
+            QualifiedTime = qualifiedTime;
+            UpgradeMonth = upgradeMonth;
             CalculateMonth = calculateMonth;
         }
 
@@ -204,16 +210,19 @@ namespace BonusService.Service.Model
         public int CurrencyId { get; }
         public DateTime StartTime { get; }
         public DateTime EndTime { get; }
-        public string CalculateMonth { get; }
 
+        public DateTime QualifiedTime { get; }
+
+        public string UpgradeMonth { get; }
+        public string CalculateMonth { get; }
     }
 
     public class VipDowngradeInfo
     {
         public VipDowngradeInfo(string calculateMonth,
-                                int siteId,
-                                int status,
-                                DateTime downgradeTime)
+            int siteId,
+            int status,
+            DateTime downgradeTime)
         {
             SiteId = siteId;
             CalculateMonth = calculateMonth;
@@ -222,17 +231,17 @@ namespace BonusService.Service.Model
         }
 
         public VipDowngradeInfo(int custId,
-                                string calculateMonth,
-                                int siteId,
-                                int currencyId,
-                                int currentVipLevel,
-                                int downgradeVipLevel,
-                                decimal depositAmount,
-                                decimal downgradeDepositAmount,
-                                decimal turnoverAmount,
-                                decimal downgradeTurnoverAmount,
-                                int status,
-                                DateTime settleTime)
+            string calculateMonth,
+            int siteId,
+            int currencyId,
+            int currentVipLevel,
+            int downgradeVipLevel,
+            decimal depositAmount,
+            decimal downgradeDepositAmount,
+            decimal turnoverAmount,
+            decimal downgradeTurnoverAmount,
+            int status,
+            DateTime settleTime)
         {
             CustId = custId;
             CalculateMonth = calculateMonth;
