@@ -183,6 +183,7 @@ namespace BonusService.Service.BLL
                     success = SetVipSetting(new VipSetting
                     {
                         SiteId = vipSetting.SiteId,
+                        Status = vipSetting.Status,
                         LastUpdateTime = null,
                         SettleTime = DateTime.UtcNow.AddHours(8)
                     });
@@ -340,6 +341,7 @@ namespace BonusService.Service.BLL
                     success = SetVipSetting(new VipSetting
                     {
                         SiteId = vipSetting.SiteId,
+                        Status = vipSetting.Status,
                         LastUpdateTime = null,
                         SettleTime = DateTime.UtcNow.AddHours(8)
                     });
