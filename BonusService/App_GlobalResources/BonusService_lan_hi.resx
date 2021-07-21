@@ -144,4 +144,10 @@
   <data name="lbl_VipUpgradeTitle" xml:space="preserve">
     <value>वीआईपी अपग्रेड</value>
   </data>
+  <data name="lbl_VipDowngradeContent" xml:space="preserve">
+    <value>हमें यह बताते हुए खेद हो रहा है कि संरक्षण की आवश्यकता को पूरा करने में विफल रहने के कारण आपके वीआईपी स्तर को डाउनग्रेड कर दिया गया है। धन्यवाद!</value>
+  </data>
+  <data name="lbl_VipDowngradeTitle" xml:space="preserve">
+    <value>वीआईपी सदस्यता सूचना</value>
+  </data>
 </root>

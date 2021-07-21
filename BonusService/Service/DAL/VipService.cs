@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using BonusService.Service.Library;
 using BonusService.Service.Model;
 using Dapper;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace BonusService.Service.DAL
@@ -13,8 +15,10 @@ namespace BonusService.Service.DAL
         private readonly MySqlClient _mainDbClient;
         private readonly MySqlClient _reportDbClient;
 
-        public VipService(IConfiguration configuration, ILogger<MySqlClient> logger)
+        public VipService(IServiceProvider provider)
         {
+            var configuration = provider.GetRequiredService<IConfiguration>();
+            var logger = provider.GetRequiredService<ILogger<MySqlClient>>();
             _mainDbClient = new MySqlClient(configuration.GetConnectionString("ConnectionString"), logger);
             _reportDbClient = new MySqlClient(configuration.GetConnectionString("ConnectionStringReport"), logger);
         }
@@ -26,18 +30,21 @@ namespace BonusService.Service.DAL
             return _reportDbClient.Query<VipSystem>("Service_VipSystem_GetV2", parameter);
         }
 
-        public IEnumerable<VipSetting> GetVipSettings()
+        public IEnumerable<VipSetting> GetVipSettings(int vipType)
         {
-            return _reportDbClient.Query<VipSetting>("Service_VipSetting_Get", null);
+            var parameter = new DynamicParameters();
+            parameter.Add("_Status", vipType);
+            return _reportDbClient.Query<VipSetting>("Service_VipSetting_GetV2", parameter);
         }
 
         public bool SetVipSetting(VipSetting vipSetting)
         {
             var parameter = new DynamicParameters();
-            parameter.Add("SiteId", vipSetting.SiteId);
-            parameter.Add("SettleTime", vipSetting.SettleTime);
-            parameter.Add("LastUpdateTime", vipSetting.LastUpdateTime);
-            return _mainDbClient.Execute("Service_VipSetting_Set", parameter);
+            parameter.Add("_SiteId", vipSetting.SiteId);
+            parameter.Add("_Status", vipSetting.Status);
+            parameter.Add("_SettleTime", vipSetting.SettleTime);
+            parameter.Add("_LastUpdateTime", vipSetting.LastUpdateTime);
+            return _mainDbClient.Execute("Service_VipSetting_SetV2", parameter);
         }
 
 
@@ -103,6 +110,70 @@ namespace BonusService.Service.DAL
             parameter.Add("CalculateMonth", customerVipInfo.CalculateMonth);
             parameter.Add("SettleTime", customerVipInfo.SettleTime);
             return _mainDbClient.Execute("Service_CustVip_SetV2", parameter);
+        }
+
+        public IEnumerable<CustVipForDowngrade> GetCustDowngrade(CustomerDowngradeInfo customerDowngradeInfo)
+        {
+            var parameter = new DynamicParameters();
+            parameter.Add("_VipLevel", customerDowngradeInfo.VipLevel);
+            parameter.Add("_DownDeposit", customerDowngradeInfo.DownDeposit);
+            parameter.Add("_DownTurnover", customerDowngradeInfo.DownTurnover);
+            parameter.Add("_SiteId", customerDowngradeInfo.SiteId);
+            parameter.Add("_CurrencyId", customerDowngradeInfo.CurrencyId);
+            parameter.Add("_StartTime", customerDowngradeInfo.StartTime);
+            parameter.Add("_EndTime", customerDowngradeInfo.EndTime);
+            parameter.Add("_QualifiedTime", customerDowngradeInfo.QualifiedTime);
+            parameter.Add("_UpgradeMonth", customerDowngradeInfo.UpgradeMonth);
+            parameter.Add("_CalculateMonth", customerDowngradeInfo.CalculateMonth);
+            return _reportDbClient.Query<CustVipForDowngrade>("Service_VIP_CustDowngrade_GetV2", parameter);
+        }
+
+        public bool SetVipDowngradeReview(VipDowngradeInfo vipDowngradeInfo)
+        {
+            var parameter = new DynamicParameters();
+            parameter.Add("_CustId", vipDowngradeInfo.CustId);
+            parameter.Add("_CalculateMonth", vipDowngradeInfo.CalculateMonth);
+            parameter.Add("_SiteId", vipDowngradeInfo.SiteId);
+            parameter.Add("_CurrencyId", vipDowngradeInfo.CurrencyId);
+            parameter.Add("_CurrentVipLevel", vipDowngradeInfo.CurrentVipLevel);
+            parameter.Add("_DowngradeVipLevel", vipDowngradeInfo.DowngradeVipLevel);
+            parameter.Add("_DepositAmount", vipDowngradeInfo.DepositAmount);
+            parameter.Add("_DowngradeDepositAmount", vipDowngradeInfo.DowngradeDepositAmount);
+            parameter.Add("_TurnoverAmount", vipDowngradeInfo.TurnoverAmount);
+            parameter.Add("_DowngradeTurnoverAmount", vipDowngradeInfo.DowngradeTurnoverAmount);
+            parameter.Add("_Status", vipDowngradeInfo.Status);
+            parameter.Add("_SettleTime", vipDowngradeInfo.SettleTime);
+            return _mainDbClient.Execute("Service_VipDowngradeReview_Ins", parameter);
+        }
+
+        public IEnumerable<VipDowngradeReview> GetVipDowngradeReview(VipDowngradeInfo vipDowngradeInfo)
+        {
+            var parameter = new DynamicParameters();
+            parameter.Add("_CalculateMonth", vipDowngradeInfo.CalculateMonth);
+            parameter.Add("_SiteId", vipDowngradeInfo.SiteId);
+            parameter.Add("_CustId", 0);
+            parameter.Add("_Status", vipDowngradeInfo.Status);
+            parameter.Add("_DowngradeTime", vipDowngradeInfo.DowngradeTime);
+            parameter.Add("_PageSize", -1);
+            parameter.Add("_PageNumber", 1, DbType.Int32, ParameterDirection.InputOutput);
+            parameter.Add("_TotalPages", dbType: DbType.Int32, direction: ParameterDirection.Output);
+            parameter.Add("_RowCount", dbType: DbType.Int32, direction: ParameterDirection.Output);
+            parameter.Add("_StartIndex", dbType: DbType.Int32, direction: ParameterDirection.Output);
+
+            return _reportDbClient.Query<VipDowngradeReview>("Service_VipDowngradeReview_Get", parameter);
+        }
+
+        public bool SetCustVipForDowngrade(CustomerVipInfo customerVipInfo)
+        {
+            var parameter = new DynamicParameters();
+            parameter.Add("_SiteId", customerVipInfo.SiteId);
+            parameter.Add("_CustId", customerVipInfo.CustId);
+            parameter.Add("_UserName", customerVipInfo.UserName);
+            parameter.Add("_OldLevel", customerVipInfo.OldLevel);
+            parameter.Add("_NewLevel", customerVipInfo.NewLevel);
+            parameter.Add("_CalculateMonth", customerVipInfo.CalculateMonth);
+            parameter.Add("_SettleTime", customerVipInfo.SettleTime);
+            return _mainDbClient.Execute("Service_CustVip_Downgrade_Set", parameter);
         }
     }
 }

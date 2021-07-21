@@ -19,6 +19,8 @@ namespace BonusService
     {
         private static IConfigurationRoot Configuration => new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
+            .AddEnvironmentVariables()
+            .AddJsonFile($"appsettings.json", false, true)
             .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json")
             .Build();
         
@@ -70,7 +72,6 @@ namespace BonusService
                     services.AddSingleton<PromotionAutoExtendBLL>();
                     services.AddSingleton<DepositBonusBLL>();
 
-                    //services.AddHostedService<RebateWorker>();
                     services.AddHostedService<ExpiredBonusWorker>();
                     services.AddHostedService<ReferralWorker>();
                     services.AddHostedService<VipWorker>();
@@ -78,6 +79,11 @@ namespace BonusService
                     services.AddHostedService<VipCashBackWorker>();
                     services.AddHostedService<PromotionAutoExtendWorker>();
                     services.AddHostedService<DepositBonusWorker>();
+
+                    if (Configuration.GetSection("RunVipDownGradeWorker").Get<bool>())
+                    {
+                        services.AddHostedService<VipDownGradeWorker>();
+                    }
                 });
     }
 }

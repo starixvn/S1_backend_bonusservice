@@ -138,6 +138,12 @@
   <data name="lbl_ReferralBonusCreditedTitle" xml:space="preserve">
     <value>推荐奖金[推荐&amp;奖励]</value>
   </data>
+  <data name="lbl_VipDowngradeContent" xml:space="preserve">
+    <value>非常遗憾的通知，由于您未能达成等级维护需求，故您的 VIP 已被降级。请知晓，谢谢！</value>
+  </data>
+  <data name="lbl_VipDowngradeTitle" xml:space="preserve">
+    <value>VIP 会员制通知</value>
+  </data>
   <data name="lbl_VipUpgrade" xml:space="preserve">
     <value>恭喜！解锁您的贵族新阶段！您的贵族特权奖励为 {0} {1}。谢谢！</value>
   </data>

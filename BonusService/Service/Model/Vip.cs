@@ -4,22 +4,31 @@ namespace BonusService.Service.Model
 {
     public class VipSystem
     {
-        public int SiteId { get; set;}
-        public int CurrencyId { get; set;}
-        public int Level { get; set;}
-        public decimal UpDeposit { get; set;}
-        public decimal UpBonus { get; set;}
+        public int SiteId { get; set; }
+        public int CurrencyId { get; set; }
+        public int Level { get; set; }
+        public decimal UpDeposit { get; set; }
+        public decimal UpBonus { get; set; }
         public decimal? DownDeposit { get; set; }
         public decimal? DownTurnover { get; set; }
     }
 
     public class CustVip
     {
-        public int CustId { get; set;}
-        public int VipLevel { get; set;}
-        public string UserName { get; set;}
+        public int CustId { get; set; }
+        public int VipLevel { get; set; }
+        public string UserName { get; set; }
         public decimal DepositAmount { get; set; }
     }
+
+    public class CustVipForDowngrade
+    {
+        public int CustId { get; set; }
+        public int VipLevel { get; set; }
+        public decimal DepositAmount { get; set; }
+        public decimal TurnoverAmount { get; set; }
+    }
+
 
     public class VipSetting
     {
@@ -71,7 +80,8 @@ namespace BonusService.Service.Model
     public class CustomerVipInfo
     {
         public CustomerVipInfo(int oldLevel, int newLevel, int custId, string userName, int siteId,
-            decimal upgradeAmount, decimal withdrawalLimitAmount, string financialMemo, string withdrawalLimitMemo, string calculateMonth, DateTime settleTime)
+            decimal upgradeAmount, decimal withdrawalLimitAmount, string financialMemo, string withdrawalLimitMemo,
+            string calculateMonth, DateTime settleTime)
         {
             OldLevel = oldLevel;
             NewLevel = newLevel;
@@ -82,6 +92,33 @@ namespace BonusService.Service.Model
             WithdrawalLimitAmount = withdrawalLimitAmount;
             FinancialMemo = financialMemo;
             WithdrawalLimitMemo = withdrawalLimitMemo;
+            CalculateMonth = calculateMonth;
+            SettleTime = settleTime;
+        }
+
+        /// <summary>
+        /// 降級參數
+        /// </summary>
+        /// <param name="oldLevel">降級前等級</param>
+        /// <param name="newLevel">降級後等級</param>
+        /// <param name="custId">客戶ID</param>
+        /// <param name="userName">客戶名稱</param>
+        /// <param name="siteId">網站ID</param>
+        /// <param name="calculateMonth">計算年月區間</param>
+        /// <param name="settleTime">結算時間</param>
+        public CustomerVipInfo(int oldLevel,
+            int newLevel,
+            int custId,
+            string userName,
+            int siteId,
+            string calculateMonth,
+            DateTime settleTime)
+        {
+            OldLevel = oldLevel;
+            NewLevel = newLevel;
+            CustId = custId;
+            UserName = userName;
+            SiteId = siteId;
             CalculateMonth = calculateMonth;
             SettleTime = settleTime;
         }
@@ -111,7 +148,8 @@ namespace BonusService.Service.Model
         }
 
         public VipUpgradeInfo(int custId, string calculateMonth, string userName, int siteId, int currentVipLevel,
-            int upgradeVipLevel, int currencyId, decimal depositAmount, decimal upgradeAmount, int status, DateTime settleTime)
+            int upgradeVipLevel, int currencyId, decimal depositAmount, decimal upgradeAmount, int status,
+            DateTime settleTime)
         {
             CustId = custId;
             CalculateMonth = calculateMonth;
@@ -138,5 +176,110 @@ namespace BonusService.Service.Model
         public int Status { get; }
         public DateTime UpgradeTime { get; }
         public DateTime SettleTime { get; }
+    }
+
+    public class CustomerDowngradeInfo
+    {
+        public CustomerDowngradeInfo(int vipLevel,
+            decimal? downDeposit,
+            decimal? downTurnover,
+            int siteId,
+            int currencyId,
+            DateTime startTime,
+            DateTime endTime,
+            DateTime qualifiedTime,
+            string upgradeMonth,
+            string calculateMonth)
+        {
+            VipLevel = vipLevel;
+            DownDeposit = downDeposit ?? 0;
+            DownTurnover = downTurnover ?? 0;
+            SiteId = siteId;
+            CurrencyId = currencyId;
+            StartTime = startTime;
+            EndTime = endTime;
+            QualifiedTime = qualifiedTime;
+            UpgradeMonth = upgradeMonth;
+            CalculateMonth = calculateMonth;
+        }
+
+        public int VipLevel { get; }
+        public decimal DownDeposit { get; }
+        public decimal DownTurnover { get; }
+        public int SiteId { get; }
+        public int CurrencyId { get; }
+        public DateTime StartTime { get; }
+        public DateTime EndTime { get; }
+
+        public DateTime QualifiedTime { get; }
+
+        public string UpgradeMonth { get; }
+        public string CalculateMonth { get; }
+    }
+
+    public class VipDowngradeInfo
+    {
+        public VipDowngradeInfo(string calculateMonth,
+            int siteId,
+            int status,
+            DateTime downgradeTime)
+        {
+            SiteId = siteId;
+            CalculateMonth = calculateMonth;
+            Status = status;
+            DowngradeTime = downgradeTime;
+        }
+
+        public VipDowngradeInfo(int custId,
+            string calculateMonth,
+            int siteId,
+            int currencyId,
+            int currentVipLevel,
+            int downgradeVipLevel,
+            decimal depositAmount,
+            decimal downgradeDepositAmount,
+            decimal turnoverAmount,
+            decimal downgradeTurnoverAmount,
+            int status,
+            DateTime settleTime)
+        {
+            CustId = custId;
+            CalculateMonth = calculateMonth;
+            SiteId = siteId;
+            CurrencyId = currencyId;
+            CurrentVipLevel = currentVipLevel;
+            DowngradeVipLevel = downgradeVipLevel;
+            DepositAmount = depositAmount;
+            DowngradeDepositAmount = downgradeDepositAmount;
+            TurnoverAmount = turnoverAmount;
+            DowngradeTurnoverAmount = downgradeTurnoverAmount;
+            Status = status;
+            SettleTime = settleTime;
+        }
+
+        public int CustId { get; }
+        public string CalculateMonth { get; }
+        public int SiteId { get; }
+        public int CurrencyId { get; }
+        public int CurrentVipLevel { get; }
+        public int DowngradeVipLevel { get; }
+        public decimal DepositAmount { get; }
+        public decimal DowngradeDepositAmount { get; }
+        public decimal TurnoverAmount { get; }
+        public decimal DowngradeTurnoverAmount { get; }
+        public int Status { get; }
+        public DateTime DowngradeTime { get; }
+        public DateTime SettleTime { get; }
+    }
+
+    public class VipDowngradeReview
+    {
+        public int SiteId { get; set; }
+        public int CustId { get; set; }
+        public string UserName { get; set; }
+        public string UserLang { get; set; }
+        public int CurrencyId { get; set; }
+        public int CurrentVipLevel { get; set; }
+        public int DowngradeVipLevel { get; set; }
     }
 }
