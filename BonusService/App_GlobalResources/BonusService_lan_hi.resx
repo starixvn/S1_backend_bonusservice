@@ -117,6 +117,33 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="lbl_CancelBonus1" xml:space="preserve">
+    <value>आपका बोनस प्रमोशन रद्द कर दिया गया है</value>
+  </data>
+  <data name="lbl_CancelBonus2" xml:space="preserve">
+    <value>आपका बोनस प्रमोशन रद्द कर दिया गया है, योग्य धनवापसी राशि {0} है।</value>
+  </data>
+  <data name="lbl_CancelBonusTitle" xml:space="preserve">
+    <value>प्रमोशन समाप्ति सूचना</value>
+  </data>
+  <data name="lbl_CashbackMsg" xml:space="preserve">
+    <value>बधाई हो, आपका कैशबैक {0} आपके खाते में क्रेडिट कर दिया गया है!</value>
+  </data>
+  <data name="lbl_RebateMsg" xml:space="preserve">
+    <value>बधाई हो, आपकी छूट {0} आपके खाते में क्रेडिट कर दी गई है!</value>
+  </data>
+  <data name="lbl_ReferralBonusCreditedMsg" xml:space="preserve">
+    <value>बधाई हो! आपका रेफ़रल बोनस {0} आपके खाते में क्रेडिट कर दिया गया है!</value>
+  </data>
+  <data name="lbl_ReferralBonusCreditedTitle" xml:space="preserve">
+    <value>रेफ़र फ्रेंड्स रिवॉर्ड्स [रेफ़र करें और कमाएँ]</value>
+  </data>
+  <data name="lbl_VipUpgrade" xml:space="preserve">
+    <value>बधाई! आपका वीआईपी स्तर अपग्रेड कर दिया गया है, आपको सम्मानित किया गया है {0} {1} धन्यवाद!</value>
+  </data>
+  <data name="lbl_VipUpgradeTitle" xml:space="preserve">
+    <value>वीआईपी अपग्रेड</value>
+  </data>
   <data name="lbl_VipDowngradeContent" xml:space="preserve">
     <value>हमें यह बताते हुए खेद हो रहा है कि संरक्षण की आवश्यकता को पूरा करने में विफल रहने के कारण आपके वीआईपी स्तर को डाउनग्रेड कर दिया गया है। धन्यवाद!</value>
   </data>
