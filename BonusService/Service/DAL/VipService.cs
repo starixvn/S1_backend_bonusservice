@@ -123,7 +123,6 @@ namespace BonusService.Service.DAL
             parameter.Add("_StartTime", customerDowngradeInfo.StartTime);
             parameter.Add("_EndTime", customerDowngradeInfo.EndTime);
             parameter.Add("_QualifiedTime", customerDowngradeInfo.QualifiedTime);
-            parameter.Add("_UpgradeMonth", customerDowngradeInfo.UpgradeMonth);
             parameter.Add("_CalculateMonth", customerDowngradeInfo.CalculateMonth);
             return _reportDbClient.Query<CustVipForDowngrade>("Service_VIP_CustDowngrade_GetV3", parameter);
         }
