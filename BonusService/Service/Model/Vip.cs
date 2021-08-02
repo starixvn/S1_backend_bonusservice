@@ -188,7 +188,6 @@ namespace BonusService.Service.Model
             DateTime startTime,
             DateTime endTime,
             DateTime qualifiedTime,
-            string upgradeMonth,
             string calculateMonth)
         {
             VipLevel = vipLevel;
@@ -199,7 +198,6 @@ namespace BonusService.Service.Model
             StartTime = startTime;
             EndTime = endTime;
             QualifiedTime = qualifiedTime;
-            UpgradeMonth = upgradeMonth;
             CalculateMonth = calculateMonth;
         }
 
@@ -213,7 +211,6 @@ namespace BonusService.Service.Model
 
         public DateTime QualifiedTime { get; }
 
-        public string UpgradeMonth { get; }
         public string CalculateMonth { get; }
     }
 

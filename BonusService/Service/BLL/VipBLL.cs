@@ -35,7 +35,7 @@ namespace BonusService.Service.BLL
 
         public IEnumerable<VipSetting> GetVipSettings(VipTypeEnum vipType)
         {
-            return _vipService.GetVipSettings((int) vipType);
+            return _vipService.GetVipSettings((int)vipType);
         }
 
         private bool SetVipSetting(VipSetting vipSetting)
@@ -116,7 +116,7 @@ namespace BonusService.Service.BLL
                             success = SetVipUpgradeReview(new VipUpgradeInfo(custVip.CustId,
                                 calculateMonth, custVip.UserName, vipSystem.SiteId, custVip.VipLevel, vipSystem.Level,
                                 vipSystem.CurrencyId, custVip.DepositAmount, upgradeAmount,
-                                (int) VipReviewStatus.Pending, settleTime));
+                                (int)VipReviewStatus.Pending, settleTime));
                         }
                     }
 
@@ -156,7 +156,7 @@ namespace BonusService.Service.BLL
 
                     var customers =
                         GetVipUpgradeReview(new VipUpgradeInfo(calculateMonth, vipSetting.SiteId, string.Empty,
-                            (int) VipReviewStatus.Approved, upgradeTime));
+                            (int)VipReviewStatus.Approved, upgradeTime));
 
                     foreach (var customer in customers)
                     {
@@ -219,7 +219,6 @@ namespace BonusService.Service.BLL
                         out var downgradeTime,
                         out var settleTime,
                         out var qualifiedTime,
-                        out var upgradeMonth,
                         out var calculateMonth))
                     {
                         continue;
@@ -245,7 +244,6 @@ namespace BonusService.Service.BLL
                             startTime,
                             endTime,
                             qualifiedTime,
-                            upgradeMonth,
                             calculateMonth));
 
                         var downgradeDepositAmount = vipSystem.DownDeposit ?? 0;
@@ -263,7 +261,7 @@ namespace BonusService.Service.BLL
                                 downgradeDepositAmount,
                                 custVip.TurnoverAmount,
                                 downgradeTurnoverAmount,
-                                (int) VipReviewStatus.Approved,
+                                (int)VipReviewStatus.Approved,
                                 settleTime));
                         }
                     }
@@ -307,7 +305,6 @@ namespace BonusService.Service.BLL
                         out var downgradeTime,
                         out var settleTime,
                         out var qualifiedTime,
-                        out var upgradeMonth,
                         out var calculateMonth))
                     {
                         continue;
@@ -315,7 +312,7 @@ namespace BonusService.Service.BLL
 
                     var customers = GetVipDowngradeReview(new VipDowngradeInfo(calculateMonth,
                         vipSetting.SiteId,
-                        (int) VipReviewStatus.Approved,
+                        (int)VipReviewStatus.Approved,
                         downgradeTime));
 
                     foreach (var customer in customers)
@@ -367,7 +364,7 @@ namespace BonusService.Service.BLL
         {
             switch (vipSetting.PeriodType)
             {
-                case (int) VipPeriodType.Monthly:
+                case (int)VipPeriodType.Monthly:
                     var taskTime = new DateTime(currentTime.Year, currentTime.Month, vipSetting.PeriodInterval).Date;
                     if (taskType == TaskType.UpgradeReview)
                     {
@@ -379,8 +376,8 @@ namespace BonusService.Service.BLL
                     return vipSetting.LastUpdateTime > firstDayOfMonth && taskTime > vipSetting.SettleTime &&
                            currentTime > sixthDayOfMonth;
 
-                case (int) VipPeriodType.Daily:
-                case (int) VipPeriodType.Weekly:
+                case (int)VipPeriodType.Daily:
+                case (int)VipPeriodType.Weekly:
                 default:
                     return false;
             }
@@ -399,7 +396,7 @@ namespace BonusService.Service.BLL
         {
             switch (vipSetting.PeriodType)
             {
-                case (int) VipPeriodType.Monthly:
+                case (int)VipPeriodType.Monthly:
                     //當月指定第N天 YYYY/MM/N
                     var taskTime = new DateTime(currentTime.Year,
                         currentTime.Month,
@@ -417,8 +414,8 @@ namespace BonusService.Service.BLL
                            && taskTime > vipSetting.SettleTime //當月指定執行時間 > 設定執行時間(執行降級)
                            && currentTime > firstDayOfMonth;
 
-                case (int) VipPeriodType.Daily:
-                case (int) VipPeriodType.Weekly:
+                case (int)VipPeriodType.Daily:
+                case (int)VipPeriodType.Weekly:
                 default:
                     return false;
             }
@@ -445,7 +442,7 @@ namespace BonusService.Service.BLL
         {
             switch (vipSetting.PreviousDateRangeType)
             {
-                case (int) VipPreviousDateRangeType.LastMonth:
+                case (int)VipPreviousDateRangeType.LastMonth:
                     var previousDateTime = currentTime.AddMonths(-1);
                     startTime = new DateTime(previousDateTime.Year, previousDateTime.Month, vipSetting.PeriodInterval)
                         .Date;
@@ -455,7 +452,7 @@ namespace BonusService.Service.BLL
                     calculateMonth = startTime.ToString("yyyyMM");
                     break;
 
-                case (int) VipPreviousDateRangeType.LastThreeMonth:
+                case (int)VipPreviousDateRangeType.LastThreeMonth:
 
                     #region Description
 
@@ -496,7 +493,6 @@ namespace BonusService.Service.BLL
         /// <param name="operateTime">實際異動時間</param>
         /// <param name="settleTime">排程結算時間</param>
         /// <param name="qualifiedTime">應被計算的實際異動時間</param>
-        /// <param name="upgradeMonth">應被計算的升級年月期間</param>
         /// <param name="calculateMonth">計算年月期間</param>
         /// <returns></returns>
         private static bool CalculateDowngradeTime(VipSetting vipSetting,
@@ -506,12 +502,11 @@ namespace BonusService.Service.BLL
             out DateTime operateTime,
             out DateTime settleTime,
             out DateTime qualifiedTime,
-            out string upgradeMonth,
             out string calculateMonth)
         {
             switch (vipSetting.PreviousDateRangeType)
             {
-                case (int) VipPreviousDateRangeType.LastMonth:
+                case (int)VipPreviousDateRangeType.LastMonth:
                     // var previousDateTime = currentTime.AddMonths(-1);
                     // startTime = new DateTime(previousDateTime.Year, previousDateTime.Month, vipSetting.PeriodInterval)
                     //     .Date;
@@ -520,10 +515,10 @@ namespace BonusService.Service.BLL
                     // settleTime = new DateTime(currentTime.Year, currentTime.Month, 1);
                     // calculateMonth = startTime.ToString("yyyyMM");
                     startTime = endTime = operateTime = settleTime = qualifiedTime = new DateTime();
-                    calculateMonth = upgradeMonth = string.Empty;
+                    calculateMonth = string.Empty;
                     return false;
 
-                case (int) VipPreviousDateRangeType.LastThreeMonth:
+                case (int)VipPreviousDateRangeType.LastThreeMonth:
 
                     #region Description
 
@@ -544,12 +539,11 @@ namespace BonusService.Service.BLL
                     operateTime = new DateTime(currentTime.Year, currentTime.Month, 1);
                     settleTime = new DateTime(currentTime.Year, currentTime.Month, 1);
                     qualifiedTime = startTime.AddMonths(1);
-                    upgradeMonth = startTime.AddDays(-1).ToString("yyyyMM");
                     calculateMonth = startTime.ToString("yyyyMM") + endTime.ToString("yyyyMM");
                     break;
                 default:
                     startTime = endTime = operateTime = settleTime = qualifiedTime = new DateTime();
-                    calculateMonth = upgradeMonth = string.Empty;
+                    calculateMonth = string.Empty;
                     return false;
             }
 
