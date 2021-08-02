@@ -543,7 +543,7 @@ namespace BonusService.Service.BLL
                     endTime = startTime.AddMonths(3).AddTicks(-1);
                     operateTime = new DateTime(currentTime.Year, currentTime.Month, 1);
                     settleTime = new DateTime(currentTime.Year, currentTime.Month, 1);
-                    qualifiedTime = startTime;
+                    qualifiedTime = startTime.AddMonths(1);
                     upgradeMonth = startTime.AddDays(-1).ToString("yyyyMM");
                     calculateMonth = startTime.ToString("yyyyMM") + endTime.ToString("yyyyMM");
                     break;
