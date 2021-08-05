@@ -78,33 +78,6 @@ namespace BonusService.Service.BLL
             return _vipCashBackCashBackService.SetCustCashBack(custCashBackInput);
         }
 
-        public void InitData()
-        {
-            var tpGameTypes = GetTpGameType("[3]")
-                .OrderBy(item => item.CategoryId)
-                .ThenBy(item => item.TpId).ThenBy(item => item.CurrencyId);
-            foreach (var tpGameType in tpGameTypes)
-            {
-                if (tpGameType.CurrencyId != 2 && tpGameType.CurrencyId != 4 && tpGameType.CurrencyId != 15)
-                {
-                    continue;
-                }
-                // for (var siteId = 1; siteId <= 3; siteId++)
-                // {
-                var siteId = 1;
-                decimal percentage = 1;
-                for (var level = 1; level <= 6; level++)
-                {
-                    SetPromotionCashBackSetting(new PromotionCashBackSettingInputInsert("Nova88LCCashBack",
-                        tpGameType.CurrencyId, siteId,
-                        tpGameType.TpId, tpGameType.CategoryId, level, percentage, 1, "System"));
-                    percentage += 1;
-                }
-
-                // }
-            }
-        }
-
         public bool CalculateCashBack()
         {
             try
