@@ -13,9 +13,9 @@ namespace BonusService.Service.Workers
         private Timer _timer;
         private readonly IHostEnvironment _environment;
         private readonly VipCashBackBLL _vipCashBackBLL;
-        private readonly ILogger<VipWorker> _logger;
+        private readonly ILogger<VipCashBackWorker> _logger;
 
-        public VipCashBackWorker(ILogger<VipWorker> logger, IHostEnvironment environment, VipCashBackBLL vipCashBackBll)
+        public VipCashBackWorker(ILogger<VipCashBackWorker> logger, IHostEnvironment environment, VipCashBackBLL vipCashBackBll)
         {
             _environment = environment;
             _vipCashBackBLL = vipCashBackBll;

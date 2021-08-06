@@ -74,7 +74,7 @@ namespace BonusService
 
                     services.AddHostedService<ExpiredBonusWorker>();
                     services.AddHostedService<ReferralWorker>();
-                    services.AddHostedService<VipWorker>();
+                    services.AddHostedService<VipUpgradeWorker>();
                     services.AddHostedService<VipRebateWorker>();
                     services.AddHostedService<VipCashBackWorker>();
                     services.AddHostedService<PromotionAutoExtendWorker>();

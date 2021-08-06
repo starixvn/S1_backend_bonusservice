@@ -2,9 +2,10 @@
 {
     public enum VipReviewStatus
     {
-        Pending = 1,
-        Approved = 2,
-        Rejected = 3
+        Pending = 1, //已暫停
+        Approved = 2, //已核准
+        Rejected = 3, //已拒絕
+        Settled = 4 //已異動
     }
 
     public enum TaskType
