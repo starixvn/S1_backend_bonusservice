@@ -98,7 +98,7 @@ namespace BonusService.Service.BLL
                         Status = vipSetting.Status,
                         LastUpdateTime = DateTime.UtcNow.AddHours(8),  //GMT+8
                         SettleTime = null,
-                        LastReviewTime = DateTime.UtcNow, //GMT+0
+                        LastReviewedTime = DateTime.UtcNow, //GMT+0
                         LastSettledTime = null
                     });
                 }
@@ -129,7 +129,7 @@ namespace BonusService.Service.BLL
                         out var startTime,
                         out var endTime,
                         out var reviewTime,
-                        out var settledTime,
+                        out var settleTime,
                         out var calculateMonth))
                     {
                         continue;
@@ -166,7 +166,7 @@ namespace BonusService.Service.BLL
                         Status = vipSetting.Status,
                         LastUpdateTime = null,
                         SettleTime = DateTime.UtcNow.AddHours(8), //GMT+8
-                        LastReviewTime = null,
+                        LastReviewedTime = null,
                         LastSettledTime = DateTime.UtcNow //GMT+0
                     });
                 }
@@ -253,7 +253,7 @@ namespace BonusService.Service.BLL
                         Status = vipSetting.Status,
                         LastUpdateTime = DateTime.UtcNow.AddHours(8), //GMT+8
                         SettleTime = null,
-                        LastReviewTime = DateTime.UtcNow, //GMT+0
+                        LastReviewedTime = DateTime.UtcNow, //GMT+0
                         LastSettledTime = null
                     });
                 }
@@ -322,7 +322,7 @@ namespace BonusService.Service.BLL
                         Status = vipSetting.Status,
                         LastUpdateTime = null,
                         SettleTime = DateTime.UtcNow.AddHours(8), //GMT+8
-                        LastReviewTime = null,
+                        LastReviewedTime = null,
                         LastSettledTime = DateTime.UtcNow //GMT+0
                     });
                 }
@@ -407,15 +407,15 @@ namespace BonusService.Service.BLL
                     
                     if (taskType == TaskType.UpgradeReview)
                     {
-                        return taskTime > vipSetting.LastReviewTime;
+                        return taskTime > vipSetting.LastReviewedTime;
                     }
 
                     var reviewDayOfMonth = new DateTime(currentTime.Year, currentTime.Month,vipSetting.AssignReviewDate);
-                    var settledDayOfMonth = new DateTime(currentTime.Year, currentTime.Month, vipSetting.AssignSettledDate);
+                    var settledDayOfMonth = new DateTime(currentTime.Year, currentTime.Month, vipSetting.AssignSettleDate);
                     // return vipSetting.LastUpdateTime > reviewDayOfMonth && 
                     //        taskTime > vipSetting.SettleTime &&
                     //        currentTime > settledDayOfMonth;
-                    return vipSetting.LastReviewTime > reviewDayOfMonth && //上一次執行級別判定的時間 > 當月應執行級別判定日期時間 : 這個月已執行過級別判定
+                    return vipSetting.LastReviewedTime > reviewDayOfMonth && //上一次執行級別判定的時間 > 當月應執行級別判定日期時間 : 這個月已執行過級別判定
                            taskTime > vipSetting.LastSettledTime && // 這個月1號 > 上一次執行級別異動的時間 : 這個月還未執行過級別異動
                            currentTime > settledDayOfMonth; // 目前時間(GMT+8) > 當月應執行級別異動日期時間 : 目前時間可否執行級別異動 
 
@@ -434,7 +434,7 @@ namespace BonusService.Service.BLL
         /// <param name="startTime">計算開始時間</param>
         /// <param name="endTime">計算結束時間</param>
         /// <param name="reviewTime">級別判定時間</param>
-        /// <param name="settledTime">級別異動時間</param>
+        /// <param name="settleTime">級別異動時間</param>
         /// <param name="calculateMonth">計算年月期間</param>
         /// <returns></returns>
         private static bool CalculateUpgradeTime(VipSetting vipSetting,
@@ -442,7 +442,7 @@ namespace BonusService.Service.BLL
             out DateTime startTime,
             out DateTime endTime,
             out DateTime reviewTime,
-            out DateTime settledTime,
+            out DateTime settleTime,
             out string calculateMonth)
         {
             switch (vipSetting.PreviousDateRangeType)
@@ -453,18 +453,18 @@ namespace BonusService.Service.BLL
                         .Date;
                     endTime = startTime.AddMonths(1).AddTicks(-1);
                     reviewTime = new DateTime(currentTime.Year, currentTime.Month, vipSetting.AssignReviewDate);
-                    settledTime = new DateTime(currentTime.Year, currentTime.Month, vipSetting.AssignSettledDate);
+                    settleTime = new DateTime(currentTime.Year, currentTime.Month, vipSetting.AssignSettleDate);
                     calculateMonth = startTime.ToString("yyyyMM");
                     break;
 
                 case (int) VipPreviousDateRangeType.LastThreeMonth:
                     //暫無使用，return false;
-                    startTime = endTime = reviewTime = settledTime = new DateTime();
+                    startTime = endTime = reviewTime = settleTime = new DateTime();
                     calculateMonth = string.Empty;
                     return false;
                 
                 default:
-                    startTime = endTime = reviewTime = settledTime = new DateTime();
+                    startTime = endTime = reviewTime = settleTime = new DateTime();
                     calculateMonth = string.Empty;
                     return false;
             }
@@ -518,13 +518,13 @@ namespace BonusService.Service.BLL
                     if (taskType == TaskType.DowngradeReview)
                     {
                         //當月指定執行時間 > 設定最近更新時間(Downgrade Review)
-                        return taskTime > vipSetting.LastReviewTime;
+                        return taskTime > vipSetting.LastReviewedTime;
                     }
 
                     //當月第一天 YYYY/MM/01
                     var reviewDayOfMonth = new DateTime(currentTime.Year, currentTime.Month, vipSetting.AssignReviewDate);
-                    var settledDayOfMonth = new DateTime(currentTime.Year, currentTime.Month, vipSetting.AssignSettledDate);
-                    return vipSetting.LastReviewTime > reviewDayOfMonth //上一次執行級別判定的時間 > 當月應執行級別判定日期時間 : 這個月已執行過級別判定
+                    var settledDayOfMonth = new DateTime(currentTime.Year, currentTime.Month, vipSetting.AssignSettleDate);
+                    return vipSetting.LastReviewedTime > reviewDayOfMonth //上一次執行級別判定的時間 > 當月應執行級別判定日期時間 : 這個月已執行過級別判定
                            && taskTime > vipSetting.LastSettledTime //這個月1號 > 上一次執行級別異動的時間 : 這個月還未執行過級別異動
                            && currentTime > settledDayOfMonth; //目前時間(GMT+8) > 當月應執行級別異動日期時間 : 目前時間可否執行級別異動 
 
@@ -587,7 +587,7 @@ namespace BonusService.Service.BLL
                     startTime = new DateTime(previousThreeMonthDateTime.Year,previousThreeMonthDateTime.Month, vipSetting.PeriodInterval).Date;
                     endTime = startTime.AddMonths(3).AddTicks(-1);
                     reviewTime = new DateTime(currentTime.Year, currentTime.Month, vipSetting.AssignReviewDate);
-                    settleTime = new DateTime(currentTime.Year, currentTime.Month, vipSetting.AssignSettledDate);
+                    settleTime = new DateTime(currentTime.Year, currentTime.Month, vipSetting.AssignSettleDate);
                     qualifiedTime = startTime.AddMonths(1);
                     calculateMonth = startTime.ToString("yyyyMM") + endTime.ToString("yyyyMM");
                     break;

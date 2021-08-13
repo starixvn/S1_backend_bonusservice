@@ -13,12 +13,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace BonusService.Service.Workers
 {
-    public class VipDownGradeWorker : BackgroundService
+    public class VipDowngradeWorker : BackgroundService
     {
         #region Fields
 
         private Timer _timer;
-        private readonly ILogger<VipDownGradeWorker> _logger;
+        private readonly ILogger<VipDowngradeWorker> _logger;
         private readonly IHostEnvironment _environment;
         private readonly VipBLL _vipBLL;
 
@@ -28,11 +28,11 @@ namespace BonusService.Service.Workers
 
         #region Constructors
 
-        public VipDownGradeWorker(IServiceProvider provider)
+        public VipDowngradeWorker(IServiceProvider provider)
         {
             _environment = provider.GetRequiredService<IHostEnvironment>();
             _vipBLL = provider.GetRequiredService<VipBLL>();
-            _logger = provider.GetRequiredService<ILogger<VipDownGradeWorker>>();
+            _logger = provider.GetRequiredService<ILogger<VipDowngradeWorker>>();
         }
 
         #endregion

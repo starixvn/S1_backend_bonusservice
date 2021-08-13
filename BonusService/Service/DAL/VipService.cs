@@ -44,7 +44,7 @@ namespace BonusService.Service.DAL
             parameter.Add("_Status", vipSetting.Status);
             parameter.Add("_SettleTime", vipSetting.SettleTime);
             parameter.Add("_LastUpdateTime", vipSetting.LastUpdateTime);
-            parameter.Add("_LastReviewTime", vipSetting.LastReviewTime);
+            parameter.Add("_LastReviewedTime", vipSetting.LastReviewedTime);
             parameter.Add("_LastSettledTime", vipSetting.LastSettledTime);
             return _mainDbClient.Execute("Service_VipSettingV3_Set", parameter);
         }

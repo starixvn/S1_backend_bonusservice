@@ -80,9 +80,9 @@ namespace BonusService
                     services.AddHostedService<PromotionAutoExtendWorker>();
                     services.AddHostedService<DepositBonusWorker>();
 
-                    if (Configuration.GetSection("RunVipDownGradeWorker").Get<bool>())
+                    if (Configuration.GetSection("RunVipDowngradeWorker").Get<bool>())
                     {
-                        services.AddHostedService<VipDownGradeWorker>();
+                        services.AddHostedService<VipDowngradeWorker>();
                     }
                 });
     }
