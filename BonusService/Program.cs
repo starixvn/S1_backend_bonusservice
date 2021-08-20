@@ -74,15 +74,15 @@ namespace BonusService
 
                     services.AddHostedService<ExpiredBonusWorker>();
                     services.AddHostedService<ReferralWorker>();
-                    services.AddHostedService<VipWorker>();
+                    services.AddHostedService<VipUpgradeWorker>();
                     services.AddHostedService<VipRebateWorker>();
                     services.AddHostedService<VipCashBackWorker>();
                     services.AddHostedService<PromotionAutoExtendWorker>();
                     services.AddHostedService<DepositBonusWorker>();
 
-                    if (Configuration.GetSection("RunVipDownGradeWorker").Get<bool>())
+                    if (Configuration.GetSection("RunVipDowngradeWorker").Get<bool>())
                     {
-                        services.AddHostedService<VipDownGradeWorker>();
+                        services.AddHostedService<VipDowngradeWorker>();
                     }
                 });
     }
