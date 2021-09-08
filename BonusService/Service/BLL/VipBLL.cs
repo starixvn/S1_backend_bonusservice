@@ -524,7 +524,7 @@ namespace BonusService.Service.BLL
                     //當月第一天 YYYY/MM/01
                     var reviewDayOfMonth = new DateTime(currentTime.Year, currentTime.Month, vipSetting.AssignReviewDate);
                     var settledDayOfMonth = new DateTime(currentTime.Year, currentTime.Month, vipSetting.AssignSettleDate);
-                    return vipSetting.LastReviewedTime > reviewDayOfMonth //上一次執行級別判定的時間 > 當月應執行級別判定日期時間 : 這個月已執行過級別判定
+                    return vipSetting.LastReviewedTime >= reviewDayOfMonth //上一次執行級別判定的時間 > 當月應執行級別判定日期時間 : 這個月已執行過級別判定
                            && taskTime > vipSetting.LastSettledTime //這個月1號 > 上一次執行級別異動的時間 : 這個月還未執行過級別異動
                            && currentTime > settledDayOfMonth; //目前時間(GMT+8) > 當月應執行級別異動日期時間 : 目前時間可否執行級別異動 
 
