@@ -13,13 +13,13 @@ namespace BonusService.Service.Workers
 {
     public class ReferralWorker : BackgroundService
     {
-        private readonly ILogger<RebateWorker> _logger;
+        private readonly ILogger<ReferralWorker> _logger;
         private readonly Log2File log2File;
         private readonly IHostEnvironment environment;
         private readonly SelLangBLL selLangBLL;
         private readonly ReferralBLL referralBLL;
         private Timer timer;
-        public ReferralWorker(ILogger<RebateWorker> logger, IHostEnvironment environment, Common tools, Log2File log2File, SelLangBLL selLangBLL, ReferralBLL referralBLL)
+        public ReferralWorker(ILogger<ReferralWorker> logger, IHostEnvironment environment, Common tools, Log2File log2File, SelLangBLL selLangBLL, ReferralBLL referralBLL)
         {
             _logger = logger;
             this.log2File = log2File;
