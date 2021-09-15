@@ -50,6 +50,7 @@ namespace BonusService
                     services.AddSingleton<Log2File>();
                     services.AddSingleton<Currency>();
                     services.AddSingleton<CourierAdapter>();
+                    services.AddSingleton<CacheHelper>();
 
                     services.AddSingleton<MessageService>();
                     services.AddSingleton<CustInfoService>();
