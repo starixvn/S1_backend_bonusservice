@@ -14,7 +14,6 @@ namespace BonusService.Service.Workers
     public class ReferralWorker : BackgroundService
     {
         private readonly ILogger<RebateWorker> _logger;
-        private readonly Common tools;
         private readonly Log2File log2File;
         private readonly IHostEnvironment environment;
         private readonly SelLangBLL selLangBLL;
@@ -23,7 +22,6 @@ namespace BonusService.Service.Workers
         public ReferralWorker(ILogger<RebateWorker> logger, IHostEnvironment environment, Common tools, Log2File log2File, SelLangBLL selLangBLL, ReferralBLL referralBLL)
         {
             _logger = logger;
-            this.tools = tools;
             this.log2File = log2File;
             this.environment = environment;
             this.selLangBLL = selLangBLL;

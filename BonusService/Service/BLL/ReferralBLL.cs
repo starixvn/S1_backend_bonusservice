@@ -11,15 +11,13 @@ namespace BonusService.Service.BLL
 {
     public class ReferralBLL
     {
-        private readonly IMemoryCache cache;
         private readonly SelLangBLL selLangBLL;
         private readonly ReferralService referralService;
         private readonly MessageService messageService;
         private readonly CustInfoService custInfoService;
 
-        public ReferralBLL(IMemoryCache cache, SelLangBLL selLangBLL, ReferralService referralService, MessageService messageService, CustInfoService custInfoService)
+        public ReferralBLL(SelLangBLL selLangBLL, ReferralService referralService, MessageService messageService, CustInfoService custInfoService)
         {
-            this.cache = cache;
             this.selLangBLL = selLangBLL;
             this.referralService = referralService;
             this.messageService = messageService;
