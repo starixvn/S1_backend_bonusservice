@@ -5,7 +5,6 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
-using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -29,108 +28,6 @@ namespace BonusService.Service.DAL
             _logger = logger;
         }
 
-        public IEnumerable<RebateTask> GetRebateTask()
-        {
-            using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
-            return conn.Query<RebateTask>("Service_RebateTask_Get", commandType: CommandType.StoredProcedure);
-        }
-        public int SetRebateTaskDone(string bonusCode, int siteId)
-        {
-            using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
-            return conn.Execute("Service_RebateTaskDone_Set", new { BonusCode = bonusCode, SiteId = siteId }, commandType: CommandType.StoredProcedure);
-        }
-        public IEnumerable<RebateInfo> GetRebateInfo(string bonusCode, int siteId, int pageSize, int pageNumber)
-        {
-            using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
-            return conn.Query<RebateInfo>("Service_RebateInfo_Get", new { BonusCode = bonusCode, SiteId = siteId, PageSize = pageSize, PageNumber = pageNumber }, commandType: CommandType.StoredProcedure);
-        }
-        public IEnumerable<RebateTpBetRecord> GetRebateTpBetRecord(string bonusCode, int siteId, int custId, int currencyId, int is14)
-        {
-            using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
-            return conn.Query<RebateTpBetRecord>("Service_RebateTpBetRecord_Get", new { BonusCode = bonusCode, SiteId = siteId, CurrencyId = currencyId, CustId = custId, Is14 = is14 }, commandType: CommandType.StoredProcedure);
-        }
-        public int PayoutRebate(int siteId, int custId, string userName, string bonusCode, RebateInfo rebateInfo, IEnumerable<RebateTpBetRecord> rebateTpBetRecords, IEnumerable<RebateTask> rebateTasks, out decimal payAmount, out Dictionary<int, decimal> rebateLogList)
-        {
-            int result = 0;
-            using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
-            conn.Open();
-            using var trans = conn.BeginTransaction();
-            payAmount = 0m;
-            int promotionType = 0;
-            rebateLogList = new Dictionary<int, decimal>();
-
-            long tc = DateTime.Now.Ticks;
-
-            foreach (var rr in rebateTpBetRecords)
-            {
-                var rebateSetting = rebateTasks.FirstOrDefault(x => x.BonusCode == bonusCode && x.CurrencyId == rebateInfo.CurrencyId && x.GameType == rr.GameType);
-                if (rebateSetting != null)
-                {
-                    var sum = rebateSetting.PromotionType == 6 ? rr.ValidBet : rr.WinlostAmount;
-                    if (sum != 0)
-                    {
-                        var rebateRecord = GetRebateRecord(custId, int.Parse(rr.SettledDate.ToString("yyyyMMdd")), rr.GameType, bonusCode, rebateSetting.PromotionType, conn, trans);
-                        if (rebateRecord == null)
-                        {
-                            promotionType = rebateSetting.PromotionType;
-                            SetRebateRecord(custId, int.Parse(rr.SettledDate.ToString("yyyyMMdd")), rr.GameType, bonusCode, sum, rebateSetting.PromotionType, tc, conn, trans);
-                            var amount = sum / 100 * rebateSetting.Percentage;
-                            amount = common.Floor(amount, 2);
-
-
-                            if (promotionType == 7)
-                            {
-                                amount *= -1;
-                            }
-
-                            if (rebateLogList.ContainsKey(rr.GameType))
-                            {
-                                rebateLogList[rr.GameType] += amount;
-                            }
-                            else
-                            {
-                                rebateLogList.Add(rr.GameType, amount);
-                            }
-
-                            payAmount += amount;
-                        }
-                    }
-                }
-            }
-
-            var rebateSetting1 = rebateTasks.FirstOrDefault(x => x.BonusCode == bonusCode && x.CurrencyId == rebateInfo.CurrencyId);
-
-            if (payAmount >= rebateSetting1.MinPayout && payAmount > 0)
-            {
-                if (rebateSetting1.MaxBonus > 0 && payAmount > rebateSetting1.MaxBonus)
-                {
-                    payAmount = rebateSetting1.MaxBonus;
-                }
-
-                result = walletService.SetBalance(custId, siteId, userName, payAmount, 17 - promotionType, $"{(promotionType == 6 ? "Rebate" : "Cashback")}: {payAmount:#,##0.##}", bonusCode, out _, out _, conn, trans);
-
-                if (result > 0)
-                {
-                    conn.Execute("Common_RebateMLog_Ins", new { CustId = custId, CurrencyId = rebateInfo.CurrencyId, RebateType = promotionType - 5, UserName = userName, SiteId = siteId, RedeemAmount = payAmount, Memo = "", BonusCode = bonusCode, RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
-
-                    var rollOver = rebateSetting1.RollOver * payAmount;
-                    if (rollOver > 0)
-                        result = withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, rollOver, $"{(promotionType == 6 ? "Rebate" : "Cashback")}: {rollOver:#,##0.##}", bonusCode, out _, conn, trans);
-
-                    if (result > 0)
-                    {
-                        foreach (var rebateLog in rebateLogList)
-                        {
-                            conn.Execute("Common_RebateLog_Ins", new { CustId = custId, CurrencyId = rebateInfo.CurrencyId, GameType = rebateLog.Key, RebateType = promotionType - 5, UserName = userName, SiteId = siteId, RedeemAmount = rebateLog.Value, Memo = "", BonusCode = bonusCode, RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
-                        }
-
-                        trans.Commit();
-                    }
-                }
-            }
-
-            return result;
-        }
         public RebateRecord GetRebateRecord(int CustId, int SettledDate, int GameType, string BonusCode, int PromotionType, MySqlConnection conn, MySqlTransaction trans)
         {
             return conn.Query<RebateRecord>("Service_RebateRecord_Get", new { CustId, SettledDate, GameType, BonusCode, PromotionType }, transaction: trans, commandType: CommandType.StoredProcedure).FirstOrDefault();
@@ -139,36 +36,18 @@ namespace BonusService.Service.DAL
         {
             return conn.Execute("Service_RebateRecord_Set", new { CustId, SettledDate, GameType, BonusCode, Sum, PromotionType, RelId }, transaction: trans, commandType: CommandType.StoredProcedure);
         }
-        public IEnumerable<TpGameType> GetTpGameList()
-        {
-            using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
-            return conn.Query<TpGameType>("Common_TpGameType_Get", commandType: CommandType.StoredProcedure);
-        }
+
         public IEnumerable<TpCategory> GetTpCategoryList()
         {
             using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
             return conn.Query<TpCategory>("Common_TpCategory_Get", commandType: CommandType.StoredProcedure);
         }
-        public IEnumerable<BonusCashBack> GetBonusCashBackInfo()
-        {
-            using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport")))
-            {
-                return conn.Query<BonusCashBack>("Service_BonusCashBack_Get", commandType: CommandType.StoredProcedure);
-            }
-        }
+
         public IEnumerable<BonusCashBackGames> GetBonusCashBackGamesInfo(int CashbackId, int SiteId)
         {
             using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport")))
             {
                 return conn.Query<BonusCashBackGames>("Service_BonusCashBackGames_Get", new { CashbackId, SiteId }, commandType: CommandType.StoredProcedure);
-            }
-        }
-
-        public IEnumerable<BonusCashBackMinMax> GetBonusCashBackMinMaxInfo(int CashbackId, int SiteId)
-        {
-            using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport")))
-            {
-                return conn.Query<BonusCashBackMinMax>("Service_BonusCashBackMinMax_Get", new { CashbackId, SiteId }, commandType: CommandType.StoredProcedure);
             }
         }
 
@@ -178,30 +57,6 @@ namespace BonusService.Service.DAL
             {
                 return conn.Query<TpBetRecord>("Service_BonusCashBackTpBetRecord_Get", new { StartDate, EndDate, SiteId, GameType }, commandType: CommandType.StoredProcedure);
             }
-        }
-        public void SetBonusCashBackLogoInfo(int BonusInfoId, int GameId, int CustId, string UserName, int CurrencyId, int SiteId, decimal StakeCount, decimal WinlostAmountCount, decimal Percentage)
-        {
-
-            using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString")))
-            {
-                conn.Execute("Service_BonusCashBackLogoInfo_Ins", new { BonusInfoId, CustId, GameId, UserName, CurrencyId, SiteId, StakeCount, WinlostAmountCount, Percentage }, commandType: CommandType.StoredProcedure);
-            }
-        }
-        public void SetBonusInfoCashBack(int PromotionType, string BonusCode, int CustId, string UserName, int CurrencyId, int SiteId, decimal LockedAmount, decimal BonusAmount, decimal ExpiryDays)
-        {
-
-            using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString")))
-            {
-                string BonusInfo = "";
-                string Memo = "";
-                string Prefix = $"B{common.GetEnv()}";
-
-                var p = new DynamicParameters(new { PromotionType, BonusCode, CustId, UserName, CurrencyId, SiteId, BonusInfo, LockedAmount, BonusAmount, ExpiryDays, Memo, Prefix });
-                p.Add("BonusId", dbType: DbType.String, direction: ParameterDirection.Output);
-
-                conn.Execute("Service_BonusInfoCashBack_Ins", p, commandType: CommandType.StoredProcedure);
-            }
-
         }
 
         public int GetBonusCashBack(BonusCashBackInfoList bonusCashBackInfo, out decimal WinlostAmount, MySqlConnection conn, MySqlTransaction trans)
