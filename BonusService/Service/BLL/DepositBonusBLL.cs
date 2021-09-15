@@ -1,12 +1,12 @@
 ﻿using BonusService.Service.DAL;
 using BonusService.Service.Model;
-using MemberSite.Service.Library;
 using MemberSite.Service.Model;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BonusService.Service.Library;
 
 namespace BonusService.Service.BLL
 {
