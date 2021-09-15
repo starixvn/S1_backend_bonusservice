@@ -100,7 +100,7 @@ namespace BonusService.Service.BLL
                     var promotions = GetVipCashBackPromotion(new CashBackPromotionInput
                     {
                         SiteId = cashBackSetting.SiteId,
-                        PromotionType = (int) PromotionType.CashBack
+                        PromotionType = (int) PromotionType.Cashback
                     });
 
                     foreach (var promotion in promotions)
