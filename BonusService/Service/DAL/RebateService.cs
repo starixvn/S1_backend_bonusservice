@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 
 namespace BonusService.Service.DAL
 {
@@ -26,15 +25,6 @@ namespace BonusService.Service.DAL
             this.withdrawalLimitService = withdrawalLimitService;
             this.common = common;
             _logger = logger;
-        }
-
-        public RebateRecord GetRebateRecord(int CustId, int SettledDate, int GameType, string BonusCode, int PromotionType, MySqlConnection conn, MySqlTransaction trans)
-        {
-            return conn.Query<RebateRecord>("Service_RebateRecord_Get", new { CustId, SettledDate, GameType, BonusCode, PromotionType }, transaction: trans, commandType: CommandType.StoredProcedure).FirstOrDefault();
-        }
-        public int SetRebateRecord(int CustId, int SettledDate, int GameType, string BonusCode, decimal Sum, int PromotionType, long RelId, MySqlConnection conn, MySqlTransaction trans)
-        {
-            return conn.Execute("Service_RebateRecord_Set", new { CustId, SettledDate, GameType, BonusCode, Sum, PromotionType, RelId }, transaction: trans, commandType: CommandType.StoredProcedure);
         }
 
         public IEnumerable<TpCategory> GetTpCategoryList()
