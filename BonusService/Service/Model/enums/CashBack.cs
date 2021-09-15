@@ -4,10 +4,11 @@
     {
         FstDeposit = 1,
         ReDeposit = 2,
-        Special = 3,
+        FreeBet = 3,
         WalletBonus = 5,
         Rebate = 6,
-        CashBack = 7
+        Cashback = 7,
+        StaticPage = 8
     }
 
     public enum PromotionCategoryId
