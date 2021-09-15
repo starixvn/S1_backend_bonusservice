@@ -85,4 +85,12 @@ namespace BonusService.Service.Model.enums
         public decimal RollOver { get; set; }
         public decimal TurnOver { get; set; }
     }
+    
+    public enum DataBase
+    {
+        Main, //ConnectionString
+        Report,//ConnectionStringReport
+        Wager,//ConnectionStringWager
+        Log,//ConnectionStringLog
+    }
 }

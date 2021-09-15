@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
+using System.Linq;
 using BonusService.Service.Library;
 using BonusService.Service.Model;
+using BonusService.Service.Model.enums;
 using Dapper;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace BonusService.Service.DAL
 {
@@ -17,10 +16,8 @@ namespace BonusService.Service.DAL
 
         public VipService(IServiceProvider provider)
         {
-            var configuration = provider.GetRequiredService<IConfiguration>();
-            var logger = provider.GetRequiredService<ILogger<MySqlClient>>();
-            _mainDbClient = new MySqlClient(configuration.GetConnectionString("ConnectionString"), logger);
-            _reportDbClient = new MySqlClient(configuration.GetConnectionString("ConnectionStringReport"), logger);
+            _mainDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);
+            _reportDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Report);
         }
         
         public IEnumerable<VipSetting> GetVipSettings(int vipType)

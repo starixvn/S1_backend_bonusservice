@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using BonusService.Service.Model.enums;
 using Dapper;
 using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
@@ -12,6 +13,7 @@ namespace BonusService.Service.Library
 {
     public sealed class MySqlClient
     {
+        public DataBase DataBase { get; set; }
         private readonly string _connectionString;
 
         private readonly ILogger<MySqlClient> _logger;
@@ -158,6 +160,26 @@ namespace BonusService.Service.Library
 
             LogContext.PushProperty("elapsed", sw.Elapsed.TotalMilliseconds);
             _logger.LogInformation($"{name} {sw.Elapsed:c}");
+            return result;
+        }
+        
+        public IEnumerable<T> Query<T>(string sql, object parameters, CommandType commandType = CommandType.StoredProcedure)
+        {
+            IEnumerable<T> result;
+            var sw = Stopwatch.StartNew();
+            try
+            {
+                using var connection = new MySqlConnection(_connectionString);
+                result = connection.Query<T>(sql, param: parameters, commandType: commandType);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, sql);
+                throw;
+            }
+
+            LogContext.PushProperty("ElapsedMilliseconds", sw.Elapsed.TotalMilliseconds);
+            _logger.LogDebug($"{sql} {sw.Elapsed:c}");
             return result;
         }
 

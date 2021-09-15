@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using BonusService.Service.Library;
 using BonusService.Service.Model;
+using BonusService.Service.Model.enums;
 using Dapper;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BonusService.Service.DAL
 {
@@ -12,10 +14,10 @@ namespace BonusService.Service.DAL
         private readonly MySqlClient _mainDbClient;
         private readonly MySqlClient _reportDbClient;
 
-        public VipCashBackService(IConfiguration configuration, ILogger<MySqlClient> logger)
+        public VipCashBackService(IServiceProvider provider)
         {
-            _mainDbClient = new MySqlClient(configuration.GetConnectionString("ConnectionString"), logger);
-            _reportDbClient = new MySqlClient(configuration.GetConnectionString("ConnectionStringReport"), logger);
+            _mainDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);
+            _reportDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Report);
         }
         
         public IEnumerable<CashBackSettingOutput> GetCashBackSettings()

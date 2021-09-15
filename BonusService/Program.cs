@@ -4,13 +4,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using BonusService.Service.BLL;
 using BonusService.Service.DAL;
+using BonusService.Service.Extensions;
 using BonusService.Service.Library;
 using BonusService.Service.Workers;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Exceptions;
 using Serilog.Formatting.Json;
-using MemberSite.Service.Library;
 using Microsoft.AspNetCore.Hosting;
 
 namespace BonusService
@@ -45,6 +45,7 @@ namespace BonusService
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.AddMemoryCache();
+                    services.AddDatabaseConnection(Configuration);
                     services.AddSingleton<Common>();
                     services.AddSingleton<Log2File>();
                     services.AddSingleton<Currency>();
@@ -62,6 +63,7 @@ namespace BonusService
                     services.AddSingleton<VipCashBackService>();
                     services.AddSingleton<PromotionAutoExtendService>();
                     services.AddSingleton<DepositBonusService>();
+                    services.AddSingleton<ConfigService>();
 
                     services.AddSingleton<RebateBLL>();
                     services.AddSingleton<ReferralBLL>();

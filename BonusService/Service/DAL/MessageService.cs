@@ -1,11 +1,15 @@
-﻿using Dapper;
+﻿using System;
+using Dapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 using BonusService.Service.Library;
 using BonusService.Service.Model;
+using BonusService.Service.Model.enums;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BonusService.Service.DAL
 {
@@ -14,11 +18,10 @@ namespace BonusService.Service.DAL
         private readonly IConfiguration _configuration;
         private readonly MySqlClient _mainDbClient;
 
-        public MessageService(IConfiguration configuration, ILogger<MySqlClient> logger)
+        public MessageService(IServiceProvider provider)
         {
-            this._configuration = configuration;
-            _mainDbClient = new MySqlClient(configuration.GetConnectionString("ConnectionString"), logger);
-
+            _configuration = provider.GetRequiredService<IConfiguration>();
+            _mainDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);
         }
         public int SendMessage(int siteId, string sender, string title, string content, int custId, string CustUserName, string lang)
         {
