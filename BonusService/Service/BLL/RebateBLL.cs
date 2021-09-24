@@ -38,13 +38,13 @@ namespace BonusService.Service.BLL
             return _vipRebateService.SetVipRebateTaskDone(siteId);
         }
 
-        public IEnumerable<VipRebateTpBetRecord> GetVipRebateTpBetRecord(int siteId, int custId, int is14)
+        public IEnumerable<VipRebateTpBetRecord> GetVipRebateTpBetRecord(int siteId, int custId, DateTime specificDate, int is14)
         {
-            return _vipRebateService.GetVipRebateTpBetRecord(siteId, custId, is14);
+            return _vipRebateService.GetVipRebateTpBetRecord(siteId, custId, specificDate, is14);
         }
-        public IEnumerable<VipRebateInfo> GetVipRebateCustList(int siteId, int pageSize, int pageNumber)
+        public IEnumerable<VipRebateInfo> GetVipRebateCustList(int siteId, int pageSize, int pageNumber, DateTime specificDate)
         {
-            return _vipRebateService.GetVipRebateCustList(siteId, pageSize, pageNumber);
+            return _vipRebateService.GetVipRebateCustList(siteId, pageSize, pageNumber, specificDate);
         }
         public int PayoutVipRebate(int siteId, int custId, string userName, VipRebateInfo vipRebateInfo, IEnumerable<VipRebateTpBetRecord> vipRebateTpBetRecords, IEnumerable<RebatePayoutLimit> rebatePayoutLimits)
         {
