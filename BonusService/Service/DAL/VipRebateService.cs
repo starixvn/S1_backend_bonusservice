@@ -25,15 +25,15 @@ namespace BonusService.Service.DAL
             this.withdrawalLimitService = withdrawalLimitService;
             this.common = common;
         }
-        public IEnumerable<VipRebateTpBetRecord> GetVipRebateTpBetRecord(int siteId, int custId, int is14)
+        public IEnumerable<VipRebateTpBetRecord> GetVipRebateTpBetRecord(int siteId, int custId, DateTime specificDate, int is14)
         {
             using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
-            return conn.Query<VipRebateTpBetRecord>("Service_VipRebateTpBetRecord_Get", new { SiteId = siteId, CustId = custId, Is14 = is14 }, commandType: CommandType.StoredProcedure);
+            return conn.Query<VipRebateTpBetRecord>("Service_VipRebateTpBetRecordV2_Get", new { SiteId = siteId, CustId = custId, SpecificDate = specificDate, Is14 = is14 }, commandType: CommandType.StoredProcedure);
         }
-        public IEnumerable<VipRebateInfo> GetVipRebateCustList(int siteId, int pageSize, int pageNumber)
+        public IEnumerable<VipRebateInfo> GetVipRebateCustList(int siteId, int pageSize, int pageNumber, DateTime specificDate )
         {
             using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
-            return conn.Query<VipRebateInfo>("Service_VipRebateCustList_Get", new { SiteId = siteId, PageSize = pageSize, PageNumber = pageNumber }, commandType: CommandType.StoredProcedure);
+            return conn.Query<VipRebateInfo>("Service_VipRebateCustListV2_Get", new { SiteId = siteId, PageSize = pageSize, PageNumber = pageNumber, SpecificDate = specificDate }, commandType: CommandType.StoredProcedure);
         }
         public IEnumerable<RebateTask> GetVipRebateTask()
         {
