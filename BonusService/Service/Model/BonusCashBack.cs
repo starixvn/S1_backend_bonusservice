@@ -16,6 +16,7 @@ namespace BonusService.Service.Model
         public decimal MaxBonus { set; get; }
         public decimal RollOver { set; get; }
         public decimal MinPayout { set; get; }
+        public DateTime SpecificDate { set; get; }
     }
     public class RebatePeriod
     {
