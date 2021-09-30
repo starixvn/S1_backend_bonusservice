@@ -1,32 +1,38 @@
-﻿using BonusService.Service.Library;
-using BonusService.Service.Model;
-using BonusService.Service.Model.enums;
-using Dapper;
-using Microsoft.Extensions.Configuration;
-using MySql.Data.MySqlClient;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+using BonusService.Service.Library;
+using BonusService.Service.Model;
+using BonusService.Service.Model.enums;
+using Dapper;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using MySql.Data.MySqlClient;
+using Newtonsoft.Json;
 
 namespace BonusService.Service.DAL
 {
     public class DepositBonusService
     {
         private readonly IConfiguration configuration;
+        private readonly MySqlClient _mainDbClient;
+        private readonly MySqlClient _reportDbClient;
+        private readonly string _connectionString;
         private readonly Common common;
         private readonly WalletService walletService;
         private readonly WithdrawalLimitService withdrawalLimitService;
 
-        public DepositBonusService(IConfiguration configuration, Common common, WalletService walletService, WithdrawalLimitService withdrawalLimitService)
+        public DepositBonusService(IServiceProvider serviceProvider)
         {
-            this.configuration = configuration;
-            this.common = common;
-            this.walletService = walletService;
-            this.withdrawalLimitService = withdrawalLimitService;
+            configuration = serviceProvider.GetRequiredService<IConfiguration>();
+            _connectionString = configuration.GetConnectionString("ConnectionString");
+            common = serviceProvider.GetRequiredService<Common>();
+            walletService = serviceProvider.GetRequiredService<WalletService>();
+            withdrawalLimitService = serviceProvider.GetRequiredService<WithdrawalLimitService>();
+            _mainDbClient = serviceProvider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);
+            _reportDbClient = serviceProvider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Report);
         }
         public IEnumerable<DepositBonus> GetDepositBonusQueue()
         {
@@ -39,28 +45,39 @@ namespace BonusService.Service.DAL
             rollOver = 0;
             expiryTime = 0;
 
-            using var conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
+            using var conn = new MySqlConnection(_connectionString);
             conn.Open();
             using var trans = conn.BeginTransaction();
 
-            promotion = conn.QueryFirstOrDefault<Promotion>("Member_PromotionV3_Get", new { CustId = custId, SiteId = siteId, BonusCode = bonusCode, CurrencyId = currencyId, DeviceType = deviceType }, transaction: trans, commandType: CommandType.StoredProcedure);
+            promotion = _reportDbClient.QueryFirst<Promotion>("Member_PromotionV3_Get", new DynamicParameters(new { CustId = custId,
+                CurrencyId = currencyId,
+                SiteId = siteId,
+                BonusCode = bonusCode,
+                DeviceType = deviceType
+            }));
             if (promotion == null)
             {
                 return 0;
             }
 
-            int result = 0;
             var p = new DynamicParameters(new { CustId = custId, CurrencyId = currencyId, SiteId = siteId, BonusCode = bonusCode, DeviceType = deviceType });
             p.Add("CanJoin", dbType: DbType.Boolean, direction: ParameterDirection.Output);
             p.Add("Amount", dbType: DbType.Decimal, direction: ParameterDirection.Output);
             p.Add("RefId", dbType: DbType.String, direction: ParameterDirection.Output);
             p.Add("Result", dbType: DbType.Int32, direction: ParameterDirection.Output);
             p.Add("RefList", dbType: DbType.String, direction: ParameterDirection.Output);
-            conn.Execute("Member_PromotionCanJoinV6_Get", p, commandType: CommandType.StoredProcedure);
+            _mainDbClient.Execute("Member_PromotionCanJoinV6_Get", p, conn, trans);
 
             var jResult = p.Get<int>("Result");
             var canJoin = p.Get<byte?>("CanJoin") ?? 0;
             var amount = p.Get<decimal?>("Amount") ?? 0;
+            var refList = p.Get<string>("RefList");
+            IEnumerable<Ref> reference = new List<Ref>();
+            if (refList != null && refList.Contains("DepositId", StringComparison.OrdinalIgnoreCase))
+            {
+                reference = JsonConvert.DeserializeObject<IEnumerable<Ref>>(refList);
+            }
+            
             if (canJoin == 1)
             {
                 decimal dBonus = 0;
@@ -124,6 +141,7 @@ namespace BonusService.Service.DAL
                         return 0;
                 }
 
+                var result = 0;
                 switch (promotion.PromotionType)
                 {
                     case PromotionType.FstDeposit:
@@ -142,10 +160,11 @@ namespace BonusService.Service.DAL
                                 BonusAmount = dBonus,
                                 promotion.ExpiryDays,
                                 Memo = (string)null,
-                                Prefix = $"B{common.GetEnv()}"
+                                Prefix = $"B{common.GetEnv()}",
+                                RefList = reference.Any() ? JsonConvert.SerializeObject(reference.FirstOrDefault()) : null
                             });
                             p.Add("TransId", dbType: DbType.String, direction: ParameterDirection.Output);
-                            result = conn.Execute("Member_BonusInfo_Ins", p, trans, commandType: CommandType.StoredProcedure);
+                            result = _mainDbClient.Execute("Member_BonusInfo_InsV2", p, conn, trans);
                             var transId = p.Get<string>("TransId");
 
                             if (result > 0 && dLockedAmount > 0)
@@ -185,9 +204,9 @@ namespace BonusService.Service.DAL
 
                 if (result > 0)
                 {
-                    result = conn.Execute("Member_PromotionBeenUsedV2_Set",
-                        new { SiteId = siteId, BonusCode = bonusCode, CurrencyId = currencyId }, trans,
-                        commandType: CommandType.StoredProcedure);
+                    result = _mainDbClient.Execute("Member_PromotionBeenUsedV2_Set",
+                        new DynamicParameters(new {SiteId = siteId, BonusCode = bonusCode, CurrencyId = currencyId}), conn,
+                        trans);
                 }
 
                 if (result > 0)
@@ -208,7 +227,9 @@ namespace BonusService.Service.DAL
         }
         public bool RewardBonus(int bonusId, int promoCategoryId, int tpId, int custId, int siteId, string userName, decimal bonusAmount, decimal lockedAmount, decimal rollover, long expiryTime, int type, string Memo, string RefTransId, MySqlConnection conn, MySqlTransaction trans)
         {
-            var p = new DynamicParameters(new { BonusId = bonusId, PromoCategoryId = promoCategoryId, TpId = tpId, CustId = custId, SiteId = siteId, UserName = userName, BonusAmount = bonusAmount, LockedAmount = lockedAmount, Rollover = rollover, ExpiryTime = expiryTime, Type = type, Memo = Memo, RefTransId = RefTransId });
+            var p = new DynamicParameters(new { BonusId = bonusId, PromoCategoryId = promoCategoryId, TpId = tpId, CustId = custId, SiteId = siteId, UserName = userName, BonusAmount = bonusAmount, LockedAmount = lockedAmount, Rollover = rollover, ExpiryTime = expiryTime, Type = type,
+                Memo,
+                RefTransId });
             return conn.Execute("Common_Bonus_Ins", p, transaction: trans, commandType: CommandType.StoredProcedure) > 0;
         }
         public void CheckDepositBonusExpired()
