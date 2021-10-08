@@ -46,7 +46,7 @@ namespace BonusService.Service.Workers
                 //logger.LogInformation($"DoDepositBonus  count: {depositBonusList.Count()}");
                 foreach (var depositBonus in depositBonusList)
                 {
-                    var rtn = await depositBonusBLL.SetClaimPromotionAsync(depositBonus.CustId, depositBonus.BonusCode, depositBonus.SiteId, depositBonus.UserName, depositBonus.CurrencyId, depositBonus.LockedAmount, depositBonus.DeviceType);
+                    var rtn = await depositBonusBLL.SetClaimPromotionAsync(depositBonus);
                     if (rtn)
                     {
                         logger.LogInformation($"DoDepositBonus  success TransId: {depositBonus.TransId}");

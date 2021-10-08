@@ -63,11 +63,12 @@ namespace BonusService.Service.BLL
             public decimal Turnover { get; set; }
             public int BonusStatus { get; set; }
         }
-        public async Task<Boolean> SetClaimPromotionAsync(int custId, string bonusCode, int siteId,string userName, int currencyId, decimal dLockedAmount, int deviceType)
+        public async Task<Boolean> SetClaimPromotionAsync(DepositBonus depositBonus)
         {
             var apiResult1 = new ApiResult();
-            var lockedAmount = dLockedAmount;
-            var result = depositBonusService.SetClaimPromotion(custId, userName, siteId, bonusCode, currencyId, deviceType, out var bonusAmount, ref lockedAmount, out var rollOver, out var expiryTime, out var promotion);
+            var lockedAmount = depositBonus.LockedAmount;
+            var result = depositBonusService.SetClaimPromotion(depositBonus, out var bonusAmount, ref lockedAmount,
+                out var rollOver, out var expiryTime, out var promotion);
 
             if (result > 0)
             {
@@ -77,7 +78,7 @@ namespace BonusService.Service.BLL
                     var tpBonusTransfer = new TpBonusTransfer
                     {
                         TpId = promotion.TpId,
-                        CustId = custId,
+                        CustId = depositBonus.CustId,
                         Bonus = bonusAmount + lockedAmount,
                         BonusAmount = bonusAmount,
                         LockedAmount = lockedAmount,
