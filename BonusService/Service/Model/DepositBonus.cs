@@ -16,6 +16,7 @@ namespace BonusService.Service.Model
         public int CurrencyId { set; get; }
         public decimal LockedAmount { set; get; }
         public int DeviceType { set; get; }
+        public decimal Amount { set; get; }
     }
 
     public class Promotion
