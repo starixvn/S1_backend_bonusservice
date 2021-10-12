@@ -39,7 +39,7 @@ namespace BonusService.Service.DAL
             using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
             return conn.Query<DepositBonus>("Service_DepositBonusQueue_Get", commandType: CommandType.StoredProcedure);
         }
-        public int SetClaimPromotion(int custId, string userName, int siteId, string bonusCode, int currencyId, int? deviceType, out decimal bonusAmount,  ref decimal lockedAmount, out decimal rollOver, out long expiryTime, out Promotion promotion)
+        public int SetClaimPromotion(DepositBonus depositBonus, out decimal bonusAmount,  ref decimal lockedAmount, out decimal rollOver, out long expiryTime, out Promotion promotion)
         {
             bonusAmount = 0;
             rollOver = 0;
@@ -49,18 +49,19 @@ namespace BonusService.Service.DAL
             conn.Open();
             using var trans = conn.BeginTransaction();
 
-            promotion = _reportDbClient.QueryFirst<Promotion>("Member_PromotionV3_Get", new DynamicParameters(new { CustId = custId,
-                CurrencyId = currencyId,
-                SiteId = siteId,
-                BonusCode = bonusCode,
-                DeviceType = deviceType
+            promotion = _reportDbClient.QueryFirst<Promotion>("Member_PromotionV3_Get", new DynamicParameters(new {
+                depositBonus.CustId,
+                depositBonus.CurrencyId,
+                depositBonus.SiteId,
+                depositBonus.BonusCode,
+                depositBonus.DeviceType
             }));
             if (promotion == null)
             {
                 return 0;
             }
 
-            var p = new DynamicParameters(new { CustId = custId, CurrencyId = currencyId, SiteId = siteId, BonusCode = bonusCode, DeviceType = deviceType });
+            var p = new DynamicParameters(new { depositBonus.CustId, depositBonus.CurrencyId, depositBonus.SiteId, depositBonus.BonusCode, depositBonus.DeviceType });
             p.Add("CanJoin", dbType: DbType.Boolean, direction: ParameterDirection.Output);
             p.Add("Amount", dbType: DbType.Decimal, direction: ParameterDirection.Output);
             p.Add("RefId", dbType: DbType.String, direction: ParameterDirection.Output);
@@ -71,13 +72,15 @@ namespace BonusService.Service.DAL
             var jResult = p.Get<int>("Result");
             var canJoin = p.Get<byte?>("CanJoin") ?? 0;
             var amount = p.Get<decimal?>("Amount") ?? 0;
-            var refList = p.Get<string>("RefList");
-            IEnumerable<Ref> reference = new List<Ref>();
-            if (refList != null && refList.Contains("DepositId", StringComparison.OrdinalIgnoreCase))
+            var reference = new List<Ref>
             {
-                reference = JsonConvert.DeserializeObject<IEnumerable<Ref>>(refList);
-            }
-            
+                new Ref
+                {
+                    DepositId = depositBonus.TransId,
+                    Amount = depositBonus.Amount
+                }
+            };
+
             if (canJoin == 1)
             {
                 decimal dBonus = 0;
@@ -150,11 +153,11 @@ namespace BonusService.Service.DAL
                             p = new DynamicParameters(new
                             {
                                 PromotionType = (int)promotion.PromotionType,
-                                BonusCode = bonusCode,
-                                CustId = custId,
-                                UserName = userName,
-                                CurrencyId = currencyId,
-                                SiteId = siteId,
+                                depositBonus.BonusCode,
+                                depositBonus.CustId,
+                                depositBonus.UserName,
+                                depositBonus.CurrencyId,
+                                depositBonus.SiteId,
                                 BonusInfo = sBonusInfo,
                                 LockedAmount = dLockedAmount,
                                 BonusAmount = dBonus,
@@ -170,13 +173,13 @@ namespace BonusService.Service.DAL
                             if (result > 0 && dLockedAmount > 0)
                             {
                                 var type = 5 /*Bonus*/;
-                                result = walletService.SetBalance(custId, siteId, userName, dLockedAmount * -1, type,
-                                    $"Claim Promotion BonusCode: {bonusCode}, Locked Amount: {dLockedAmount:#,##0.##}", transId,
+                                result = walletService.SetBalance(depositBonus.CustId, depositBonus.SiteId, depositBonus.UserName, dLockedAmount * -1, type,
+                                    $"Claim Promotion BonusCode: {depositBonus.BonusCode}, Locked Amount: {dLockedAmount:#,##0.##}", transId,
                                     out _, out _, conn, trans);
 
                                 if (result > 0)
                                 {
-                                    withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, dLockedAmount * -1,
+                                    withdrawalLimitService.SetWithdrawalLimit(depositBonus.CustId, depositBonus.UserName, depositBonus.SiteId, dLockedAmount * -1,
                                         null, transId, out _, conn, trans);
                                 }
                                 else
@@ -190,9 +193,9 @@ namespace BonusService.Service.DAL
                                 var m = Regex.Match(transId, @"\d+");
                                 int.TryParse(m.Value, out var bonusId);
 
-                                result = RewardBonus(bonusId, promotion.CategoryId, promotion.TpId, custId,
-                                    siteId, userName, dBonus, dLockedAmount, dRollOver, expiryTime, 5,
-                                    $"Claim Promotion BonusCode: {bonusCode}", transId, conn, trans)
+                                result = RewardBonus(bonusId, promotion.CategoryId, promotion.TpId, depositBonus.CustId,
+                                    depositBonus.SiteId, depositBonus.UserName, dBonus, dLockedAmount, dRollOver, expiryTime, 5,
+                                    $"Claim Promotion BonusCode: {depositBonus.BonusCode}", transId, conn, trans)
                                     ? 1
                                     : 0;
                             }
@@ -205,7 +208,7 @@ namespace BonusService.Service.DAL
                 if (result > 0)
                 {
                     result = _mainDbClient.Execute("Member_PromotionBeenUsedV2_Set",
-                        new DynamicParameters(new {SiteId = siteId, BonusCode = bonusCode, CurrencyId = currencyId}), conn,
+                        new DynamicParameters(new {depositBonus.SiteId, depositBonus.BonusCode, depositBonus.CurrencyId}), conn,
                         trans);
                 }
 
