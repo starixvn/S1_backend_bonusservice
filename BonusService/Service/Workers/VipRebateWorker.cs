@@ -54,43 +54,37 @@ namespace BonusService.Service.Workers
                     int listCnt = 0;
                     var rebatePayoutLimit = rebateBLL.GetRebatePayoutLimit();
 
-                    do
+                  
+                    var rebateInfoList = rebateBLL.GetVipRebateCustList(rebateTask.SiteId, pageSize, pageNumber, rebateTask.SpecificDate);
+                    log2File.Info($"SiteId:{rebateTask.SiteId} CustCount:{rebateInfoList.Count()} list {JsonConvert.SerializeObject(rebateInfoList)}", "rebateInfoList");
+                    foreach (var rebateInfo in rebateInfoList)
                     {
-                        var rebateInfoList = rebateBLL.GetVipRebateCustList(rebateTask.SiteId, pageSize, pageNumber, rebateTask.SpecificDate);
-                        int ncount = 0;
-                        foreach (var rebateInfo in rebateInfoList)
+                            var rebateTpBetRecordList = rebateBLL.GetVipRebateTpBetRecord(rebateTask.SiteId, rebateInfo.CustId, rebateTask.SpecificDate, 0).ToList();//.ToDictionary<string, RebateTpBetRecord>(x => $"{x.SettledDate:yyyyMMdd}_{x.GameType}", x => x);
+
+                        if (rebateTask.PeriodType == 3)
                         {
-                               var rebateTpBetRecordList = rebateBLL.GetVipRebateTpBetRecord(rebateTask.SiteId, rebateInfo.CustId, rebateTask.SpecificDate, 0).ToList();//.ToDictionary<string, RebateTpBetRecord>(x => $"{x.SettledDate:yyyyMMdd}_{x.GameType}", x => x);
+                            var dd = rebateTpBetRecordList.ToDictionary(x => $"{x.SettledDate:yyyyMMdd}_{x.GameType}", x => x);
 
-                            if (rebateTask.PeriodType == 3)
+                            foreach (var rebateTpBetRecord14 in rebateBLL.GetVipRebateTpBetRecord(rebateTask.SiteId, rebateInfo.CustId, rebateTask.SpecificDate, 1))
                             {
-                                var dd = rebateTpBetRecordList.ToDictionary(x => $"{x.SettledDate:yyyyMMdd}_{x.GameType}", x => x);
-
-                                foreach (var rebateTpBetRecord14 in rebateBLL.GetVipRebateTpBetRecord(rebateTask.SiteId, rebateInfo.CustId, rebateTask.SpecificDate, 1))
+                                if (dd.ContainsKey($"{rebateTpBetRecord14.SettledDate:yyyyMMdd}_{rebateTpBetRecord14.GameType}"))
                                 {
-                                    if (dd.ContainsKey($"{rebateTpBetRecord14.SettledDate:yyyyMMdd}_{rebateTpBetRecord14.GameType}"))
-                                    {
-                                        dd[$"{rebateTpBetRecord14.SettledDate:yyyyMMdd}_{rebateTpBetRecord14.GameType}"].ValidBet += rebateTpBetRecord14.ValidBet;
-                                        dd[$"{rebateTpBetRecord14.SettledDate:yyyyMMdd}_{rebateTpBetRecord14.GameType}"].WinlostAmount += rebateTpBetRecord14.WinlostAmount;
-                                    }
-                                    else
-                                    {
-                                        rebateTpBetRecordList.Add(rebateTpBetRecord14);
-                                    }
+                                    dd[$"{rebateTpBetRecord14.SettledDate:yyyyMMdd}_{rebateTpBetRecord14.GameType}"].ValidBet += rebateTpBetRecord14.ValidBet;
+                                    dd[$"{rebateTpBetRecord14.SettledDate:yyyyMMdd}_{rebateTpBetRecord14.GameType}"].WinlostAmount += rebateTpBetRecord14.WinlostAmount;
                                 }
-                            }
-
-                            if (rebateTpBetRecordList.Count > 0)
-                            {
-                                log2File.Info(JsonConvert.SerializeObject(rebateTpBetRecordList), "rebateTpBetRecordList");
-                                rebateBLL.PayoutVipRebate(rebateTask.SiteId, rebateInfo.CustId, rebateInfo.UserName, rebateInfo, rebateTpBetRecordList, rebatePayoutLimit);
+                                else
+                                {
+                                    rebateTpBetRecordList.Add(rebateTpBetRecord14);
+                                }
                             }
                         }
 
-                        listCnt = rebateInfoList.Count();
-                        pageNumber++;
+                        if (rebateTpBetRecordList.Count > 0)
+                        {
+                            log2File.Info($"CustId:{rebateInfo.CustId} TpBetRecordList:{JsonConvert.SerializeObject(rebateTpBetRecordList)}", "rebateTpBetRecordList");
+                            rebateBLL.PayoutVipRebate(rebateTask.SiteId, rebateInfo.CustId, rebateInfo.UserName, rebateInfo, rebateTpBetRecordList, rebatePayoutLimit);
+                        }
                     }
-                    while (listCnt == pageSize);
 
                     rebateBLL.SetVipRebateTaskDone(rebateTask.SiteId);
                     int spendTime = System.Environment.TickCount - startTick;
