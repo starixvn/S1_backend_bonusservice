@@ -102,16 +102,15 @@ namespace BonusService.Service.Workers
             finally
             {
                 TimeSpan dueTimeSpan = TimeSpan.FromMinutes(60);
-              //  if (environment.IsDevelopment())
-              //  {
-              //      dueTimeSpan = TimeSpan.FromMinutes(1);
-              //  }
+                //  if (environment.IsDevelopment())
+                //  {
+                //      dueTimeSpan = TimeSpan.FromMinutes(1);
+                //  }
 
-              // // if (isError)
-              ////  {
-              ////      dueTimeSpan = TimeSpan.FromSeconds(5);
-              ////  }
-
+                if (isError)
+                {
+                    dueTimeSpan = TimeSpan.FromMinutes(10);
+                }
                 timer.Change(dueTimeSpan, TimeSpan.Zero);
             }
         }
