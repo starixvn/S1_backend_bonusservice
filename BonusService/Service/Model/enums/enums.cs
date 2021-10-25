@@ -93,4 +93,9 @@ namespace BonusService.Service.Model.enums
         Wager,//ConnectionStringWager
         Log,//ConnectionStringLog
     }
+    
+    public enum FinancialType
+    {
+        CancelledBonus = 7
+    }
 }

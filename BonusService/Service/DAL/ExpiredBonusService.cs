@@ -14,15 +14,16 @@ namespace BonusService.Service.DAL
 {
     public class ExpiredBonusService
     {
-        private readonly IConfiguration _configuration;
         private readonly WalletService _walletService;
         private readonly WithdrawalLimitService _withdrawalLimitService;
         private readonly MySqlClient _mainDbClient;
         private readonly MySqlClient _reportDbClient;
+        private readonly string _connectionString;
 
         public ExpiredBonusService(IServiceProvider provider)
         {
-            _configuration = provider.GetRequiredService<IConfiguration>();
+            var configuration = provider.GetRequiredService<IConfiguration>();
+            _connectionString = configuration.GetConnectionString("ConnectionString");
             _walletService = provider.GetRequiredService<WalletService>();
             _withdrawalLimitService = provider.GetRequiredService<WithdrawalLimitService>();
             _mainDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);
@@ -30,29 +31,60 @@ namespace BonusService.Service.DAL
         }
         public IEnumerable<ExpiredBonus> GetBonusExpired(int limit)
         {
-            using MySqlConnection conn = new MySqlConnection(_configuration.GetConnectionString("ConnectionString"));
-            return conn.Query<ExpiredBonus>("Service_BonusExpired_Get", new { Limit = limit }, commandType: CommandType.StoredProcedure);
+            return _reportDbClient.Query<ExpiredBonus>("Service_BonusExpired_Get", new DynamicParameters(new { Limit = limit }));
         }
-        public int RefundExpiredBonus(ExpiredBonus expiredBonus)
+        
+        public IEnumerable<ExpiredBonus> GetTransferBonusExpired(int limit)
         {
-            using MySqlConnection conn = new MySqlConnection(_configuration.GetConnectionString("ConnectionString"));
+            return _reportDbClient.Query<ExpiredBonus>("Service_TransferBonusExpired_Get", new DynamicParameters(new { Limit = limit }));
+        }
+        
+        public IEnumerable<decimal> GetBonusWinLoss(int bonusId)
+        {
+            return _reportDbClient.Query<decimal>("Service_BonusWinLoss_Get", new DynamicParameters(new { BonusId = bonusId }));
+        }
+        
+        public int RefundExpiredBonus(ExpiredBonus expiredBonus, string memo)
+        {
+            using var conn = new MySqlConnection(_connectionString);
             conn.Open();
             using var trans = conn.BeginTransaction();
-            int rtn = 0;
+            var result = 0;
             if (expiredBonus.Refund > 0) //money
             {
-                rtn = _walletService.SetBalance(expiredBonus.CustId, expiredBonus.SiteId, expiredBonus.UserName, expiredBonus.Refund, 7, $"CancelBonus: {expiredBonus.Refund:#,##0.##}", expiredBonus.BonusId.ToString(), out _, out _, conn, trans);
-                rtn = _withdrawalLimitService.SetWithdrawalLimit(expiredBonus.CustId, expiredBonus.UserName, expiredBonus.SiteId, expiredBonus.Refund, "CancelBonus", expiredBonus.BonusId.ToString(), out decimal afterWithdrawalLimit, conn, trans);
+                result = _walletService.SetBalance(expiredBonus.CustId, expiredBonus.SiteId, expiredBonus.UserName,
+                    expiredBonus.Refund, (int)FinancialType.CancelledBonus, memo,
+                    expiredBonus.BonusId.ToString(), out _, out _, conn, trans);
+                
+                if (result >= 0)
+                {
+                    result = _withdrawalLimitService.SetWithdrawalLimit(expiredBonus.CustId, expiredBonus.UserName,
+                        expiredBonus.SiteId, expiredBonus.Refund, "CancelBonus", expiredBonus.BonusId.ToString(),
+                        out _, conn, trans);
+                }
             }
 
-            rtn = conn.Execute("Service_BonusExpired_Set", new { BonusId = expiredBonus.BonusId, CustId = expiredBonus.CustId, UserName = expiredBonus.UserName, SiteId = expiredBonus.SiteId, TYPE = 7, PromoCategoryId = expiredBonus.PromoCategoryId, Bonus = expiredBonus.Bonus }, commandType: CommandType.StoredProcedure);
+            if (result >= 0)
+            {
+                result = _mainDbClient.Execute("Service_BonusExpired_Set",
+                    new DynamicParameters(new
+                    {
+                        expiredBonus.BonusId,
+                        expiredBonus.CustId,
+                        expiredBonus.UserName,
+                        expiredBonus.SiteId,
+                        TYPE = (int)FinancialType.CancelledBonus,
+                        expiredBonus.PromoCategoryId,
+                        expiredBonus.Bonus
+                    }), conn, trans);
+            }
 
-            if (rtn > 0)
+            if (result >= 0)
             {
                 trans.Commit();
             }
 
-            return rtn;
+            return result;
         }
     }
 }
