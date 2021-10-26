@@ -1,17 +1,16 @@
-using System;
-using System.IO;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using BonusService.Service.BLL;
 using BonusService.Service.DAL;
 using BonusService.Service.Extensions;
 using BonusService.Service.Library;
 using BonusService.Service.Workers;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Exceptions;
-using Serilog.Formatting.Json;
-using Microsoft.AspNetCore.Hosting;
+using System;
+using System.IO;
 
 namespace BonusService
 {
@@ -23,7 +22,7 @@ namespace BonusService
             .AddJsonFile($"appsettings.json", false, true)
             .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json")
             .Build();
-        
+
         public static void Main(string[] args)
         {
             CreateHostBuilder(args).Build().Run();
@@ -75,18 +74,19 @@ namespace BonusService
                     services.AddSingleton<PromotionAutoExtendBLL>();
                     services.AddSingleton<DepositBonusBLL>();
 
-                    services.AddHostedService<ExpiredBonusWorker>();
-                    services.AddHostedService<ReferralWorker>();
-                    services.AddHostedService<VipUpgradeWorker>();
+                    //services.AddHostedService<ExpiredBonusWorker>();
+                    //services.AddHostedService<ReferralWorker>();
+                    //services.AddHostedService<VipUpgradeWorker>();
                     services.AddHostedService<VipRebateWorker>();
-                    services.AddHostedService<VipCashBackWorker>();
-                    services.AddHostedService<PromotionAutoExtendWorker>();
-                    services.AddHostedService<DepositBonusWorker>();
+                    //services.AddHostedService<VipCashBackWorker>();
+                    //services.AddHostedService<PromotionAutoExtendWorker>();
+                    //services.AddHostedService<DepositBonusWorker>();
 
-                    if (Configuration.GetSection("RunVipDowngradeWorker").Get<bool>())
-                    {
-                        services.AddHostedService<VipDowngradeWorker>();
-                    }
+                    //if (Configuration.GetSection("RunVipDowngradeWorker").Get<bool>())
+                    //{
+                    //    services.AddHostedService<VipDowngradeWorker>();
+                    //}
+                    services.AddControllers();
                 });
     }
 }
