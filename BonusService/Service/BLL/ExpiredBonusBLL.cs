@@ -73,11 +73,11 @@ namespace BonusService.Service.BLL
 
         }
 
-        public int BonusCancelTransfer(TpBonusCancelTransfer tpBonusCancelTransfer)
+        public ApiResult<DepositBonusBLL.TransferResult> BonusCancelTransfer(TpBonusCancelTransfer tpBonusCancelTransfer)
         {
             var myUrl = $"{_apiUrl}BonusCancelTransfer";
             var data = _courierAdapter.MyPostAsync<DepositBonusBLL.TransferResult, TpBonusCancelTransfer>(myUrl, tpBonusCancelTransfer).Result;
-            return data.ErrorCode;
+            return data;
         }
     }
 }

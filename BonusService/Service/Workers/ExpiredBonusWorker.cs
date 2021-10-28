@@ -1,17 +1,14 @@
 ﻿using BonusService.Service.BLL;
-using BonusService.Service.Library;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using BonusService.Service.Extensions;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 
@@ -81,12 +78,11 @@ namespace BonusService.Service.Workers
                                             {
                                                 refundAmount = item.LockedAmount;
                                             }
-                                            
 
                                             //呼叫轉帳 API 扣款
                                             if (remainingBonus > 0)
                                             {
-                                                _expiredBonusBll.BonusCancelTransfer(new TpBonusCancelTransfer
+                                                var result = _expiredBonusBll.BonusCancelTransfer(new TpBonusCancelTransfer
                                                 {
                                                     TpId = item.TpId,
                                                     CustId = item.CustId,
@@ -97,6 +93,11 @@ namespace BonusService.Service.Workers
                                                     RemainingBonus = remainingBonus,
                                                     RefundAmount = refundAmount
                                                 });
+                                                
+                                                if (result.ErrorCode != (int)ErrorCode.Success)
+                                                {
+                                                    _logger.LogWarning(JsonConvert.SerializeObject(result));
+                                                }
                                             }
                                             else
                                             {

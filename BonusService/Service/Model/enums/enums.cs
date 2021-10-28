@@ -4,6 +4,11 @@ using System.Text;
 
 namespace BonusService.Service.Model.enums
 {
+    public enum ErrorCode
+    {
+        Success = 0
+    }
+
     public enum SettlementType
     {
         UnSettled = 0,
