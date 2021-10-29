@@ -22,9 +22,6 @@ namespace BonusService.Service.Model
         public decimal Bonus { set; get; }
         public decimal BonusAmount { set; get; }
         public decimal LockedAmount { set; get; }
-        public string RefList { get; set; }
-
-        public List<Ref> DepositInfo => RefList == null ? null : JsonConvert.DeserializeObject<List<Ref>>(RefList);
         public int TpId { set; get; }
     }
     
