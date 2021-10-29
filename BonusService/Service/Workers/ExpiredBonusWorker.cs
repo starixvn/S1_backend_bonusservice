@@ -60,8 +60,8 @@ namespace BonusService.Service.Workers
                                 {
                                     var winLossAmount = _expiredBonusBll.GetBonusWinLoss(item.BonusId)?.FirstOrDefault() ?? 0m;
                                     //計算當初領取 Bonus Amount 總額 
-                                    var bonusAmount = item.BonusAmount + item.LockedAmount;
-                                    var remainingBonus = bonusAmount + winLossAmount;
+                                    var transferBonusAmount = item.BonusAmount + item.LockedAmount;
+                                    var remainingBonus = transferBonusAmount + winLossAmount;
                                     
                                     switch (item.PromotionType)
                                     {
