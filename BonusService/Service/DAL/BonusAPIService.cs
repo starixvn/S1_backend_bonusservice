@@ -4,6 +4,7 @@ using BonusService.Service.Model.enums;
 using Dapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
 using System;
@@ -25,8 +26,9 @@ namespace BonusService.Service.DAL
         private readonly Common common;
         private readonly WalletService walletService;
         private readonly WithdrawalLimitService withdrawalLimitService;
+        private readonly ILogger<BonusAPIService> _logger;
 
-        public BonusAPIService(IServiceProvider serviceProvider)
+        public BonusAPIService(IServiceProvider serviceProvider, ILogger<BonusAPIService> logger)
         {
             configuration = serviceProvider.GetRequiredService<IConfiguration>();
             _connectionString = configuration.GetConnectionString("ConnectionString");
@@ -36,43 +38,54 @@ namespace BonusService.Service.DAL
             _mainDbClient = serviceProvider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);
             _reportDbClient = serviceProvider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Report);
             depositBonusService = serviceProvider.GetRequiredService<DepositBonusService>();
-            
+            this._logger = logger;
+
+
         }
 
-        public int SetAdjustmentBonus(DepositBonus depositBonus, out decimal bonusAmount, ref decimal lockedAmount, out decimal rollOver, out long expiryTime, out Promotion promotion)
+          public int SetAdjustmentBonus(DepositBonus depositBonus, out decimal bonusAmount, ref decimal lockedAmount, out decimal rollOver, out long expiryTime, out Promotion promotion, out int errorCode, out string errorMessage)
         {
             bonusAmount = 0;
             rollOver = 0;
             expiryTime = 0;
-
+            errorCode = 9000;
+            errorMessage = "";
             using var conn = new MySqlConnection(_connectionString);
             conn.Open();
             using var trans = conn.BeginTransaction();
-
-       
-            promotion = _reportDbClient.QueryFirst<Promotion>("Member_PromotionV3_Get", new DynamicParameters(new
+            var parameter = new DynamicParameters(new
             {
                 depositBonus.CustId,
                 depositBonus.CurrencyId,
                 depositBonus.SiteId,
                 depositBonus.BonusCode,
                 depositBonus.DeviceType
-            }));
-            if (promotion == null|| promotion.PromotionType != PromotionType.RetentionBonus)
+            });
+
+            promotion = _reportDbClient.QueryFirst<Promotion>("Member_PromotionV3_Get", parameter);
+
+            if (promotion == null)
             {
+                errorCode = 201;
+                errorMessage = $"BonusCode:{depositBonus.BonusCode} not found";
+                _logger.LogError($"BonusCode:{depositBonus.BonusCode} not found  parameter:{ Newtonsoft.Json.JsonConvert.SerializeObject(parameter)}");
+                return 0;
+            }else if(promotion.PromotionType != PromotionType.RetentionBonus)
+            {
+                errorCode = 202;
+                errorMessage = $"BonusCode:{depositBonus.BonusCode} is not Retention Bonus";
+                _logger.LogError($"BonusCode:{depositBonus.BonusCode} is not Retention Bonus  parameter:{ Newtonsoft.Json.JsonConvert.SerializeObject(parameter)}");
                 return 0;
             }
 
 
-            decimal dBonus = 0;
+
             var dLockedAmount = 0;
-            decimal dRollOver = 0;
-            var sBonusInfo = "";
             IEnumerable<Ref> reference = new List<Ref>();
 
-            dBonus = promotion.Bonus;
-            dRollOver = dBonus * promotion.RollOver;
-            sBonusInfo = JsonConvert.SerializeObject(promotion,
+            decimal dBonus = promotion.Bonus;
+            decimal dRollOver = dBonus * promotion.RollOver;
+            var sBonusInfo = JsonConvert.SerializeObject(promotion,
                 new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
             bonusAmount = dBonus;
             lockedAmount = 0;
@@ -127,7 +140,7 @@ namespace BonusService.Service.DAL
 
                 result = depositBonusService.RewardBonus(bonusId, promotion.CategoryId, promotion.TpId, depositBonus.CustId,
                     depositBonus.SiteId, depositBonus.UserName, dBonus, dLockedAmount, dRollOver, expiryTime, 5,
-                    $"Claim Promotion BonusCode: {depositBonus.BonusCode}", transId, conn, trans)
+                    $"Claim Retention Promotion BonusCode: {depositBonus.BonusCode}", transId, conn, trans)
                     ? 1
                     : 0;
             }
@@ -148,6 +161,8 @@ namespace BonusService.Service.DAL
             if (result > 0)
             {
                 trans.Commit();
+                errorCode = 0;
+                errorMessage = "";
             }
 
             return result;

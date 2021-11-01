@@ -33,6 +33,7 @@ namespace BonusService.Service.BLL
             var apiResult1 = new ApiResult();
             var lockedAmount = (decimal)0;
             var custInfo = _custInfoService.GetCustInfo(custId);
+           
             DepositBonus depositBonus = new DepositBonus();
             depositBonus.CustId = custId;
             depositBonus.UserName = custInfo.UserName;
@@ -41,7 +42,7 @@ namespace BonusService.Service.BLL
             depositBonus.CurrencyId = custInfo.CurrencyId;
             depositBonus.DeviceType = 1;
 
-            var result = _bonusAPIService.SetAdjustmentBonus(depositBonus, out var bonusAmount, ref lockedAmount, out var rollOver, out var expiryTime, out var promotion);
+            var result = _bonusAPIService.SetAdjustmentBonus(depositBonus, out var bonusAmount, ref lockedAmount, out var rollOver, out var expiryTime, out var promotion, out var errorCode, out var errorMessage);
 
             if (result > 0)
             {
@@ -83,6 +84,15 @@ namespace BonusService.Service.BLL
                 {
                     apiResult1.ErrorCode = 0;
                 }
+            }
+            else
+            {
+                if(errorCode !=0 )
+                {
+                    apiResult1.ErrorCode = errorCode;
+                    apiResult1.Message = errorMessage;
+                }
+
             }
             return apiResult1;
         }

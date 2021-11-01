@@ -1,7 +1,9 @@
 ﻿using BonusService.Service.BLL;
+using BonusService.Service.Extensions;
 using MemberSite.Service.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 
@@ -12,10 +14,12 @@ namespace BonusService.Controllers
     public class APIController : ControllerBase
     {
         private readonly BonusAPIBLL _bonusAPIBLL;
+        private readonly ILogger<APIController> _logger;
 
-        public APIController(IServiceProvider provider)
+        public APIController(IServiceProvider provider, ILogger<APIController> logger)
         {
             _bonusAPIBLL = provider.GetRequiredService<BonusAPIBLL>();
+            this._logger = logger;
         }
 
         public class SetAdjustBonusAsyncReq
@@ -29,14 +33,20 @@ namespace BonusService.Controllers
             var result = new ApiResult();
             try
             {
+                _logger.LogInformation($"SetAdjustBonusAsync { Newtonsoft.Json.JsonConvert.SerializeObject(setAdjustBonusReq)}");
                 result = await _bonusAPIBLL.SetAdjustmentBonusAsync(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode);
+
             }
             catch (Exception ex)
             {
                 result.ErrorCode = 999;
                 result.RawMessage = ex.ToString();
+                _logger.LogError(ex, MethodExtension.GetCurrentMethod());
             }
-
+            if (result.ErrorCode != 0)
+            {
+                _logger.LogError($"SetAdjustBonusAsync { Newtonsoft.Json.JsonConvert.SerializeObject(result)}");
+            }
             return result;
         }
     }
