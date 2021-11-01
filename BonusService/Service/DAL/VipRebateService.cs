@@ -63,7 +63,7 @@ namespace BonusService.Service.DAL
                     var rebateRecord = GetRebateRecord(custId, int.Parse(rr.SettledDate.ToString("yyyyMMdd")), rr.GameType, promotionType, conn, trans);
                     if (rebateRecord == null)
                     {
-                        SetRebateRecord(custId, int.Parse(rr.SettledDate.ToString("yyyyMMdd")), rr.GameType, sum, promotionType, tc, conn, trans);
+                        SetRebateRecord(custId, int.Parse(rr.SettledDate.ToString("yyyyMMdd")), rr.GameType, rr.Percentage, sum, promotionType, tc, conn, trans);
                         var amount = sum;
                         amount = common.Floor(amount, 2);
 
@@ -144,9 +144,9 @@ namespace BonusService.Service.DAL
         {
             return conn.Query<RebateRecord>("Service_RebateRecord_Get", new { CustId, SettledDate, GameType, BonusCode = "VipRebate", PromotionType }, transaction: trans, commandType: CommandType.StoredProcedure).FirstOrDefault();
         }
-        public int SetRebateRecord(int CustId, int SettledDate, int GameType, decimal Sum, int PromotionType, long RelId, MySqlConnection conn, MySqlTransaction trans)
+        public int SetRebateRecord(int CustId, int SettledDate, int GameType, decimal Percentage, decimal Sum, int PromotionType, long RelId, MySqlConnection conn, MySqlTransaction trans)
         {
-            return conn.Execute("Service_RebateRecord_Set", new { CustId, SettledDate, GameType, BonusCode = "VipRebate", Sum, PromotionType, RelId }, transaction: trans, commandType: CommandType.StoredProcedure);
+            return conn.Execute("Service_RebateRecord_Set_V2", new { CustId, SettledDate, GameType, BonusCode = "VipRebate", Percentage, Sum, PromotionType, RelId }, transaction: trans, commandType: CommandType.StoredProcedure);
         }
         public IEnumerable<RebatePayoutLimit> GetRebatePayoutLimit()
         {
