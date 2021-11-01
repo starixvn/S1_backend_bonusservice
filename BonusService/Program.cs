@@ -11,6 +11,7 @@ using Serilog;
 using Serilog.Exceptions;
 using System;
 using System.IO;
+using Serilog.Formatting.Json;
 
 namespace BonusService
 {
@@ -33,12 +34,12 @@ namespace BonusService
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseSerilog((hostContext, loggerConfiguration) =>
-                        {
-                            loggerConfiguration
-                                .ReadFrom.Configuration(Configuration)
-                                .Enrich.FromLogContext()
-                                .Enrich.WithExceptionDetails();
-                        })
+                    {
+                        loggerConfiguration
+                            .ReadFrom.Configuration(Configuration)
+                            .Enrich.FromLogContext()
+                            .Enrich.WithExceptionDetails();
+                    })
                         .UseStartup<Startup>();
                 })
                 .ConfigureServices((hostContext, services) =>
@@ -77,18 +78,18 @@ namespace BonusService
                     services.AddSingleton<BonusAPIBLL>();
                     services.AddSingleton<BonusAPIService>();
 
-                    //services.AddHostedService<ExpiredBonusWorker>();
-                    //services.AddHostedService<ReferralWorker>();
-                    //services.AddHostedService<VipUpgradeWorker>();
+                    services.AddHostedService<ExpiredBonusWorker>();
+                    services.AddHostedService<ReferralWorker>();
+                    services.AddHostedService<VipUpgradeWorker>();
                     services.AddHostedService<VipRebateWorker>();
-                    //services.AddHostedService<VipCashBackWorker>();
-                    //services.AddHostedService<PromotionAutoExtendWorker>();
-                    //services.AddHostedService<DepositBonusWorker>();
+                    services.AddHostedService<VipCashBackWorker>();
+                    services.AddHostedService<PromotionAutoExtendWorker>();
+                    services.AddHostedService<DepositBonusWorker>();
 
-                    //if (Configuration.GetSection("RunVipDowngradeWorker").Get<bool>())
-                    //{
-                    //    services.AddHostedService<VipDowngradeWorker>();
-                    //}
+                    if (Configuration.GetSection("RunVipDowngradeWorker").Get<bool>())
+                    {
+                        services.AddHostedService<VipDowngradeWorker>();
+                    }
                     services.AddControllers();
                 });
     }
