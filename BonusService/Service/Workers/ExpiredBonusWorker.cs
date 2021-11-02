@@ -42,102 +42,102 @@ namespace BonusService.Service.Workers
         {
             try
             {
-                    int count;
-                    var allTasks = new List<Task>();
-                    do
+                int count;
+                var allTasks = new List<Task>();
+                do
+                {
+                    var data = _expiredBonusBll.GetTransferBonusExpired(Limit);
+                    foreach (var item in data)
                     {
-                        var data = _expiredBonusBll.GetTransferBonusExpired(Limit);
-                        foreach (var item in data)
+                        allTasks.Add(Task.Run(() =>
                         {
-                            allTasks.Add(Task.Run(() =>
+                            try
                             {
-                                try
+                                var winLossAmount = _expiredBonusBll.GetBonusWinLoss(item.BonusId)?.FirstOrDefault() ?? 0m;
+                                //計算當初領取 Bonus Amount 總額 
+                                var transferBonusAmount = item.BonusAmount + item.LockedAmount;
+                                var remainingBonus = transferBonusAmount + winLossAmount;
+
+                                switch (item.PromotionType)
                                 {
-                                    var winLossAmount = _expiredBonusBll.GetBonusWinLoss(item.BonusId)?.FirstOrDefault() ?? 0m;
-                                    //計算當初領取 Bonus Amount 總額 
-                                    var transferBonusAmount = item.BonusAmount + item.LockedAmount;
-                                    var remainingBonus = transferBonusAmount + winLossAmount;
-                                    
-                                    switch (item.PromotionType)
-                                    {
-                                        case PromotionType.FstDeposit:
-                                        case PromotionType.ReDeposit:
-                                            
-                                            //確認剩餘本金
-                                            var refundAmount = remainingBonus - item.BonusAmount;
-                                            if (refundAmount < 0)
-                                            {
-                                                refundAmount = 0;
-                                            }
-                                            else if (refundAmount > item.LockedAmount)
-                                            {
-                                                refundAmount = item.LockedAmount;
-                                            }
+                                    case PromotionType.FstDeposit:
+                                    case PromotionType.ReDeposit:
 
-                                            //呼叫轉帳 API 扣款
-                                            if (remainingBonus > 0)
+                                        //確認剩餘本金
+                                        var refundAmount = remainingBonus - item.BonusAmount;
+                                        if (refundAmount < 0)
+                                        {
+                                            refundAmount = 0;
+                                        }
+                                        else if (refundAmount > item.LockedAmount)
+                                        {
+                                            refundAmount = item.LockedAmount;
+                                        }
+
+                                        //呼叫轉帳 API 扣款
+                                        if (remainingBonus > 0)
+                                        {
+                                            var tpBonusCancelTransfer = new TpBonusCancelTransfer
                                             {
-                                                var tpBonusCancelTransfer = new TpBonusCancelTransfer
-                                                {
-                                                    TpId = item.TpId,
-                                                    CustId = item.CustId,
-                                                    UserName = item.UserName,
-                                                    SiteId = item.SiteId,
-                                                    PromoCategoryId = item.PromoCategoryId,
-                                                    BonusId = item.BonusId,
-                                                    RemainingBonus = remainingBonus,
-                                                    RefundAmount = refundAmount
-                                                };
-                                                var result = _expiredBonusBll.BonusCancelTransfer(tpBonusCancelTransfer);
-                                                
-                                                if (result.ErrorCode != (int)ErrorCode.Success)
-                                                {
-                                                    _logger.LogWarning(
-                                                        $"result={JsonConvert.SerializeObject(result)}, tpBonusCancelTransfer={JsonConvert.SerializeObject(tpBonusCancelTransfer)}");
-                                                }
-                                            }
-                                            else
+                                                TpId = item.TpId,
+                                                CustId = item.CustId,
+                                                UserName = item.UserName,
+                                                SiteId = item.SiteId,
+                                                PromoCategoryId = item.PromoCategoryId,
+                                                BonusId = item.BonusId,
+                                                RemainingBonus = remainingBonus,
+                                                RefundAmount = refundAmount
+                                            };
+                                            var result = _expiredBonusBll.BonusCancelTransfer(tpBonusCancelTransfer);
+
+                                            if (result.ErrorCode != (int)ErrorCode.Success)
                                             {
-                                                _expiredBonusBll.RefundExpiredBonus(item,
-                                                    $"CancelBonus: BonusId={item.BonusId}, Remaining Bonus={remainingBonus:#,##0.##}, Refund Amount={0:#,##0.##}");
+                                                _logger.LogWarning(
+                                                    $"result={JsonConvert.SerializeObject(result)}, tpBonusCancelTransfer={JsonConvert.SerializeObject(tpBonusCancelTransfer)}");
                                             }
-
-                                            break;
-
-                                        case PromotionType.FreeBet:
-                                        case PromotionType.WalletBonus:
-                                        case PromotionType.Rebate:
-                                        case PromotionType.Cashback:
-                                        case PromotionType.StaticPage:
-                                        default:
-
+                                        }
+                                        else
+                                        {
                                             _expiredBonusBll.RefundExpiredBonus(item,
                                                 $"CancelBonus: BonusId={item.BonusId}, Remaining Bonus={remainingBonus:#,##0.##}, Refund Amount={0:#,##0.##}");
-                                            
-                                            break;
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    _logger.LogError(ex, MethodExtension.GetCurrentMethod());
-                                }
-                            }));
+                                        }
 
-                            if (allTasks.Count >= 4)
-                            {
-                                Task.WhenAll(allTasks).Wait();
-                                allTasks.Clear();
+                                        break;
+
+                                    case PromotionType.FreeBet:
+                                    case PromotionType.WalletBonus:
+                                    case PromotionType.Rebate:
+                                    case PromotionType.Cashback:
+                                    case PromotionType.StaticPage:
+                                    default:
+
+                                        _expiredBonusBll.RefundExpiredBonus(item,
+                                            $"CancelBonus: BonusId={item.BonusId}, Remaining Bonus={remainingBonus:#,##0.##}, Refund Amount={0:#,##0.##}");
+
+                                        break;
+                                }
                             }
-                        }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, MethodExtension.GetCurrentMethod());
+                            }
+                        }));
 
-                        if (allTasks.Count > 0)
+                        if (allTasks.Count >= 4)
                         {
                             Task.WhenAll(allTasks).Wait();
                             allTasks.Clear();
                         }
+                    }
 
-                        count = data.Count();
-                    } while (count >= Limit);
+                    if (allTasks.Count > 0)
+                    {
+                        Task.WhenAll(allTasks).Wait();
+                        allTasks.Clear();
+                    }
+
+                    count = data.Count();
+                } while (count >= Limit);
             }
             catch (Exception ex)
             {
@@ -147,7 +147,6 @@ namespace BonusService.Service.Workers
             {
                 _timerExpiredTransferBonus.Change(TimeSpan.FromMinutes(10), TimeSpan.Zero);
             }
-            
         }
 
         private void DoExpiredBonusTaskAsync(object state)
