@@ -21,7 +21,6 @@ namespace BonusService.Service.Workers
         private Timer _timerExpiredBonus;
         private Timer _timerExpiredTransferBonus;
         private int _lastCheckHour;
-        private int _lastTransferBonusCheckHour;
         private const int Limit = 1000;
 
         public ExpiredBonusWorker(IServiceProvider provider)
@@ -43,10 +42,6 @@ namespace BonusService.Service.Workers
         {
             try
             {
-                if (GetUTC8Time().Hour != _lastTransferBonusCheckHour)
-                {
-                    _lastTransferBonusCheckHour = GetUTC8Time().Hour;
-
                     int count;
                     var allTasks = new List<Task>();
                     do
@@ -143,7 +138,6 @@ namespace BonusService.Service.Workers
 
                         count = data.Count();
                     } while (count >= Limit);
-                }
             }
             catch (Exception ex)
             {
