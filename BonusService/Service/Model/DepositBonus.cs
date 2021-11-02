@@ -48,4 +48,33 @@ namespace BonusService.Service.Model
         public string SpecialCode { get; set; }
         public decimal MinPayout { get; set; }
     }
+    public class TpBonusTransfer
+    {   
+        public int TpId { set; get; }
+        public int CustId { set; get; }
+        public decimal Bonus { set; get; }
+        public decimal BonusAmount { set; get; }
+        public decimal LockedAmount { set; get; }
+        public decimal RolloverAmount { set; get; }
+        public long ExpiryTime { set; get; }
+        public Dictionary<string, string> inputs { set; get; }
+    }
+    public enum TransferStatus
+    {
+        Success = 0, Fail = 1, Pending = 2, PendingD = 3
+    }
+    public class TransferResult
+    {
+        public TransferResult()
+        {
+            Status = TransferStatus.Pending;
+        }
+        public TransferStatus Status { get; set; }
+        public string ThirdId { get; set; }
+        public decimal Difference { get; set; }
+        public decimal Bonus { get; set; }
+        public decimal Rollover { get; set; }
+        public decimal Turnover { get; set; }
+        public int BonusStatus { get; set; }
+    }
 }
