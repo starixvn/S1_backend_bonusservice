@@ -82,7 +82,7 @@ namespace BonusService.Service.Workers
                                             //呼叫轉帳 API 扣款
                                             if (remainingBonus > 0)
                                             {
-                                                var result = _expiredBonusBll.BonusCancelTransfer(new TpBonusCancelTransfer
+                                                var tpBonusCancelTransfer = new TpBonusCancelTransfer
                                                 {
                                                     TpId = item.TpId,
                                                     CustId = item.CustId,
@@ -92,11 +92,13 @@ namespace BonusService.Service.Workers
                                                     BonusId = item.BonusId,
                                                     RemainingBonus = remainingBonus,
                                                     RefundAmount = refundAmount
-                                                });
+                                                };
+                                                var result = _expiredBonusBll.BonusCancelTransfer(tpBonusCancelTransfer);
                                                 
                                                 if (result.ErrorCode != (int)ErrorCode.Success)
                                                 {
-                                                    _logger.LogWarning(JsonConvert.SerializeObject(result));
+                                                    _logger.LogWarning(
+                                                        $"result={JsonConvert.SerializeObject(result)}, tpBonusCancelTransfer={JsonConvert.SerializeObject(tpBonusCancelTransfer)}");
                                                 }
                                             }
                                             else
