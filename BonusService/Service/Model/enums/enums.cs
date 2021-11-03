@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BonusService.Service.Model.enums
+﻿namespace BonusService.Service.Model.enums
 {
     public enum ErrorCode
     {

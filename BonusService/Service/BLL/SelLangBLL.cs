@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Concurrent;
 using System.Reflection;
 using System.Resources;
-using System.Threading.Tasks;
 
 namespace BonusService.Service.BLL
 {

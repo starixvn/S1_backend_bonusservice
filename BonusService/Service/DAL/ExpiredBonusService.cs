@@ -4,7 +4,6 @@ using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using BonusService.Service.Library;
 using BonusService.Service.Model.enums;

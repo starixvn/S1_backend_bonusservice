@@ -1,7 +1,6 @@
 ﻿using BonusService.Service.Library;
 using BonusService.Service.Model;
 using Dapper;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;

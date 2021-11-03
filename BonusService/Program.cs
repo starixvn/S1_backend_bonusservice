@@ -12,7 +12,6 @@ using Serilog.Exceptions;
 using System;
 using System.IO;
 using System.Linq;
-using Serilog.Formatting.Json;
 
 namespace BonusService
 {

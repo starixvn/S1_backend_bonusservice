@@ -2,9 +2,7 @@
 using BonusService.Service.Model;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using BonusService.Service.Library;
 using MemberSite.Service.Model;
 using Microsoft.Extensions.Configuration;

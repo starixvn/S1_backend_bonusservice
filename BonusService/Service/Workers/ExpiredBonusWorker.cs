@@ -10,7 +10,6 @@ using BonusService.Service.Extensions;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
 
 namespace BonusService.Service.Workers
 {

@@ -1,7 +1,6 @@
 ﻿using System;
 using Dapper;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
 using System.Data;
 using System.Linq;

@@ -1,10 +1,7 @@
 ﻿using BonusService.Service.BLL;
-using BonusService.Service.Library;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using BonusService.Service.Extensions;
