@@ -88,13 +88,7 @@ namespace BonusService.Service.Workers
                                                 RemainingBonus = remainingBonus,
                                                 RefundAmount = refundAmount
                                             };
-                                            var result = _expiredBonusBll.BonusCancelTransfer(tpBonusCancelTransfer);
-
-                                            if (result.ErrorCode != (int)ErrorCode.Success)
-                                            {
-                                                _logger.LogWarning(
-                                                    $"result={JsonConvert.SerializeObject(result)}, tpBonusCancelTransfer={JsonConvert.SerializeObject(tpBonusCancelTransfer)}");
-                                            }
+                                            _expiredBonusBll.BonusCancelTransfer(tpBonusCancelTransfer);
                                         }
                                         else
                                         {
