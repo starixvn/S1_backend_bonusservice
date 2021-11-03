@@ -14,15 +14,13 @@ namespace BonusService.Service.Workers
     public class ReferralWorker : BackgroundService
     {
         private readonly ILogger<ReferralWorker> _logger;
-        private readonly Log2File log2File;
         private readonly IHostEnvironment environment;
         private readonly SelLangBLL selLangBLL;
         private readonly ReferralBLL referralBLL;
         private Timer timer;
-        public ReferralWorker(ILogger<ReferralWorker> logger, IHostEnvironment environment, Common tools, Log2File log2File, SelLangBLL selLangBLL, ReferralBLL referralBLL)
+        public ReferralWorker(ILogger<ReferralWorker> logger, IHostEnvironment environment, Common tools, SelLangBLL selLangBLL, ReferralBLL referralBLL)
         {
             _logger = logger;
-            this.log2File = log2File;
             this.environment = environment;
             this.selLangBLL = selLangBLL;
             this.referralBLL = referralBLL;
@@ -57,15 +55,14 @@ namespace BonusService.Service.Workers
                 {
                     if(referralBLL.PayoutReferral(rr.Value, out decimal payAmount, out List<ReferralInfo> paidReferralList) > 0)
                     {
-                        log2File.Info(JsonConvert.SerializeObject(paidReferralList), "Referral");
+                        _logger.LogInformation($"Referral:{JsonConvert.SerializeObject(paidReferralList)}");
                     }
                 }
             }
             catch (Exception ex)
             {
                 isError = true;
-                _logger.LogError(ex.ToString());
-                log2File.Error(ex.ToString(), "Referral");
+                _logger.LogError(ex, "ReferralWorker");
             }
             finally
             {

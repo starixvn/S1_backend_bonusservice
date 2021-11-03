@@ -11,6 +11,7 @@ using Serilog;
 using Serilog.Exceptions;
 using System;
 using System.IO;
+using System.Linq;
 using Serilog.Formatting.Json;
 
 namespace BonusService
@@ -33,11 +34,18 @@ namespace BonusService
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
+                    var excludesMessage = Configuration.GetSection("ExcludesMessage").Get<string[]>();
+                    var excludesApiEndpoints = Configuration.GetSection("ExcludesApiEndpoint").Get<string[]>();
+                    
                     webBuilder.UseSerilog((hostContext, loggerConfiguration) =>
                     {
                         loggerConfiguration
                             .ReadFrom.Configuration(Configuration)
                             .Enrich.FromLogContext()
+                            .Filter.ByExcluding(c =>
+                                c.Properties.Any(p =>
+                                    excludesApiEndpoints.Any(item => p.Value.ToString().Contains(item))
+                                    || excludesMessage.Any(item => c.MessageTemplate.ToString().Contains(item))))
                             .Enrich.WithExceptionDetails();
                     })
                         .UseStartup<Startup>();
@@ -47,7 +55,6 @@ namespace BonusService
                     services.AddMemoryCache();
                     services.AddDatabaseConnection(Configuration);
                     services.AddSingleton<Common>();
-                    services.AddSingleton<Log2File>();
                     services.AddSingleton<Currency>();
                     services.AddSingleton<CourierAdapter>();
                     services.AddSingleton<CacheHelper>();

@@ -7,21 +7,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using BonusService.Service.Extensions;
 
 namespace BonusService.Service.Workers
 {
     public class DepositBonusWorker : BackgroundService
     {
         private readonly ILogger<DepositBonusWorker> logger;
-        private readonly Log2File log2File;
         private readonly DepositBonusBLL depositBonusBLL;
         private Timer timerDepositBonus;
         private DateTime LastChickDate;
 
-        public DepositBonusWorker(ILogger<DepositBonusWorker> logger, Log2File log2File, DepositBonusBLL depositBonusBLL)
+        public DepositBonusWorker(ILogger<DepositBonusWorker> logger, DepositBonusBLL depositBonusBLL)
         {
             this.logger = logger;
-            this.log2File = log2File;
             this.depositBonusBLL = depositBonusBLL;
         }
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -57,8 +56,7 @@ namespace BonusService.Service.Workers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex.Message);
-                log2File.Error(ex.ToString(), "DepositBonus");
+                logger.LogError(ex, MethodExtension.GetCurrentAsyncMethod());
             }
             finally
             {

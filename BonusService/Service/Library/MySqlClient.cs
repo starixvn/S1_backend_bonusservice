@@ -41,7 +41,7 @@ namespace BonusService.Service.Library
             }
 
             LogContext.PushProperty("elapsed", sw.Elapsed.TotalMilliseconds);
-            _logger.LogInformation($"{name} {sw.Elapsed:c}");
+            _logger.LogDebug($"{name} {sw.Elapsed:c}");
             return result;
         }
 
@@ -62,7 +62,7 @@ namespace BonusService.Service.Library
             }
 
             LogContext.PushProperty("elapsed", sw.Elapsed.TotalMilliseconds);
-            _logger.LogInformation($"{name} {sw.Elapsed:c}");
+            _logger.LogDebug($"{name} {sw.Elapsed:c}");
             return result;
         }
 
@@ -81,7 +81,7 @@ namespace BonusService.Service.Library
             }
 
             LogContext.PushProperty("elapsed", sw.Elapsed.TotalMilliseconds);
-            _logger.LogInformation($"{name} {sw.Elapsed:c}");
+            _logger.LogDebug($"{name} {sw.Elapsed:c}");
             return true;
         }
         
@@ -121,7 +121,7 @@ namespace BonusService.Service.Library
             }
 
             LogContext.PushProperty("elapsed", sw.Elapsed.TotalMilliseconds);
-            _logger.LogInformation(command);
+            _logger.LogDebug(command);
             return true;
         }
 
@@ -140,7 +140,7 @@ namespace BonusService.Service.Library
             }
 
             LogContext.PushProperty("elapsed", sw.Elapsed.TotalMilliseconds);
-            _logger.LogInformation($"{name} {sw.Elapsed:c}");
+            _logger.LogDebug($"{name} {sw.Elapsed:c}");
             return true;
         }
 
@@ -160,7 +160,7 @@ namespace BonusService.Service.Library
             }
 
             LogContext.PushProperty("elapsed", sw.Elapsed.TotalMilliseconds);
-            _logger.LogInformation(name);
+            _logger.LogDebug(name);
             return result;
         }
 
@@ -180,7 +180,7 @@ namespace BonusService.Service.Library
             }
 
             LogContext.PushProperty("elapsed", sw.Elapsed.TotalMilliseconds);
-            _logger.LogInformation($"{name} {sw.Elapsed:c}");
+            _logger.LogDebug($"{name} {sw.Elapsed:c}");
             return result;
         }
         
@@ -222,7 +222,7 @@ namespace BonusService.Service.Library
             }
 
             LogContext.PushProperty("elapsed", sw.Elapsed.TotalMilliseconds);
-            _logger.LogInformation($"{name} {sw.Elapsed:c}");
+            _logger.LogDebug($"{name} {sw.Elapsed:c}");
             return result;
         }
 
@@ -242,7 +242,7 @@ namespace BonusService.Service.Library
             }
 
             LogContext.PushProperty("elapsed", sw.Elapsed.TotalMilliseconds);
-            _logger.LogInformation($"{name} {sw.Elapsed:c}");
+            _logger.LogDebug($"{name} {sw.Elapsed:c}");
             return result;
         }
 
@@ -265,7 +265,7 @@ namespace BonusService.Service.Library
             }
 
             LogContext.PushProperty("elapsed", sw.Elapsed.TotalMilliseconds);
-            _logger.LogInformation($"{name} {sw.Elapsed:c}");
+            _logger.LogDebug($"{name} {sw.Elapsed:c}");
             return result;
         }
     }

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using BonusService.Service.Extensions;
 
 namespace BonusService.Service.Workers
 {
@@ -14,16 +15,14 @@ namespace BonusService.Service.Workers
     {
         private readonly ILogger<PromotionAutoExtendWorker> logger;
         private readonly PromotionAutoExtendBLL promotionAutoExtendBLL;
-        private readonly Log2File log2File;
         private Timer timerPromotionAutoExtend;
         private DateTime ExecutTime;
         private string SpecificDate = null;
 
-        public PromotionAutoExtendWorker(ILogger<PromotionAutoExtendWorker> logger, PromotionAutoExtendBLL promotionAutoExtendBLL, Log2File log2File)
+        public PromotionAutoExtendWorker(ILogger<PromotionAutoExtendWorker> logger, PromotionAutoExtendBLL promotionAutoExtendBLL)
         {
             this.logger = logger;
             this.promotionAutoExtendBLL = promotionAutoExtendBLL;
-            this.log2File = log2File;
         }
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -54,9 +53,9 @@ namespace BonusService.Service.Workers
                                 {
                                     promotionAutoExtendBLL.SetPromotionExtend(item);
                                 }
-                                catch (Exception ex1)
+                                catch (Exception ex)
                                 {
-                                    log2File.Error(ex1.ToString(), "PromotionAutoExtend");
+                                    logger.LogError(ex, MethodExtension.GetCurrentAsyncMethod());
                                 }
                             }));
 
@@ -76,8 +75,7 @@ namespace BonusService.Service.Workers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex.Message);
-                log2File.Error(ex.ToString(), "PromotionAutoExtend");
+                logger.LogError(ex, MethodExtension.GetCurrentAsyncMethod());
             }
             finally
             {
