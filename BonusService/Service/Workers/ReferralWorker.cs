@@ -1,5 +1,4 @@
 ﻿using BonusService.Service.BLL;
-using BonusService.Service.Library;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
@@ -15,14 +14,12 @@ namespace BonusService.Service.Workers
     {
         private readonly ILogger<ReferralWorker> _logger;
         private readonly IHostEnvironment environment;
-        private readonly SelLangBLL selLangBLL;
         private readonly ReferralBLL referralBLL;
         private Timer timer;
-        public ReferralWorker(ILogger<ReferralWorker> logger, IHostEnvironment environment, Common tools, SelLangBLL selLangBLL, ReferralBLL referralBLL)
+        public ReferralWorker(ILogger<ReferralWorker> logger, IHostEnvironment environment, ReferralBLL referralBLL)
         {
             _logger = logger;
             this.environment = environment;
-            this.selLangBLL = selLangBLL;
             this.referralBLL = referralBLL;
         }
         protected override Task ExecuteAsync(CancellationToken stoppingToken)

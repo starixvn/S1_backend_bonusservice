@@ -14,16 +14,11 @@ namespace BonusService.Service.BLL
     {
         private readonly VipCashBackService _vipCashBackCashBackService;
         private readonly ILogger<VipCashBackBLL> _logger;
-        private readonly SelLangBLL _selLangBLL;
-        private readonly Currency _currency;
 
-        public VipCashBackBLL(VipCashBackService vipCashBackService, ILogger<VipCashBackBLL> logger,
-            SelLangBLL selLangBLL, Currency currency)
+        public VipCashBackBLL(VipCashBackService vipCashBackService, ILogger<VipCashBackBLL> logger)
         {
             _logger = logger;
             _vipCashBackCashBackService = vipCashBackService;
-            _selLangBLL = selLangBLL;
-            _currency = currency;
         }
         
         private IEnumerable<CashBackSettingOutput> GetCashBackSettings()

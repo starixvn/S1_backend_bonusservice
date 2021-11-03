@@ -1,6 +1,5 @@
 ﻿using BonusService.Service.BLL;
 using BonusService.Service.Extensions;
-using BonusService.Service.Library;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
@@ -13,19 +12,13 @@ namespace BonusService.Service.Workers
     public class VipRebateWorker : BackgroundService
     {
         private readonly RebateBLL rebateBLL;
-        private readonly Common tools;
-        private readonly IHostEnvironment environment;
-        private readonly SelLangBLL selLangBLL;
         private readonly ILogger<VipRebateWorker> _logger;
         private Timer timer;
 
-        public VipRebateWorker(IHostEnvironment environment, RebateBLL rebateBLL, Common tools, SelLangBLL selLangBLL, ILogger<VipRebateWorker> logger)
+        public VipRebateWorker(RebateBLL rebateBLL, ILogger<VipRebateWorker> logger)
         {
             this.rebateBLL = rebateBLL;
-            this.tools = tools;
-            this.environment = environment;
-            this.selLangBLL = selLangBLL;
-            this._logger = logger;
+            _logger = logger;
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
