@@ -29,6 +29,14 @@ namespace BonusService.Service.BLL
         {
             return depositBonusService.GetDepositBonusQueue();
         }
+        public IEnumerable<DepositBonusCustList> GetDepositBonusQueueCustList()
+        {
+            return depositBonusService.GetDepositBonusQueueCustList();
+        }
+        public IEnumerable<DepositBonus> GetDepositBonusQueueByCustId(int custId)
+        {
+                return depositBonusService.GetDepositBonusQueueByCustId(custId);
+        }
         public bool IsConvertRequired(int CurrencyId)
         {
             return isConvert.ContainsKey(CurrencyId);
@@ -138,6 +146,22 @@ namespace BonusService.Service.BLL
         public int SetDepositBonusStatus(string transId, int status)
         {
             return depositBonusService.SetDepositBonusStatus( transId, status);
+        }
+        public int SetDepositBonusFinish(string transId, int custId)
+        {
+            var BonusList = GetDepositBonusQueueByCustId(custId);
+            foreach (var depositBonus in BonusList)
+            {
+                if (depositBonus.TransId == transId)
+                {
+                    SetDepositBonusStatus(depositBonus.TransId, (int)DepositBonusQueueStatus.Finish);
+                }else
+                {
+                    SetDepositBonusStatus(depositBonus.TransId, (int)DepositBonusQueueStatus.Cancel_other_Bonus);
+                }
+
+            }
+            return 1;
         }
     }
 }

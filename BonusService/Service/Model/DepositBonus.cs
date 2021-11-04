@@ -4,6 +4,16 @@ using System.Collections.Generic;
 
 namespace BonusService.Service.Model
 {
+    public enum DepositBonusQueueStatus : int
+    {
+        Undo = 1,
+        Finish = 2,
+        Expiry = 3,
+        Cancel_other_Bonus = 4,//Rewarded other Bonus
+        Cancel_not_eligible = 5,
+        Cancel_Rejected = 6
+    }
+
     public class DepositBonus
     {
         public string TransId { set; get; }
@@ -15,8 +25,14 @@ namespace BonusService.Service.Model
         public decimal LockedAmount { set; get; }
         public int DeviceType { set; get; }
         public decimal Amount { set; get; }
+        public int DepositStatus { set; get; }        
     }
-
+    public class DepositBonusCustList
+    {
+        public int CustId { set; get; }
+        public int SiteId { set; get; }
+        public string UserName { set; get; }
+    }
     public class Promotion
     {
         public string BonusCode { get; set; }
