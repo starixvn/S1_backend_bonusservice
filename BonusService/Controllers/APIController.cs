@@ -33,7 +33,6 @@ namespace BonusService.Controllers
             var result = new ApiResult();
             try
             {
-                _logger.LogInformation($"SetAdjustBonusAsync { Newtonsoft.Json.JsonConvert.SerializeObject(setAdjustBonusReq)}");
                 result = await _bonusAPIBLL.SetAdjustmentBonusAsync(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode);
 
             }

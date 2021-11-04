@@ -1,9 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BonusService.Service.Model.enums
+﻿namespace BonusService.Service.Model.enums
 {
+    public enum ErrorCode
+    {
+        Success = 0
+    }
+
     public enum SettlementType
     {
         UnSettled = 0,
@@ -92,5 +93,10 @@ namespace BonusService.Service.Model.enums
         Report,//ConnectionStringReport
         Wager,//ConnectionStringWager
         Log,//ConnectionStringLog
+    }
+    
+    public enum FinancialType
+    {
+        CancelledBonus = 7
     }
 }

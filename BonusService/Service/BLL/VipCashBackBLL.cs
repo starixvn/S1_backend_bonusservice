@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using BonusService.Service.DAL;
 using BonusService.Service.Extensions;
 using BonusService.Service.Library;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
-using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;
 
 namespace BonusService.Service.BLL
@@ -16,16 +14,11 @@ namespace BonusService.Service.BLL
     {
         private readonly VipCashBackService _vipCashBackCashBackService;
         private readonly ILogger<VipCashBackBLL> _logger;
-        private readonly SelLangBLL _selLangBLL;
-        private readonly Currency _currency;
 
-        public VipCashBackBLL(VipCashBackService vipCashBackService, ILogger<VipCashBackBLL> logger,
-            SelLangBLL selLangBLL, Currency currency)
+        public VipCashBackBLL(VipCashBackService vipCashBackService, ILogger<VipCashBackBLL> logger)
         {
             _logger = logger;
             _vipCashBackCashBackService = vipCashBackService;
-            _selLangBLL = selLangBLL;
-            _currency = currency;
         }
         
         private IEnumerable<CashBackSettingOutput> GetCashBackSettings()

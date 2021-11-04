@@ -21,30 +21,22 @@ namespace BonusService.Extensions.Middlewares
         public async Task Invoke(HttpContext context)
         {
             var sw = Stopwatch.StartNew();
-            var path = context.Request.Path.Value;
-            if (path.EndsWith("home.html"))
+            var bodyStream = context.Response.Body;
+
+            var responseBodyStream = new MemoryStream();
+            context.Response.Body = responseBodyStream;
+
+            await _next(context);
+
+            responseBodyStream.Seek(0, SeekOrigin.Begin);
+            var recordContent = await new StreamReader(responseBodyStream, Encoding.UTF8, true, 1024, true).ReadToEndAsync();
+            using (_logger.BeginScope("ElapsedMilliseconds: {ElapsedMilliseconds}", sw.Elapsed.TotalMilliseconds))
             {
-                await _next(context);
+                _logger.LogInformation($"RESPONSE: {recordContent}");
             }
-            else
-            {
-                var bodyStream = context.Response.Body;
 
-                var responseBodyStream = new MemoryStream();
-                context.Response.Body = responseBodyStream;
-
-                await _next(context);
-
-                responseBodyStream.Seek(0, SeekOrigin.Begin);
-                var recordContent = await new StreamReader(responseBodyStream, Encoding.UTF8, true, 1024, true).ReadToEndAsync();
-                using (_logger.BeginScope("ElapsedMilliseconds: {ElapsedMilliseconds}", sw.Elapsed.TotalMilliseconds))
-                {
-                    _logger.LogInformation($"RESPONSE: {recordContent}");
-                }
-
-                responseBodyStream.Seek(0, SeekOrigin.Begin);
-                await responseBodyStream.CopyToAsync(bodyStream);
-            }
+            responseBodyStream.Seek(0, SeekOrigin.Begin);
+            await responseBodyStream.CopyToAsync(bodyStream);
         }
     }
 }

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace BonusService.Service.Model
+﻿namespace BonusService.Service.Model
 {
     public class ReferralInfo
     {
