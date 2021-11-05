@@ -26,15 +26,17 @@ namespace BonusService.Controllers
         {
             public int CustId { get; set; }
             public string BonusCode { get; set; }
+            public string Operator { get; set; }
+            public string Memo { get; set; }
+
         }
         [HttpPost]
-        public async Task<ApiResult> SetAdjustBonusAsync(SetAdjustBonusAsyncReq setAdjustBonusReq)
+        public async Task<ApiResult<string>> SetAdjustBonusAsync(SetAdjustBonusAsyncReq setAdjustBonusReq)
         {
-            var result = new ApiResult();
+            var result = new ApiResult<string>();
             try
             {
-                result = await _bonusAPIBLL.SetAdjustmentBonusAsync(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode);
-
+                result = await _bonusAPIBLL.SetAdjustmentBonusAsync(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode, setAdjustBonusReq.Operator, setAdjustBonusReq.Memo);
             }
             catch (Exception ex)
             {
