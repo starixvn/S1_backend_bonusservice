@@ -42,8 +42,9 @@ namespace BonusService.Service.DAL
 
         }
 
-          public int SetAdjustmentBonus(DepositBonus depositBonus, out decimal bonusAmount, ref decimal lockedAmount, out decimal rollOver, out long expiryTime, out Promotion promotion, out int errorCode, out string errorMessage)
+        public int SetAdjustmentBonus(DepositBonus depositBonus, string Operator, string memo, out string Adjustment_transId, out decimal bonusAmount, ref decimal lockedAmount, out decimal rollOver, out long expiryTime, out Promotion promotion, out int errorCode, out string errorMessage)
         {
+            Adjustment_transId = null;
             bonusAmount = 0;
             rollOver = 0;
             expiryTime = 0;
@@ -139,11 +140,10 @@ namespace BonusService.Service.DAL
 
                 result = depositBonusService.RewardBonus(bonusId, promotion.CategoryId, promotion.TpId, depositBonus.CustId,
                     depositBonus.SiteId, depositBonus.UserName, dBonus, dLockedAmount, dRollOver, expiryTime, 5,
-                    $"Claim Retention Promotion BonusCode: {depositBonus.BonusCode}", transId, conn, trans)
+                    $"Payment Claim Retention BonusCode: {depositBonus.BonusCode} ", transId, conn, trans)
                     ? 1
                     : 0;
             }
-
 
             if (result > 0)
             {
@@ -156,7 +156,10 @@ namespace BonusService.Service.DAL
 
                 result = _mainDbClient.Execute("Member_PromotionBeenUsedV2_Set", p, conn, trans);
             }
-
+            if (result > 0)
+            { 
+                result = PaymentAdjustment(depositBonus, bonusAmount, sBonusInfo, Operator, memo, conn, trans, out Adjustment_transId);
+            }
             if (result > 0)
             {
                 trans.Commit();
@@ -166,6 +169,87 @@ namespace BonusService.Service.DAL
 
             return result;
 
+        }
+        
+        public int PaymentAdjustment(DepositBonus depositBonus, decimal bonusAmount, string sBonusInfo, string Operator, string memo, MySqlConnection conn, MySqlTransaction trans, out string transId)
+        {
+
+            var Adjustment_p = new DynamicParameters(
+                new {
+                    AdjustType = 5,//Retention Bonus
+                    CustId = depositBonus.CustId,
+                    UserName = depositBonus.UserName,
+                    CurrencyId = depositBonus.CurrencyId,
+                    SiteId = depositBonus.SiteId,
+                    AdjustIdInfo = sBonusInfo,
+                    Amount = bonusAmount,
+                    Prefix = $"A{common.GetEnv()}",
+                    Memo = memo
+                }); 
+            Adjustment_p.Add("TransId", dbType: DbType.String, direction: ParameterDirection.Output);
+            var result = conn.Execute("Admin_Adjustment_Ins", Adjustment_p, transaction: trans, commandType: CommandType.StoredProcedure);
+            transId = Adjustment_p.Get<string>("TransId");
+            if (result > 0)
+            {
+                var forStatus = new List<int>();
+                forStatus.Add((int)AdjustStatus.Pending);
+                if (SetAdjustmentInfo(transId, depositBonus.SiteId, $"Payment Claim Retention BonusCode: {depositBonus.BonusCode}  BonusAmount:{bonusAmount}", Operator, forStatus, AdjustStatus.Approved, conn, trans) > 0)
+                {
+                    transId = Adjustment_p.Get<string>("TransId");
+                }
+                else
+                {
+                    result = 0;
+                }
+            }
+
+            return result;
+        }
+
+        public int SetAdjustmentInfo(string transId, int siteId, string comment, string Operator, IEnumerable<int> forStatus, AdjustStatus status, MySqlConnection conn, MySqlTransaction trans)
+        {
+            int adjustId = 0;
+            var m = Regex.Match(transId, @"\d+");
+            int.TryParse(m.Value, out adjustId);
+
+            var result = 0;
+            try
+            {
+                var sForStatus = Newtonsoft.Json.JsonConvert.SerializeObject(forStatus);
+                var p = new DynamicParameters(
+                    new { 
+                        AdjustId = adjustId, 
+                        SiteId = siteId, 
+                        RefId = (string)null, 
+                        Comment = comment, 
+                        ForStatus = sForStatus, 
+                        Status = (int)status, 
+                        ThirdId = (string)null 
+                    });
+                p.Add("CustId", dbType: DbType.Int32, direction: ParameterDirection.Output);
+                p.Add("UserName", dbType: DbType.String, direction: ParameterDirection.Output);
+                result = conn.Execute("Adjustment_Set", p, trans, commandType: CommandType.StoredProcedure);
+
+                if (result > 0)
+                {
+                    SetAdjustmentLog(adjustId, siteId, comment, (int)status, Operator);
+                    if (result > 0)
+                    {
+                        result = p.Get<int?>("CustId") ?? result;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                SetAdjustmentLog(adjustId, siteId, ex.Message, (int)AdjustStatus.Error, Operator);
+            }
+
+            return result;
+        }
+        private int SetAdjustmentLog(int adjustId, int siteId, string comment, int status, string Operator)
+        {
+            using var conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
+            return conn.Execute("AdjustmentLog_Ins", new { AdjustId = adjustId, SiteId = siteId, Comment = comment, Action = status, Operator = Operator }, commandType: CommandType.StoredProcedure);
         }
     }
 }
