@@ -33,9 +33,9 @@ namespace BonusService.Service.BLL
         {
             return depositBonusService.GetDepositBonusQueueCustList();
         }
-        public IEnumerable<DepositBonus> GetDepositBonusQueueByCustId(int custId)
+        public IEnumerable<DepositBonus> GetDepositBonusQueueByCustId(int custId, bool useMainDb = false)
         {
-                return depositBonusService.GetDepositBonusQueueByCustId(custId);
+                return depositBonusService.GetDepositBonusQueueByCustId(custId, useMainDb);
         }
         public bool IsConvertRequired(int CurrencyId)
         {
@@ -149,7 +149,7 @@ namespace BonusService.Service.BLL
         }
         public int SetDepositBonusFinish(string transId, int custId)
         {
-            var BonusList = GetDepositBonusQueueByCustId(custId);
+            var BonusList = GetDepositBonusQueueByCustId(custId,true); //改變狀態用mainDb取得資料，避免資料不同步
             foreach (var depositBonus in BonusList)
             {
                 if (depositBonus.TransId == transId)

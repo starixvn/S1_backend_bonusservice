@@ -44,9 +44,13 @@ namespace BonusService.Service.DAL
             using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
             return conn.Query<DepositBonusCustList>("Service_DepositBonusQueueCustList_Get", commandType: CommandType.StoredProcedure);
         }
-        public IEnumerable<DepositBonus> GetDepositBonusQueueByCustId(int custId)
+        public IEnumerable<DepositBonus> GetDepositBonusQueueByCustId(int custId ,bool useMainDb = false)
         {
-            using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
+            var ConnectionString = configuration.GetConnectionString("ConnectionStringReport");
+            if(useMainDb)
+                ConnectionString = configuration.GetConnectionString("ConnectionString");//避免時間差造成資料不同步
+            using MySqlConnection conn = new MySqlConnection(ConnectionString);
+
             return conn.Query<DepositBonus>("Service_DepositBonusQueueByCustId_Get",new { CustId  = custId }, commandType: CommandType.StoredProcedure);
         }
         public int SetClaimPromotion(DepositBonus depositBonus, out decimal bonusAmount,  ref decimal lockedAmount, out decimal rollOver, out long expiryTime, out Promotion promotion)
