@@ -17,4 +17,13 @@ namespace BonusService.Service.Model
         OnHold = 4,
         Error = 99
     }
+    public class CustRunningBonus
+    {
+        public int BonusId { set; get; }
+        public string TransId { set; get; }
+        public int PromotionType { set; get; }
+        public string BonusCode { set; get; }
+        public DateTime ExpiryTime { set; get; }
+        public int Status { set; get; }
+    }
 }

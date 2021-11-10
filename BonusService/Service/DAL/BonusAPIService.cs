@@ -77,7 +77,19 @@ namespace BonusService.Service.DAL
                 _logger.LogError($"BonusCode:{depositBonus.BonusCode} is not Retention Bonus  parameter:{ Newtonsoft.Json.JsonConvert.SerializeObject(parameter)}");
                 return 0;
             }
-
+            var pCustRunningBonus = new DynamicParameters(new
+            {
+                CustId = depositBonus.CustId
+            });
+            
+            var runningBonusList = _reportDbClient.Query<CustRunningBonus>("Service_CustRunningBonus_Get", new DynamicParameters(new { CustId = depositBonus.CustId }));
+            if (runningBonusList.Any())
+            {
+                errorCode = 203;
+                errorMessage = $"CustId {depositBonus.CustId} has other running bonus";
+                _logger.LogError($"CustId {depositBonus.CustId} has other running bonus  BonusList:{ Newtonsoft.Json.JsonConvert.SerializeObject(runningBonusList)}");
+                return 0;
+            }
 
 
             var dLockedAmount = 0;
