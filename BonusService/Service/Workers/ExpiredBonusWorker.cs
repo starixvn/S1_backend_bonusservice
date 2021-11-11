@@ -32,7 +32,7 @@ namespace BonusService.Service.Workers
         {
 
             _timerExpiredBonus = new Timer(DoExpiredBonusTaskAsync, null, TimeSpan.Zero, TimeSpan.Zero);
-            // _timerExpiredTransferBonus = new Timer(DoExpiredTransferBonusTaskAsync, null, TimeSpan.Zero, TimeSpan.Zero);
+            _timerExpiredTransferBonus = new Timer(DoExpiredTransferBonusTaskAsync, null, TimeSpan.Zero, TimeSpan.Zero);
 
             return Task.CompletedTask;
         }
@@ -61,6 +61,12 @@ namespace BonusService.Service.Workers
                                 {
                                     case PromotionType.FstDeposit:
                                     case PromotionType.ReDeposit:
+                                    case PromotionType.FreeBet:
+                                    case PromotionType.WalletBonus:
+                                    case PromotionType.Rebate:
+                                    case PromotionType.Cashback:
+                                    case PromotionType.StaticPage:
+                                    case PromotionType.RetentionBonus:
 
                                         //確認剩餘本金
                                         var refundAmount = remainingBonus - item.BonusAmount;
@@ -94,18 +100,6 @@ namespace BonusService.Service.Workers
                                             _expiredBonusBll.RefundExpiredBonus(item,
                                                 $"CancelBonus: BonusId={item.BonusId}, Remaining Bonus={remainingBonus:#,##0.##}, Refund Amount={0:#,##0.##}");
                                         }
-
-                                        break;
-
-                                    case PromotionType.FreeBet:
-                                    case PromotionType.WalletBonus:
-                                    case PromotionType.Rebate:
-                                    case PromotionType.Cashback:
-                                    case PromotionType.StaticPage:
-                                    default:
-
-                                        _expiredBonusBll.RefundExpiredBonus(item,
-                                            $"CancelBonus: BonusId={item.BonusId}, Remaining Bonus={remainingBonus:#,##0.##}, Refund Amount={0:#,##0.##}");
 
                                         break;
                                 }
