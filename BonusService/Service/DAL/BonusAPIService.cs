@@ -82,7 +82,7 @@ namespace BonusService.Service.DAL
                 CustId = depositBonus.CustId
             });
             
-            var runningBonusList = _reportDbClient.Query<CustRunningBonus>("Service_CustRunningBonus_Get", new DynamicParameters(new { CustId = depositBonus.CustId }));
+            var runningBonusList = _mainDbClient.Query<CustRunningBonus>("Service_CustRunningBonus_Get", new DynamicParameters(new { CustId = depositBonus.CustId }));
             if (runningBonusList.Any())
             {
                 errorCode = 203;
