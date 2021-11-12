@@ -62,7 +62,7 @@ namespace BonusService.Service.DAL
                 depositBonus.DeviceType
             });
 
-            promotion = _reportDbClient.QueryFirst<Promotion>("Member_PromotionV3_Get", parameter);
+            promotion = depositBonusService.GetMemberPromotion(parameter);
 
             if (promotion == null)
             {

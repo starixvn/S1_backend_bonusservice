@@ -63,13 +63,15 @@ namespace BonusService.Service.DAL
             conn.Open();
             using var trans = conn.BeginTransaction();
 
-            promotion = _reportDbClient.QueryFirst<Promotion>("Member_PromotionV3_Get", new DynamicParameters(new {
+            var parameter = new DynamicParameters(new
+            {
                 depositBonus.CustId,
                 depositBonus.CurrencyId,
                 depositBonus.SiteId,
                 depositBonus.BonusCode,
                 depositBonus.DeviceType
-            }));
+            });
+            promotion = GetMemberPromotion(parameter);
             if (promotion == null)
             {
                 return 0;
@@ -242,6 +244,12 @@ namespace BonusService.Service.DAL
             return 0;
 
         }
+
+        public Promotion GetMemberPromotion(DynamicParameters parameters)
+        {
+            return _reportDbClient.QueryFirst<Promotion>("Member_PromotionV3_Get", parameters);
+        }
+
         public bool RewardBonus(int bonusId, int promoCategoryId, int tpId, int custId, int siteId, string userName, decimal bonusAmount, decimal lockedAmount, decimal rollover, long expiryTime, int type, string Memo, string RefTransId, MySqlConnection conn, MySqlTransaction trans)
         {
             var p = new DynamicParameters(new { BonusId = bonusId, PromoCategoryId = promoCategoryId, TpId = tpId, CustId = custId, SiteId = siteId, UserName = userName, BonusAmount = bonusAmount, LockedAmount = lockedAmount, Rollover = rollover, ExpiryTime = expiryTime, Type = type,
