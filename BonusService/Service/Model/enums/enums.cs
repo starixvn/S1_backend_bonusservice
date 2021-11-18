@@ -99,4 +99,9 @@
     {
         CancelledBonus = 7
     }
+    public enum BonusInfoAtPage
+    {
+        Promotion = 0,
+        Deposit = 1
+    }
 }
