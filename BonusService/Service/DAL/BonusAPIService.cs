@@ -42,9 +42,8 @@ namespace BonusService.Service.DAL
 
         }
 
-        public int SetAdjustmentBonus(DepositBonus depositBonus, string Operator, string memo, out string Adjustment_transId, out decimal bonusAmount, ref decimal lockedAmount, out decimal rollOver, out long expiryTime, out Promotion promotion, out int errorCode, out string errorMessage)
+        public int SetAdjustmentBonus(DepositBonus depositBonus, string Operator, string memo, out decimal bonusAmount, ref decimal lockedAmount, out decimal rollOver, out long expiryTime, out Promotion promotion, out int errorCode, out string errorMessage)
         {
-            Adjustment_transId = null;
             bonusAmount = 0;
             rollOver = 0;
             expiryTime = 0;
@@ -168,10 +167,6 @@ namespace BonusService.Service.DAL
                 });
 
                 result = _mainDbClient.Execute("Member_PromotionBeenUsedV2_Set", p, conn, trans);
-            }
-            if (result > 0)
-            { 
-                result = PaymentAdjustment(depositBonus, bonusAmount, sBonusInfo, Operator, memo, conn, trans, out Adjustment_transId);
             }
             if (result > 0)
             {

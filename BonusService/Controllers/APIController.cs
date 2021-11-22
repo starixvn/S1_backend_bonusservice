@@ -31,9 +31,9 @@ namespace BonusService.Controllers
 
         }
         [HttpPost]
-        public async Task<ApiResult<string>> SetAdjustBonusAsync(SetAdjustBonusAsyncReq setAdjustBonusReq)
+        public async Task<ApiResult> SetAdjustBonusAsync(SetAdjustBonusAsyncReq setAdjustBonusReq)
         {
-            var result = new ApiResult<string>();
+            var result = new ApiResult();
             try
             {
                 result = await _bonusAPIBLL.SetAdjustmentBonusAsync(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode, setAdjustBonusReq.Operator, setAdjustBonusReq.Memo);
