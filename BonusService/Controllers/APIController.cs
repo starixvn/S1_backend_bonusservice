@@ -36,6 +36,18 @@ namespace BonusService.Controllers
             var result = new ApiResult();
             try
             {
+                //檢核PhoneVerified,AccountName,Birth
+                var custInfoProfile = _bonusAPIBLL.GetCustInfoProfile(setAdjustBonusReq.CustId);
+                if (!custInfoProfile.PhoneVerified
+                || string.IsNullOrEmpty(custInfoProfile.AccountName)
+                || string.IsNullOrEmpty(custInfoProfile.Birth_y)
+                || string.IsNullOrEmpty(custInfoProfile.Birth_m)
+                || string.IsNullOrEmpty(custInfoProfile.Birth_d))
+                {
+                    result.ErrorCode = 999;
+                    result.Message = "Please complete your profile and verify your phone number to enjoy our promotions.";
+                    return result;
+                }
                 result = await _bonusAPIBLL.SetAdjustmentBonusAsync(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode, setAdjustBonusReq.Operator, setAdjustBonusReq.Memo);
             }
             catch (Exception ex)

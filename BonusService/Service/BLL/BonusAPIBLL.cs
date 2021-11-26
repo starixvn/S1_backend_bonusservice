@@ -95,5 +95,12 @@ namespace BonusService.Service.BLL
 
             return apiResult1;
         }
+
+        public CustInfoProfile GetCustInfoProfile(int custId)
+        {
+            var custInfo = _custInfoService.GetCustInfo(custId);
+            var customer = _custInfoService.GetCustInfoProfile(custId, custInfo.SiteId);
+            return customer;
+        }
     }
 }
