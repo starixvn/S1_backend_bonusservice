@@ -76,10 +76,10 @@ namespace BonusService.Service.BLL
             try
             {
                 var currentTime = DateTime.UtcNow.AddHours(8);
-                var startTime = currentTime.AddDays(-(int) currentTime.DayOfWeek - 6).Date;
+                var startTime = StartOfWeek(currentTime.AddDays(-7), DayOfWeek.Monday).Date;
                 var startDate = startTime.ToString("yyyy-MM-dd");
                 var endDate = startTime.AddDays(7).AddTicks(-1).ToString("yyyy-MM-dd");
-                var monday = currentTime.AddDays(-(int) currentTime.DayOfWeek + (int) DayOfWeek.Monday)
+                var monday = StartOfWeek(currentTime, DayOfWeek.Monday)
                     .ToString("yyyy-MM-dd");
 
                 var cashBackSettings = GetCashBackSettings();
@@ -192,7 +192,7 @@ namespace BonusService.Service.BLL
             switch (cashBackSettingOutput.PeriodType)
             {
                 case (int) VipPeriodType.Weekly:
-                    var monday = currentTime.AddDays(-(int) currentTime.DayOfWeek + cashBackSettingOutput.PeriodInterval);
+                    var monday = StartOfWeek(currentTime, DayOfWeek.Monday).Date;
                     return cashBackSettingOutput.SettleTime < monday;
 
                 case (int) VipPeriodType.Monthly:
@@ -200,6 +200,12 @@ namespace BonusService.Service.BLL
                 default:
                     return false;
             }
+        }
+        
+        private static DateTime StartOfWeek(DateTime dateTime, DayOfWeek startOfWeek)
+        {
+            var diff = (7 + (dateTime.DayOfWeek - startOfWeek)) % 7;
+            return dateTime.AddDays(-1 * diff).Date;
         }
     }
 }
