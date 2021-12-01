@@ -28,6 +28,9 @@ namespace BonusService.Controllers
             public string BonusCode { get; set; }
             public string Operator { get; set; }
             public string Memo { get; set; }
+            public decimal Amount { get; set; }
+            public int RollOver { get; set; }
+            public int PromotionType { get; set; }
 
         }
         [HttpPost]
@@ -36,7 +39,7 @@ namespace BonusService.Controllers
             var result = new ApiResult<string>();
             try
             {
-                result = await _bonusAPIBLL.SetAdjustmentBonusAsync(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode, setAdjustBonusReq.Operator, setAdjustBonusReq.Memo);
+                result = await _bonusAPIBLL.SetAdjustmentBonusAsync(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode, setAdjustBonusReq.Operator, setAdjustBonusReq.Memo, setAdjustBonusReq.Amount, setAdjustBonusReq.RollOver, setAdjustBonusReq.PromotionType);
             }
             catch (Exception ex)
             {
