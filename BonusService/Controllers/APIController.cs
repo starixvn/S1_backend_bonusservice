@@ -28,6 +28,9 @@ namespace BonusService.Controllers
             public string BonusCode { get; set; }
             public string Operator { get; set; }
             public string Memo { get; set; }
+            public decimal Amount { get; set; }
+            public int RollOver { get; set; }
+            public int PromotionType { get; set; }
 
         }
         [HttpPost]
@@ -48,7 +51,7 @@ namespace BonusService.Controllers
                     result.Message = "Please complete your profile and verify your phone number to enjoy our promotions.";
                     return result;
                 }
-                result = await _bonusAPIBLL.SetAdjustmentBonusAsync(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode, setAdjustBonusReq.Operator, setAdjustBonusReq.Memo);
+                result = await _bonusAPIBLL.SetAdjustmentBonusAsync(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode, setAdjustBonusReq.Operator, setAdjustBonusReq.Memo, setAdjustBonusReq.Amount, setAdjustBonusReq.RollOver, setAdjustBonusReq.PromotionType);
             }
             catch (Exception ex)
             {
