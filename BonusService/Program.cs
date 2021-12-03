@@ -83,7 +83,10 @@ namespace BonusService
 
                     services.AddSingleton<BonusAPIBLL>();
                     services.AddSingleton<BonusAPIService>();
-
+                    services.AddSingleton<BonusWalletService>();
+                    services.AddSingleton<BonusAPIServiceV2>();
+                    services.AddSingleton<BonusAPIBLLV2>();
+                    
                     services.AddHostedService<ExpiredBonusWorker>();
                     services.AddHostedService<ReferralWorker>();
                     services.AddHostedService<VipUpgradeWorker>();

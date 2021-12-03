@@ -7,6 +7,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using BonusService.Service.Extensions;
+using BonusService.Service.Model.enums;
 
 namespace BonusService.Service.Workers
 {
