@@ -110,7 +110,7 @@ namespace BonusService.Service.DAL
             decimal dBonus = 0;
             decimal dRollOver = 0;
 
-            if(promotion.PromotionType != PromotionType.RetentionBonus)
+            if(promotion.PromotionType == PromotionType.RetentionBonus)
             {
                 dBonus = promotion.Bonus;
                 dRollOver = dBonus * promotion.RollOver;
