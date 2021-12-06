@@ -9,7 +9,7 @@
         WalletBonus = 5,
         Rebate = 6,
         Cashback = 7,
-        ManualBonus = 8,
+        StaticPage = 8,
         RetentionBonus = 9
     }
 

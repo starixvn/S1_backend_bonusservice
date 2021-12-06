@@ -247,7 +247,7 @@ namespace BonusService.Service.DAL
 
         public Promotion GetMemberPromotion(DynamicParameters parameters)
         {
-            return _reportDbClient.QueryFirst<Promotion>("Service_Promotion_Get", parameters);
+            return _reportDbClient.QueryFirst<Promotion>("Member_PromotionV3_Get", parameters);
         }
 
         public bool RewardBonus(int bonusId, int promoCategoryId, int tpId, int custId, int siteId, string userName, decimal bonusAmount, decimal lockedAmount, decimal rollover, long expiryTime, int type, string Memo, string RefTransId, MySqlConnection conn, MySqlTransaction trans)

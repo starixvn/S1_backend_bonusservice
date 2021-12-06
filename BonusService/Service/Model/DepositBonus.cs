@@ -61,7 +61,6 @@ namespace BonusService.Service.Model
         public bool IsSpecial { get; set; }
         public string SpecialCode { get; set; }
         public decimal MinPayout { get; set; }
-        public int PromotionAction { get; set; }
     }
     public class TpBonusTransfer
     {   
