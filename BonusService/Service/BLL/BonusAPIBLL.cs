@@ -27,7 +27,7 @@ namespace BonusService.Service.BLL
             _courierAdapter = provider.GetRequiredService<CourierAdapter>();
         }
 
-        public async Task<ApiResult> SetAdjustmentBonusAsync(int custId, string bonusCode, string Operator, string memo)
+        public async Task<ApiResult> SetAdjustmentBonusAsync(int custId, string bonusCode, string Operator, string memo, decimal Amount,int RollOver, int PromotionType)
         {
             var apiResult1 = new ApiResult();
             var lockedAmount = (decimal)0;
@@ -41,7 +41,7 @@ namespace BonusService.Service.BLL
             depositBonus.CurrencyId = custInfo.CurrencyId;
             depositBonus.DeviceType = 1;
 
-            var result = _bonusAPIService.SetAdjustmentBonus(depositBonus, Operator, memo, out var bonusAmount, ref lockedAmount, out var rollOver, out var expiryTime, out var promotion, out var errorCode, out var errorMessage);
+            var result = _bonusAPIService.SetAdjustmentBonus(depositBonus, Operator, memo, Amount, RollOver, PromotionType, out var bonusAmount, ref lockedAmount, out var rollOver, out var expiryTime, out var promotion, out var errorCode, out var errorMessage);
             if (result > 0)
             {
                 if (promotion?.TpId > 0)

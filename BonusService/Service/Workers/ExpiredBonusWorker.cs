@@ -65,7 +65,7 @@ namespace BonusService.Service.Workers
                                     case PromotionType.WalletBonus:
                                     case PromotionType.Rebate:
                                     case PromotionType.Cashback:
-                                    case PromotionType.StaticPage:
+                                    case PromotionType.ManualBonus:
                                     case PromotionType.RetentionBonus:
 
                                         //確認剩餘本金
