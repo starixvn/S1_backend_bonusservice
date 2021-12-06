@@ -43,7 +43,7 @@ namespace BonusService.Service.Workers
             }
             finally
             {
-                var dueTimeSpan = TimeSpan.FromHours(1);
+                var dueTimeSpan = TimeSpan.FromMinutes(10);
                 if (_environment.IsDevelopment())
                 {
                     dueTimeSpan = TimeSpan.FromMinutes(1);
