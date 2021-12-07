@@ -1,6 +1,7 @@
 ﻿using BonusService.Service.DAL;
 using BonusService.Service.Library;
 using BonusService.Service.Model;
+using BonusService.Service.Model.enums;
 using MemberSite.Service.Model;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -102,5 +103,89 @@ namespace BonusService.Service.BLL
             var customer = _custInfoService.GetCustInfoProfile(custId, custInfo.SiteId);
             return customer;
         }
+
+        public ApiResult SetVerificationReward(int custId, VerificationItem InputType)
+        {
+            var result = new ApiResult();
+            var custInfo = _custInfoService.GetCustInfo(custId);
+            var VerInfo = _bonusAPIService.GetVerificationReward(custInfo.SiteId, custInfo.CurrencyId);
+
+            var CustRewardInfo = _bonusAPIService.GetCustVerificationReward(custId, true);
+            if (VerInfo.VerificationType == 1) //email & phone both
+            {
+                if(CustRewardInfo.EmailReward!= null || CustRewardInfo.PhoneReward != null)
+                {
+                    //payout before
+                    result.ErrorCode = 101;
+                    result.Message = "Reward already payout before";
+                }
+                else if (CustRewardInfo.PhoneVerified && CustRewardInfo.EmailVerified)
+                {
+                    if(_bonusAPIService.PayoutVerificationReward(custInfo.CustId, custInfo.SiteId, custInfo.CurrencyId, custInfo.UserName, VerificationItem.All, VerInfo.PhoneReward)>0)
+                    {
+                        result.ErrorCode = 0;
+                    }
+                }
+                else
+                {
+                    result.ErrorCode = 102;
+                    result.Message = "Condition not fulfilled";
+                    // Condition not fulfilled
+                }
+            }
+            else if (VerInfo.VerificationType == 0)//email & phone each
+            {
+                if(InputType == VerificationItem.SMS)
+                {
+                    if (CustRewardInfo.PhoneReward != null)
+                    {
+                        //payout before
+                        result.ErrorCode = 101;
+                        result.Message = "Reward already payout before";
+                    }
+                    else if(CustRewardInfo.PhoneVerified)
+                    {
+                        if (_bonusAPIService.PayoutVerificationReward(custInfo.CustId, custInfo.SiteId, custInfo.CurrencyId, custInfo.UserName, VerificationItem.SMS, VerInfo.PhoneReward) > 0)
+                        {
+                            result.ErrorCode = 0;
+                        }
+                    }else
+                    {
+                        // Condition not fulfilled
+                        result.ErrorCode = 102;
+                        result.Message = "Condition not fulfilled";
+                    }
+                }
+                else
+                {
+                    if (CustRewardInfo.EmailReward != null)
+                    {
+                        result.ErrorCode = 101;
+                        result.Message = "Reward already payout before";
+                    }
+                    else if (CustRewardInfo.EmailVerified)
+                    {
+                        if(_bonusAPIService.PayoutVerificationReward(custInfo.CustId, custInfo.SiteId, custInfo.CurrencyId, custInfo.UserName, VerificationItem.Email, VerInfo.EmailReward) > 0)
+                        {
+                            result.ErrorCode = 0;
+                        }
+                    }
+                    else
+                    {
+                        // Condition not fulfilled
+                        result.ErrorCode = 102;
+                        result.Message = "Condition not fulfilled";
+                    }
+                }
+            }
+            else
+            {
+                // out of Setting
+                result.ErrorCode = 103;
+                result.Message = "setting error";
+            }
+            return result;
+        }
+
     }
 }

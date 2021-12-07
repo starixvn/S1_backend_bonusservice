@@ -2,6 +2,7 @@
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
 using Dapper;
+using MemberSite.Service.Model;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -283,5 +284,66 @@ namespace BonusService.Service.DAL
             using var conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
             return conn.Execute("AdjustmentLog_Ins", new { AdjustId = adjustId, SiteId = siteId, Comment = comment, Action = status, Operator = Operator }, commandType: CommandType.StoredProcedure);
         }
+        //==============================================================================================================================
+        public VerificationRewardData GetVerificationReward(int siteId, int currencyId)
+        {
+            var p = new DynamicParameters(new { _SiteId = siteId, _CurrencyId = currencyId });
+            return _reportDbClient.QueryFirst<VerificationRewardData>("Service_VerificationReward_Get", p);
+        }
+        public CustVerificationRewardData GetCustVerificationReward(int custId,bool usedMainDb = false)
+        {
+            var p = new DynamicParameters(new { _CustId = custId });
+            if(usedMainDb)
+                return _mainDbClient.QueryFirst<CustVerificationRewardData>("Service_CustVerificationReward_Get", p);
+            else
+                return _reportDbClient.QueryFirst<CustVerificationRewardData>("Service_CustVerificationReward_Get", p);
+
+        }
+        public int SetCustVerifiedReward(int custId, int siteId, int currencyId, int verifyItem, MySqlConnection conn, MySqlTransaction trans)
+        {
+            var p = new DynamicParameters(new { _CustId = custId, _SiteId = siteId, _CurrencyId = currencyId, _VerificationItem = verifyItem });
+            return _mainDbClient.Execute("Service_CustVerificationReward_Set", p, conn, trans);
+        }
+
+        public int PayoutVerificationReward(int custId, int siteId, int currencyId, string userName, VerificationItem Verificationtype, decimal reward)
+        {
+            using var conn = new MySqlConnection(_connectionString);
+            conn.Open();
+
+            int Type = 20;
+            using var trans = conn.BeginTransaction();
+
+            var transId = "";
+            var result = 0;
+            string comment = "";
+            if (Verificationtype == VerificationItem.Email)
+            {
+                comment = $"email verification reward: {reward:#,##0.##}";
+            }
+            else if (Verificationtype == VerificationItem.SMS)
+            {
+                comment = $"phone verification reward: {reward:#,##0.##}";
+            }
+            else
+            {
+                comment = $"verification reward: {reward:#,##0.##}";
+            }
+        
+     
+            result = walletService.SetBalance(custId, siteId, userName, reward, Type,
+                comment, transId, out _, out _, conn, trans);
+            if (result <= 0) return result;
+
+            result = withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, reward, null, transId, out _, conn, trans);
+            if (result <= 0) return result;
+
+            result = SetCustVerifiedReward(custId, siteId, currencyId, (int)Verificationtype, conn, trans);
+            if (result <= 0) return result;
+
+            trans.Commit();
+            return result;
+        }
+
+        //==============================================================================================================================
     }
 }
