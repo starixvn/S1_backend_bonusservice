@@ -1,5 +1,6 @@
 ﻿using BonusService.Service.BLL;
 using BonusService.Service.Extensions;
+using BonusService.Service.Model.enums;
 using MemberSite.Service.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -64,6 +65,25 @@ namespace BonusService.Controllers
             }
             return result;
         }
+
+
+
+        public class SetVerificationRewardReq
+        {
+            public int CustId { get; set; }
+            public int VerificationType { get; set; }
+
+        }
+        [HttpPost]
+        public ApiResult SetVerificationReward(SetVerificationRewardReq verificationRewardReq)
+        {
+            VerificationItem item = VerificationItem.SMS;
+            if(verificationRewardReq.VerificationType == 1)
+                item = VerificationItem.Email;
+
+            return _bonusAPIBLL.SetVerificationReward(verificationRewardReq.CustId, item);
+        }
+
     }
 
 
