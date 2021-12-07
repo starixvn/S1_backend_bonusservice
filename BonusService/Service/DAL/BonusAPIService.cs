@@ -42,7 +42,7 @@ namespace BonusService.Service.DAL
 
         }
 
-        public int SetAdjustmentBonus(DepositBonus depositBonus, string Operator, string memo, decimal Amount, int RollOver, int promotionType, out decimal bonusAmount, ref decimal lockedAmount, out decimal rollOver, out long expiryTime, out Promotion promotion, out int errorCode, out string errorMessage)
+        public int SetAdjustmentBonus(DepositBonus depositBonus, string Operator, string memo, decimal Amount, int promotionType, out decimal bonusAmount, ref decimal lockedAmount, out decimal rollOver, out long expiryTime, out Promotion promotion, out int errorCode, out string errorMessage)
         {
             bonusAmount = 0;
             rollOver = 0;
@@ -118,7 +118,7 @@ namespace BonusService.Service.DAL
             else
             {
                 dBonus = Amount;
-                dRollOver = Amount * RollOver;
+                dRollOver = Amount * promotion.RollOver;
             }
             var sBonusInfo = JsonConvert.SerializeObject(promotion,
                 new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
