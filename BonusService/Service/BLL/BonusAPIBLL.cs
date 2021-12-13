@@ -109,7 +109,12 @@ namespace BonusService.Service.BLL
             var result = new ApiResult();
             var custInfo = _custInfoService.GetCustInfo(custId);
             var VerInfo = _bonusAPIService.GetVerificationReward(custInfo.SiteId, custInfo.CurrencyId);
-
+            if(VerInfo == null)
+            {
+                result.ErrorCode = 103;
+                result.Message = $"SiteId:{custInfo.SiteId} CurrencyId:{custInfo.CurrencyId} setting  not found";
+                return result;
+            }
             var CustRewardInfo = _bonusAPIService.GetCustVerificationReward(custId, true);
             if (VerInfo.VerificationType == 1) //email & phone both
             {
