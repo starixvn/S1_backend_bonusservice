@@ -71,7 +71,7 @@ namespace BonusService.Controllers
         public class SetVerificationRewardReq
         {
             public int CustId { get; set; }
-            public int VerificationType { get; set; }
+            public int VerificationType { get; set; }//0.SMS 1.EMAIL
 
         }
         [HttpPost]
