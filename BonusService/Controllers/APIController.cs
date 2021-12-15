@@ -84,6 +84,15 @@ namespace BonusService.Controllers
             return _bonusAPIBLL.SetVerificationReward(verificationRewardReq.CustId, item);
         }
 
+        [HttpPost]
+        public ApiResult CheckRewardCondination(SetVerificationRewardReq verificationRewardReq)
+        {
+            VerificationItem item = VerificationItem.SMS;
+            if (verificationRewardReq.VerificationType == 1)
+                item = VerificationItem.Email;
+
+            return _bonusAPIBLL.CheckRewardCondination(verificationRewardReq.CustId, item);
+        }
     }
 
 

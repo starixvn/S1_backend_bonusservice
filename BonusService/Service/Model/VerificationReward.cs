@@ -6,6 +6,7 @@ namespace MemberSite.Service.Model
     {
         public int SiteId { get; set; }
         public int CurrencyId { get; set; }
+        public string CurrencyName { get; set; }        
         public int VerificationType { get; set; }
         public decimal PhoneReward { get; set; }
         public decimal EmailReward { get; set; }
