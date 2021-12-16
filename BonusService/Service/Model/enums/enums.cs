@@ -104,13 +104,17 @@
         Promotion = 0,
         Deposit = 1
     }
-    public enum VerificationItem
+    public enum OTPVerificationType
     {
         
         SMS = 0,
         Email = 1,
         All = 2,
     }
-
+    public enum OTPTypeEnum
+    {
+        SMS = 0,
+        Email = 1
+    }
 
 }

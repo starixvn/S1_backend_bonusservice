@@ -103,7 +103,7 @@ namespace BonusService.Service.BLL
             var customer = _custInfoService.GetCustInfoProfile(custId, custInfo.SiteId);
             return customer;
         }
-        public ApiResult CheckRewardCondination(int custId, VerificationItem InputType)
+        public ApiResult CheckRewardCondination(int custId, OTPTypeEnum InputType)
         {
             var result = new ApiResult();
             var custInfo = _custInfoService.GetCustInfo(custId);
@@ -123,12 +123,12 @@ namespace BonusService.Service.BLL
                     result.ErrorCode = 101;
                     result.Message = "Reward already payout before";
                 }
-                else if ((InputType == VerificationItem.SMS) && (!CustRewardInfo.PhoneVerified  && CustRewardInfo.EmailVerified))
+                else if ((InputType == OTPTypeEnum.SMS) && (!CustRewardInfo.PhoneVerified  && CustRewardInfo.EmailVerified))
                 {
                     result.ErrorCode = 0; 
                     result.Message = $"{VerInfo.CurrencyName} {VerInfo.PhoneReward:#,##0.##}";
                 }
-                else if ((InputType == VerificationItem.Email) && (CustRewardInfo.PhoneVerified && !CustRewardInfo.EmailVerified))
+                else if ((InputType == OTPTypeEnum.Email) && (CustRewardInfo.PhoneVerified && !CustRewardInfo.EmailVerified))
                 {
                     result.ErrorCode = 0;
                     result.Message = $"{VerInfo.CurrencyName} {VerInfo.PhoneReward:#,##0.##}";
@@ -142,7 +142,7 @@ namespace BonusService.Service.BLL
             }
             else if (VerInfo.VerificationType == 0)//email & phone each
             {
-                if (InputType == VerificationItem.SMS)
+                if (InputType == OTPTypeEnum.SMS)
                 {
                     if (CustRewardInfo.PhoneReward != null)
                     {
@@ -190,7 +190,7 @@ namespace BonusService.Service.BLL
             }
             return result;
         }
-        public ApiResult SetVerificationReward(int custId, VerificationItem InputType)
+        public ApiResult SetVerificationReward(int custId, OTPTypeEnum InputType)
         {
             var result = new ApiResult();
             var custInfo = _custInfoService.GetCustInfo(custId);
@@ -212,7 +212,7 @@ namespace BonusService.Service.BLL
                 }
                 else if (CustRewardInfo.PhoneVerified && CustRewardInfo.EmailVerified)
                 {
-                    result = _bonusAPIService.PayoutVerificationReward(custInfo.CustId, custInfo.SiteId, custInfo.CurrencyId, custInfo.UserName, VerificationItem.All, VerInfo.PhoneReward);
+                    result = _bonusAPIService.PayoutVerificationReward(custInfo.CustId, custInfo.SiteId, custInfo.CurrencyId, custInfo.UserName, OTPVerificationType.All, VerInfo.PhoneReward);
                     
                 }
                 else
@@ -224,7 +224,7 @@ namespace BonusService.Service.BLL
             }
             else if (VerInfo.VerificationType == 0)//email & phone each
             {
-                if(InputType == VerificationItem.SMS)
+                if(InputType == OTPTypeEnum.SMS)
                 {
                     if (CustRewardInfo.PhoneReward != null)
                     {
@@ -234,7 +234,7 @@ namespace BonusService.Service.BLL
                     }
                     else if(CustRewardInfo.PhoneVerified)
                     {
-                        result = _bonusAPIService.PayoutVerificationReward(custInfo.CustId, custInfo.SiteId, custInfo.CurrencyId, custInfo.UserName, VerificationItem.SMS, VerInfo.PhoneReward);
+                        result = _bonusAPIService.PayoutVerificationReward(custInfo.CustId, custInfo.SiteId, custInfo.CurrencyId, custInfo.UserName, OTPVerificationType.SMS, VerInfo.PhoneReward);
                     }else
                     {
                         // Condition not fulfilled
@@ -251,7 +251,7 @@ namespace BonusService.Service.BLL
                     }
                     else if (CustRewardInfo.EmailVerified)
                     {
-                        result = _bonusAPIService.PayoutVerificationReward(custInfo.CustId, custInfo.SiteId, custInfo.CurrencyId, custInfo.UserName, VerificationItem.Email, VerInfo.EmailReward);
+                        result = _bonusAPIService.PayoutVerificationReward(custInfo.CustId, custInfo.SiteId, custInfo.CurrencyId, custInfo.UserName, OTPVerificationType.Email, VerInfo.EmailReward);
                     }
                     else
                     {

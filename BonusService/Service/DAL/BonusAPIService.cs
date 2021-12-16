@@ -305,7 +305,7 @@ namespace BonusService.Service.DAL
             return _mainDbClient.Execute("Service_CustVerificationReward_Set", p, conn, trans);
         }
 
-        public ApiResult PayoutVerificationReward(int custId, int siteId, int currencyId, string userName, VerificationItem Verificationtype, decimal reward)
+        public ApiResult PayoutVerificationReward(int custId, int siteId, int currencyId, string userName, OTPVerificationType OTPVerificationtype, decimal reward)
         {
             var apiResult = new ApiResult();
             try
@@ -319,11 +319,11 @@ namespace BonusService.Service.DAL
                 var transId = "";
                 var result = 0;
                 string comment = "";
-                if (Verificationtype == VerificationItem.Email)
+                if (OTPVerificationtype == OTPVerificationType.Email)
                 {
                     comment = $"email verification reward: {reward:#,##0.##}";
                 }
-                else if (Verificationtype == VerificationItem.SMS)
+                else if (OTPVerificationtype == OTPVerificationType.SMS)
                 {
                     comment = $"phone verification reward: {reward:#,##0.##}";
                 }
@@ -347,7 +347,7 @@ namespace BonusService.Service.DAL
                     return apiResult;
                 }
 
-                result = SetCustVerifiedReward(custId, siteId, currencyId, (int)Verificationtype, conn, trans);
+                result = SetCustVerifiedReward(custId, siteId, currencyId, (int)OTPVerificationtype, conn, trans);
                 if (result <= 0)
                 {
                     apiResult.Message = "SetCustVerifiedReward fail";
