@@ -71,15 +71,15 @@ namespace BonusService.Controllers
         public class SetVerificationRewardReq
         {
             public int CustId { get; set; }
-            public int VerificationType { get; set; }//0.SMS 1.EMAIL
+            public int OTPType { get; set; }//0.SMS 1.EMAIL
 
         }
         [HttpPost]
         public ApiResult SetVerificationReward(SetVerificationRewardReq verificationRewardReq)
         {
-            VerificationItem item = VerificationItem.SMS;
-            if(verificationRewardReq.VerificationType == 1)
-                item = VerificationItem.Email;
+            OTPTypeEnum item = OTPTypeEnum.SMS;
+            if(verificationRewardReq.OTPType == 1)
+                item = OTPTypeEnum.Email;
 
             return _bonusAPIBLL.SetVerificationReward(verificationRewardReq.CustId, item);
         }
@@ -87,9 +87,9 @@ namespace BonusService.Controllers
         [HttpPost]
         public ApiResult CheckRewardCondination(SetVerificationRewardReq verificationRewardReq)
         {
-            VerificationItem item = VerificationItem.SMS;
-            if (verificationRewardReq.VerificationType == 1)
-                item = VerificationItem.Email;
+            OTPTypeEnum item = OTPTypeEnum.SMS;
+            if (verificationRewardReq.OTPType == 1)
+                item = OTPTypeEnum.Email;
 
             return _bonusAPIBLL.CheckRewardCondination(verificationRewardReq.CustId, item);
         }
