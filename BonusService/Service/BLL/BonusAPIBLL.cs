@@ -160,7 +160,6 @@ namespace BonusService.Service.BLL
                     apiResult1.ErrorCode = 0;
                 }
 
-                //預計在member site端處理
                 if (apiResult1.ErrorCode == 0 && promotion is { PromotionType: PromotionType.Cashback })
                 {
                     var content = string.Format(_selLangBll.GetMsg("msg_ClaimCashBackBonus", custInfo.SiteId, custInfo.SiteName, custInfo.UserLang),

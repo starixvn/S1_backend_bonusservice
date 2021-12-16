@@ -464,7 +464,7 @@ namespace BonusService.Service.DAL
                 return -3;
 
             var custConditionInfo = GetCustConditionInfo(custId, currencyId, siteId, bonusCode, deviceType, conn, trans);
-
+            _logger.LogError($"PromotionType:{promotion.PromotionType} jResult:{custConditionInfo.Result} canJoin:{custConditionInfo.CanJoin} amount:{custConditionInfo.Amount} refList:{custConditionInfo.RefList} reference:{custConditionInfo.reference}");
             if (custConditionInfo.CanJoin == 1)
             {
                 var CalculateBonusAmount = CalculateBonus(promotion, custConditionInfo.Amount, lockedAmount, custId, siteId, currencyId);
@@ -474,7 +474,23 @@ namespace BonusService.Service.DAL
                 bonusAmount = CalculateBonusAmount.BonusAmount;
                 rollOver = CalculateBonusAmount.RollOver;
                 expiryTime = CalculateBonusAmount.ExpiryTime;
-
+                var pdebug = new DynamicParameters(new
+                {
+                    PromotionType = (int)promotion.PromotionType,
+                    BonusCode = bonusCode,
+                    CustId = custId,
+                    UserName = userName,
+                    CurrencyId = currencyId,
+                    SiteId = siteId,
+                    BonusInfo = CalculateBonusAmount.BonusInfo,
+                    LockedAmount = CalculateBonusAmount.LockedAmount,
+                    BonusAmount = CalculateBonusAmount.BonusAmount,
+                    promotion.ExpiryDays,
+                    Memo = (string)null,
+                    Prefix = $"B{_common.GetEnv()}",
+                    RefList = custConditionInfo.reference.Any() ? JsonConvert.SerializeObject(custConditionInfo.reference) : null
+                });
+                _logger.LogError($"param;{pdebug}");
                 var result = 0;
                 var bonusRewardInput = new BonusRewardInput
                 {

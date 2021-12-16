@@ -322,7 +322,7 @@ namespace BonusService.Service.DAL
             {
                 reference = JsonConvert.DeserializeObject<IEnumerable<Ref>>(refList);
             }
-
+            _logger.LogError($"PromotionType:{promotion.PromotionType} jResult:{jResult} canJoin:{canJoin} amount:{amount} refList:{refList} reference:{reference}");
             if (canJoin == 1)
             {
                 decimal dBonus = 0;
@@ -469,7 +469,24 @@ namespace BonusService.Service.DAL
                     default:
                         return 0;
                 }
-
+               var pdebug = new DynamicParameters(new
+                {
+                    PromotionType = (int)promotion.PromotionType,
+                    BonusCode = bonusCode,
+                    CustId = custId,
+                    UserName = userName,
+                    CurrencyId = currencyId,
+                    SiteId = siteId,
+                    BonusInfo = sBonusInfo,
+                    LockedAmount = dLockedAmount,
+                    BonusAmount = dBonus,
+                    promotion.ExpiryDays,
+                    Memo = (string)null,
+                    Prefix = $"B{_common.GetEnv()}",
+                    RefList = reference.Any() ? JsonConvert.SerializeObject(reference) : null
+                });
+                _logger.LogError($"param;{pdebug}");
+                return 0;
                 var result = 0;
                 switch (promotion.PromotionType)
                 {
