@@ -42,7 +42,7 @@ namespace BonusService.Service.DAL
 
         }
 
-        public int SetAdjustmentBonus(DepositBonus depositBonus, string Operator, string memo, out decimal bonusAmount, ref decimal lockedAmount, out decimal rollOver, out long expiryTime, out Promotion promotion, out int errorCode, out string errorMessage)
+        public int SetAdjustmentBonus(DepositBonus depositBonus, string Operator, string memo, decimal Amount, int promotionType, out decimal bonusAmount, ref decimal lockedAmount, out decimal rollOver, out long expiryTime, out Promotion promotion, out int errorCode, out string errorMessage)
         {
             bonusAmount = 0;
             rollOver = 0;
@@ -69,11 +69,18 @@ namespace BonusService.Service.DAL
                 errorMessage = $"BonusCode:{depositBonus.BonusCode} not found";
                 _logger.LogError($"BonusCode:{depositBonus.BonusCode} not found  parameter:{ Newtonsoft.Json.JsonConvert.SerializeObject(parameter)}");
                 return 0;
-            }else if(promotion.PromotionType != PromotionType.RetentionBonus)
+            }else if(promotion.PromotionType != (PromotionType)promotionType)
             {
                 errorCode = 202;
-                errorMessage = $"BonusCode:{depositBonus.BonusCode} is not Retention Bonus";
-                _logger.LogError($"BonusCode:{depositBonus.BonusCode} is not Retention Bonus  parameter:{ Newtonsoft.Json.JsonConvert.SerializeObject(parameter)}");
+                errorMessage = $"BonusCode:{depositBonus.BonusCode} is not {Enum.GetName(typeof(PromotionType), (PromotionType)promotionType)}";
+                _logger.LogError($"BonusCode:{depositBonus.BonusCode} is not {Enum.GetName(typeof(PromotionType), (PromotionType)promotionType)}  parameter:{ Newtonsoft.Json.JsonConvert.SerializeObject(parameter)}");
+                return 0;
+            }
+            if(promotion.PromotionType == PromotionType.ManualBonus && promotion.PromotionAction != 1)
+            {
+                errorCode = 201;
+                errorMessage = $"BonusCode:{depositBonus.BonusCode} not found";
+                _logger.LogError($"BonusCode:{depositBonus.BonusCode} not found  parameter:{ Newtonsoft.Json.JsonConvert.SerializeObject(parameter)}");
                 return 0;
             }
             var pCustRunningBonus = new DynamicParameters(new
@@ -89,13 +96,30 @@ namespace BonusService.Service.DAL
                 _logger.LogError($"CustId {depositBonus.CustId} has other running bonus  BonusList:{ Newtonsoft.Json.JsonConvert.SerializeObject(runningBonusList)}");
                 return 0;
             }
-
+            if(promotion.PromotionType == PromotionType.ManualBonus && promotion.MaxBonus < Amount)
+            {
+                errorCode = 203;
+                errorMessage = $"Amount:{Amount} is over BonusCode:{depositBonus.BonusCode} MaxBonus";
+                _logger.LogError($"Amount:{Amount} is over BonusCode:{depositBonus.BonusCode} MaxBonus  parameter:{ Newtonsoft.Json.JsonConvert.SerializeObject(parameter)}");
+                return 0;
+            }
 
             var dLockedAmount = 0;
             IEnumerable<Ref> reference = new List<Ref>();
 
-            decimal dBonus = promotion.Bonus;
-            decimal dRollOver = dBonus * promotion.RollOver;
+            decimal dBonus = 0;
+            decimal dRollOver = 0;
+
+            if(promotion.PromotionType == PromotionType.RetentionBonus)
+            {
+                dBonus = promotion.Bonus;
+                dRollOver = dBonus * promotion.RollOver;
+            }
+            else
+            {
+                dBonus = Amount;
+                dRollOver = Amount * promotion.RollOver;
+            }
             var sBonusInfo = JsonConvert.SerializeObject(promotion,
                 new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
             bonusAmount = dBonus;
@@ -131,7 +155,7 @@ namespace BonusService.Service.DAL
             {
                 var type = 5 /*Bonus*/;
                 result = walletService.SetBalance(depositBonus.CustId, depositBonus.SiteId, depositBonus.UserName, dLockedAmount * -1, type,
-                    $"Claim Retention Bonus BonusCode: {depositBonus.BonusCode}, Locked Amount: {dLockedAmount:#,##0.##}", transId,
+                    $"Claim {Enum.GetName(typeof(PromotionType), (PromotionType)promotionType)} BonusCode: {depositBonus.BonusCode}, Locked Amount: {dLockedAmount:#,##0.##}", transId,
                     out _, out _, conn, trans);
 
                 if (result > 0)
@@ -152,7 +176,7 @@ namespace BonusService.Service.DAL
 
                 result = depositBonusService.RewardBonus(bonusId, promotion.CategoryId, promotion.TpId, depositBonus.CustId,
                     depositBonus.SiteId, depositBonus.UserName, dBonus, dLockedAmount, dRollOver, expiryTime, 5,
-                    $"Payment Claim Retention BonusCode: {depositBonus.BonusCode} ", transId, conn, trans)
+                    $"Payment Claim {Enum.GetName(typeof(PromotionType), (PromotionType)promotionType)}: {depositBonus.BonusCode} ", transId, conn, trans)
                     ? 1
                     : 0;
             }
