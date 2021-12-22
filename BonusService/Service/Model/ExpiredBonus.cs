@@ -10,7 +10,7 @@ namespace BonusService.Service.Model
         public string UserName { set; get; }
         public string UserLang { set; get; }
         public int CurrencyId { set; get; }
-        public int Refund { set; get; }
+        public decimal Refund { set; get; }
         public int PromoCategoryId { get; set; }
         public PromotionType PromotionType { get; set; }
         public decimal Bonus { set; get; }
