@@ -77,6 +77,17 @@ namespace BonusService.Service.DAL
                         expiredBonus.Bonus
                     }), conn, trans);
             }
+            
+            if (result >= 0)
+            {
+                var cp = new DynamicParameters(
+                    new
+                    {
+                        _BonusId = expiredBonus.BonusId,
+                        _CancelBonus = expiredBonus.Bonus - expiredBonus.Refund
+                    });
+                result = _mainDbClient.Execute("Service_CancelBonusAmount_Set",cp,conn,trans);
+            }
 
             if (result >= 0)
             {
