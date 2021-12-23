@@ -34,6 +34,7 @@ namespace BonusService.Service.DAL
         private readonly CustInfoService _custInfoService;
         private readonly string _apiUrl;
         private readonly CourierAdapter _courierAdapter;
+        private readonly Log2File _log2File;
 
         public BonusAPIServiceV2(IServiceProvider serviceProvider, ILogger<BonusAPIService> logger)
         {
@@ -50,6 +51,7 @@ namespace BonusService.Service.DAL
             _custInfoService = serviceProvider.GetRequiredService<CustInfoService>();
             _apiUrl = _configuration.GetValue<string>("TpService");
             _courierAdapter = serviceProvider.GetRequiredService<CourierAdapter>();
+            _log2File = serviceProvider.GetRequiredService<Log2File>();
             this._logger = logger;
         }
         public Promotion GetPromotion(int custId, int currencyId, int siteId, string bonusCode, int? deviceType)
@@ -464,7 +466,11 @@ namespace BonusService.Service.DAL
                 return -3;
 
             var custConditionInfo = GetCustConditionInfo(custId, currencyId, siteId, bonusCode, deviceType, conn, trans);
-            _logger.LogError($"PromotionType:{promotion.PromotionType} jResult:{custConditionInfo.Result} canJoin:{custConditionInfo.CanJoin} amount:{custConditionInfo.Amount} refList:{custConditionInfo.RefList} reference:{custConditionInfo.reference}");
+            {
+                string tmpstring = $"PromotionType:{promotion.PromotionType} jResult:{custConditionInfo.Result} canJoin:{custConditionInfo.CanJoin} amount:{custConditionInfo.Amount} refList:{custConditionInfo.RefList} reference:{custConditionInfo.reference}";
+                _logger.LogError(tmpstring);
+                _log2File.Error(tmpstring, "BonusAPIServiceV2_test");
+            }
             if (custConditionInfo.CanJoin == 1)
             {
                 var CalculateBonusAmount = CalculateBonus(promotion, custConditionInfo.Amount, lockedAmount, custId, siteId, currencyId);
@@ -490,7 +496,11 @@ namespace BonusService.Service.DAL
                     Prefix = $"B{_common.GetEnv()}",
                     RefList = custConditionInfo.reference.Any() ? JsonConvert.SerializeObject(custConditionInfo.reference) : null
                 });
-                _logger.LogError($"param;{pdebug}");
+                {
+                    string tmpstring = $"param;{pdebug}";
+                    _logger.LogError(tmpstring);
+                    _log2File.Error(tmpstring, "BonusAPIServiceV2_test");
+                }
                 var result = 0;
                 var bonusRewardInput = new BonusRewardInput
                 {

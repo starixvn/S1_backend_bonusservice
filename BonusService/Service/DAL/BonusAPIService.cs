@@ -30,7 +30,7 @@ namespace BonusService.Service.DAL
         private readonly BonusWalletService _bonusWalletService;
         private readonly SelLangBLL _selLangBll;
         private readonly CustInfoService _custInfoService;
-
+        private readonly Log2File _log2File;
 
         public BonusAPIService(IServiceProvider serviceProvider, ILogger<BonusAPIService> logger)
         {
@@ -45,6 +45,7 @@ namespace BonusService.Service.DAL
             _bonusWalletService = serviceProvider.GetRequiredService<BonusWalletService>();
             _selLangBll = serviceProvider.GetRequiredService<SelLangBLL>();
             _custInfoService = serviceProvider.GetRequiredService<CustInfoService>();
+            _log2File = serviceProvider.GetRequiredService<Log2File>();
             this._logger = logger;
 
 
@@ -322,7 +323,11 @@ namespace BonusService.Service.DAL
             {
                 reference = JsonConvert.DeserializeObject<IEnumerable<Ref>>(refList);
             }
-            _logger.LogError($"PromotionType:{promotion.PromotionType} jResult:{jResult} canJoin:{canJoin} amount:{amount} refList:{refList} reference:{reference}");
+            {
+                string tmpstring = $"PromotionType:{promotion.PromotionType} jResult:{jResult} canJoin:{canJoin} amount:{amount} refList:{refList} reference:{reference}";
+                _logger.LogError(tmpstring);
+                _log2File.Error(tmpstring, "BonusAPIServiceV2_test");
+            }
             if (canJoin == 1)
             {
                 decimal dBonus = 0;
@@ -485,7 +490,11 @@ namespace BonusService.Service.DAL
                     Prefix = $"B{_common.GetEnv()}",
                     RefList = reference.Any() ? JsonConvert.SerializeObject(reference) : null
                 });
-                _logger.LogError($"param;{pdebug}");
+                {
+                    string tmpstring = $"param;{pdebug}";
+                    _logger.LogError(tmpstring);
+                    _log2File.Error(tmpstring, "BonusAPIServiceV2_test");
+                }
                 return 0;
                 var result = 0;
                 switch (promotion.PromotionType)
