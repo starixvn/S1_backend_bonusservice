@@ -19,7 +19,6 @@ namespace BonusService.Service.Workers
         private readonly ExpiredBonusBLL _expiredBonusBll;
         private Timer _timerExpiredBonus;
         private Timer _timerExpiredTransferBonus;
-        private int _lastCheckHour;
         private const int Limit = 1000;
 
         public ExpiredBonusWorker(IServiceProvider provider)
@@ -41,6 +40,7 @@ namespace BonusService.Service.Workers
         {
             try
             {
+                _logger.LogInformation("Expired Transfer Bonus Task Start");
                 int count;
                 var allTasks = new List<Task>();
                 do
@@ -140,47 +140,43 @@ namespace BonusService.Service.Workers
         {
             try
             {
-                if (GetUTC8Time().Hour != _lastCheckHour)
+                _logger.LogInformation("Expired Bonus Task Async Start");
+                var allTasks = new List<Task>();
+                int nCount;
+                do
                 {
-                    _lastCheckHour = GetUTC8Time().Hour;
-
-                    var allTasks = new List<Task>();
-                    int nCount;
-                    do
+                    var data = _expiredBonusBll.GetBonusExpired(Limit).ToList();
+                    foreach (var item in data)
                     {
-                        var data = _expiredBonusBll.GetBonusExpired(Limit).ToList();
-                        foreach (var item in data)
+                        allTasks.Add(Task.Run(() =>
                         {
-                            allTasks.Add(Task.Run(() =>
+                            try
                             {
-                                try
-                                {
-                                    _expiredBonusBll.RefundExpiredBonus(item,
-                                        $"CancelBonus: BonusId={item.BonusId}, Remaining Bonus={item.Bonus:#,##0.##}, Refund Amount={item.Refund:#,##0.##}");
-                                }
-                                catch (Exception ex)
-                                {
-                                    _logger.LogError(ex, MethodExtension.GetCurrentMethod());
-                                }
-                            }));
-
-                            if (allTasks.Count >= 4)
-                            {
-                                Task.WhenAll(allTasks).Wait();
-                                allTasks.Clear();
+                                _expiredBonusBll.RefundExpiredBonus(item,
+                                    $"CancelBonus: BonusId={item.BonusId}, Remaining Bonus={item.Bonus:#,##0.##}, Refund Amount={item.Refund:#,##0.##}");
                             }
-                        }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, MethodExtension.GetCurrentMethod());
+                            }
+                        }));
 
-                        if (allTasks.Count > 0)
+                        if (allTasks.Count >= 4)
                         {
                             Task.WhenAll(allTasks).Wait();
                             allTasks.Clear();
                         }
+                    }
 
-                        nCount = data.Count;
-                    } while (nCount >= Limit);
+                    if (allTasks.Count > 0)
+                    {
+                        Task.WhenAll(allTasks).Wait();
+                        allTasks.Clear();
+                    }
 
-                }
+                    nCount = data.Count;
+                } while (nCount >= Limit);
+                
             }
             catch (Exception ex)
             {

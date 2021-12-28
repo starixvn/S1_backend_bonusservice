@@ -65,7 +65,7 @@ namespace BonusService.Service.DAL
 
             if (result >= 0)
             {
-                result = _mainDbClient.Execute("Service_BonusExpired_Set",
+                result = _mainDbClient.Execute("Service_BonusExpired_Set_V2",
                     new DynamicParameters(new
                     {
                         expiredBonus.BonusId,
@@ -74,8 +74,20 @@ namespace BonusService.Service.DAL
                         expiredBonus.SiteId,
                         TYPE = (int)FinancialType.CancelledBonus,
                         expiredBonus.PromoCategoryId,
-                        expiredBonus.Bonus
+                        expiredBonus.Bonus,
+                        Memo = "Expired Bonus" 
                     }), conn, trans);
+            }
+            
+            if (result >= 0)
+            {
+                var cp = new DynamicParameters(
+                    new
+                    {
+                        _BonusId = expiredBonus.BonusId,
+                        _CancelBonus = expiredBonus.Bonus - expiredBonus.Refund
+                    });
+                result = _mainDbClient.Execute("Service_CancelBonusAmount_Set",cp,conn,trans);
             }
 
             if (result >= 0)
