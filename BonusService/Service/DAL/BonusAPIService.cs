@@ -2,6 +2,7 @@
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
 using Dapper;
+using MemberSite.Service.Model;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -283,5 +284,96 @@ namespace BonusService.Service.DAL
             using var conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
             return conn.Execute("AdjustmentLog_Ins", new { AdjustId = adjustId, SiteId = siteId, Comment = comment, Action = status, Operator = Operator }, commandType: CommandType.StoredProcedure);
         }
+        //==============================================================================================================================
+        public VerificationRewardData GetVerificationReward(int siteId, int currencyId)
+        {
+            var p = new DynamicParameters(new { _SiteId = siteId, _CurrencyId = currencyId });
+            return _reportDbClient.QueryFirst<VerificationRewardData>("Service_VerificationReward_Get", p);
+        }
+        public CustVerificationRewardData GetCustVerificationReward(int custId,bool usedMainDb = false)
+        {
+            var p = new DynamicParameters(new { _CustId = custId });
+            if(usedMainDb)
+                return _mainDbClient.QueryFirst<CustVerificationRewardData>("Service_CustVerificationReward_Get", p);
+            else
+                return _reportDbClient.QueryFirst<CustVerificationRewardData>("Service_CustVerificationReward_Get", p);
+
+        }
+        public int SetCustVerifiedReward(int custId, int siteId, int currencyId, int verifyItem, MySqlConnection conn, MySqlTransaction trans)
+        {
+            var p = new DynamicParameters(new { _CustId = custId, _SiteId = siteId, _CurrencyId = currencyId, _VerificationItem = verifyItem });
+            return _mainDbClient.Execute("Service_CustVerificationReward_Set", p, conn, trans);
+        }
+
+        public ApiResult PayoutVerificationReward(int custId, int siteId, int currencyId, string userName, OTPVerificationType OTPVerificationtype, decimal reward)
+        {
+            var apiResult = new ApiResult();
+            try
+            {
+                using var conn = new MySqlConnection(_connectionString);
+                conn.Open();
+
+                int Type = 20;
+                using var trans = conn.BeginTransaction();
+
+                var transId = "";
+                var result = 0;
+                string comment = "";
+                if (OTPVerificationtype == OTPVerificationType.Email)
+                {
+                    comment = $"email verification reward: {reward:#,##0.##}";
+                }
+                else if (OTPVerificationtype == OTPVerificationType.SMS)
+                {
+                    comment = $"phone verification reward: {reward:#,##0.##}";
+                }
+                else
+                {
+                    comment = $"verification reward: {reward:#,##0.##}";
+                }
+
+
+                result = walletService.SetBalance(custId, siteId, userName, reward, Type,
+                    comment, transId, out _, out _, conn, trans);
+                if (result <= 0)
+                {
+                    apiResult.Message = "SetBalance fail";
+                    return apiResult;
+                }
+                result = withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, reward, null, transId, out _, conn, trans);
+                if (result <= 0)
+                {
+                    apiResult.Message = "SetWithdrawalLimit fail";
+                    return apiResult;
+                }
+
+                result = SetCustVerifiedReward(custId, siteId, currencyId, (int)OTPVerificationtype, conn, trans);
+                if (result <= 0)
+                {
+                    apiResult.Message = "SetCustVerifiedReward fail";
+                    return apiResult;
+                }
+
+                trans.Commit();
+
+                if(result>0)
+                {
+                    apiResult.ErrorCode = 0;
+                    apiResult.Message = comment;
+                }
+                else
+                {
+                    apiResult.Message = "UnKnow Fail";
+                }
+            }
+            catch (Exception ex)
+            {
+                apiResult.ErrorCode = 999;
+                apiResult.RawMessage = ex.ToString();
+            }
+            return apiResult;
+        }
+
+        //==============================================================================================================================
     }
 }

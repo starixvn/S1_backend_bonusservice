@@ -1,5 +1,6 @@
 ﻿using BonusService.Service.BLL;
 using BonusService.Service.Extensions;
+using BonusService.Service.Model.enums;
 using MemberSite.Service.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -63,6 +64,34 @@ namespace BonusService.Controllers
                 _logger.LogError($"SetAdjustBonusAsync { Newtonsoft.Json.JsonConvert.SerializeObject(result)}");
             }
             return result;
+        }
+
+
+
+        public class SetVerificationRewardReq
+        {
+            public int CustId { get; set; }
+            public int OTPType { get; set; }//0.SMS 1.EMAIL
+
+        }
+        [HttpPost]
+        public ApiResult SetVerificationReward(SetVerificationRewardReq verificationRewardReq)
+        {
+            OTPTypeEnum item = OTPTypeEnum.SMS;
+            if(verificationRewardReq.OTPType == 1)
+                item = OTPTypeEnum.Email;
+
+            return _bonusAPIBLL.SetVerificationReward(verificationRewardReq.CustId, item);
+        }
+
+        [HttpPost]
+        public ApiResult CheckRewardCondination(SetVerificationRewardReq verificationRewardReq)
+        {
+            OTPTypeEnum item = OTPTypeEnum.SMS;
+            if (verificationRewardReq.OTPType == 1)
+                item = OTPTypeEnum.Email;
+
+            return _bonusAPIBLL.CheckRewardCondination(verificationRewardReq.CustId, item);
         }
     }
 
