@@ -180,10 +180,11 @@ namespace BonusService.Service.DAL
                                 promotion.ExpiryDays,
                                 Memo = (string)null,
                                 Prefix = $"B{common.GetEnv()}",
-                                RefList = reference.Any() ? JsonConvert.SerializeObject(reference) : null
+                                RefList = reference.Any() ? JsonConvert.SerializeObject(reference) : null,
+                                AtPage = (int)BonusInfoAtPage.Deposit
                             });
                             p.Add("TransId", dbType: DbType.String, direction: ParameterDirection.Output);
-                            result = _mainDbClient.Execute("Member_BonusInfo_InsV2", p, conn, trans);
+                            result = _mainDbClient.Execute("Member_BonusInfo_Ins_V3", p, conn, trans);
                             var transId = p.Get<string>("TransId");
 
                             if (result > 0 && dLockedAmount > 0)
