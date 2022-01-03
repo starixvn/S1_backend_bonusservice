@@ -52,6 +52,7 @@ namespace BonusService.Service.BLL
                     var apiResult = await _bonusAPIServiceV2.TransferTpBonus(tpBonusTransfer);
                     if (apiResult.ErrorCode != 0)
                     {
+                        //ErrorCode:1205 TPService Pending
                         apiResult1 = apiResult;
                     }
                     else

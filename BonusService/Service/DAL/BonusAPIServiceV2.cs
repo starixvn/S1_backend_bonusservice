@@ -469,7 +469,7 @@ namespace BonusService.Service.DAL
             {
                 string tmpstring = $"PromotionType:{promotion.PromotionType} jResult:{custConditionInfo.Result} canJoin:{custConditionInfo.CanJoin} amount:{custConditionInfo.Amount} refList:{custConditionInfo.RefList} reference:{custConditionInfo.reference}";
                 _logger.LogError(tmpstring);
-                _log2File.Error(tmpstring, "BonusAPIServiceV2_test");
+               // _log2File.Error(tmpstring, "BonusAPIServiceV2_test");
             }
             if (custConditionInfo.CanJoin == 1)
             {
@@ -480,7 +480,7 @@ namespace BonusService.Service.DAL
                 bonusAmount = CalculateBonusAmount.BonusAmount;
                 rollOver = CalculateBonusAmount.RollOver;
                 expiryTime = CalculateBonusAmount.ExpiryTime;
-                var pdebug = new DynamicParameters(new
+                var pdebug =new
                 {
                     PromotionType = (int)promotion.PromotionType,
                     BonusCode = bonusCode,
@@ -495,11 +495,11 @@ namespace BonusService.Service.DAL
                     Memo = (string)null,
                     Prefix = $"B{_common.GetEnv()}",
                     RefList = custConditionInfo.reference.Any() ? JsonConvert.SerializeObject(custConditionInfo.reference) : null
-                });
+                };
                 {
                     string tmpstring = $"param;{pdebug}";
                     _logger.LogError(tmpstring);
-                    _log2File.Error(tmpstring, "BonusAPIServiceV2_test");
+                    //_log2File.Error(tmpstring, "BonusAPIServiceV2_test");
                 }
                 var result = 0;
                 var bonusRewardInput = new BonusRewardInput

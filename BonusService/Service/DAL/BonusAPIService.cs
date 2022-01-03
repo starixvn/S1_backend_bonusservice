@@ -326,7 +326,7 @@ namespace BonusService.Service.DAL
             {
                 string tmpstring = $"PromotionType:{promotion.PromotionType} jResult:{jResult} canJoin:{canJoin} amount:{amount} refList:{refList} reference:{reference}";
                 _logger.LogError(tmpstring);
-                _log2File.Error(tmpstring, "BonusAPIServiceV2_test");
+                //_log2File.Error(tmpstring, "BonusAPIServiceV2_test");
             }
             if (canJoin == 1)
             {
@@ -474,7 +474,7 @@ namespace BonusService.Service.DAL
                     default:
                         return 0;
                 }
-               var pdebug = new DynamicParameters(new
+               var pdebug = new
                 {
                     PromotionType = (int)promotion.PromotionType,
                     BonusCode = bonusCode,
@@ -488,12 +488,12 @@ namespace BonusService.Service.DAL
                     promotion.ExpiryDays,
                     Memo = (string)null,
                     Prefix = $"B{_common.GetEnv()}",
-                    RefList = reference.Any() ? JsonConvert.SerializeObject(reference) : null
-                });
+                    //RefList = reference.Any() ? JsonConvert.SerializeObject(reference) : null
+                }; 
                 {
-                    string tmpstring = $"param;{pdebug}";
+                    string tmpstring = $"param;{Newtonsoft.Json.JsonConvert.SerializeObject(pdebug)}";
                     _logger.LogError(tmpstring);
-                    _log2File.Error(tmpstring, "BonusAPIServiceV2_test");
+                   // _log2File.Error(tmpstring, "BonusAPIServiceV2_test");
                 }
                 return 0;
                 var result = 0;
