@@ -14,16 +14,18 @@ namespace BonusService.Service.BLL
         private readonly DepositBonusService depositBonusService;
         private readonly string apiUrl;
         private readonly CourierAdapter courierAdapter;
+        private readonly BonusAPIBLL bonusAPIBLL;
         private readonly Dictionary<int, bool> isConvert = new Dictionary<int, bool>()
         {
             {51,false },{15,false }
         };
 
-        public DepositBonusBLL(DepositBonusService depositBonusService, IConfiguration configuration, CourierAdapter courierAdapter)
+        public DepositBonusBLL(DepositBonusService depositBonusService, IConfiguration configuration, CourierAdapter courierAdapter, BonusAPIBLL bonusAPIBLL)
         {
             this.depositBonusService = depositBonusService;
             this.apiUrl = configuration.GetValue<string>("TpService");
             this.courierAdapter = courierAdapter;
+            this.bonusAPIBLL = bonusAPIBLL;
         }
         public IEnumerable<DepositBonus> GetDepositBonusQueue()
         {
@@ -46,6 +48,19 @@ namespace BonusService.Service.BLL
         {
             var apiResult1 = new ApiResult();
             var lockedAmount = depositBonus.LockedAmount;
+            //check PhoneVerified,AccountName,Birth
+            var custInfoProfile = bonusAPIBLL.GetCustInfoProfile(depositBonus.CustId);
+            if (!custInfoProfile.PhoneVerified
+                || string.IsNullOrEmpty(custInfoProfile.AccountName)
+                || string.IsNullOrEmpty(custInfoProfile.Birth_y)
+                || string.IsNullOrEmpty(custInfoProfile.Birth_m)
+                || string.IsNullOrEmpty(custInfoProfile.Birth_d))
+            {
+                apiResult1.ErrorCode = 999;
+                apiResult1.Message = "Please complete your profile and verify your phone number to enjoy our promotions.";
+                return false;
+            }
+
             var result = depositBonusService.SetClaimPromotion(depositBonus, out var bonusAmount, ref lockedAmount,
                 out var rollOver, out var expiryTime, out var promotion);
 
