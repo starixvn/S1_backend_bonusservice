@@ -146,7 +146,7 @@ namespace BonusService.Service.DAL
                 Memo = (string)null,
                 Prefix = $"B{common.GetEnv()}",
                 RefList = reference.Any() ? JsonConvert.SerializeObject(reference.FirstOrDefault()) : null,
-                AtPage = (int)BonusInfoAtPage.Deposit
+                AtPage = (int)BonusInfoAtPage.Promotion
             });
             p.Add("TransId", dbType: DbType.String, direction: ParameterDirection.Output);
             result = _mainDbClient.Execute("Member_BonusInfo_Ins_V3", p, conn, trans);
