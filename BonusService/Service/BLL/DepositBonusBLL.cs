@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using BonusService.Service.Library;
+using BonusService.Service.Model.enums;
 
 namespace BonusService.Service.BLL
 {
@@ -19,13 +20,17 @@ namespace BonusService.Service.BLL
         {
             {51,false },{15,false }
         };
+        private readonly BonusAPIServiceV2 bonusAPIServiceV2;
+        private readonly BonusAPIBLLV2 bonusAPIBLLV2;
 
-        public DepositBonusBLL(DepositBonusService depositBonusService, IConfiguration configuration, CourierAdapter courierAdapter, BonusAPIBLL bonusAPIBLL)
+        public DepositBonusBLL(DepositBonusService depositBonusService, IConfiguration configuration, CourierAdapter courierAdapter, BonusAPIBLL bonusAPIBLL, BonusAPIServiceV2 bonusAPIServiceV2, BonusAPIBLLV2 bonusAPIBLLV2)
         {
             this.depositBonusService = depositBonusService;
             this.apiUrl = configuration.GetValue<string>("TpService");
             this.courierAdapter = courierAdapter;
             this.bonusAPIBLL = bonusAPIBLL;
+            this.bonusAPIServiceV2 = bonusAPIServiceV2;
+            this.bonusAPIBLLV2 = bonusAPIBLLV2;
         }
         public IEnumerable<DepositBonus> GetDepositBonusQueue()
         {
@@ -37,13 +42,10 @@ namespace BonusService.Service.BLL
         }
         public IEnumerable<DepositBonus> GetDepositBonusQueueByCustId(int custId, bool useMainDb = false)
         {
-                return depositBonusService.GetDepositBonusQueueByCustId(custId, useMainDb);
+                return bonusAPIServiceV2.GetDepositBonusQueueByCustId(custId, useMainDb);
         }
-        public bool IsConvertRequired(int CurrencyId)
-        {
-            return isConvert.ContainsKey(CurrencyId);
-        }
-        
+
+       
         public async Task<Boolean> SetClaimPromotionAsync(DepositBonus depositBonus)
         {
             var apiResult1 = new ApiResult();
@@ -177,6 +179,15 @@ namespace BonusService.Service.BLL
 
             }
             return 1;
+        }
+
+        public async Task<Boolean> SetClaimPromotionV2Async(DepositBonus depositBonus)
+        {
+            var apiResult1 = new ApiResult();
+            apiResult1 = await bonusAPIBLLV2.SetClaimPromotionV2Async(depositBonus.CustId, depositBonus.BonusCode, "", depositBonus.LockedAmount, 1);
+            if (apiResult1.ErrorCode == 0)
+                return true;
+            return false;
         }
     }
 }

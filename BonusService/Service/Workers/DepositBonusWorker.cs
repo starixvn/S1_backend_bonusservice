@@ -7,6 +7,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using BonusService.Service.Extensions;
+using BonusService.Service.Model.enums;
 
 namespace BonusService.Service.Workers
 {
@@ -49,7 +50,9 @@ namespace BonusService.Service.Workers
                         //table "DepositInfo" Status 0. Draft, 1. Pending, 2. Paid, 3. Approved, 4. Rejected, 5. Canceled, 6. Expired, 7. OnHold, 99. Error.
                         if (depositBonus.DepositStatus == 3)
                         {
-                            var rtn = await depositBonusBLL.SetClaimPromotionAsync(depositBonus);
+                            // var rtn = await depositBonusBLL.SetClaimPromotionAsync(depositBonus);
+                            
+                            var rtn = await depositBonusBLL.SetClaimPromotionV2Async(depositBonus);
                             if (rtn)
                             {
                                 logger.LogInformation($"DoDepositBonus  success TransId: {depositBonus.TransId}");
@@ -116,7 +119,6 @@ namespace BonusService.Service.Workers
         //    catch (Exception ex)
         //    {
         //        logger.LogError(ex.Message);
-        //        log2File.Error(ex.ToString(), "DepositBonus");
         //    }
         //    finally
         //    {
