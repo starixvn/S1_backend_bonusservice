@@ -151,7 +151,7 @@ namespace BonusService.Service.DAL
                 BonusAmount = dBonus,
                 promotion.ExpiryDays,
                 Memo = (string)null,
-                Prefix = $"B{common.GetEnv()}",
+                Prefix = $"B{_common.GetEnv()}",
                 RefList = reference.Any() ? JsonConvert.SerializeObject(reference.FirstOrDefault()) : null,
                 AtPage = (int)BonusInfoAtPage.Promotion
             });
@@ -162,7 +162,7 @@ namespace BonusService.Service.DAL
             if (result > 0 && dLockedAmount > 0)
             {
                 var type = 5 /*Bonus*/;
-                result = walletService.SetBalance(depositBonus.CustId, depositBonus.SiteId, depositBonus.UserName, dLockedAmount * -1, type,
+                result = _walletService.SetBalance(depositBonus.CustId, depositBonus.SiteId, depositBonus.UserName, dLockedAmount * -1, type,
                     $"Claim {Enum.GetName(typeof(PromotionType), (PromotionType)promotionType)} BonusCode: {depositBonus.BonusCode}, Locked Amount: {dLockedAmount:#,##0.##}", transId,
                     out _, out _, conn, trans);
 
@@ -340,14 +340,14 @@ namespace BonusService.Service.DAL
                 }
 
 
-                result = walletService.SetBalance(custId, siteId, userName, reward, Type,
+                result = _walletService.SetBalance(custId, siteId, userName, reward, Type,
                     comment, transId, out _, out _, conn, trans);
                 if (result <= 0)
                 {
                     apiResult.Message = "SetBalance fail";
                     return apiResult;
                 }
-                result = withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, reward, null, transId, out _, conn, trans);
+                result = _withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, reward, null, transId, out _, conn, trans);
                 if (result <= 0)
                 {
                     apiResult.Message = "SetWithdrawalLimit fail";
