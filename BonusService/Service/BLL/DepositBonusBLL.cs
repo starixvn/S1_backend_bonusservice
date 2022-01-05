@@ -16,13 +16,15 @@ namespace BonusService.Service.BLL
         private readonly string apiUrl;
         private readonly CourierAdapter courierAdapter;
         private readonly BonusAPIServiceV2 bonusAPIServiceV2;
+        private readonly BonusAPIBLLV2 bonusAPIBLLV2;
 
-        public DepositBonusBLL(DepositBonusService depositBonusService, IConfiguration configuration, CourierAdapter courierAdapter, BonusAPIServiceV2 bonusAPIServiceV2)
+        public DepositBonusBLL(DepositBonusService depositBonusService, IConfiguration configuration, CourierAdapter courierAdapter, BonusAPIServiceV2 bonusAPIServiceV2 , BonusAPIBLLV2 bonusAPIBLLV2)
         {
             this.depositBonusService = depositBonusService;
             this.apiUrl = configuration.GetValue<string>("TpService");
             this.courierAdapter = courierAdapter;
             this.bonusAPIServiceV2 = bonusAPIServiceV2;
+            this.bonusAPIBLLV2 = bonusAPIBLLV2;
         }
         public IEnumerable<DepositBonus> GetDepositBonusQueue()
         {
@@ -36,6 +38,8 @@ namespace BonusService.Service.BLL
         {
                 return bonusAPIServiceV2.GetDepositBonusQueueByCustId(custId, useMainDb);
         }
+
+       
         public async Task<Boolean> SetClaimPromotionAsync(DepositBonus depositBonus)
         {
             var apiResult1 = new ApiResult();
@@ -156,6 +160,15 @@ namespace BonusService.Service.BLL
 
             }
             return 1;
+        }
+
+        public async Task<Boolean> SetClaimPromotionV2Async(DepositBonus depositBonus)
+        {
+            var apiResult1 = new ApiResult();
+            apiResult1 = await bonusAPIBLLV2.SetClaimPromotionV2Async(depositBonus.CustId, depositBonus.BonusCode, "", depositBonus.LockedAmount, 1);
+            if (apiResult1.ErrorCode == 0)
+                return true;
+            return false;
         }
     }
 }

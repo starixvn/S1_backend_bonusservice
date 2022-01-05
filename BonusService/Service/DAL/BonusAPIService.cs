@@ -30,7 +30,6 @@ namespace BonusService.Service.DAL
         private readonly BonusWalletService _bonusWalletService;
         private readonly SelLangBLL _selLangBll;
         private readonly CustInfoService _custInfoService;
-        private readonly Log2File _log2File;
 
         public BonusAPIService(IServiceProvider serviceProvider, ILogger<BonusAPIService> logger)
         {
@@ -45,7 +44,6 @@ namespace BonusService.Service.DAL
             _bonusWalletService = serviceProvider.GetRequiredService<BonusWalletService>();
             _selLangBll = serviceProvider.GetRequiredService<SelLangBLL>();
             _custInfoService = serviceProvider.GetRequiredService<CustInfoService>();
-            _log2File = serviceProvider.GetRequiredService<Log2File>();
             this._logger = logger;
 
 
@@ -326,7 +324,6 @@ namespace BonusService.Service.DAL
             {
                 string tmpstring = $"PromotionType:{promotion.PromotionType} jResult:{jResult} canJoin:{canJoin} amount:{amount} refList:{refList} reference:{reference}";
                 _logger.LogError(tmpstring);
-                //_log2File.Error(tmpstring, "BonusAPIServiceV2_test");
             }
             if (canJoin == 1)
             {
@@ -493,7 +490,6 @@ namespace BonusService.Service.DAL
                 {
                     string tmpstring = $"param;{Newtonsoft.Json.JsonConvert.SerializeObject(pdebug)}";
                     _logger.LogError(tmpstring);
-                   // _log2File.Error(tmpstring, "BonusAPIServiceV2_test");
                 }
                 return 0;
                 var result = 0;

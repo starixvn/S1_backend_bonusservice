@@ -57,7 +57,6 @@ namespace BonusService
                     services.AddSingleton<Currency>();
                     services.AddSingleton<CourierAdapter>();
                     services.AddSingleton<CacheHelper>();
-                    services.AddSingleton<Log2File>();
 
                     services.AddSingleton<MessageService>();
                     services.AddSingleton<CustInfoService>();

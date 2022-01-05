@@ -34,7 +34,6 @@ namespace BonusService.Service.DAL
         private readonly CustInfoService _custInfoService;
         private readonly string _apiUrl;
         private readonly CourierAdapter _courierAdapter;
-        private readonly Log2File _log2File;
 
         public BonusAPIServiceV2(IServiceProvider serviceProvider, ILogger<BonusAPIService> logger)
         {
@@ -51,7 +50,6 @@ namespace BonusService.Service.DAL
             _custInfoService = serviceProvider.GetRequiredService<CustInfoService>();
             _apiUrl = _configuration.GetValue<string>("TpService");
             _courierAdapter = serviceProvider.GetRequiredService<CourierAdapter>();
-            _log2File = serviceProvider.GetRequiredService<Log2File>();
             this._logger = logger;
         }
         public Promotion GetPromotion(int custId, int currencyId, int siteId, string bonusCode, int? deviceType)
@@ -79,6 +77,19 @@ namespace BonusService.Service.DAL
             }
             return false;
         }
+        public bool CheckProfileFinish(int custId, int siteId)
+        {
+            var custInfoProfile = _custInfoService.GetCustInfoProfile( custId, siteId);
+            if (!custInfoProfile.PhoneVerified
+                || string.IsNullOrEmpty(custInfoProfile.AccountName)
+                || string.IsNullOrEmpty(custInfoProfile.Birth_y)
+                || string.IsNullOrEmpty(custInfoProfile.Birth_m)
+                || string.IsNullOrEmpty(custInfoProfile.Birth_d))
+            {
+                return false;
+            }
+            return true;
+        }
         public CustCondition GetCustConditionInfo(int custId, int currencyId, int siteId, string bonusCode, int? deviceType, MySqlConnection conn,
             MySqlTransaction trans)
         {
@@ -89,7 +100,7 @@ namespace BonusService.Service.DAL
             p.Add("RefId", dbType: DbType.String, direction: ParameterDirection.Output);
             p.Add("Result", dbType: DbType.Int32, direction: ParameterDirection.Output);
             p.Add("RefList", dbType: DbType.String, direction: ParameterDirection.Output);
-            _mainDbClient.Execute("Member_PromotionCanJoinV6_Get", p, conn, trans);
+            _mainDbClient.Execute("Member_PromotionCanJoin_Get_V7", p, conn, trans);
 
             rtn.Result = p.Get<int>("Result");
             rtn.CanJoin = p.Get<byte?>("CanJoin") ?? 0;
@@ -464,13 +475,11 @@ namespace BonusService.Service.DAL
 
             if (IsBlockIP(promotion, bonusCode, siteId, custIP))
                 return -3;
+            if (!CheckProfileFinish(custId, siteId))
+                return -6;
 
             var custConditionInfo = GetCustConditionInfo(custId, currencyId, siteId, bonusCode, deviceType, conn, trans);
-            {
-                string tmpstring = $"PromotionType:{promotion.PromotionType} jResult:{custConditionInfo.Result} canJoin:{custConditionInfo.CanJoin} amount:{custConditionInfo.Amount} refList:{custConditionInfo.RefList} reference:{custConditionInfo.reference}";
-                _logger.LogError(tmpstring);
-               // _log2File.Error(tmpstring, "BonusAPIServiceV2_test");
-            }
+          
             if (custConditionInfo.CanJoin == 1)
             {
                 var CalculateBonusAmount = CalculateBonus(promotion, custConditionInfo.Amount, lockedAmount, custId, siteId, currencyId);
@@ -480,27 +489,7 @@ namespace BonusService.Service.DAL
                 bonusAmount = CalculateBonusAmount.BonusAmount;
                 rollOver = CalculateBonusAmount.RollOver;
                 expiryTime = CalculateBonusAmount.ExpiryTime;
-                var pdebug =new
-                {
-                    PromotionType = (int)promotion.PromotionType,
-                    BonusCode = bonusCode,
-                    CustId = custId,
-                    UserName = userName,
-                    CurrencyId = currencyId,
-                    SiteId = siteId,
-                    BonusInfo = CalculateBonusAmount.BonusInfo,
-                    LockedAmount = CalculateBonusAmount.LockedAmount,
-                    BonusAmount = CalculateBonusAmount.BonusAmount,
-                    promotion.ExpiryDays,
-                    Memo = (string)null,
-                    Prefix = $"B{_common.GetEnv()}",
-                    RefList = custConditionInfo.reference.Any() ? JsonConvert.SerializeObject(custConditionInfo.reference) : null
-                };
-                {
-                    string tmpstring = $"param;{pdebug}";
-                    _logger.LogError(tmpstring);
-                    //_log2File.Error(tmpstring, "BonusAPIServiceV2_test");
-                }
+                
                 var result = 0;
                 var bonusRewardInput = new BonusRewardInput
                 {
