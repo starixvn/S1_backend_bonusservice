@@ -94,13 +94,13 @@ namespace BonusService.Service.BLL
             return apiResult1;
         }
 
-        public async Task<ApiResult> SetClaimPromotionV2Async(int custId, string bonusCode, string custIP, decimal? dLockedAmount, int? deviceType)
+        public async Task<ApiResult> SetClaimPromotionV2Async(int custId, string bonusCode, string custIP, decimal? dLockedAmount, int? deviceType, BonusInfoAtPage atPage)
         {
             var apiResult1 = new ApiResult();
             var lockedAmount = dLockedAmount ?? 0;
             bonusCode = bonusCode.Trim();
             var custInfo = _custInfoService.GetCustInfo(custId);
-            var result = _bonusAPIServiceV2.SetClaimPromotionV2(custId, custInfo.UserName, custInfo.SiteId, bonusCode, custInfo.CurrencyId, custIP, deviceType, out var bonusAmount, ref lockedAmount, out var rollOver, out var expiryTime, out var promotion);
+            var result = _bonusAPIServiceV2.SetClaimPromotionV2(custId, custInfo.UserName, custInfo.SiteId, bonusCode, custInfo.CurrencyId, custIP, deviceType, atPage, out var bonusAmount, ref lockedAmount, out var rollOver, out var expiryTime, out var promotion);
 
             if (result > 0)
             {

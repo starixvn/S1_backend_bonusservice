@@ -77,7 +77,7 @@ namespace BonusService.Service.DAL
             }
             return false;
         }
-        public bool CheckProfileFinish(int custId, int siteId)
+        public bool CheckProfileFinish(int custId, int siteId) //Profile Finish & Phone Verified
         {
             var custInfoProfile = _custInfoService.GetCustInfoProfile( custId, siteId);
             if (!custInfoProfile.PhoneVerified
@@ -130,10 +130,11 @@ namespace BonusService.Service.DAL
                 ExpiryDays = bonusRewardInput.ExpiryDays,
                 Memo = bonusRewardInput.Memo,
                 Prefix = bonusRewardInput.Prefix,
-                RefList = bonusRewardInput.RefList
+                RefList = bonusRewardInput.RefList,
+                AtPage = (int)bonusRewardInput.AtPage
             });
             p.Add("TransId", dbType: DbType.String, direction: ParameterDirection.Output);
-            var result = _mainDbClient.Execute("Member_BonusInfo_InsV2", p, conn, trans);
+            var result = _mainDbClient.Execute("Member_BonusInfo_InsV3", p, conn, trans);
             var transId = p.Get<string>("TransId");
 
             if (result > 0 && bonusRewardInput.LockedAmount > 0)
@@ -458,7 +459,7 @@ namespace BonusService.Service.DAL
             details.First().CashBackDetail = detail;
             promotion.CashBackDetails = details.First();
         }
-        public int SetClaimPromotionV2(int custId, string userName, int siteId, string bonusCode, int currencyId, string custIP, int? deviceType, out decimal bonusAmount, ref decimal lockedAmount, out decimal rollOver, out long expiryTime, out Promotion promotion)
+        public int SetClaimPromotionV2(int custId, string userName, int siteId, string bonusCode, int currencyId, string custIP, int? deviceType, BonusInfoAtPage atPage, out decimal bonusAmount, ref decimal lockedAmount, out decimal rollOver, out long expiryTime, out Promotion promotion)
         {
             bonusAmount = 0;
             rollOver = 0;
@@ -475,20 +476,20 @@ namespace BonusService.Service.DAL
 
             if (IsBlockIP(promotion, bonusCode, siteId, custIP))
                 return -3;
-            if (!CheckProfileFinish(custId, siteId))
+            if (!CheckProfileFinish(custId, siteId))//Profile Finish & Phone Verified
                 return -6;
 
             var custConditionInfo = GetCustConditionInfo(custId, currencyId, siteId, bonusCode, deviceType, conn, trans);
           
             if (custConditionInfo.CanJoin == 1)
             {
-                var CalculateBonusAmount = CalculateBonus(promotion, custConditionInfo.Amount, lockedAmount, custId, siteId, currencyId);
-                if (CalculateBonusAmount.result <= 0)
-                    return CalculateBonusAmount.result;
+                var CalculateBonus = this.CalculateBonus(promotion, custConditionInfo.Amount, lockedAmount, custId, siteId, currencyId);
+                if (CalculateBonus.result <= 0)
+                    return CalculateBonus.result;
 
-                bonusAmount = CalculateBonusAmount.BonusAmount;
-                rollOver = CalculateBonusAmount.RollOver;
-                expiryTime = CalculateBonusAmount.ExpiryTime;
+                bonusAmount = CalculateBonus.BonusAmount;
+                rollOver = CalculateBonus.RollOver;
+                expiryTime = CalculateBonus.ExpiryTime;
                 
                 var result = 0;
                 var bonusRewardInput = new BonusRewardInput
@@ -497,10 +498,10 @@ namespace BonusService.Service.DAL
                     BonusCode = bonusCode,
                     CategoryId = promotion.CategoryId,
                     TpId = promotion.TpId,
-                    BonusInfo = CalculateBonusAmount.BonusInfo,
-                    BonusAmount = CalculateBonusAmount.BonusAmount,
-                    LockedAmount = CalculateBonusAmount.LockedAmount,
-                    RollOver = CalculateBonusAmount.RollOver,
+                    BonusInfo = CalculateBonus.BonusInfo,
+                    BonusAmount = CalculateBonus.BonusAmount,
+                    LockedAmount = CalculateBonus.LockedAmount,
+                    RollOver = CalculateBonus.RollOver,
                     ExpiryTime = expiryTime,
                     ExpiryDays = promotion.ExpiryDays,
                     CustId = custId,
@@ -510,9 +511,10 @@ namespace BonusService.Service.DAL
                     Memo = (string)null,
                     Prefix = $"B{_common.GetEnv()}",
                     RefList = custConditionInfo.reference.Any() ? JsonConvert.SerializeObject(custConditionInfo.reference) : null,
-                    SetBalanceMemo = $"Claim Promotion BonusCode: {bonusCode}, Locked Amount: {CalculateBonusAmount.LockedAmount:#,##0.##}",
+                    SetBalanceMemo = $"Claim Promotion BonusCode: {bonusCode}, Locked Amount: {CalculateBonus.LockedAmount:#,##0.##}",
                     RewardBonusMemo = $"Claim Promotion BonusCode: {bonusCode}",
-                    FinancialType = FinancialType.Bonusreward
+                    FinancialType = FinancialType.Bonusreward,
+                    AtPage = atPage
                 };
                 result = Reward(bonusRewardInput, conn, trans);
 

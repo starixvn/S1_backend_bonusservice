@@ -184,7 +184,7 @@ namespace BonusService.Service.BLL
         public async Task<Boolean> SetClaimPromotionV2Async(DepositBonus depositBonus)
         {
             var apiResult1 = new ApiResult();
-            apiResult1 = await bonusAPIBLLV2.SetClaimPromotionV2Async(depositBonus.CustId, depositBonus.BonusCode, "", depositBonus.LockedAmount, 1);
+            apiResult1 = await bonusAPIBLLV2.SetClaimPromotionV2Async(depositBonus.CustId, depositBonus.BonusCode, "", depositBonus.LockedAmount, 1, BonusInfoAtPage.Deposit);
             if (apiResult1.ErrorCode == 0)
                 return true;
             return false;
