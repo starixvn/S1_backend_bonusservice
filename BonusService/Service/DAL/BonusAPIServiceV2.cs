@@ -511,8 +511,8 @@ namespace BonusService.Service.DAL
                     Memo = (string)null,
                     Prefix = $"B{_common.GetEnv()}",
                     RefList = custConditionInfo.reference.Any() ? JsonConvert.SerializeObject(custConditionInfo.reference) : null,
-                    SetBalanceMemo = $"Claim Promotion BonusCode: {bonusCode}, Locked Amount: {CalculateBonus.LockedAmount:#,##0.##}",
-                    RewardBonusMemo = $"Claim Promotion BonusCode: {bonusCode}",
+                    SetBalanceMemo = $"Claim {Enum.GetName(typeof(PromotionType), (PromotionType)promotion.PromotionType)} BonusCode: {bonusCode}, Locked Amount: {CalculateBonus.LockedAmount:#,##0.##}",
+                    RewardBonusMemo = $"Claim {Enum.GetName(typeof(PromotionType), (PromotionType)promotion.PromotionType)} BonusCode: {bonusCode}",
                     FinancialType = FinancialType.Bonusreward,
                     AtPage = atPage
                 };
