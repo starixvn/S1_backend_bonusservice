@@ -134,7 +134,7 @@ namespace BonusService.Service.DAL
                 AtPage = (int)bonusRewardInput.AtPage
             });
             p.Add("TransId", dbType: DbType.String, direction: ParameterDirection.Output);
-            var result = _mainDbClient.Execute("Member_BonusInfo_InsV3", p, conn, trans);
+            var result = _mainDbClient.Execute("Member_BonusInfo_Ins_V3", p, conn, trans);
             var transId = p.Get<string>("TransId");
 
             if (result > 0 && bonusRewardInput.LockedAmount > 0)
