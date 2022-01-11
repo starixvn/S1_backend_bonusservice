@@ -111,6 +111,7 @@ namespace BonusService.Service.DAL
             {
                 rtn.reference = JsonConvert.DeserializeObject<IEnumerable<Ref>>(rtn.RefList);
             }
+           
             return rtn;
         }
         public int BonusReward(BonusRewardInput bonusRewardInput, MySqlConnection conn, MySqlTransaction trans)
@@ -344,7 +345,7 @@ namespace BonusService.Service.DAL
 
             return output;
         }
-        public int AfterReward(Promotion promotion, int custId, int siteId, string bonusCode, int currencyId, string custIP, MySqlConnection conn, MySqlTransaction trans)
+        public int AfterReward(Promotion promotion, int custId, int siteId, string bonusCode, int currencyId, string custIP, BonusInfoAtPage atPage, MySqlConnection conn, MySqlTransaction trans)
         {
             var result = _mainDbClient.Execute("Member_PromotionBeenUsedV2_Set",
                        new DynamicParameters(new { SiteId = siteId, BonusCode = bonusCode, CurrencyId = currencyId }), conn, trans);
@@ -353,8 +354,8 @@ namespace BonusService.Service.DAL
                 if (promotion.PromotionType == PromotionType.FreeBet)
                     _mainDbClient.Execute("Service_BlockFreeBet_Ins",
                                new DynamicParameters(new { BonusCode = bonusCode, SiteId = siteId, IP = custIP }), conn, trans);
-
-                CancelAllWaitingBonus(custId, conn, trans);
+                if(atPage != BonusInfoAtPage.Deposit)
+                    CancelAllWaitingBonus(custId, conn, trans);
             }
             return result;
         }
@@ -459,7 +460,7 @@ namespace BonusService.Service.DAL
             details.First().CashBackDetail = detail;
             promotion.CashBackDetails = details.First();
         }
-        public int SetClaimPromotionV2(int custId, string userName, int siteId, string bonusCode, int currencyId, string custIP, int? deviceType, BonusInfoAtPage atPage, out decimal bonusAmount, ref decimal lockedAmount, out decimal rollOver, out long expiryTime, out Promotion promotion)
+        public int SetClaimPromotionV2(int custId, string userName, int siteId, string bonusCode, int currencyId, string custIP, int? deviceType, BonusInfoAtPage atPage, out decimal bonusAmount, ref decimal lockedAmount, out decimal rollOver, out long expiryTime, out Promotion promotion, string DepositTransId = null)
         {
             bonusAmount = 0;
             rollOver = 0;
@@ -480,7 +481,7 @@ namespace BonusService.Service.DAL
                 return -6;
 
             var custConditionInfo = GetCustConditionInfo(custId, currencyId, siteId, bonusCode, deviceType, conn, trans);
-          
+
             if (custConditionInfo.CanJoin == 1)
             {
                 var CalculateBonus = this.CalculateBonus(promotion, custConditionInfo.Amount, lockedAmount, custId, siteId, currencyId);
@@ -491,6 +492,18 @@ namespace BonusService.Service.DAL
                 rollOver = CalculateBonus.RollOver;
                 expiryTime = CalculateBonus.ExpiryTime;
                 
+                if (atPage == BonusInfoAtPage.Deposit) //記錄由Deposit頁面進來的 reference紀錄指定TransId、Amount
+                {
+                    custConditionInfo.reference = new List<Ref>
+                    {
+                        new Ref
+                        {
+                            DepositId = DepositTransId,
+                            Amount = lockedAmount
+                        }
+                    };
+                }
+
                 var result = 0;
                 var bonusRewardInput = new BonusRewardInput
                 {
@@ -520,7 +533,7 @@ namespace BonusService.Service.DAL
 
                 if (result > 0)
                 {
-                    if (AfterReward(promotion, custId, siteId, bonusCode, currencyId, custIP, conn, trans) > 0)
+                    if (AfterReward(promotion, custId, siteId, bonusCode, currencyId, custIP, atPage, conn, trans) > 0)
                         trans.Commit();
                 }
                 return result;
