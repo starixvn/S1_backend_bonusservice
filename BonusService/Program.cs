@@ -90,7 +90,7 @@ namespace BonusService
                     services.AddHostedService<VipRebateWorker>();
                     services.AddHostedService<VipCashBackWorker>();
                     services.AddHostedService<PromotionAutoExtendWorker>();
-                   // services.AddHostedService<DepositBonusWorker>();
+                    services.AddHostedService<DepositBonusWorker>();
 
                     if (Configuration.GetSection("RunVipDowngradeWorker").Get<bool>())
                     {
