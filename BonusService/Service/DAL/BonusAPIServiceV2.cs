@@ -376,10 +376,7 @@ namespace BonusService.Service.DAL
 
             foreach (var depositBonus in BonusList)
             {
-                {
-                    var p = new DynamicParameters(new { TransId = depositBonus.TransId, Status = (int)DepositBonusQueueStatus.Cancel_other_Bonus });
-                    _mainDbClient.Execute("Service_DepositBonusStatus_Set", p, conn, trans);
-                }
+                _depositBonusService.SetDepositBonusStatus(depositBonus.TransId, (int)DepositBonusQueueStatus.Cancel_other_Bonus);
             }
         }
         private static DateTime StartOfWeek(DateTime dateTime, DayOfWeek startOfWeek)
