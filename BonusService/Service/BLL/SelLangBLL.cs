@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Reflection;
 using System.Resources;
 
@@ -38,6 +39,32 @@ namespace BonusService.Service.BLL
             }
 
             return labelString;
+        }
+        public string GetMsg(string key,int siteId, string siteName, string langId)
+        {
+            var msgString = "";
+            if (siteId == 1)
+            {
+                msgString = GetResourceValue(key, "msg", langId);
+            }
+            else
+            {
+                try
+                {
+                    msgString = GetResourceValue(key, $"{siteName}_msg", langId);
+                }
+                catch (Exception ex)
+                {
+
+                }
+
+                if (string.IsNullOrEmpty(msgString))
+                {
+                    msgString = GetResourceValue(key, "msg", langId);
+                }
+            }
+
+            return msgString;
         }
     }
 }

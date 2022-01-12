@@ -46,7 +46,7 @@
     public enum Tp
     {
         None = 0,
-        OW = 1,
+        Saba = 1,
         SA = 2,
         AG = 3,
         DG = 4,
@@ -55,7 +55,31 @@
         YL = 7,
         YGG = 8,
         Joker = 9,
-        SG = 10
+        SG = 10,
+        KM = 11,
+        Allbet = 12,
+        OneGaming = 13,
+        PG = 14,
+        Sexy = 15,
+        CQ9 = 16,
+        CF = 17,
+        EBet = 18,
+        AWC = 19,
+        WM = 20,
+        Kiss918 = 21,
+        Mega = 22,
+        One789 = 23,
+        Iconic = 24,
+        V8 = 25,
+        PT = 27,
+        N2Live = 28,
+        BTI = 29,
+        AMB = 30,
+        NineW = 31,
+        JILI = 32,
+        TCG = 33,
+        MG = 34,
+        MP = 35
     }
 
     public enum VipPeriodType
@@ -97,7 +121,43 @@
     
     public enum FinancialType
     {
-        CancelledBonus = 7
+        LocalBankDeposit = 1,
+        PaymentAdjustmentDebit = 2,
+        PaymentAdjustmentCredit = 3,
+        Bonusreward = 5,
+        LockedAmount = 6,
+        CancelledBonus = 7,
+        Cashreward = 8
+    }
+    public enum WalletStatus
+    {
+        Normal = 1,
+        UM = 2,
+        Error = 3,
+    }
+    public enum SiteId
+    {
+        Nova88 = 1,
+        Goal123 = 2,
+        Bwing = 3
+    }
+    public enum DepositBonusQueueStatus : int
+    {
+        Undo = 1,
+        Finish = 2,
+        Expiry = 3,
+        Cancel_other_Bonus = 4,//Rewarded other Bonus
+        Cancel_not_eligible = 5,
+        Cancel_Rejected = 6
+    }
+    public enum AdjustStatus
+    {
+        Draft = 0,
+        Pending = 1,
+        Approved = 2,
+        Rejected = 3,
+        OnHold = 4,
+        Error = 99
     }
     public enum BonusInfoAtPage
     {
@@ -116,5 +176,16 @@
         SMS = 0,
         Email = 1
     }
-
+    public enum DepositStatusEnum
+    {
+        Draft = 0,    
+        Pending = 1,
+        Paid = 2,     
+        Approved = 3,
+        Rejected = 4,
+        Canceled = 5,
+        Expired = 6,  
+        OnHold = 7,   
+        Error = 99    
+    }
 }
