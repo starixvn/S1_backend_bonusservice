@@ -50,6 +50,10 @@ namespace BonusService.Service.DAL
 
         }
 
+        public class Memo
+        {
+            public string Operator { get; set; }
+        }
         public int SetAdjustmentBonus(DepositBonus depositBonus, string Operator, string memo, decimal Amount, int promotionType, out decimal bonusAmount, ref decimal lockedAmount, out decimal rollOver, out long expiryTime, out Promotion promotion, out int errorCode, out string errorMessage)
         {
             bonusAmount = 0;
@@ -134,7 +138,7 @@ namespace BonusService.Service.DAL
             lockedAmount = 0;
             rollOver = dRollOver;
             expiryTime = DateTimeOffset.Now.AddDays(promotion.ExpiryDays).ToUnixTimeSeconds();
-
+            var sMemo = JsonConvert.SerializeObject(new Memo { Operator = Operator });
 
             var result = 0;
 
@@ -150,7 +154,7 @@ namespace BonusService.Service.DAL
                 LockedAmount = dLockedAmount,
                 BonusAmount = dBonus,
                 promotion.ExpiryDays,
-                Memo = (string)null,
+                Memo = sMemo,
                 Prefix = $"B{_common.GetEnv()}",
                 RefList = reference.Any() ? JsonConvert.SerializeObject(reference.FirstOrDefault()) : null,
                 AtPage = (int)BonusInfoAtPage.Promotion
