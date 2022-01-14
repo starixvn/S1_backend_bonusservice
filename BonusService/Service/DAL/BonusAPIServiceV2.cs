@@ -595,7 +595,7 @@ namespace BonusService.Service.DAL
 
             return output;
         }
-        public int SetAdjustmentBonusV2(DepositBonus depositBonus, decimal amount, int promotionType, out decimal bonusAmount, ref decimal lockedAmount, out decimal rollOver, out long expiryTime, out Promotion promotion)
+        public int SetAdjustmentBonusV2(DepositBonus depositBonus, decimal amount, int promotionType, string memo, out decimal bonusAmount, ref decimal lockedAmount, out decimal rollOver, out long expiryTime, out Promotion promotion)
         {
             bonusAmount = 0;
             rollOver = 0;
@@ -666,7 +666,7 @@ namespace BonusService.Service.DAL
                 UserName = depositBonus.UserName,
                 CurrencyId = depositBonus.CurrencyId,
                 SiteId = depositBonus.SiteId,
-                Memo = (string)null,
+                Memo = memo,
                 Prefix = $"B{_common.GetEnv()}",
                 RefList =  null,
                 SetBalanceMemo = $"Claim {Enum.GetName(typeof(PromotionType), (PromotionType)promotion.PromotionType)} BonusCode: {depositBonus.BonusCode}, Locked Amount: {CalculateBonus.LockedAmount:#,##0.##}",

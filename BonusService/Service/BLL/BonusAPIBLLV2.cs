@@ -204,7 +204,7 @@ namespace BonusService.Service.BLL
             depositBonus.CurrencyId = custInfo.CurrencyId;
             depositBonus.DeviceType = 1;
 
-            var result = _bonusAPIServiceV2.SetAdjustmentBonusV2(depositBonus, amount, promotionType, out var bonusAmount, ref lockedAmount, out var rollOver, out var expiryTime, out var promotion);
+            var result = _bonusAPIServiceV2.SetAdjustmentBonusV2(depositBonus, amount, promotionType, memo, out var bonusAmount, ref lockedAmount, out var rollOver, out var expiryTime, out var promotion);
             if (result > 0)
             {
                 if (promotion?.TpId > 0)
