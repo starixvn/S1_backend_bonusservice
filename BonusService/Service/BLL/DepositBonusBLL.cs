@@ -16,10 +16,6 @@ namespace BonusService.Service.BLL
         private readonly string apiUrl;
         private readonly CourierAdapter courierAdapter;
         private readonly BonusAPIBLL bonusAPIBLL;
-        private readonly Dictionary<int, bool> isConvert = new Dictionary<int, bool>()
-        {
-            {51,false },{15,false }
-        };
         private readonly BonusAPIServiceV2 bonusAPIServiceV2;
         private readonly BonusAPIBLLV2 bonusAPIBLLV2;
 
