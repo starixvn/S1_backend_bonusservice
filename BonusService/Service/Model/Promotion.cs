@@ -146,5 +146,16 @@ namespace BonusService.Service.Model
         public long ExpiryTime { set; get; }
         public Dictionary<string, string> inputs { set; get; }
     }
-  
+    public class ErrorMessageMakerInput
+    {
+        public int Result { set; get; }
+        public string InputBonusCode { set; get; }
+        public decimal LockedAmount { set; get; }
+        public int InputPromotionType { set; get; }
+        public decimal InputAmount { set; get; }
+        public Customer CustInfo { set; get; }
+        public Promotion Promotion { set; get; }
+        
+    }
+
 }
