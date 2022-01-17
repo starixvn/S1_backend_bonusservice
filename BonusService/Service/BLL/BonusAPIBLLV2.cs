@@ -87,13 +87,13 @@ namespace BonusService.Service.BLL
                 case -202:
                     {
                         apiResult1.ErrorCode = input.Result;
-                        apiResult1.Message = $"BonusCode:{input.InputBonusCode} is not {Enum.GetName(typeof(PromotionType), (PromotionType)input.InputPromotionType)}"; ;
+                        apiResult1.Message = $"BonusCode:{input.InputBonusCode} is not {Enum.GetName(typeof(PromotionType), (PromotionType)input.InputPromotionType)}"; 
                     }
                     break;
                 case -203:
                     {
                         apiResult1.ErrorCode = input.Result;
-                        apiResult1.Message = $"BonusCode:{input.InputBonusCode} not Action"; ;
+                        apiResult1.Message = $"BonusCode:{input.InputBonusCode} not Action"; 
                     }
                     break;
                 case -204:
@@ -105,7 +105,7 @@ namespace BonusService.Service.BLL
                 case -205:
                     {
                         apiResult1.ErrorCode = input.Result;
-                        apiResult1.Message = $"CustId {input.CustInfo.CustId} has other running bonus"; ;
+                        apiResult1.Message = $"CustId {input.CustInfo.CustId} has other running bonus"; 
                     }
                     break;
 
