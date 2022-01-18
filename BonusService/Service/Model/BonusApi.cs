@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BonusService.Service.Model.enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,15 +9,7 @@ namespace BonusService.Service.Model
     public class BonusApi
     {
     }
-    public enum AdjustStatus
-    {
-        Draft = 0,
-        Pending = 1,
-        Approved = 2,
-        Rejected = 3,
-        OnHold = 4,
-        Error = 99
-    }
+    
     public class CustRunningBonus
     {
         public int BonusId { set; get; }
@@ -26,4 +19,48 @@ namespace BonusService.Service.Model
         public DateTime ExpiryTime { set; get; }
         public int Status { set; get; }
     }
+    public class CustCondition
+    {
+        public byte CanJoin { set; get; }
+        public decimal Amount { set; get; }
+        public string RefId { set; get; }
+        public int Result { set; get; }
+        public string RefList { set; get; }
+        public IEnumerable<Ref> reference { set; get; }
+    }
+
+    public class BonusRewardInput
+    {
+        public PromotionType PromotionType { set; get; }
+        public string BonusCode { set; get; }
+        public int CategoryId { set; get; }
+        public int TpId { set; get; }
+        public string BonusInfo { set; get; }
+        public decimal BonusAmount { set; get; }
+        public decimal LockedAmount { set; get; }
+        public decimal RollOver { set; get; }
+        public long ExpiryTime { set; get; }
+        public int ExpiryDays { get; set; }
+        public int CustId { set; get; }
+        public string UserName { set; get; }
+        public int CurrencyId { set; get; }
+        public int SiteId { set; get; }
+        public string Memo { set; get; }
+        public string Prefix { set; get; }
+        public string RefList { set; get; }
+        public string SetBalanceMemo { set; get; }
+        public string RewardBonusMemo { set; get; }
+        public FinancialType FinancialType { set; get; }
+        public BonusInfoAtPage AtPage { set; get; }
+    }
+    public class CalculateBonusOutput
+    {
+        public decimal BonusAmount { set; get; }
+        public decimal LockedAmount { set; get; }
+        public decimal RollOver { set; get; }
+        public string BonusInfo { set; get; }
+        public long ExpiryTime { set; get; }
+        public int result { set; get; }
+    }
 }
+

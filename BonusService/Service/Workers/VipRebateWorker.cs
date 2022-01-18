@@ -38,7 +38,6 @@ namespace BonusService.Service.Workers
                     startTick = Environment.TickCount;
                     _logger.LogInformation($"VipRebate SiteId:{rebateTask.SiteId} start ");
                     int pageSize = 1000, pageNumber = 1;
-                    int listCnt = 0;
                     var rebatePayoutLimit = rebateBLL.GetRebatePayoutLimit();
 
                   
