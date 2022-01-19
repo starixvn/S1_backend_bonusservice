@@ -16,6 +16,8 @@ namespace BonusService.Service.BLL
         private readonly BonusAPIServiceV2 _bonusAPIServiceV2;
         private readonly SelLangBLL _selLangBll;
         private readonly MessageService _messageService;
+        private readonly DepositBonusService _depositBonusService;
+        private readonly DepositBonusBLL _depositBonusBLL;
 
         public BonusAPIBLLV2(IServiceProvider provider)
         {
@@ -23,6 +25,8 @@ namespace BonusService.Service.BLL
             _bonusAPIServiceV2 = provider.GetRequiredService<BonusAPIServiceV2>();
             _selLangBll = provider.GetRequiredService<SelLangBLL>();
             _messageService = provider.GetRequiredService<MessageService>();
+            _depositBonusService = provider.GetRequiredService<DepositBonusService>();
+            _depositBonusBLL = provider.GetRequiredService<DepositBonusBLL>();
 
         }
         public ApiResult MakeErrorMessage(ErrorMessageMakerInput input)
@@ -126,7 +130,21 @@ namespace BonusService.Service.BLL
             }
             return apiResult1;
         }
+        public void CancelAllWaitingBonus(int custId)
+        {//當領取BONUS成功   將客戶DepositBonusQueue中的BONUS CANCEL掉
 
+            var BonusList = _bonusAPIServiceV2.GetDepositBonusQueueByCustId(custId, true);//改變狀態用mainDb取得資料，避免資料不同步
+
+            foreach (var depositBonus in BonusList)
+            {
+                _depositBonusBLL.SetDepositBonusStatus(depositBonus.TransId, (int)DepositBonusQueueStatus.Cancel_other_Bonus);
+            }
+        }
+        public void AfterRewardSuccess(AfterRewardSuccessInput input)
+        {
+            if(input.atPage != BonusInfoAtPage.Deposit) 
+                CancelAllWaitingBonus(input.CustId);
+        }
         public async Task<ApiResult> SetClaimPromotionV2Async(int custId, string bonusCode, string custIP, decimal? dLockedAmount, int? deviceType, BonusInfoAtPage atPage, string DepositTransId = null)
         {
             var apiResult1 = new ApiResult();
@@ -171,8 +189,15 @@ namespace BonusService.Service.BLL
                     var content = string.Format(_selLangBll.GetMsg("msg_ClaimCashBackBonus", custInfo.SiteId, custInfo.SiteName, custInfo.UserLang),
                         bonusAmount.ToString("#,##0.##"));
                     _messageService.SendMessage(custInfo.SiteId, "System", content, content, custInfo.CustId, custInfo.UserName, custInfo.UserLang);
-
-
+                }
+                if (apiResult1.ErrorCode == 0)
+                {
+                    var input = new AfterRewardSuccessInput
+                    {
+                        CustId = custId,
+                        atPage = atPage
+                    };
+                    AfterRewardSuccess(input);
                 }
             }
             else
@@ -189,6 +214,7 @@ namespace BonusService.Service.BLL
             }
             return apiResult1;
         }
+        
         public async Task<ApiResult> SetAdjustmentBonusV2Async(int custId, string bonusCode, string Operator, string memo, decimal amount, int promotionType)
         {
             var apiResult1 = new ApiResult();
@@ -234,6 +260,16 @@ namespace BonusService.Service.BLL
                 else
                 {
                     apiResult1.ErrorCode = 0;
+                }
+
+                if (apiResult1.ErrorCode == 0)
+                {
+                    var input = new AfterRewardSuccessInput
+                    {
+                        CustId = custId,
+                        atPage = BonusInfoAtPage.Promotion
+                    };
+                    AfterRewardSuccess(input);
                 }
             }
             else
