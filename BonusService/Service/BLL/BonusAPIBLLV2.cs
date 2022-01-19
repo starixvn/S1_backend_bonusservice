@@ -34,6 +34,12 @@ namespace BonusService.Service.BLL
             var apiResult1 = new ApiResult();
             switch (input.Result)
             {
+                case 0://未知錯誤
+                    {
+                        apiResult1.ErrorCode = 9000;//未知錯誤
+                        apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible", input.CustInfo.SiteId, input.CustInfo.SiteName, input.CustInfo.UserLang);
+                    }
+                    break;
                 case -2://中心錢包餘額不可少於 {0}
                     {
                         apiResult1.ErrorCode = input.Result;
