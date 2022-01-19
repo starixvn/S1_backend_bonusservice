@@ -289,5 +289,13 @@ namespace BonusService.Service.BLL
 
             return apiResult1;
         }
+        public async Task<Boolean> SetClaimPromotionV2Async(DepositBonus depositBonus)
+        {
+            var apiResult1 = new ApiResult();
+            apiResult1 = await SetClaimPromotionV2Async(depositBonus.CustId, depositBonus.BonusCode, "", depositBonus.LockedAmount, 1, BonusInfoAtPage.Deposit, depositBonus.TransId);
+            if (apiResult1.ErrorCode == 0)
+                return true;
+            return false;
+        }
     }
 }
