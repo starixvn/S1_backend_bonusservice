@@ -15,13 +15,15 @@ namespace BonusService.Service.Workers
     {
         private readonly ILogger<DepositBonusWorker> logger;
         private readonly DepositBonusBLL depositBonusBLL;
+        private readonly BonusAPIBLLV2 bonusAPIBLLV2;
         private Timer timerDepositBonus;
         private DateTime LastChickDate;
 
-        public DepositBonusWorker(ILogger<DepositBonusWorker> logger, DepositBonusBLL depositBonusBLL)
+        public DepositBonusWorker(ILogger<DepositBonusWorker> logger, DepositBonusBLL depositBonusBLL, BonusAPIBLLV2 bonusAPIBLLV2)
         {
             this.logger = logger;
             this.depositBonusBLL = depositBonusBLL;
+            this.bonusAPIBLLV2 = bonusAPIBLLV2;
         }
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -51,7 +53,7 @@ namespace BonusService.Service.Workers
                         if (depositBonus.DepositStatus == (int)DepositStatusEnum.Approved)
                         {
                             // var rtn = await depositBonusBLL.SetClaimPromotionAsync(depositBonus);
-                            var rtn = await depositBonusBLL.SetClaimPromotionV2Async(depositBonus);
+                            var rtn = await bonusAPIBLLV2.SetClaimPromotionV2Async(depositBonus);
                             if (rtn)
                             {
                                 logger.LogInformation($"DoDepositBonus  success TransId: {depositBonus.TransId}");

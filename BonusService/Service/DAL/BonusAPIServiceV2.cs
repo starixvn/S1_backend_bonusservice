@@ -356,8 +356,8 @@ namespace BonusService.Service.DAL
                 if (promotion.PromotionType == PromotionType.FreeBet && string.IsNullOrEmpty(custIP))
                     _mainDbClient.Execute("Service_BlockFreeBet_Ins",
                                new DynamicParameters(new { BonusCode = bonusCode, SiteId = siteId, IP = custIP }), conn, trans);
-                if(atPage != BonusInfoAtPage.Deposit)
-                    CancelAllWaitingBonus(custId, conn, trans);
+                //if(atPage != BonusInfoAtPage.Deposit)
+                //    CancelAllWaitingBonus(custId, conn, trans);
             }
             return result;
         }
@@ -371,16 +371,16 @@ namespace BonusService.Service.DAL
             return conn.Query<DepositBonus>("Service_DepositBonusQueueByCustId_Get", new { CustId = custId }, commandType: CommandType.StoredProcedure);
         }
 
-        public void CancelAllWaitingBonus(int custId, MySqlConnection conn, MySqlTransaction trans)
-        {//當領取BONUS成功   將客戶DepositBonusQueue中的BONUS CANCEL掉
+        //public void CancelAllWaitingBonus(int custId, MySqlConnection conn, MySqlTransaction trans)
+        //{//當領取BONUS成功   將客戶DepositBonusQueue中的BONUS CANCEL掉
 
-            var BonusList = GetDepositBonusQueueByCustId(custId,true);//改變狀態用mainDb取得資料，避免資料不同步
+        //    var BonusList = GetDepositBonusQueueByCustId(custId,true);//改變狀態用mainDb取得資料，避免資料不同步
 
-            foreach (var depositBonus in BonusList)
-            {
-                _depositBonusService.SetDepositBonusStatus(depositBonus.TransId, (int)DepositBonusQueueStatus.Cancel_other_Bonus);
-            }
-        }
+        //    foreach (var depositBonus in BonusList)
+        //    {
+        //        _depositBonusService.SetDepositBonusStatus(depositBonus.TransId, (int)DepositBonusQueueStatus.Cancel_other_Bonus);
+        //    }
+        //}
         private static DateTime StartOfWeek(DateTime dateTime, DayOfWeek startOfWeek)
         {
             var diff = (7 + (dateTime.DayOfWeek - startOfWeek)) % 7;

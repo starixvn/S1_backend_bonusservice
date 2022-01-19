@@ -62,5 +62,12 @@ namespace BonusService.Service.Model
         public long ExpiryTime { set; get; }
         public int result { set; get; }
     }
+
+    public class AfterRewardSuccessInput
+    {
+        public int CustId { set; get; }
+        public BonusInfoAtPage atPage { set; get; }
+    }
+
 }
 

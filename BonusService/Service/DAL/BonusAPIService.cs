@@ -691,7 +691,7 @@ namespace BonusService.Service.DAL
                 return -5;
             }
 
-            return 0;
+            return -1;
 
         }
         public void CancelAllWaitingBonus(int custId, MySqlConnection conn, MySqlTransaction trans)
