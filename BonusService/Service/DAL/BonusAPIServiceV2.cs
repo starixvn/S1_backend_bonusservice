@@ -472,7 +472,7 @@ namespace BonusService.Service.DAL
             promotion = GetPromotion(custId, currencyId, siteId, bonusCode, deviceType);
 
             if (promotion == null)
-                return 0;
+                return -3;
 
             if (IsBlockIP(promotion, bonusCode, siteId, custIP))
                 return -3;
@@ -543,7 +543,7 @@ namespace BonusService.Service.DAL
                 return -5;
             }
 
-            return 0;
+            return -3;
 
         }
         public async Task<ApiResult<TransferResult>> TransferTpBonus(TpBonusTransfer tpBonusTransfer)
