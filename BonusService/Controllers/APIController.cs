@@ -5,6 +5,7 @@ using MemberSite.Service.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Threading.Tasks;
 
@@ -15,11 +16,13 @@ namespace BonusService.Controllers
     public class APIController : ControllerBase
     {
         private readonly BonusAPIBLL _bonusAPIBLL;
+        private readonly BonusAPIBLLV2 _bonusAPIBLLV2;
         private readonly ILogger<APIController> _logger;
 
         public APIController(IServiceProvider provider, ILogger<APIController> logger)
         {
             _bonusAPIBLL = provider.GetRequiredService<BonusAPIBLL>();
+            _bonusAPIBLLV2 = provider.GetRequiredService<BonusAPIBLLV2>();
             this._logger = logger;
         }
 
@@ -51,7 +54,11 @@ namespace BonusService.Controllers
                     result.Message = "Please complete your profile and verify your phone number to enjoy our promotions.";
                     return result;
                 }
-                result = await _bonusAPIBLL.SetAdjustmentBonusAsync(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode, setAdjustBonusReq.Operator, setAdjustBonusReq.Memo, setAdjustBonusReq.Amount, setAdjustBonusReq.PromotionType);
+                //result = await _bonusAPIBLL.SetAdjustmentBonusAsync(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode, setAdjustBonusReq.Operator, setAdjustBonusReq.Memo, setAdjustBonusReq.Amount, setAdjustBonusReq.PromotionType);
+                string Memo = JsonConvert.SerializeObject(new { Operator = setAdjustBonusReq.Operator }); 
+
+                result = await _bonusAPIBLLV2.SetAdjustmentBonusV2Async(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode, setAdjustBonusReq.Operator, Memo, setAdjustBonusReq.Amount, setAdjustBonusReq.PromotionType);
+
             }
             catch (Exception ex)
             {
@@ -92,6 +99,39 @@ namespace BonusService.Controllers
                 item = OTPTypeEnum.Email;
 
             return _bonusAPIBLL.CheckRewardCondination(verificationRewardReq.CustId, item);
+        }
+
+        public class PromotionReq
+        {
+            public string BonusCode { set; get; }
+            public int CustId { set; get; }
+            public string custIP { set; get; }
+            public decimal? LockedAmount { set; get; }
+            public int? DeviceType { set; get; }
+        }
+
+        [HttpPost]
+        public async Task<ApiResult> SetClaimPromotionAsync(PromotionReq promotionReq)
+        {
+            var apiResult = new ApiResult();
+            try
+            {
+                
+                int? deviceType = 1;
+                if (promotionReq.DeviceType != null)
+                {
+                    deviceType = promotionReq.DeviceType;
+                }
+                //apiResult = await _bonusAPIBLL.SetClaimPromotionAsync(promotionReq.CustId, promotionReq.BonusCode, promotionReq.custIP, promotionReq.LockedAmount, deviceType);
+                apiResult = await _bonusAPIBLLV2.SetClaimPromotionV2Async(promotionReq.CustId, promotionReq.BonusCode, promotionReq.custIP, promotionReq.LockedAmount, deviceType, BonusInfoAtPage.Promotion);
+            }
+            catch (Exception ex)
+            {
+                apiResult.RawMessage = ex.Message;
+                apiResult.Message = ex.Message;
+            }
+
+            return apiResult;
         }
     }
 

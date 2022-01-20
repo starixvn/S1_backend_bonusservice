@@ -7,6 +7,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using BonusService.Service.Extensions;
+using BonusService.Service.Model.enums;
 
 namespace BonusService.Service.Workers
 {
@@ -14,13 +15,15 @@ namespace BonusService.Service.Workers
     {
         private readonly ILogger<DepositBonusWorker> logger;
         private readonly DepositBonusBLL depositBonusBLL;
+        private readonly BonusAPIBLLV2 bonusAPIBLLV2;
         private Timer timerDepositBonus;
         private DateTime LastChickDate;
 
-        public DepositBonusWorker(ILogger<DepositBonusWorker> logger, DepositBonusBLL depositBonusBLL)
+        public DepositBonusWorker(ILogger<DepositBonusWorker> logger, DepositBonusBLL depositBonusBLL, BonusAPIBLLV2 bonusAPIBLLV2)
         {
             this.logger = logger;
             this.depositBonusBLL = depositBonusBLL;
+            this.bonusAPIBLLV2 = bonusAPIBLLV2;
         }
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -46,10 +49,11 @@ namespace BonusService.Service.Workers
                     var depositBonusList = depositBonusBLL.GetDepositBonusQueueByCustId(CudepositBonusQueueCuststList.CustId);
                     foreach (var depositBonus in depositBonusList)
                     {
-                        //table "DepositInfo" Status 0. Draft, 1. Pending, 2. Paid, 3. Approved, 4. Rejected, 5. Canceled, 6. Expired, 7. OnHold, 99. Error.
-                        if (depositBonus.DepositStatus == 3)
+                        
+                        if (depositBonus.DepositStatus == (int)DepositStatusEnum.Approved)
                         {
-                            var rtn = await depositBonusBLL.SetClaimPromotionAsync(depositBonus);
+                            // var rtn = await depositBonusBLL.SetClaimPromotionAsync(depositBonus);
+                            var rtn = await bonusAPIBLLV2.SetClaimPromotionV2Async(depositBonus);
                             if (rtn)
                             {
                                 logger.LogInformation($"DoDepositBonus  success TransId: {depositBonus.TransId}");
@@ -61,8 +65,8 @@ namespace BonusService.Service.Workers
                                 depositBonusBLL.SetDepositBonusStatus(depositBonus.TransId, (int)DepositBonusQueueStatus.Cancel_not_eligible);
                             }
                         }
-                        //table "DepositInfo" Status 0. Draft, 1. Pending, 2. Paid, 3. Approved, 4. Rejected, 5. Canceled, 6. Expired, 7. OnHold, 99. Error.
-                        else if (depositBonus.DepositStatus == 4 || depositBonus.DepositStatus == 5 || depositBonus.DepositStatus == 6 ||depositBonus.DepositStatus == 99 )
+                       
+                        else if (depositBonus.DepositStatus == (int)DepositStatusEnum.Rejected || depositBonus.DepositStatus == (int)DepositStatusEnum.Canceled || depositBonus.DepositStatus == (int)DepositStatusEnum.Expired || depositBonus.DepositStatus == (int)DepositStatusEnum.Error )
                         {
                             depositBonusBLL.SetDepositBonusStatus(depositBonus.TransId, (int)DepositBonusQueueStatus.Cancel_Rejected);
                         }
@@ -116,7 +120,6 @@ namespace BonusService.Service.Workers
         //    catch (Exception ex)
         //    {
         //        logger.LogError(ex.Message);
-        //        log2File.Error(ex.ToString(), "DepositBonus");
         //    }
         //    finally
         //    {
