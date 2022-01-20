@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using BonusService.Service.Library;
 using BonusService.Service.Model.enums;
+using Microsoft.Extensions.Logging;
 
 namespace BonusService.Service.BLL
 {
@@ -17,16 +18,16 @@ namespace BonusService.Service.BLL
         private readonly CourierAdapter courierAdapter;
         private readonly BonusAPIBLL bonusAPIBLL;
         private readonly BonusAPIServiceV2 bonusAPIServiceV2;
-        private readonly BonusAPIBLLV2 bonusAPIBLLV2;
+        private readonly ILogger<DepositBonusBLL> _logger;
 
-        public DepositBonusBLL(DepositBonusService depositBonusService, IConfiguration configuration, CourierAdapter courierAdapter, BonusAPIBLL bonusAPIBLL, BonusAPIServiceV2 bonusAPIServiceV2, BonusAPIBLLV2 bonusAPIBLLV2)
+        public DepositBonusBLL(DepositBonusService depositBonusService, IConfiguration configuration, CourierAdapter courierAdapter, BonusAPIBLL bonusAPIBLL, BonusAPIServiceV2 bonusAPIServiceV2, ILogger<DepositBonusBLL> logger)
         {
             this.depositBonusService = depositBonusService;
             this.apiUrl = configuration.GetValue<string>("TpService");
             this.courierAdapter = courierAdapter;
             this.bonusAPIBLL = bonusAPIBLL;
             this.bonusAPIServiceV2 = bonusAPIServiceV2;
-            this.bonusAPIBLLV2 = bonusAPIBLLV2;
+            _logger = logger;
         }
         public IEnumerable<DepositBonus> GetDepositBonusQueue()
         {
@@ -156,8 +157,37 @@ namespace BonusService.Service.BLL
         {
             depositBonusService.CheckDepositBonusExpired();
         }
+        public string GetDepositBonusQueueStatusComment(int status)
+        {
+            string Comment = "UnKnowStatus";
+            switch (status)
+            {
+                case (int)DepositBonusQueueStatus.Undo:
+                    Comment = "Undo";
+                    break;
+                case (int)DepositBonusQueueStatus.Finish:
+                    Comment = "Bonus Dispatched";
+                    break;
+                case (int)DepositBonusQueueStatus.Expiry:
+                    Comment = "DepositBonusQueue Expiry";
+                    break;
+                case (int)DepositBonusQueueStatus.Cancel_other_Bonus:
+                    Comment = "Cancel-Already received other bonus";
+                    break;
+                case (int)DepositBonusQueueStatus.Cancel_not_eligible:
+                    Comment = "Cancel-User is not eligible";
+                    break;
+                case (int)DepositBonusQueueStatus.Cancel_Rejected:
+                    Comment = "Cancel-Deposit has been rejected";
+                    break;
+
+            }
+            return Comment;
+        }
         public int SetDepositBonusStatus(string transId, int status)
         {
+            _logger.LogInformation($"Change DepositBonus Queue status TransId: {transId} status:{status} {GetDepositBonusQueueStatusComment(status)}");
+
             return depositBonusService.SetDepositBonusStatus( transId, status);
         }
         public int SetDepositBonusFinish(string transId, int custId)
@@ -177,13 +207,5 @@ namespace BonusService.Service.BLL
             return 1;
         }
 
-        public async Task<Boolean> SetClaimPromotionV2Async(DepositBonus depositBonus)
-        {
-            var apiResult1 = new ApiResult();
-            apiResult1 = await bonusAPIBLLV2.SetClaimPromotionV2Async(depositBonus.CustId, depositBonus.BonusCode, "", depositBonus.LockedAmount, 1, BonusInfoAtPage.Deposit, depositBonus.TransId);
-            if (apiResult1.ErrorCode == 0)
-                return true;
-            return false;
-        }
     }
 }
