@@ -1,7 +1,7 @@
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1 as builder
 
 COPY . .
-WORKDIR PaymentService/PaymentService
+WORKDIR BonusService/BonusService
 RUN dotnet publish -c Release -o /app
 
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1
