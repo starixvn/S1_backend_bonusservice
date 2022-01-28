@@ -32,40 +32,46 @@ namespace BonusService.Service.BLL
         public ApiResult MakeErrorMessage(ErrorMessageMakerInput input)
         {
             var apiResult1 = new ApiResult();
+            //defult Message display
+            apiResult1.ErrorCode = input.Result;
+            apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible", input.CustInfo.SiteId, input.CustInfo.SiteName, input.CustInfo.UserLang);
+
+            if (input.CustInfo.SiteId == (int)SiteId.Goal123 || input.CustInfo.SiteId == (int)SiteId.Bwing)
+            {
+                if (input.Promotion.PromotionType == PromotionType.FreeBet)
+                {
+                    apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible_FreeBet", input.CustInfo.SiteId, input.CustInfo.SiteName, input.CustInfo.UserLang);
+                }
+            }
             switch (input.Result)
             {
-                case 0://未知錯誤
+                case (int)BonusErrorCode.ERROR:
                     {
                         apiResult1.ErrorCode = 9000;//未知錯誤
                         apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible", input.CustInfo.SiteId, input.CustInfo.SiteName, input.CustInfo.UserLang);
+                        apiResult1.RawMessage = "Unknow Error";
                     }
                     break;
-                case -2://中心錢包餘額不可少於 {0}
+                //API error -10xx
+                case (int)BonusErrorCode.PROMOTION_NOT_FOUND:
                     {
-                        apiResult1.ErrorCode = input.Result;
-                        var dRequiredAmount = input.LockedAmount.ToString("#,##0");
-                        if (_custInfoService.IsConvertRequired(input.CustInfo.CurrencyId))
-                        {
-                            dRequiredAmount = $"{input.LockedAmount / 1000:#,##0} ('000)";
-                        }
-
-                        apiResult1.Message = string.Format(_selLangBll.GetMsg("msg_LockedAmountInsufficient", input.CustInfo.SiteId, input.CustInfo.SiteName, input.CustInfo.UserLang), dRequiredAmount);
+                        apiResult1.Message = $"BonusCode:{input.InputBonusCode} not found";
+                        apiResult1.RawMessage = $"BonusCode:{input.InputBonusCode} not found";
                     }
                     break;
-                case -3://您不符合領取此優惠，請聯繫客服以了解詳情。
+                case (int)BonusErrorCode.IP_IS_BLOCKED:
                     {
-                        apiResult1.ErrorCode = input.Result;
-                        apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible", input.CustInfo.SiteId, input.CustInfo.SiteName, input.CustInfo.UserLang);
-
-                        if ((input.CustInfo.SiteId == 2 || input.CustInfo.SiteId == 3) && input.Promotion?.PromotionType == PromotionType.FreeBet)
-                        {
-                            apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible_FreeBet", input.CustInfo.SiteId, input.CustInfo.SiteName, input.CustInfo.UserLang);
-                        }
+                        apiResult1.RawMessage = "Customer's IP is blocked";
                     }
                     break;
-                case -4://最低存款{0}可以享受優惠
+                case (int)BonusErrorCode.PROFILE_OR_PHONE_NOT_FINISH:
                     {
-                        apiResult1.ErrorCode = input.Result;
+                        apiResult1.Message = $"{_selLangBll.GetMsg("msg_PhoneProfile_ERROR", input.CustInfo.SiteId, input.CustInfo.SiteName, input.CustInfo.UserLang)}";
+                        apiResult1.RawMessage = "Customer profile incomplete or phone not verified. ";
+                    }
+                    break;
+                case (int)BonusErrorCode.DEPOSIT_AMOUNT_NOT_ENOUGH:
+                    {
                         var dRequiredAmount = input.Promotion.RequiredAmount.ToString("#,##0");
                         if (_custInfoService.IsConvertRequired(input.CustInfo.CurrencyId))
                         {
@@ -73,55 +79,135 @@ namespace BonusService.Service.BLL
                         }
 
                         apiResult1.Message = string.Format(_selLangBll.GetMsg("msg_RequiredAmountInsufficient", input.CustInfo.SiteId, input.CustInfo.SiteName, input.CustInfo.UserLang), dRequiredAmount);
+                        apiResult1.RawMessage = $"Customer's deposit amount less then requiredamount {dRequiredAmount}.";
                     }
                     break;
-                case -5://您想享受我們完整的產品和服務嗎？現在驗證您的電話？
+                case (int)BonusErrorCode.MAINWALLET_AMOUNT_NOT_ENOUGH://中心錢包餘額不可少於 {0}
                     {
-                        apiResult1.ErrorCode = input.Result;
-                        apiResult1.Message = $"{_selLangBll.GetMsg("msg_OTPHint1", input.CustInfo.SiteId, input.CustInfo.SiteName, input.CustInfo.UserLang)}\r\n{_selLangBll.GetMsg("msg_OTPHint2", input.CustInfo.SiteId, input.CustInfo.SiteName, input.CustInfo.UserLang)}";
+                        var dRequiredAmount = input.LockedAmount.ToString("#,##0");
+                        if (_custInfoService.IsConvertRequired(input.CustInfo.CurrencyId))
+                        {
+                            dRequiredAmount = $"{input.LockedAmount / 1000:#,##0} ('000)";
+                        }
+
+                        apiResult1.Message = string.Format(_selLangBll.GetMsg("msg_LockedAmountInsufficient", input.CustInfo.SiteId, input.CustInfo.SiteName, input.CustInfo.UserLang), dRequiredAmount);
+                        apiResult1.RawMessage = $"Customer's mainwallet amount less then {dRequiredAmount}.";
                     }
                     break;
-                case -6://Please complete your profile and verify your phone number to enjoy our promotions.
+                case (int)BonusErrorCode.CALCULATE_AMOUNT_IS_NEGATIVE:
                     {
-                        apiResult1.ErrorCode = input.Result;
-                        apiResult1.Message = $"{_selLangBll.GetMsg("msg_PhoneProfile_ERROR", input.CustInfo.SiteId, input.CustInfo.SiteName, input.CustInfo.UserLang)}";
+                        apiResult1.RawMessage = "Calculate amount is negiative.";
                     }
                     break;
-                //-2XX AdjustmentBonus Error Message
-                case -201:
+                case (int)BonusErrorCode.CALCULATE_CASHBACK_TOTALBONUS_LESS_THEN_MINPAY:
                     {
-                        apiResult1.ErrorCode = input.Result;
-                        apiResult1.Message = $"BonusCode:{input.InputBonusCode} not found"; 
+                        apiResult1.RawMessage = "Calculate cashback bonus less then minpay.";
+                    }break;
+                case (int)BonusErrorCode.CALCULATE_UNKNOW_PROMOTION_TYPE:
+                    {
+                        apiResult1.RawMessage = "Calculate function unknow promotion type.";
                     }
                     break;
-                case -202:
+                //SP Return ERROR -11XX
+                case (int)BonusErrorCode.SP_BONUS_NOT_FOUND:
                     {
-                        apiResult1.ErrorCode = input.Result;
-                        apiResult1.Message = $"BonusCode:{input.InputBonusCode} is not {Enum.GetName(typeof(PromotionType), (PromotionType)input.InputPromotionType)}"; 
+                        apiResult1.RawMessage = $"SP can not found this bonus {input.InputBonusCode}";
                     }
                     break;
-                case -203:
+                case (int)BonusErrorCode.SP_CUSTUMER_NOT_JOIN_SPECIALCODE:
                     {
-                        apiResult1.ErrorCode = input.Result;
-                        apiResult1.Message = $"BonusCode:{input.InputBonusCode} not Action"; 
+                        apiResult1.RawMessage = "Customer did not join special code";
                     }
                     break;
-                case -204:
+                case (int)BonusErrorCode.SP_CUSTUMER_JOIN_THIS_PROMOTION_BEFORE:
                     {
-                        apiResult1.ErrorCode = input.Result;
-                        apiResult1.Message = $"Amount:{input.InputAmount} is over MaxBonus{input.Promotion.MaxBonus} BonusCode:{input.InputBonusCode} "; 
+                        apiResult1.RawMessage = "Customer join this promotion before";
                     }
                     break;
-                case -205:
+                case (int)BonusErrorCode.SP_CUSTUMER_BONUS_STILL_RUNNING:
                     {
-                        apiResult1.ErrorCode = input.Result;
-                        apiResult1.Message = $"CustId {input.CustInfo.CustId} has other running bonus"; 
+                        apiResult1.RawMessage = "Customer has other running bonus.";
+                    }
+                    break;
+                case (int)BonusErrorCode.SP_CUSTUMER_DEPOSITE_NOT_EXCEED_REQUIRED_AMOUNT:
+                    {
+                        apiResult1.RawMessage = "Customer deposit amount less then requiredamount.";
+                    }
+                    break;
+                case (int)BonusErrorCode.SP_CUSTUMER_DONT_HAVE_FIRSTDEPOSIT:
+                    {
+                        apiResult1.RawMessage = "Can't not find Customer's firstdeposit";
+                    }
+                    break;
+                case (int)BonusErrorCode.SP_CUSTUMER_FIRSTDEPOSIT_RULT_DONT_MATCH:
+                    {
+                        apiResult1.RawMessage = "Customer does not match firstdeposit bonus rult";
+                    }
+                    break;
+                case (int)BonusErrorCode.SP_CUSTUMER_WITHDRAWAL_BEFORE:
+                    {
+                        apiResult1.RawMessage = "Customer withdrawal before";
+                    }
+                    break;
+                case (int)BonusErrorCode.SP_CUSTOMER_BONUS_STILL_RUNNING_OR_ADD_OTHER_BONUS_IN_PERIOD_TIME:
+                    {
+                        apiResult1.RawMessage = "Customer has other running bonus or join other bonus in period time.";
+                    }
+                    break;
+                case (int)BonusErrorCode.SP_CUSTOMER_BONUS_STILL_RUNNING_OR_ADD_OTHER_BONUS_WHICH_PROMOTIONTYPE_IN_135:
+                    {
+                        apiResult1.RawMessage = "Customer has other running bonus or ever join other bonus which promotion type in 1,3,5.";
+                    }
+                    break;
+                case (int)BonusErrorCode.SP_CUSTOMER_DEPOSIT_APPROVE_BEFORE:
+                    {
+                        apiResult1.RawMessage = "Customer has approved deposit before.";
+                    }
+                    break;
+                case (int)BonusErrorCode.SP_CUSTOMER_BONUS_STILL_RUNNING_OR_ADD_THIS_BONUS_BEFORE:
+                    {
+                        apiResult1.RawMessage = "Customer has other running bonus or join this bonus before.";
+                    }
+                    break;
+                case (int)BonusErrorCode.SP_CUSTOMER_JOIN_THIS_REBATE_BEFORE:
+                    {
+                        apiResult1.RawMessage = "Customer has other running bonus or join this bonus before.";
+                    }
+                    break;
+                case (int)BonusErrorCode.SP_CUSTOMER_HAVE_RUNNING_BONUS_OR_JOIN_THIS_BONUS_IN_PROID_TIME:
+                    {
+                        apiResult1.RawMessage = "Customer has other running bonus or join other bonus in period time.";
                     }
                     break;
 
+                //AdjustmentBonus Error -12XX
+                case (int)BonusErrorCode.ADJUSTMENT_BONUS_PROMOTIONTYPE_NOT_MATCH:
+                    {
+                        apiResult1.Message = $"BonusCode:{input.InputBonusCode} is not {Enum.GetName(typeof(PromotionType), (PromotionType)input.InputPromotionType)}";
+                        apiResult1.RawMessage = $"BonusCode:{input.InputBonusCode} is not {Enum.GetName(typeof(PromotionType), (PromotionType)input.InputPromotionType)}"; ;
+                    }
+                    break;
+                case (int)BonusErrorCode.ADJUSTMENT_BONUS_PROMOTION_NOT_ACTIVE:
+                    {
+                        apiResult1.Message = $"BonusCode:{input.InputBonusCode} not Action";
+                        apiResult1.RawMessage = $"BonusCode:{input.InputBonusCode} not Action";
+                    }
+                    break;
+                case (int)BonusErrorCode.ADJUSTMENT_BONUS_PROMOTION_AMOUNT_OVER_MAXBONUS:
+                    {
+                        apiResult1.Message = $"Amount:{input.InputAmount} is over MaxBonus{input.Promotion.MaxBonus} BonusCode:{input.InputBonusCode} ";
+                        apiResult1.RawMessage = $"Amount:{input.InputAmount} is over MaxBonus{input.Promotion.MaxBonus} BonusCode:{input.InputBonusCode} ";
+                    }
+                    break;
+                case (int)BonusErrorCode.ADJUSTMENT_BONUS_CUSTOMER_HAS_RUNNING_BONUS:
+                    {
+                        apiResult1.Message = $"CustId {input.CustInfo.CustId} has other running bonus";
+                        apiResult1.RawMessage = $"CustId {input.CustInfo.CustId} has other running bonus";
+                    }
+                    break;
+                case (int)BonusErrorCode.UNKNOWERROR:
                 default://您不符合領取此優惠，請聯繫客服以了解詳情。
                     {
-                        apiResult1.ErrorCode = input.Result;
                         apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible", input.CustInfo.SiteId, input.CustInfo.SiteName, input.CustInfo.UserLang);
 
                         if (input.CustInfo.SiteId == (int)SiteId.Goal123 || input.CustInfo.SiteId == (int)SiteId.Bwing)
@@ -131,11 +217,13 @@ namespace BonusService.Service.BLL
                                 apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible_FreeBet", input.CustInfo.SiteId, input.CustInfo.SiteName, input.CustInfo.UserLang);
                             }
                         }
+                        apiResult1.RawMessage = "Unknow Error";
                     }
                     break;
             }
             return apiResult1;
         }
+        
         public void CancelAllWaitingBonus(int custId)
         {//當領取BONUS成功   將客戶DepositBonusQueue中的BONUS CANCEL掉
 
