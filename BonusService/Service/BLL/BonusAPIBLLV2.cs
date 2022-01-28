@@ -208,7 +208,6 @@ namespace BonusService.Service.BLL
                 case (int)BonusErrorCode.UNKNOWERROR:
                 default://您不符合領取此優惠，請聯繫客服以了解詳情。
                     {
-                        apiResult1.ErrorCode = input.Result;
                         apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible", input.CustInfo.SiteId, input.CustInfo.SiteName, input.CustInfo.UserLang);
 
                         if (input.CustInfo.SiteId == (int)SiteId.Goal123 || input.CustInfo.SiteId == (int)SiteId.Bwing)
@@ -218,40 +217,9 @@ namespace BonusService.Service.BLL
                                 apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible_FreeBet", input.CustInfo.SiteId, input.CustInfo.SiteName, input.CustInfo.UserLang);
                             }
                         }
+                        apiResult1.RawMessage = "Unknow Error";
                     }
                     break;
-            }
-            switch (input.Result)
-            {
-                case (int)BonusErrorCode.ERROR://未知錯誤
-                    
-                
-                case -3://您不符合領取此優惠，請聯繫客服以了解詳情。
-                    {
-                        apiResult1.ErrorCode = input.Result;
-                        apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible", input.CustInfo.SiteId, input.CustInfo.SiteName, input.CustInfo.UserLang);
-
-                        if ((input.CustInfo.SiteId == 2 || input.CustInfo.SiteId == 3) && input.Promotion?.PromotionType == PromotionType.FreeBet)
-                        {
-                            apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible_FreeBet", input.CustInfo.SiteId, input.CustInfo.SiteName, input.CustInfo.UserLang);
-                        }
-                    }
-                    break;
-                
-                case -5://您想享受我們完整的產品和服務嗎？現在驗證您的電話？
-                    {
-                        apiResult1.ErrorCode = input.Result;
-                        apiResult1.Message = $"{_selLangBll.GetMsg("msg_OTPHint1", input.CustInfo.SiteId, input.CustInfo.SiteName, input.CustInfo.UserLang)}\r\n{_selLangBll.GetMsg("msg_OTPHint2", input.CustInfo.SiteId, input.CustInfo.SiteName, input.CustInfo.UserLang)}";
-                    }
-                    break;
-
-                
-                
-               
-               
-               
-
-               
             }
             return apiResult1;
         }
