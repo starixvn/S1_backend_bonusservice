@@ -179,7 +179,11 @@ namespace BonusService.Service.BLL
                         apiResult1.RawMessage = "Customer has other running bonus or join other bonus in period time.";
                     }
                     break;
-
+                case (int)BonusErrorCode.SP_UNDEFINE_PROMOTIONTYPE:
+                    {
+                        apiResult1.RawMessage = "Promotion Type not define.";
+                    }
+                    break;
                 //AdjustmentBonus Error -12XX
                 case (int)BonusErrorCode.ADJUSTMENT_BONUS_PROMOTIONTYPE_NOT_MATCH:
                     {
