@@ -152,7 +152,7 @@ namespace BonusService.Service.DAL
                 }
                 else
                 {
-                    return -2;
+                    return (int)BonusErrorCode.MAINWALLET_AMOUNT_NOT_ENOUGH;
                 }
             }
 
@@ -183,7 +183,7 @@ namespace BonusService.Service.DAL
         }
         public int Reward(BonusRewardInput bonusRewardInput, MySqlConnection conn, MySqlTransaction trans)
         {
-            int result = 0;
+            int result = (int)BonusErrorCode.UNKNOWERROR;
             switch (bonusRewardInput.PromotionType)
             {
                 case PromotionType.FstDeposit:
@@ -232,7 +232,7 @@ namespace BonusService.Service.DAL
 
                             if (amount <= 0)
                             {
-                                output.result = 0;
+                                output.result = (int)BonusErrorCode.CALCULATE_AMOUNT_IS_NEGATIVE;
                                 return output;
                             }
                             dLockedAmount = amount;
@@ -240,7 +240,7 @@ namespace BonusService.Service.DAL
 
                         if (amount < promotion.RequiredAmount)
                         {
-                            output.result = -4;
+                            output.result = (int)BonusErrorCode.DEPOSIT_AMOUNT_NOT_ENOUGH;
                             return output;
                         }
 
@@ -277,7 +277,7 @@ namespace BonusService.Service.DAL
                     GetCashbackInfo(custId, siteId, currencyId, custPromotion, true);
                     if (!(custPromotion.canJoin && custPromotion.CashBackDetails?.TotalBonus > promotion.MinPayout))
                     {
-                        output.result = 0;
+                        output.result = (int)BonusErrorCode.CALCULATE_CASHBACK_TOTALBONUS_LESS_THEN_MINPAY;
                         return output;
                     }
 
@@ -308,7 +308,7 @@ namespace BonusService.Service.DAL
                         if (amount < promotion.RequiredAmount)
                         {
                             output.LockedAmount = promotion.RequiredAmount;
-                            output.result = -4;
+                            output.result = (int)BonusErrorCode.DEPOSIT_AMOUNT_NOT_ENOUGH;
                             return output;
                         }
 
@@ -334,10 +334,10 @@ namespace BonusService.Service.DAL
                     return output;
 
                 default:
-                    output.result = 0;
+                    output.result = (int)BonusErrorCode.CALCULATE_UNKNOW_PROMOTION_TYPE;
                     return output;
             }
-
+            promotion.Details = "";
             output.BonusInfo = JsonConvert.SerializeObject(promotion,
                             new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
             output.ExpiryTime = DateTimeOffset.Now.AddDays(promotion.ExpiryDays).ToUnixTimeSeconds();
@@ -472,12 +472,12 @@ namespace BonusService.Service.DAL
             promotion = GetPromotion(custId, currencyId, siteId, bonusCode, deviceType);
 
             if (promotion == null)
-                return -3;
+                return (int)BonusErrorCode.PROMOTION_NOT_FOUND;
 
             if (IsBlockIP(promotion, bonusCode, siteId, custIP))
-                return -3;
+                return (int)BonusErrorCode.IP_IS_BLOCKED;
             if (!CheckProfileFinish(custId, siteId))//Profile Finish & Phone Verified
-                return -6;
+                return (int)BonusErrorCode.PROFILE_OR_PHONE_NOT_FINISH;
 
             var custConditionInfo = GetCustConditionInfo(custId, currencyId, siteId, bonusCode, deviceType, conn, trans);
 
@@ -491,7 +491,7 @@ namespace BonusService.Service.DAL
                 rollOver = CalculateBonus.RollOver;
                 expiryTime = CalculateBonus.ExpiryTime;
                 
-                if (atPage == BonusInfoAtPage.Deposit) //記錄由Deposit頁面進來的 reference紀錄指定TransId、Amount
+                if (atPage == BonusInfoAtPage.Deposit) //由Deposit頁面進來的 reference紀錄指定TransId、Amount
                 {
                     custConditionInfo.reference = new List<Ref>
                     {
@@ -503,7 +503,7 @@ namespace BonusService.Service.DAL
                     };
                 }
 
-                var result = 0;
+                var result = (int)BonusErrorCode.UNKNOWERROR;
                 var bonusRewardInput = new BonusRewardInput
                 {
                     PromotionType = promotion.PromotionType,
@@ -536,14 +536,10 @@ namespace BonusService.Service.DAL
                         trans.Commit();
                 }
                 return result;
-            }
-
-            if (custConditionInfo.Result == 3)
+            }else
             {
-                return -5;
+                return custConditionInfo.Result;
             }
-
-            return -3;
 
         }
         public async Task<ApiResult<TransferResult>> TransferTpBonus(TpBonusTransfer tpBonusTransfer)
@@ -561,7 +557,7 @@ namespace BonusService.Service.DAL
         public CalculateBonusOutput CalculateAdjustmentBonus(Promotion promotion, decimal amount, decimal lockedAmount, int custId, int siteId, int currencyId)
         {
             var output = new CalculateBonusOutput();
-            output.result = 1;
+            output.result = (int)BonusErrorCode.UNKNOWERROR;
 
             decimal dBonus = 0;
             var dLockedAmount = 0;
@@ -582,7 +578,7 @@ namespace BonusService.Service.DAL
                     }
                     break;
                 default:
-                    output.result = 0;
+                    output.result = (int)BonusErrorCode.CALCULATE_UNKNOW_PROMOTION_TYPE;
                     return output;
             }
 
@@ -616,28 +612,28 @@ namespace BonusService.Service.DAL
 
             if (promotion == null)
             {
-                return -201;
+                return (int)BonusErrorCode.PROMOTION_NOT_FOUND;
             }
             else if (promotion.PromotionType != (PromotionType)promotionType)
             {
-                return -202;
+                return (int)BonusErrorCode.ADJUSTMENT_BONUS_PROMOTIONTYPE_NOT_MATCH;
             }
             if (promotion.PromotionType == PromotionType.ManualBonus )
             {
                 if (promotion.PromotionAction != 1)
-                    return -203;
+                    return (int)BonusErrorCode.ADJUSTMENT_BONUS_PROMOTION_NOT_ACTIVE;
                 else if(amount > promotion.MaxBonus)
-                    return -204;
+                    return (int)BonusErrorCode.ADJUSTMENT_BONUS_PROMOTION_AMOUNT_OVER_MAXBONUS;
             }
 
             if (!CheckProfileFinish(depositBonus.CustId, depositBonus.SiteId))//Profile Finish & Phone Verified
-                return -6;
+                return (int)BonusErrorCode.PROFILE_OR_PHONE_NOT_FINISH;
 
             var runningBonusList = GetCustRunningBonus(depositBonus.CustId)
 ;
             if (runningBonusList.Any())
             {
-                return -205;
+                return (int)BonusErrorCode.ADJUSTMENT_BONUS_CUSTOMER_HAS_RUNNING_BONUS;
             }
 
 
@@ -649,7 +645,7 @@ namespace BonusService.Service.DAL
             rollOver = CalculateBonus.RollOver;
             expiryTime = CalculateBonus.ExpiryTime;
 
-            var result = 0;
+            var result = (int)BonusErrorCode.UNKNOWERROR;
             var bonusRewardInput = new BonusRewardInput
             {
                 PromotionType = promotion.PromotionType,
