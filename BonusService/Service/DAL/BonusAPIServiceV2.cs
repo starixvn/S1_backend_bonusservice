@@ -100,7 +100,7 @@ namespace BonusService.Service.DAL
             p.Add("RefId", dbType: DbType.String, direction: ParameterDirection.Output);
             p.Add("Result", dbType: DbType.Int32, direction: ParameterDirection.Output);
             p.Add("RefList", dbType: DbType.String, direction: ParameterDirection.Output);
-            _mainDbClient.Execute("Member_PromotionCanJoin_Get_V7", p, conn, trans);
+            _mainDbClient.Execute("Member_PromotionCanJoin_Get_V8", p, conn, trans);
 
             rtn.Result = p.Get<int>("Result");
             rtn.CanJoin = p.Get<byte?>("CanJoin") ?? 0;
