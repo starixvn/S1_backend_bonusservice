@@ -3,6 +3,7 @@ using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
 using MemberSite.Service.Model;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,8 +19,9 @@ namespace BonusService.Service.BLL
         private readonly MessageService _messageService;
         private readonly DepositBonusService _depositBonusService;
         private readonly DepositBonusBLL _depositBonusBLL;
+        ILogger<BonusAPIBLLV2> _logger;
 
-        public BonusAPIBLLV2(IServiceProvider provider)
+        public BonusAPIBLLV2(IServiceProvider provider, ILogger<BonusAPIBLLV2> logger)
         {
             _custInfoService = provider.GetRequiredService<CustInfoService>();
             _bonusAPIServiceV2 = provider.GetRequiredService<BonusAPIServiceV2>();
@@ -27,7 +29,7 @@ namespace BonusService.Service.BLL
             _messageService = provider.GetRequiredService<MessageService>();
             _depositBonusService = provider.GetRequiredService<DepositBonusService>();
             _depositBonusBLL = provider.GetRequiredService<DepositBonusBLL>();
-
+            _logger = logger;
         }
         public ApiResult MakeErrorMessage(ErrorMessageMakerInput input)
         {
@@ -225,6 +227,7 @@ namespace BonusService.Service.BLL
                     }
                     break;
             }
+            _logger.LogInformation($"CustId {input.CustInfo.CustId}  BonusCode:{input.InputBonusCode} apiResult:{Newtonsoft.Json.JsonConvert.SerializeObject(apiResult1)}");
             return apiResult1;
         }
         
