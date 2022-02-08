@@ -123,7 +123,9 @@ namespace BonusService.Controllers
                     deviceType = promotionReq.DeviceType;
                 }
                 //apiResult = await _bonusAPIBLL.SetClaimPromotionAsync(promotionReq.CustId, promotionReq.BonusCode, promotionReq.custIP, promotionReq.LockedAmount, deviceType);
-                apiResult = await _bonusAPIBLLV2.SetClaimPromotionV2Async(promotionReq.CustId, promotionReq.BonusCode, promotionReq.custIP, promotionReq.LockedAmount, deviceType, BonusInfoAtPage.Promotion);
+                var lockedAmount = promotionReq.LockedAmount ?? 0;
+                
+                apiResult = await _bonusAPIBLLV2.SetClaimPromotionV2Async(promotionReq.CustId, promotionReq.BonusCode, promotionReq.custIP, lockedAmount, deviceType, BonusInfoAtPage.Promotion);
             }
             catch (Exception ex)
             {
