@@ -569,12 +569,14 @@ namespace BonusService.Service.DAL
                     {
                         dBonus = promotion.Bonus;
                         dRollOver = dBonus * promotion.RollOver;
+                        output.result = (int)BonusErrorCode.SUCCESS;
                     }
                     break;
                 case PromotionType.ManualBonus:
                     {
                         dBonus = amount;
                         dRollOver = amount * promotion.RollOver;
+                        output.result = (int)BonusErrorCode.SUCCESS;
                     }
                     break;
                 default:

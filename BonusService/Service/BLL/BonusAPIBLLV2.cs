@@ -31,18 +31,24 @@ namespace BonusService.Service.BLL
             _depositBonusBLL = provider.GetRequiredService<DepositBonusBLL>();
             _logger = logger;
         }
-        public ApiResult MakeErrorMessage(ErrorMessageMakerInput input)
+        public ApiResult MakeErrorMessage(ErrorMessageMakerInput input, bool isMessageUserLang = false)
         {
             var apiResult1 = new ApiResult();
             //defult Message display
             apiResult1.ErrorCode = input.Result;
-            apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible", input.CustInfo.SiteId, input.CustInfo.SiteName, input.CustInfo.UserLang);
+            string showLangId = "en";//default
+            if(isMessageUserLang)
+            {
+                showLangId = input.CustInfo.UserLang;
+            }
+
+            apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible", input.CustInfo.SiteId, input.CustInfo.SiteName, showLangId);
 
             if (input.CustInfo.SiteId == (int)SiteId.Goal123 || input.CustInfo.SiteId == (int)SiteId.Bwing)
             {
                 if (input.Promotion.PromotionType == PromotionType.FreeBet)
                 {
-                    apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible_FreeBet", input.CustInfo.SiteId, input.CustInfo.SiteName, input.CustInfo.UserLang);
+                    apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible_FreeBet", input.CustInfo.SiteId, input.CustInfo.SiteName, showLangId);
                 }
             }
             switch (input.Result)
@@ -50,7 +56,7 @@ namespace BonusService.Service.BLL
                 case (int)BonusErrorCode.ERROR:
                     {
                         apiResult1.ErrorCode = 9000;//未知錯誤
-                        apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible", input.CustInfo.SiteId, input.CustInfo.SiteName, input.CustInfo.UserLang);
+                        apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible", input.CustInfo.SiteId, input.CustInfo.SiteName, showLangId);
                         apiResult1.RawMessage = "Unknow Error";
                     }
                     break;
@@ -68,7 +74,7 @@ namespace BonusService.Service.BLL
                     break;
                 case (int)BonusErrorCode.PROFILE_OR_PHONE_NOT_FINISH:
                     {
-                        apiResult1.Message = $"{_selLangBll.GetMsg("msg_PhoneProfile_ERROR", input.CustInfo.SiteId, input.CustInfo.SiteName, input.CustInfo.UserLang)}";
+                        apiResult1.Message = $"{_selLangBll.GetMsg("msg_PhoneProfile_ERROR", input.CustInfo.SiteId, input.CustInfo.SiteName, showLangId)}";
                         apiResult1.RawMessage = "Customer profile incomplete or phone not verified. ";
                     }
                     break;
@@ -80,7 +86,7 @@ namespace BonusService.Service.BLL
                             dRequiredAmount = $"{input.Promotion.RequiredAmount / 1000:#,##0} ('000)";
                         }
 
-                        apiResult1.Message = string.Format(_selLangBll.GetMsg("msg_RequiredAmountInsufficient", input.CustInfo.SiteId, input.CustInfo.SiteName, input.CustInfo.UserLang), dRequiredAmount);
+                        apiResult1.Message = string.Format(_selLangBll.GetMsg("msg_RequiredAmountInsufficient", input.CustInfo.SiteId, input.CustInfo.SiteName, showLangId), dRequiredAmount);
                         apiResult1.RawMessage = $"Customer's deposit amount less then requiredamount {dRequiredAmount}.";
                     }
                     break;
@@ -92,7 +98,7 @@ namespace BonusService.Service.BLL
                             dRequiredAmount = $"{input.LockedAmount / 1000:#,##0} ('000)";
                         }
 
-                        apiResult1.Message = string.Format(_selLangBll.GetMsg("msg_LockedAmountInsufficient", input.CustInfo.SiteId, input.CustInfo.SiteName, input.CustInfo.UserLang), dRequiredAmount);
+                        apiResult1.Message = string.Format(_selLangBll.GetMsg("msg_LockedAmountInsufficient", input.CustInfo.SiteId, input.CustInfo.SiteName, showLangId), dRequiredAmount);
                         apiResult1.RawMessage = $"Customer's mainwallet amount less then {dRequiredAmount}.";
                     }
                     break;
@@ -214,13 +220,13 @@ namespace BonusService.Service.BLL
                 case (int)BonusErrorCode.UNKNOWERROR:
                 default://您不符合領取此優惠，請聯繫客服以了解詳情。
                     {
-                        apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible", input.CustInfo.SiteId, input.CustInfo.SiteName, input.CustInfo.UserLang);
+                        apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible", input.CustInfo.SiteId, input.CustInfo.SiteName, showLangId);
 
                         if (input.CustInfo.SiteId == (int)SiteId.Goal123 || input.CustInfo.SiteId == (int)SiteId.Bwing)
                         {
                             if (input.Promotion.PromotionType == PromotionType.FreeBet)
                             {
-                                apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible_FreeBet", input.CustInfo.SiteId, input.CustInfo.SiteName, input.CustInfo.UserLang);
+                                apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible_FreeBet", input.CustInfo.SiteId, input.CustInfo.SiteName, showLangId);
                             }
                         }
                         apiResult1.RawMessage = "Unknow Error";
@@ -246,7 +252,7 @@ namespace BonusService.Service.BLL
             if(input.atPage != BonusInfoAtPage.Deposit) 
                 CancelAllWaitingBonus(input.CustId);
         }
-        public async Task<ApiResult> SetClaimPromotionV2Async(int custId, string bonusCode, string custIP, decimal lockedAmount, int? deviceType, BonusInfoAtPage atPage, string DepositTransId = null)
+        public async Task<ApiResult> SetClaimPromotionV2Async(int custId, string bonusCode, string custIP, decimal lockedAmount, int? deviceType, BonusInfoAtPage atPage, bool isMessageUserLang, string DepositTransId = null)
         {
             var apiResult1 = new ApiResult();
             
@@ -311,7 +317,7 @@ namespace BonusService.Service.BLL
                     CustInfo = custInfo,
                     Promotion = promotion
                 };
-                apiResult1 = MakeErrorMessage(errorInfo);
+                apiResult1 = MakeErrorMessage(errorInfo, isMessageUserLang);
             }
             return apiResult1;
         }
@@ -394,7 +400,7 @@ namespace BonusService.Service.BLL
         {
             var apiResult1 = new ApiResult();
             int? deviceType = 1;
-            apiResult1 = await SetClaimPromotionV2Async(depositBonus.CustId, depositBonus.BonusCode, "", depositBonus.LockedAmount, deviceType, BonusInfoAtPage.Deposit, depositBonus.TransId);
+            apiResult1 = await SetClaimPromotionV2Async(depositBonus.CustId, depositBonus.BonusCode, "", depositBonus.LockedAmount, deviceType, BonusInfoAtPage.Deposit, false, depositBonus.TransId);
             if (apiResult1.ErrorCode == 0)
                 return true;
             return false;

@@ -125,7 +125,7 @@ namespace BonusService.Controllers
                 //apiResult = await _bonusAPIBLL.SetClaimPromotionAsync(promotionReq.CustId, promotionReq.BonusCode, promotionReq.custIP, promotionReq.LockedAmount, deviceType);
                 var lockedAmount = promotionReq.LockedAmount ?? 0;
                 
-                apiResult = await _bonusAPIBLLV2.SetClaimPromotionV2Async(promotionReq.CustId, promotionReq.BonusCode, promotionReq.custIP, lockedAmount, deviceType, BonusInfoAtPage.Promotion);
+                apiResult = await _bonusAPIBLLV2.SetClaimPromotionV2Async(promotionReq.CustId, promotionReq.BonusCode, promotionReq.custIP, lockedAmount, deviceType, BonusInfoAtPage.Promotion,true);
             }
             catch (Exception ex)
             {
