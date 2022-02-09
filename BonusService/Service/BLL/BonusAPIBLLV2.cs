@@ -309,13 +309,16 @@ namespace BonusService.Service.BLL
             }
             else
             {
+                var P = new Promotion { };//for fix NullReferenceException
+                if (promotion != null)
+                    P = promotion;
                 var errorInfo = new ErrorMessageMakerInput
                 {
                     Result = result,
                     InputBonusCode = bonusCode,
                     LockedAmount = lockedAmount,
                     CustInfo = custInfo,
-                    Promotion = promotion
+                    Promotion = P
                 };
                 _logger.LogInformation($"{errorInfo.Result} {errorInfo.InputBonusCode} {errorInfo.LockedAmount} {errorInfo.CustInfo} {errorInfo.Promotion} apiResult:{Newtonsoft.Json.JsonConvert.SerializeObject(errorInfo)}");
                 apiResult1 = MakeErrorMessage(errorInfo, isMessageUserLang);
@@ -382,6 +385,9 @@ namespace BonusService.Service.BLL
             }
             else
             {
+                var P = new Promotion { }; //for fix NullReferenceException
+                if (promotion != null)
+                    P = promotion;
                 var errorInfo = new ErrorMessageMakerInput
                 {
                     Result = result,
@@ -390,7 +396,7 @@ namespace BonusService.Service.BLL
                     InputPromotionType = promotionType,
                     InputAmount = amount,
                     CustInfo = custInfo,
-                    Promotion = promotion
+                    Promotion = P
                 };
 
                 apiResult1 = MakeErrorMessage(errorInfo);
