@@ -8,6 +8,7 @@ namespace BonusService.Service.Model.enums
     public enum BonusErrorCode
     {
         ERROR = 0,
+        SUCCESS = 1,
         //API error -10xx
         PROMOTION_NOT_FOUND = -1001,
         IP_IS_BLOCKED = -1002,
