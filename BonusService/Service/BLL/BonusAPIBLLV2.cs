@@ -317,6 +317,7 @@ namespace BonusService.Service.BLL
                     CustInfo = custInfo,
                     Promotion = promotion
                 };
+                _logger.LogInformation($"{errorInfo.Result} {errorInfo.InputBonusCode} {errorInfo.LockedAmount} {errorInfo.CustInfo} {errorInfo.Promotion} apiResult:{Newtonsoft.Json.JsonConvert.SerializeObject(errorInfo)}");
                 apiResult1 = MakeErrorMessage(errorInfo, isMessageUserLang);
             }
             return apiResult1;
@@ -391,6 +392,7 @@ namespace BonusService.Service.BLL
                     CustInfo = custInfo,
                     Promotion = promotion
                 };
+
                 apiResult1 = MakeErrorMessage(errorInfo);
             }
 
