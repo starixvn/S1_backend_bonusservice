@@ -309,14 +309,18 @@ namespace BonusService.Service.BLL
             }
             else
             {
+                var P = new Promotion { };//for fix NullReferenceException
+                if (promotion != null)
+                    P = promotion;
                 var errorInfo = new ErrorMessageMakerInput
                 {
                     Result = result,
                     InputBonusCode = bonusCode,
                     LockedAmount = lockedAmount,
                     CustInfo = custInfo,
-                    Promotion = promotion
+                    Promotion = P
                 };
+              
                 apiResult1 = MakeErrorMessage(errorInfo, isMessageUserLang);
             }
             return apiResult1;
@@ -381,6 +385,9 @@ namespace BonusService.Service.BLL
             }
             else
             {
+                var P = new Promotion { }; //for fix NullReferenceException
+                if (promotion != null)
+                    P = promotion;
                 var errorInfo = new ErrorMessageMakerInput
                 {
                     Result = result,
@@ -389,8 +396,9 @@ namespace BonusService.Service.BLL
                     InputPromotionType = promotionType,
                     InputAmount = amount,
                     CustInfo = custInfo,
-                    Promotion = promotion
+                    Promotion = P
                 };
+
                 apiResult1 = MakeErrorMessage(errorInfo);
             }
 
@@ -400,7 +408,7 @@ namespace BonusService.Service.BLL
         {
             var apiResult1 = new ApiResult();
             int? deviceType = 1;
-            apiResult1 = await SetClaimPromotionV2Async(depositBonus.CustId, depositBonus.BonusCode, "", depositBonus.LockedAmount, deviceType, BonusInfoAtPage.Deposit, false, depositBonus.TransId);
+            apiResult1 = await SetClaimPromotionV2Async(depositBonus.CustId, depositBonus.BonusCode, null, depositBonus.LockedAmount, deviceType, BonusInfoAtPage.Deposit, false, depositBonus.TransId);
             if (apiResult1.ErrorCode == 0)
                 return true;
             return false;
