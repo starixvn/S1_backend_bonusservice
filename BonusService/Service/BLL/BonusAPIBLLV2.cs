@@ -320,7 +320,7 @@ namespace BonusService.Service.BLL
                     CustInfo = custInfo,
                     Promotion = P
                 };
-                _logger.LogInformation($"{errorInfo.Result} {errorInfo.InputBonusCode} {errorInfo.LockedAmount} {errorInfo.CustInfo} {errorInfo.Promotion} apiResult:{Newtonsoft.Json.JsonConvert.SerializeObject(errorInfo)}");
+              
                 apiResult1 = MakeErrorMessage(errorInfo, isMessageUserLang);
             }
             return apiResult1;
