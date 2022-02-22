@@ -10,20 +10,16 @@ using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Exceptions;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Text;
 
 namespace BonusService
 {
     public class Program
     {
-        private static IConfigurationRoot Configuration => new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddEnvironmentVariables()
-            .AddJsonFile($"appsettings.json", false, true)
-            .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json")
-            .Build();
-
         public static void Main(string[] args)
         {
             CreateHostBuilder(args).Build().Run();
@@ -33,26 +29,37 @@ namespace BonusService
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    var excludesMessage = Configuration.GetSection("ExcludesMessage").Get<string[]>();
-                    var excludesApiEndpoints = Configuration.GetSection("ExcludesApiEndpoint").Get<string[]>();
-                    
-                    webBuilder.UseSerilog((hostContext, loggerConfiguration) =>
-                    {
-                        loggerConfiguration
-                            .ReadFrom.Configuration(Configuration)
-                            .Enrich.FromLogContext()
-                            .Filter.ByExcluding(c =>
-                                c.Properties.Any(p =>
-                                    excludesApiEndpoints.Any(item => p.Value.ToString().Contains(item))
-                                    || excludesMessage.Any(item => c.MessageTemplate.ToString().Contains(item))))
-                            .Enrich.WithExceptionDetails();
-                    })
+                    webBuilder
+                        .ConfigureAppConfiguration((hostContext, builder) =>
+                        {
+                            builder
+                                .SetBasePath(Directory.GetCurrentDirectory())
+                                .AddEnvironmentVariables()
+                                .AddJsonFile($"appsettings.json", false, true)
+                                .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", false, true);
+                            hostContext.Configuration = builder.Build();
+                            builder.AddJsonStream(GetRemoteConfig(hostContext.Configuration.GetSection("ConfigService").Get<string[]>()));
+                        })
+                        .UseSerilog((hostContext, loggerConfiguration) =>
+                        {
+                            var excludesMessage = hostContext.Configuration.GetSection("ExcludesMessage").Get<string[]>();
+                            var excludesApiEndpoints = hostContext.Configuration.GetSection("ExcludesApiEndpoint").Get<string[]>();
+                            
+                            loggerConfiguration
+                                .ReadFrom.Configuration(hostContext.Configuration)
+                                .Enrich.FromLogContext()
+                                .Filter.ByExcluding(c =>
+                                    c.Properties.Any(p =>
+                                        excludesApiEndpoints.Any(item => p.Value.ToString().Contains(item))
+                                        || excludesMessage.Any(item => c.MessageTemplate.ToString().Contains(item))))
+                                .Enrich.WithExceptionDetails();
+                        })
                         .UseStartup<Startup>();
                 })
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.AddMemoryCache();
-                    services.AddDatabaseConnection(Configuration);
+                    services.AddDatabaseConnection(hostContext.Configuration);
                     services.AddSingleton<Common>();
                     services.AddSingleton<Currency>();
                     services.AddSingleton<CourierAdapter>();
@@ -96,11 +103,34 @@ namespace BonusService
                     services.AddHostedService<PromotionAutoExtendWorker>();
                     services.AddHostedService<DepositBonusWorker>();
 
-                    if (Configuration.GetSection("RunVipDowngradeWorker").Get<bool>())
+                    if (hostContext.Configuration.GetSection("RunVipDowngradeWorker").Get<bool>())
                     {
                         services.AddHostedService<VipDowngradeWorker>();
                     }
                     services.AddControllers();
                 });
+        
+        private static MemoryStream GetRemoteConfig(IEnumerable<string> remoteUrls)
+        {
+            using var client = new HttpClient();
+            Stream result = null;
+            foreach (var url in remoteUrls)
+            {
+                if (string.IsNullOrEmpty(url))
+                {
+                    continue;
+                }
+
+                try
+                {
+                    result = client.GetAsync(url).Result.Content.ReadAsStreamAsync().Result;
+                    break;
+                }
+                catch { }
+            }
+
+            using var streamReader = new StreamReader(result);
+            return new MemoryStream(Encoding.UTF8.GetBytes(streamReader.ReadToEnd()));
+        }
     }
 }
