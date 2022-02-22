@@ -15,20 +15,21 @@ namespace BonusService.Service.Extensions
         {
             var provider = services.BuildServiceProvider();
             var logger = provider.GetRequiredService<ILogger<MySqlClient>>();
+            var serviceType = config.GetValue<string>("ServiceType");
 
-            services.AddSingleton(factory => new MySqlClient(config.GetConnectionString("ConnectionString"), logger)
+            services.AddSingleton(factory => new MySqlClient(config.GetConnectionString($"{serviceType}_MainDB"), logger)
             {
                 DataBase = DataBase.Main
             });
-            services.AddSingleton(factory => new MySqlClient(config.GetConnectionString("ConnectionStringReport"), logger)
+            services.AddSingleton(factory => new MySqlClient(config.GetConnectionString($"{serviceType}_ReportDB"), logger)
             {
                 DataBase = DataBase.Report
             });
-            services.AddSingleton(factory => new MySqlClient(config.GetConnectionString("ConnectionStringWager"), logger)
+            services.AddSingleton(factory => new MySqlClient(config.GetConnectionString($"{serviceType}_WagerDB"), logger)
             {
                 DataBase = DataBase.Wager
             });
-            services.AddSingleton(factory => new MySqlClient(config.GetConnectionString("ConnectionStringLog"), logger)
+            services.AddSingleton(factory => new MySqlClient(config.GetConnectionString($"{serviceType}_LogDB"), logger)
             {
                 DataBase = DataBase.Log
             });
