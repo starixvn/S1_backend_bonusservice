@@ -150,4 +150,7 @@
   <data name="lbl_VipDowngradeTitle" xml:space="preserve">
     <value>वीआईपी सदस्यता सूचना</value>
   </data>
+  <data name="lbl_DepositLimit" xml:space="preserve">
+    <value>सत्यापन इनाम कार्यक्रम का आनंद लेने के लिए कृपया अपनी जमा राशि {0} {1} तक जमा करें।</value>
+  </data>
 </root>

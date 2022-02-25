@@ -301,13 +301,20 @@ namespace BonusService.Service.DAL
             var p = new DynamicParameters(new { _SiteId = siteId, _CurrencyId = currencyId });
             return _reportDbClient.QueryFirst<VerificationRewardData>("Service_VerificationReward_Get", p);
         }
+        
+        public VerificationRewardLimit GetVerificationRewardLimit(int siteId, int currencyId, OTPTypeEnum type)
+        {
+            var p = new DynamicParameters(new { _SiteId = siteId, _CurrencyId = currencyId , _Type = type});
+            return _reportDbClient.QueryFirst<VerificationRewardLimit>("Service_VerificationRewardLimit_Get", p);
+        }
+        
         public CustVerificationRewardData GetCustVerificationReward(int custId,bool usedMainDb = false)
         {
             var p = new DynamicParameters(new { _CustId = custId });
             if(usedMainDb)
-                return _mainDbClient.QueryFirst<CustVerificationRewardData>("Service_CustVerificationReward_Get", p);
+                return _mainDbClient.QueryFirst<CustVerificationRewardData>("Service_CustVerificationReward_Get_V2", p);
             else
-                return _reportDbClient.QueryFirst<CustVerificationRewardData>("Service_CustVerificationReward_Get", p);
+                return _reportDbClient.QueryFirst<CustVerificationRewardData>("Service_CustVerificationReward_Get_V2", p);
 
         }
         public int SetCustVerifiedReward(int custId, int siteId, int currencyId, int verifyItem, MySqlConnection conn, MySqlTransaction trans)

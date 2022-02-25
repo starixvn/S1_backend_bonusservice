@@ -19,6 +19,7 @@ namespace BonusService.Service.BLL
         private readonly CourierAdapter _courierAdapter;
         private readonly SelLangBLL _selLangBll;
         private readonly MessageService _messageService;
+        private readonly Currency _currency;
         private readonly string _apiUrl;
         private readonly Dictionary<int, bool> isConvert = new Dictionary<int, bool>()
         {
@@ -34,6 +35,7 @@ namespace BonusService.Service.BLL
             _courierAdapter = provider.GetRequiredService<CourierAdapter>();
             _selLangBll = provider.GetRequiredService<SelLangBLL>();
             _messageService = provider.GetRequiredService<MessageService>();
+            _currency = provider.GetRequiredService<Currency>();
         }
 
         public async Task<ApiResult> SetAdjustmentBonusAsync(int custId, string bonusCode, string Operator, string memo, decimal Amount, int PromotionType)
@@ -223,34 +225,44 @@ namespace BonusService.Service.BLL
             var customer = _custInfoService.GetCustInfoProfile(custId, custInfo.SiteId);
             return customer;
         }
-        public ApiResult CheckRewardCondination(int custId, OTPTypeEnum InputType, Customer custInfo = null, VerificationRewardData VerInfo = null, CustVerificationRewardData CustRewardInfo = null)
+        public ApiResult CheckRewardCondination(int custId, OTPTypeEnum inputType, Customer custInfo = null, VerificationRewardData verInfo = null, CustVerificationRewardData custRewardInfo = null)
         {
             var result = new ApiResult();
             if(custInfo == null)
                 custInfo = _custInfoService.GetCustInfo(custId);
-            if(VerInfo == null)
-                VerInfo = _bonusAPIService.GetVerificationReward(custInfo.SiteId, custInfo.CurrencyId);
-            if (CustRewardInfo == null)
-                CustRewardInfo = _bonusAPIService.GetCustVerificationReward(custId, true);
-
-            if (VerInfo == null)
+            if(verInfo == null)
+                verInfo = _bonusAPIService.GetVerificationReward(custInfo.SiteId, custInfo.CurrencyId);
+            if (custRewardInfo == null)
+                custRewardInfo = _bonusAPIService.GetCustVerificationReward(custId, true);
+            var rewardLimit = _bonusAPIService.GetVerificationRewardLimit(custInfo.SiteId, custInfo.CurrencyId, inputType);
+            if (custRewardInfo.MaxDepositAmount < rewardLimit.MinDeposit)
+            {
+                _currency.GetCurrency().TryGetValue(custInfo.CurrencyId, out var currencyName);
+                result.ErrorCode = 104;
+                result.Message = string.Format(_selLangBll.GetResourceValue("lbl_DepositLimit", custInfo.UserLang),
+                    currencyName,rewardLimit.MinDeposit.ToString("#,##0.##"));
+                
+                return result;
+            }
+            
+            if (verInfo == null)
             {
                 result.ErrorCode = 103;
                 result.Message = $"SiteId:{custInfo.SiteId} CurrencyId:{custInfo.CurrencyId} setting not found";
                 return result;
             }
-            if (VerInfo.VerificationType == 1) //email & phone both
+            if (verInfo.VerificationType == 1) //email & phone both
             {
-                if (CustRewardInfo.EmailReward != null || CustRewardInfo.PhoneReward != null)
+                if (custRewardInfo.EmailReward != null || custRewardInfo.PhoneReward != null)
                 {
                     //payout before
                     result.ErrorCode = 101;
                     result.Message = "Reward already payout before";
                 }
-                else if (CustRewardInfo.PhoneVerified && CustRewardInfo.EmailVerified)
+                else if (custRewardInfo.PhoneVerified && custRewardInfo.EmailVerified)
                 {
                     result.ErrorCode = 0;
-                    result.Message = $"{VerInfo.CurrencyName} {VerInfo.PhoneReward:#,##0.##}";
+                    result.Message = $"{verInfo.CurrencyName} {verInfo.PhoneReward:#,##0.##}";
                 }
                 else
                 {
@@ -259,20 +271,20 @@ namespace BonusService.Service.BLL
                     // Condition not fulfilled
                 }
             }
-            else if (VerInfo.VerificationType == 0)//email & phone each
+            else if (verInfo.VerificationType == 0)//email & phone each
             {
-                if (InputType == OTPTypeEnum.SMS)
+                if (inputType == OTPTypeEnum.SMS)
                 {
-                    if (CustRewardInfo.PhoneReward != null)
+                    if (custRewardInfo.PhoneReward != null)
                     {
                         //payout before
                         result.ErrorCode = 101;
                         result.Message = "Reward already payout before";
                     }
-                    else if (CustRewardInfo.PhoneVerified)
+                    else if (custRewardInfo.PhoneVerified)
                     {
                         result.ErrorCode = 0;
-                        result.Message = $"{VerInfo.CurrencyName} {VerInfo.PhoneReward:#,##0.##}";
+                        result.Message = $"{verInfo.CurrencyName} {verInfo.PhoneReward:#,##0.##}";
                     }
                     else
                     {
@@ -283,15 +295,15 @@ namespace BonusService.Service.BLL
                 }
                 else
                 {
-                    if (CustRewardInfo.EmailReward != null)
+                    if (custRewardInfo.EmailReward != null)
                     {
                         result.ErrorCode = 101;
                         result.Message = "Reward already payout before";
                     }
-                    else if (CustRewardInfo.EmailVerified)
+                    else if (custRewardInfo.EmailVerified)
                     {
                         result.ErrorCode = 0;
-                        result.Message = $"{VerInfo.CurrencyName} {VerInfo.EmailReward:#,##0.##}";
+                        result.Message = $"{verInfo.CurrencyName} {verInfo.EmailReward:#,##0.##}";
                     }
                     else
                     {
@@ -309,30 +321,30 @@ namespace BonusService.Service.BLL
             }
             return result;
         }
-        public ApiResult SetVerificationReward(int custId, OTPTypeEnum InputType)
+        public ApiResult SetVerificationReward(int custId, OTPTypeEnum inputType)
         {
             var result = new ApiResult();
             var custInfo = _custInfoService.GetCustInfo(custId);
-            var VerInfo = _bonusAPIService.GetVerificationReward(custInfo.SiteId, custInfo.CurrencyId);
-            var CustRewardInfo = _bonusAPIService.GetCustVerificationReward(custId, true);
+            var verInfo = _bonusAPIService.GetVerificationReward(custInfo.SiteId, custInfo.CurrencyId);
+            var custRewardInfo = _bonusAPIService.GetCustVerificationReward(custId, true);
            
-            result = CheckRewardCondination(custId, InputType, custInfo, VerInfo, CustRewardInfo);//領獎條件規則
+            result = CheckRewardCondination(custId, inputType, custInfo, verInfo, custRewardInfo);//領獎條件規則
             if (result.ErrorCode != 0) // 規則不符
                 return result;
 
-            if (VerInfo.VerificationType == 1) //email & phone both
+            if (verInfo.VerificationType == 1) //email & phone both
             {
-                result = _bonusAPIService.PayoutVerificationReward(custInfo.CustId, custInfo.SiteId, custInfo.CurrencyId, custInfo.UserName, OTPVerificationType.All, VerInfo.PhoneReward);
+                result = _bonusAPIService.PayoutVerificationReward(custInfo.CustId, custInfo.SiteId, custInfo.CurrencyId, custInfo.UserName, OTPVerificationType.All, verInfo.PhoneReward);
             }
-            else if (VerInfo.VerificationType == 0)//email & phone each
+            else if (verInfo.VerificationType == 0)//email & phone each
             {
-                if (InputType == OTPTypeEnum.SMS)
+                if (inputType == OTPTypeEnum.SMS)
                 {
-                    result = _bonusAPIService.PayoutVerificationReward(custInfo.CustId, custInfo.SiteId, custInfo.CurrencyId, custInfo.UserName, OTPVerificationType.SMS, VerInfo.PhoneReward);
+                    result = _bonusAPIService.PayoutVerificationReward(custInfo.CustId, custInfo.SiteId, custInfo.CurrencyId, custInfo.UserName, OTPVerificationType.SMS, verInfo.PhoneReward);
                 }
                 else
                 {
-                    result = _bonusAPIService.PayoutVerificationReward(custInfo.CustId, custInfo.SiteId, custInfo.CurrencyId, custInfo.UserName, OTPVerificationType.Email, VerInfo.EmailReward);
+                    result = _bonusAPIService.PayoutVerificationReward(custInfo.CustId, custInfo.SiteId, custInfo.CurrencyId, custInfo.UserName, OTPVerificationType.Email, verInfo.EmailReward);
                 }
             }
             return result;

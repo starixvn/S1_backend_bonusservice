@@ -150,4 +150,7 @@
   <data name="lbl_VipUpgradeTitle" xml:space="preserve">
     <value>VIP อัพเกรด</value>
   </data>
+  <data name="lbl_DepositLimit" xml:space="preserve">
+    <value>ทำการสะสมยอดเงินฝากของ คุณจำนวน {1} บาท เพื่อรับโบนัสการตรวจสอบ</value>
+  </data>
 </root>
