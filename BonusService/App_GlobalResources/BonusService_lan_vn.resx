@@ -144,4 +144,7 @@
   <data name="lbl_VipUpgradeTitle" xml:space="preserve">
     <value>Nâng hạng VIP</value>
   </data>
+  <data name="lbl_DepositLimit" xml:space="preserve">
+    <value>Vui lòng tích lũy khoản tiền gửi của bạn lên đến {0} {1} để tận hưởng chương trình phần thưởng xác minh.</value>
+  </data>
 </root>
