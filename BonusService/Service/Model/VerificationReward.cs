@@ -24,11 +24,5 @@ namespace MemberSite.Service.Model
         public bool EmailVerified { get; set; }
         public decimal? EmailReward { get; set; }
         public DateTime? EmailRewardTime { get; set; }
-        public decimal MaxDepositAmount { get; set; }
-    }
-    
-    public class VerificationRewardLimit
-    {
-        public int MinDeposit { get; set; }
     }
 }
