@@ -281,16 +281,10 @@ namespace BonusService.Service.BLL
                         result.ErrorCode = 101;
                         result.Message = "Reward already payout before";
                     }
-                    else if (custRewardInfo.PhoneVerified)
+                    else
                     {
                         result.ErrorCode = 0;
                         result.Message = $"{verInfo.CurrencyName} {verInfo.PhoneReward:#,##0.##}";
-                    }
-                    else
-                    {
-                        // Condition not fulfilled
-                        result.ErrorCode = 102;
-                        result.Message = "Condition not fulfilled";
                     }
                 }
                 else
@@ -300,16 +294,10 @@ namespace BonusService.Service.BLL
                         result.ErrorCode = 101;
                         result.Message = "Reward already payout before";
                     }
-                    else if (custRewardInfo.EmailVerified)
+                    else
                     {
                         result.ErrorCode = 0;
                         result.Message = $"{verInfo.CurrencyName} {verInfo.EmailReward:#,##0.##}";
-                    }
-                    else
-                    {
-                        // Condition not fulfilled
-                        result.ErrorCode = 102;
-                        result.Message = "Condition not fulfilled";
                     }
                 }
             }
