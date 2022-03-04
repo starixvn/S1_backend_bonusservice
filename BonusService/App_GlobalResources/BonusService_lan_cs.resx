@@ -150,7 +150,13 @@
   <data name="lbl_VipUpgradeTitle" xml:space="preserve">
     <value>贵宾等级升级</value>
   </data>
-  <data name="lbl_DepositLimit" xml:space="preserve">
-    <value>请累计您的存款额达马币 {1} 以享受验证奖励。</value>
+  <data name="lbl_VerificationRewardContent" xml:space="preserve">
+    <value>请完成剩余存款 {0} {1} 以享有验证奖金。</value>
+  </data>
+  <data name="lbl_VerificationRewardLimit" xml:space="preserve">
+    <value>请完成剩余存款 {0} {1} 以享有验证奖金。</value>
+  </data>
+  <data name="lbl_VerificationRewardLimitTitle" xml:space="preserve">
+    <value>验证奖励</value>
   </data>
 </root>

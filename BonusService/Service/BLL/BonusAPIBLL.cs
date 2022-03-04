@@ -19,6 +19,7 @@ namespace BonusService.Service.BLL
         private readonly CourierAdapter _courierAdapter;
         private readonly SelLangBLL _selLangBll;
         private readonly MessageService _messageService;
+        private readonly Currency _currency;
         private readonly string _apiUrl;
         private readonly Dictionary<int, bool> isConvert = new Dictionary<int, bool>()
         {
@@ -34,6 +35,7 @@ namespace BonusService.Service.BLL
             _courierAdapter = provider.GetRequiredService<CourierAdapter>();
             _selLangBll = provider.GetRequiredService<SelLangBLL>();
             _messageService = provider.GetRequiredService<MessageService>();
+            _currency = provider.GetRequiredService<Currency>();
         }
 
         public async Task<ApiResult> SetAdjustmentBonusAsync(int custId, string bonusCode, string Operator, string memo, decimal Amount, int PromotionType)
@@ -223,7 +225,7 @@ namespace BonusService.Service.BLL
             var customer = _custInfoService.GetCustInfoProfile(custId, custInfo.SiteId);
             return customer;
         }
-        public ApiResult CheckRewardCondination(int custId, OTPTypeEnum inputType, Customer custInfo = null, VerificationRewardData verInfo = null, CustVerificationRewardData custRewardInfo = null)
+        public ApiResult CheckRewardCondination(int custId, OTPTypeEnum inputType, out decimal minDeposit ,Customer custInfo = null, VerificationRewardData verInfo = null, CustVerificationRewardData custRewardInfo = null )
         {
             var result = new ApiResult();
             if(custInfo == null)
@@ -232,6 +234,14 @@ namespace BonusService.Service.BLL
                 verInfo = _bonusAPIService.GetVerificationReward(custInfo.SiteId, custInfo.CurrencyId);
             if (custRewardInfo == null)
                 custRewardInfo = _bonusAPIService.GetCustVerificationReward(custId, true);
+            var rewardLimit = _bonusAPIService.GetVerificationRewardLimit(custInfo.SiteId, custInfo.CurrencyId, inputType);
+
+            minDeposit = rewardLimit.MinDeposit;
+            if (custRewardInfo.MaxDepositAmount < minDeposit)
+            {
+                result.ErrorCode = 104;
+                return result;
+            }
             
             if (verInfo == null)
             {
@@ -297,17 +307,30 @@ namespace BonusService.Service.BLL
             }
             return result;
         }
-        public ApiResult SetVerificationReward(int custId, OTPTypeEnum inputType)
+        public ApiResult SetVerificationReward(int custId, OTPTypeEnum inputType , bool isWorker)
         {
             var result = new ApiResult();
             var custInfo = _custInfoService.GetCustInfo(custId);
             var verInfo = _bonusAPIService.GetVerificationReward(custInfo.SiteId, custInfo.CurrencyId);
             var custRewardInfo = _bonusAPIService.GetCustVerificationReward(custId, true);
            
-            result = CheckRewardCondination(custId, inputType, custInfo, verInfo, custRewardInfo);//領獎條件規則
-            if (result.ErrorCode != 0) // 規則不符
-                return result;
+            result = CheckRewardCondination(custId, inputType,out var minDeposit, custInfo, verInfo, custRewardInfo);//領獎條件規則
+            if (result.ErrorCode != 0)
+            {
+                if (result.ErrorCode == 104 && !isWorker)
+                {
+                    //Personal Msg - Failed
+                    _currency.GetCurrency().TryGetValue(custInfo.CurrencyId, out var currencyName);
+                    var leftAmountLimit = minDeposit - custRewardInfo.MaxDepositAmount;
+                    var title = string.Format(_selLangBll.GetResourceValue("lbl_VerificationRewardLimitTitle", custInfo.UserLang));
+                    var content = string.Format(_selLangBll.GetResourceValue("lbl_VerificationRewardLimit", custInfo.UserLang),
+                        currencyName,leftAmountLimit.ToString("#,##0.##"));
+                    _messageService.SendMessage(custInfo.SiteId, "System", title, content, custInfo.CustId, custInfo.UserName, custInfo.UserLang);
 
+                }
+                return result;
+            } 
+            
             if (verInfo.VerificationType == 1) //email & phone both
             {
                 result = _bonusAPIService.PayoutVerificationReward(custInfo.CustId, custInfo.SiteId, custInfo.CurrencyId, custInfo.UserName, OTPVerificationType.All, verInfo.PhoneReward);
@@ -323,6 +346,19 @@ namespace BonusService.Service.BLL
                     result = _bonusAPIService.PayoutVerificationReward(custInfo.CustId, custInfo.SiteId, custInfo.CurrencyId, custInfo.UserName, OTPVerificationType.Email, verInfo.EmailReward);
                 }
             }
+
+            if (result.ErrorCode == 0)
+            {
+                //Personal Msg - Success
+                _currency.GetCurrency().TryGetValue(custInfo.CurrencyId, out var currencyName);
+                var title = string.Format(_selLangBll.GetResourceValue("lbl_VerificationRewardLimitTitle", custInfo.UserLang));
+                var content = string.Format(_selLangBll.GetResourceValue("lbl_VerificationRewardContent", custInfo.UserLang),
+                    currencyName,
+                    (inputType == OTPTypeEnum.Email) ? 
+                        verInfo.EmailReward.ToString("#,##0.##") : verInfo.PhoneReward.ToString("#,##0.##"));
+                _messageService.SendMessage(custInfo.SiteId, "System", title, content, custInfo.CustId, custInfo.UserName, custInfo.UserLang);
+            }
+            
             return result;
         }
     }

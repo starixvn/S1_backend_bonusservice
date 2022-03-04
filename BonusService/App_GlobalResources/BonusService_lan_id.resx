@@ -150,7 +150,13 @@
   <data name="lbl_VipUpgradeTitle" xml:space="preserve">
     <value>Upgrade VIP</value>
   </data>
-  <data name="lbl_DepositLimit" xml:space="preserve">
-    <value>Silahkan kumpulkan deposit Anda hingga Rp {1} untuk menikmati program hadiah verifikasi.</value>
+  <data name="lbl_VerificationRewardContent" xml:space="preserve">
+    <value>Silakan penuhi sisa deposit {0} {1} untuk mendapatkan Hadiah Verifikasi.</value>
+  </data>
+  <data name="lbl_VerificationRewardLimit" xml:space="preserve">
+    <value>Silakan penuhi sisa deposit {0} {1} untuk mendapatkan Hadiah Verifikasi.</value>
+  </data>
+  <data name="lbl_VerificationRewardLimitTitle" xml:space="preserve">
+    <value>Hadiah Verifikasi</value>
   </data>
 </root>
