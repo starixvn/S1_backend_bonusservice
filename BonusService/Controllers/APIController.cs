@@ -88,7 +88,7 @@ namespace BonusService.Controllers
             if(verificationRewardReq.OTPType == 1)
                 item = OTPTypeEnum.Email;
 
-            return _bonusAPIBLL.SetVerificationReward(verificationRewardReq.CustId, item);
+            return _bonusAPIBLL.SetVerificationReward(verificationRewardReq.CustId, item , false);
         }
 
         [HttpPost]
@@ -98,7 +98,7 @@ namespace BonusService.Controllers
             if (verificationRewardReq.OTPType == 1)
                 item = OTPTypeEnum.Email;
 
-            return _bonusAPIBLL.CheckRewardCondination(verificationRewardReq.CustId, item);
+            return _bonusAPIBLL.CheckRewardCondination(verificationRewardReq.CustId, item ,out _ );
         }
 
         public class PromotionReq

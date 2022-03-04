@@ -150,7 +150,13 @@
   <data name="lbl_VipUpgradeTitle" xml:space="preserve">
     <value>VIP Upgrade</value>
   </data>
-  <data name="lbl_DepositLimit" xml:space="preserve">
-    <value>Please accumulate your deposit up to {0} {1} to enjoy verification reward program.</value>
+  <data name="lbl_VerificationRewardContent" xml:space="preserve">
+    <value>Please fulfill the remaining deposit {0} {1} to enjoy the Verification Rewards.</value>
+  </data>
+  <data name="lbl_VerificationRewardLimit" xml:space="preserve">
+    <value>Please fulfill the remaining deposit {0} {1} to enjoy the Verification Rewards.</value>
+  </data>
+  <data name="lbl_VerificationRewardLimitTitle" xml:space="preserve">
+    <value>Verificantion Rewards</value>
   </data>
 </root>
