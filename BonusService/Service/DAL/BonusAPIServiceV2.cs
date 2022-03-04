@@ -65,7 +65,8 @@ namespace BonusService.Service.DAL
         }
         public bool IsBlockIP(Promotion promotion, string bonusCode, int siteId, string custIP)
         {
-            if (promotion.PromotionType == PromotionType.FreeBet && !string.IsNullOrEmpty(custIP))
+            if ((promotion.PromotionType == PromotionType.FreeBet || (promotion.IsSpecial && promotion.PromotionType == PromotionType.FstDeposit))
+                && !string.IsNullOrEmpty(custIP))
             {
                 var p1 = new DynamicParameters(new { BonusCode = bonusCode, SiteId = siteId, IP = custIP });
                 p1.Add("IsBlocked", dbType: DbType.Int32, direction: ParameterDirection.Output);
@@ -353,7 +354,8 @@ namespace BonusService.Service.DAL
                        new DynamicParameters(new { SiteId = siteId, BonusCode = bonusCode, CurrencyId = currencyId }), conn, trans);
             if (result > 0)
             {
-                if (promotion.PromotionType == PromotionType.FreeBet && !string.IsNullOrEmpty(custIP))
+                if ((promotion.PromotionType == PromotionType.FreeBet || (promotion.IsSpecial && promotion.PromotionType == PromotionType.FstDeposit)) 
+                    && !string.IsNullOrEmpty(custIP))
                     _mainDbClient.Execute("Service_BlockFreeBet_Ins",
                                new DynamicParameters(new { BonusCode = bonusCode, SiteId = siteId, IP = custIP }), conn, trans);
                 //if(atPage != BonusInfoAtPage.Deposit)
