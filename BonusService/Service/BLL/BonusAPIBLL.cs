@@ -19,6 +19,7 @@ namespace BonusService.Service.BLL
         private readonly CourierAdapter _courierAdapter;
         private readonly SelLangBLL _selLangBll;
         private readonly MessageService _messageService;
+        private readonly Currency _currency;
         private readonly string _apiUrl;
         private readonly Dictionary<int, bool> isConvert = new Dictionary<int, bool>()
         {
@@ -34,6 +35,7 @@ namespace BonusService.Service.BLL
             _courierAdapter = provider.GetRequiredService<CourierAdapter>();
             _selLangBll = provider.GetRequiredService<SelLangBLL>();
             _messageService = provider.GetRequiredService<MessageService>();
+            _currency = provider.GetRequiredService<Currency>();
         }
 
         public async Task<ApiResult> SetAdjustmentBonusAsync(int custId, string bonusCode, string Operator, string memo, decimal Amount, int PromotionType)
@@ -232,6 +234,16 @@ namespace BonusService.Service.BLL
                 verInfo = _bonusAPIService.GetVerificationReward(custInfo.SiteId, custInfo.CurrencyId);
             if (custRewardInfo == null)
                 custRewardInfo = _bonusAPIService.GetCustVerificationReward(custId, true);
+            var rewardLimit = _bonusAPIService.GetVerificationRewardLimit(custInfo.SiteId, custInfo.CurrencyId, inputType);
+            if (custRewardInfo.MaxDepositAmount < rewardLimit.MinDeposit)
+            {
+                _currency.GetCurrency().TryGetValue(custInfo.CurrencyId, out var currencyName);
+                result.ErrorCode = 104;
+                result.Message = string.Format(_selLangBll.GetResourceValue("lbl_DepositLimit", custInfo.UserLang),
+                    currencyName,rewardLimit.MinDeposit.ToString("#,##0.##"));
+                
+                return result;
+            }
             
             if (verInfo == null)
             {
