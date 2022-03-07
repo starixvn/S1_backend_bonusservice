@@ -29,7 +29,7 @@ namespace MemberSite.Service.Model
     
     public class VerificationRewardLimit
     {
-        public int MinDeposit { get; set; }
+        public decimal MinDeposit { get; set; }
     }
     
     public class ClaimVerificationRewardData
@@ -40,7 +40,7 @@ namespace MemberSite.Service.Model
         public int Type { get; set; }
         public bool Verified { get; set; }
         public decimal? Reward { get; set; }
-        public int MinDeposit { get; set; }
+        public decimal MinDeposit { get; set; }
         public decimal SumDepositAmount { get; set; }
     }
 }
