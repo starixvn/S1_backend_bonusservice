@@ -34,6 +34,7 @@ namespace BonusService.Service.DAL
         private readonly CustInfoService _custInfoService;
         private readonly string _apiUrl;
         private readonly CourierAdapter _courierAdapter;
+        private readonly IEnumerable<AllowIp> _allowIp;
 
         public BonusAPIServiceV2(IServiceProvider serviceProvider, ILogger<BonusAPIService> logger)
         {
@@ -50,6 +51,7 @@ namespace BonusService.Service.DAL
             _custInfoService = serviceProvider.GetRequiredService<CustInfoService>();
             _apiUrl = _configuration.GetValue<string>("TpService");
             _courierAdapter = serviceProvider.GetRequiredService<CourierAdapter>();
+            _allowIp = serviceProvider.GetRequiredService<IEnumerable<AllowIp>>();
             this._logger = logger;
         }
         public Promotion GetPromotion(int custId, int currencyId, int siteId, string bonusCode, int? deviceType)
@@ -65,7 +67,9 @@ namespace BonusService.Service.DAL
         }
         public bool IsBlockIP(Promotion promotion, string bonusCode, int siteId, string custIP)
         {
-            if (promotion.PromotionType == PromotionType.FreeBet && !string.IsNullOrEmpty(custIP))
+            if ((promotion.PromotionType == PromotionType.FreeBet || (promotion.IsSpecial && promotion.PromotionType == PromotionType.FstDeposit))
+                && !string.IsNullOrEmpty(custIP)
+                && !_allowIp.Any(item => item.Type == AllowIpType.Bonus && item.IP == custIP))
             {
                 var p1 = new DynamicParameters(new { BonusCode = bonusCode, SiteId = siteId, IP = custIP });
                 p1.Add("IsBlocked", dbType: DbType.Int32, direction: ParameterDirection.Output);
@@ -353,7 +357,9 @@ namespace BonusService.Service.DAL
                        new DynamicParameters(new { SiteId = siteId, BonusCode = bonusCode, CurrencyId = currencyId }), conn, trans);
             if (result > 0)
             {
-                if (promotion.PromotionType == PromotionType.FreeBet && !string.IsNullOrEmpty(custIP))
+                if ((promotion.PromotionType == PromotionType.FreeBet || (promotion.IsSpecial && promotion.PromotionType == PromotionType.FstDeposit)) 
+                    && !string.IsNullOrEmpty(custIP)
+                    && !_allowIp.Any(item => item.Type == AllowIpType.Bonus && item.IP == custIP))
                     _mainDbClient.Execute("Service_BlockFreeBet_Ins",
                                new DynamicParameters(new { BonusCode = bonusCode, SiteId = siteId, IP = custIP }), conn, trans);
                 //if(atPage != BonusInfoAtPage.Deposit)

@@ -188,4 +188,10 @@
         OnHold = 7,   
         Error = 99    
     }
+
+    public enum AllowIpType
+    {
+        DormantAccountLock = 1,
+        Bonus = 2
+    }
 }

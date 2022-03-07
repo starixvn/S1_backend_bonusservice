@@ -8,7 +8,6 @@ using BonusService.Service.Model.enums;
 using Dapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
 
 namespace BonusService.Service.DAL

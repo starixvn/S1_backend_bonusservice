@@ -15,6 +15,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using BonusService.Service.Model;
 
 namespace BonusService
 {
@@ -108,6 +109,8 @@ namespace BonusService
                         services.AddHostedService<VipDowngradeWorker>();
                     }
                     services.AddControllers();
+                    
+                    services.AddOptionListByDB<AllowIp>("Service_MemberAllowIP_Get");
                 });
         
         private static MemoryStream GetRemoteConfig(IEnumerable<string> remoteUrls)
