@@ -237,7 +237,7 @@ namespace BonusService.Service.BLL
             var rewardLimit = _bonusAPIService.GetVerificationRewardLimit(custInfo.SiteId, custInfo.CurrencyId, inputType);
 
             minDeposit = rewardLimit.MinDeposit;
-            if (custRewardInfo.MaxDepositAmount < minDeposit)
+            if (custRewardInfo.SumDepositAmount < minDeposit)
             {
                 result.ErrorCode = 104;
                 return result;
@@ -321,7 +321,7 @@ namespace BonusService.Service.BLL
                 {
                     //Personal Msg - Failed
                     _currency.GetCurrency().TryGetValue(custInfo.CurrencyId, out var currencyName);
-                    var leftAmountLimit = minDeposit - custRewardInfo.MaxDepositAmount;
+                    var leftAmountLimit = minDeposit - custRewardInfo.SumDepositAmount;
                     var title = string.Format(_selLangBll.GetResourceValue("lbl_VerificationRewardLimitTitle", custInfo.UserLang));
                     var content = string.Format(_selLangBll.GetResourceValue("lbl_VerificationRewardLimit", custInfo.UserLang),
                         currencyName,leftAmountLimit.ToString("#,##0.##"));
