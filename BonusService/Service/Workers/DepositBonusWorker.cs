@@ -1,6 +1,4 @@
 ﻿using BonusService.Service.BLL;
-using BonusService.Service.Library;
-using BonusService.Service.Model;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
