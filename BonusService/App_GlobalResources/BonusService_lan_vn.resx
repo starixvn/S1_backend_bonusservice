@@ -144,4 +144,13 @@
   <data name="lbl_VipUpgradeTitle" xml:space="preserve">
     <value>Nâng hạng VIP</value>
   </data>
+  <data name="lbl_VerificationRewardContent" xml:space="preserve">
+    <value>Xin chúc mừng! Bạn đã được nhận thưởng {1} {0} vì đã xác thực tài khoản thành công.</value>
+  </data>
+  <data name="lbl_VerificationRewardLimit" xml:space="preserve">
+    <value>Vui lòng nạp thêm số tiền {1} {0} để nhận Phần Thưởng.</value>
+  </data>
+  <data name="lbl_VerificationRewardLimitTitle" xml:space="preserve">
+    <value>Phần thưởng xác thực.</value>
+  </data>
 </root>

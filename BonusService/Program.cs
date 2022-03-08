@@ -73,6 +73,7 @@ namespace BonusService
                     services.AddSingleton<VipRebateService>();
                     services.AddSingleton<ExpiredBonusService>();
                     services.AddSingleton<ReferralService>();
+                    services.AddSingleton<RewardService>();
                     services.AddSingleton<VipService>();
                     services.AddSingleton<VipCashBackService>();
                     services.AddSingleton<PromotionAutoExtendService>();
@@ -81,6 +82,7 @@ namespace BonusService
 
                     services.AddSingleton<RebateBLL>();
                     services.AddSingleton<ReferralBLL>();
+                    services.AddSingleton<RewardBLL>();
                     services.AddSingleton<SelLangBLL>();
                     services.AddSingleton<ExpiredBonusBLL>();
                     services.AddSingleton<VipBLL>();
@@ -102,6 +104,7 @@ namespace BonusService
                     services.AddHostedService<VipCashBackWorker>();
                     services.AddHostedService<PromotionAutoExtendWorker>();
                     services.AddHostedService<DepositBonusWorker>();
+                    services.AddHostedService<RewardWorker>();
 
                     if (hostContext.Configuration.GetSection("RunVipDowngradeWorker").Get<bool>())
                     {
