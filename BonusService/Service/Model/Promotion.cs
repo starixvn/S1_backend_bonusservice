@@ -110,6 +110,7 @@ namespace BonusService.Service.Model
         public int DeviceType { set; get; }
         public decimal Amount { set; get; }
         public int DepositStatus { set; get; }
+        public string IP { set; get; }
     }
     public class DepositBonusCustList
     {

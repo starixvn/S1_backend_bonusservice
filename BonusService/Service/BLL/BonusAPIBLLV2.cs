@@ -407,7 +407,7 @@ namespace BonusService.Service.BLL
         {
             var apiResult1 = new ApiResult();
             int? deviceType = 1;
-            apiResult1 = await SetClaimPromotionV2Async(depositBonus.CustId, depositBonus.BonusCode, null, depositBonus.LockedAmount, deviceType, BonusInfoAtPage.Deposit, false, depositBonus.TransId);
+            apiResult1 = await SetClaimPromotionV2Async(depositBonus.CustId, depositBonus.BonusCode, depositBonus.IP, depositBonus.LockedAmount, deviceType, BonusInfoAtPage.Deposit, false, depositBonus.TransId);
             if (apiResult1.ErrorCode == 0)
                 return true;
             return false;
