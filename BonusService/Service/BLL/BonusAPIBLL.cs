@@ -237,11 +237,6 @@ namespace BonusService.Service.BLL
             var rewardLimit = _bonusAPIService.GetVerificationRewardLimit(custInfo.SiteId, custInfo.CurrencyId, inputType);
 
             minDeposit = rewardLimit.MinDeposit;
-            if (custRewardInfo.SumDepositAmount < minDeposit)
-            {
-                result.ErrorCode = 104;
-                return result;
-            }
             
             if (verInfo == null)
             {
@@ -249,6 +244,13 @@ namespace BonusService.Service.BLL
                 result.Message = $"SiteId:{custInfo.SiteId} CurrencyId:{custInfo.CurrencyId} setting not found";
                 return result;
             }
+            
+            if (custRewardInfo.SumDepositAmount < minDeposit)
+            {
+                result.ErrorCode = 104;
+                return result;
+            }
+            
             if (verInfo.VerificationType == 1) //email & phone both
             {
                 if (custRewardInfo.EmailReward != null || custRewardInfo.PhoneReward != null)
