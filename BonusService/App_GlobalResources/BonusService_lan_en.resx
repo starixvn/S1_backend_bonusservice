@@ -157,6 +157,6 @@
     <value>Please fulfill the remaining deposit {0} {1} to enjoy the Verification Rewards.</value>
   </data>
   <data name="lbl_VerificationRewardLimitTitle" xml:space="preserve">
-    <value>Verificantion Rewards</value>
+    <value>Verification Rewards</value>
   </data>
 </root>
