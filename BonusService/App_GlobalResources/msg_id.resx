@@ -135,4 +135,7 @@
   <data name="msg_ClaimCashBackBonus" xml:space="preserve">
     <value>Selamat, Bonus CASHBACK Anda {0} telah dikreditkan ke akun Anda!</value>
   </data>
+  <data name="msg_PhoneProfile_ERROR" xml:space="preserve">
+    <value>Harap lengkapi profil Anda dan verifikasi ponsel Anda untuk menikmati promosi kami.</value>
+  </data>
 </root>
