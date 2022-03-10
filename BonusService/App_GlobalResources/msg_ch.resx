@@ -135,4 +135,7 @@
   <data name="msg_ClaimCashBackBonus" xml:space="preserve">
     <value>恭喜，您的現金返還 {0} 已匯入您的戶口！</value>
   </data>
+  <data name="msg_PhoneProfile_ERROR" xml:space="preserve">
+    <value>請完成您的個人資料並驗證您的手機以享受我們的促銷。</value>
+  </data>
 </root>

@@ -135,4 +135,7 @@
   <data name="msg_ClaimCashBackBonus" xml:space="preserve">
     <value>Xin chúc mừng, khoản tiền hoàn lại {0} của bạn đã được ghi có vào tài khoản của bạn!</value>
   </data>
+  <data name="msg_PhoneProfile_ERROR" xml:space="preserve">
+    <value>Vui lòng hoàn tất thông tin của bạn và xác minh số điện thoại của bạn để được hưởng các chương trình khuyến mãi của chúng tôi.</value>
+  </data>
 </root>

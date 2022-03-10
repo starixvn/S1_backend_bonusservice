@@ -135,4 +135,7 @@
   <data name="msg_ClaimCashBackBonus" xml:space="preserve">
     <value>बधाई हो, आपका कैशबैक {0} आपके खाते में क्रेडिट कर दिया गया है!.</value>
   </data>
+  <data name="msg_PhoneProfile_ERROR" xml:space="preserve">
+    <value>कृपया अपना प्रोफ़ाइल पूरा करें और हमारे प्रचार का आनंद लेने के लिए अपना फ़ोन नंबर सत्यापित करें।</value>
+  </data>
 </root>

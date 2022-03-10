@@ -135,4 +135,7 @@
   <data name="msg_ClaimCashBackBonus" xml:space="preserve">
     <value>ขอแสดงความยินดีเครดิตเงินคืน {0} ของคุณเข้าบัญชีของคุณแล้ว!</value>
   </data>
+  <data name="msg_PhoneProfile_ERROR" xml:space="preserve">
+    <value>กรุณากรอกข้อมูลส่วนตัวและยืนยันหมายเลขโทรศัพท์ก่อนเข้าร่วมกิจกรรม</value>
+  </data>
 </root>
