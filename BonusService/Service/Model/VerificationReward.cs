@@ -24,5 +24,23 @@ namespace MemberSite.Service.Model
         public bool EmailVerified { get; set; }
         public decimal? EmailReward { get; set; }
         public DateTime? EmailRewardTime { get; set; }
+        public decimal SumDepositAmount { get; set; }
+    }
+    
+    public class VerificationRewardLimit
+    {
+        public decimal MinDeposit { get; set; }
+    }
+    
+    public class ClaimVerificationRewardData
+    {
+        public int CustId { get; set; }
+        public int SiteId { get; set; }
+        public int CurrencyId { get; set; }
+        public int Type { get; set; }
+        public bool Verified { get; set; }
+        public decimal? Reward { get; set; }
+        public decimal MinDeposit { get; set; }
+        public decimal SumDepositAmount { get; set; }
     }
 }
