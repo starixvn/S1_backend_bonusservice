@@ -37,6 +37,7 @@ namespace BonusService.Service.Model
         public decimal BonusAmount { set; get; }
         public decimal LockedAmount { set; get; }
         public decimal RollOver { set; get; }
+        public int FullFillType { get; set; }
         public long ExpiryTime { set; get; }
         public int ExpiryDays { get; set; }
         public int CustId { set; get; }
