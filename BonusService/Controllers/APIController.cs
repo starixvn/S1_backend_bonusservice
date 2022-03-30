@@ -54,7 +54,6 @@ namespace BonusService.Controllers
                     result.Message = "Please complete your profile and verify your phone number to enjoy our promotions.";
                     return result;
                 }
-                //result = await _bonusAPIBLL.SetAdjustmentBonusAsync(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode, setAdjustBonusReq.Operator, setAdjustBonusReq.Memo, setAdjustBonusReq.Amount, setAdjustBonusReq.PromotionType);
                 string Memo = JsonConvert.SerializeObject(new { Operator = setAdjustBonusReq.Operator }); 
 
                 result = await _bonusAPIBLLV2.SetAdjustmentBonusV2Async(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode, setAdjustBonusReq.Operator, Memo, setAdjustBonusReq.Amount, setAdjustBonusReq.PromotionType);
