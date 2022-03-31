@@ -167,7 +167,7 @@ namespace BonusService.Service.DAL
 
                 result = _bonusWalletService.RewardBonus(bonusId, bonusRewardInput.CategoryId, bonusRewardInput.TpId, bonusRewardInput.CustId,
                     bonusRewardInput.SiteId, bonusRewardInput.UserName, bonusRewardInput.BonusAmount, bonusRewardInput.LockedAmount, bonusRewardInput.RollOver, bonusRewardInput.ExpiryTime, (int)bonusRewardInput.FinancialType,
-                    bonusRewardInput.RewardBonusMemo, transId, conn, trans)
+                    bonusRewardInput.RewardBonusMemo, transId, conn, trans ,bonusRewardInput.FullFillType)
                     ? 1
                     : 0;
             }
@@ -268,7 +268,7 @@ namespace BonusService.Service.DAL
                             }
                         }
 
-                        dRollOver = ((dLockedAmount + dBonus) * promotion.RollOver);
+                        dRollOver = (dLockedAmount + dBonus) * (promotion.FullFillType == 1 ? promotion.RollOver : promotion.WinOver);
                         break;
                     }
 
@@ -520,6 +520,7 @@ namespace BonusService.Service.DAL
                     BonusAmount = CalculateBonus.BonusAmount,
                     LockedAmount = CalculateBonus.LockedAmount,
                     RollOver = CalculateBonus.RollOver,
+                    FullFillType = promotion.FullFillType,
                     ExpiryTime = expiryTime,
                     ExpiryDays = promotion.ExpiryDays,
                     CustId = custId,
