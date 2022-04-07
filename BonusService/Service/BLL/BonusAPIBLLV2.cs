@@ -417,27 +417,31 @@ namespace BonusService.Service.BLL
         {
             return _bonusAPIServiceV2.GetCustConditionInfo( custId, currencyId, siteId, bonusCode, deviceType);
         }
-        public async Task<ApiResult<IEnumerable<CustPromotion>>> GetPromotionListConditionInfoAsync(int custId, int currencyId, int siteId, IEnumerable<CustPromotion> promotionList, int? deviceType)
+        public async Task<ApiResult<List<PromotionCondition>>> GetPromotionListConditionInfoAsync(int custId, int currencyId, int siteId, List<string> bonusCodeListt, int? deviceType)
         {
-            var apiResult = new ApiResult<IEnumerable<CustPromotion>>();
-
+            var apiResult = new ApiResult<List<PromotionCondition>>();
+            var promotionConditionList = new List<PromotionCondition>();
             await Task.Run(() =>
             {
-                foreach (var promo in promotionList)
+                foreach (var bonusCode in bonusCodeListt)
                 {
-                    var CustCondition =  _bonusAPIServiceV2.GetCustConditionInfo(custId, currencyId, siteId, promo.BonusCode, deviceType);
-                    promo.DepositId = CustCondition.RefId;
-                    promo.DepositAmount = CustCondition.Amount;
-                    promo.RefList = CustCondition.reference.Any()? CustCondition.reference:null;
-                    promo.canJoin = CustCondition.CanJoin == 1;
-                    promo.Result = CustCondition.Result;
-
+                    var CustCondition = _bonusAPIServiceV2.GetCustConditionInfo(custId, currencyId, siteId, bonusCode, deviceType);
+                    promotionConditionList.Add(new PromotionCondition
+                    {
+                        BonusCode = bonusCode,
+                        DepositId = CustCondition.RefId,
+                        DepositAmount = CustCondition.Amount,
+                        RefList = CustCondition.reference.Any() ? CustCondition.reference : null,
+                        CanJoin = CustCondition.CanJoin == 1,
+                        Result = CustCondition.Result
+                    });
                 }
             });
             apiResult.ErrorCode = 0;
-            apiResult.Data = promotionList;
+            apiResult.Data = promotionConditionList;
             return apiResult;
         }
+
 
     }
 }
