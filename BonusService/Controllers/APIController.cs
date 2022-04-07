@@ -172,7 +172,7 @@ namespace BonusService.Controllers
 
         public class GetPromotionListConditionReq
         {
-            public IEnumerable<CustPromotion> PromotionList { set; get; }
+            public List<string> BonusCodeList { set; get; }
             public int CustId { set; get; }
             public int CurrencyId { set; get; }
             public int SiteId { set; get; }
@@ -181,9 +181,9 @@ namespace BonusService.Controllers
         }
 
         [HttpPost]
-        public async Task<ApiResult<IEnumerable<CustPromotion>>> GetPromotionListConditionInfo(GetPromotionListConditionReq getPromotionListConditionReq)
+        public async Task<ApiResult<List<PromotionCondition>>> GetPromotionListConditionInfo(GetPromotionListConditionReq getPromotionListConditionReq)
         {
-            var apiResult = new ApiResult<IEnumerable<CustPromotion>>();
+            var apiResult = new ApiResult<List<PromotionCondition>>();
             try
             {
                 int? deviceType = 1;
@@ -191,7 +191,7 @@ namespace BonusService.Controllers
                 {
                     deviceType = getPromotionListConditionReq.DeviceType;
                 }
-                apiResult = await _bonusAPIBLLV2.GetPromotionListConditionInfoAsync(getPromotionListConditionReq.CustId, getPromotionListConditionReq.CurrencyId, getPromotionListConditionReq.SiteId, getPromotionListConditionReq.PromotionList, deviceType);
+                apiResult = await _bonusAPIBLLV2.GetPromotionListConditionInfoAsync(getPromotionListConditionReq.CustId, getPromotionListConditionReq.CurrencyId, getPromotionListConditionReq.SiteId, getPromotionListConditionReq.BonusCodeList, deviceType);
             }
             catch (Exception ex)
             {
