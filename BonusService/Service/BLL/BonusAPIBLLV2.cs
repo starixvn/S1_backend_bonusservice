@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace BonusService.Service.BLL
@@ -412,5 +413,31 @@ namespace BonusService.Service.BLL
                 return true;
             return false;
         }
+        public CustCondition GetCustConditionInfo(int custId, int currencyId, int siteId, string bonusCode, int? deviceType)
+        {
+            return _bonusAPIServiceV2.GetCustConditionInfo( custId, currencyId, siteId, bonusCode, deviceType);
+        }
+        public async Task<ApiResult<IEnumerable<CustPromotion>>> GetPromotionListConditionInfoAsync(int custId, int currencyId, int siteId, IEnumerable<CustPromotion> promotionList, int? deviceType)
+        {
+            var apiResult = new ApiResult<IEnumerable<CustPromotion>>();
+
+            await Task.Run(() =>
+            {
+                foreach (var promo in promotionList)
+                {
+                    var CustCondition =  _bonusAPIServiceV2.GetCustConditionInfo(custId, currencyId, siteId, promo.BonusCode, deviceType);
+                    promo.DepositId = CustCondition.RefId;
+                    promo.DepositAmount = CustCondition.Amount;
+                    promo.RefList = CustCondition.reference.Any()? CustCondition.reference:null;
+                    promo.canJoin = CustCondition.CanJoin == 1;
+                    promo.Result = CustCondition.Result;
+
+                }
+            });
+            apiResult.ErrorCode = 0;
+            apiResult.Data = promotionList;
+            return apiResult;
+        }
+
     }
 }

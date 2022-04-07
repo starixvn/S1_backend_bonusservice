@@ -1,5 +1,6 @@
 ﻿using BonusService.Service.BLL;
 using BonusService.Service.Extensions;
+using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
 using MemberSite.Service.Model;
 using Microsoft.AspNetCore.Mvc;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace BonusService.Controllers
@@ -54,7 +56,6 @@ namespace BonusService.Controllers
                     result.Message = "Please complete your profile and verify your phone number to enjoy our promotions.";
                     return result;
                 }
-                //result = await _bonusAPIBLL.SetAdjustmentBonusAsync(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode, setAdjustBonusReq.Operator, setAdjustBonusReq.Memo, setAdjustBonusReq.Amount, setAdjustBonusReq.PromotionType);
                 string Memo = JsonConvert.SerializeObject(new { Operator = setAdjustBonusReq.Operator }); 
 
                 result = await _bonusAPIBLLV2.SetAdjustmentBonusV2Async(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode, setAdjustBonusReq.Operator, Memo, setAdjustBonusReq.Amount, setAdjustBonusReq.PromotionType);
@@ -125,6 +126,72 @@ namespace BonusService.Controllers
                 var lockedAmount = promotionReq.LockedAmount ?? 0;
                 
                 apiResult = await _bonusAPIBLLV2.SetClaimPromotionV2Async(promotionReq.CustId, promotionReq.BonusCode, promotionReq.custIP, lockedAmount, deviceType, BonusInfoAtPage.Promotion,true);
+            }
+            catch (Exception ex)
+            {
+                apiResult.RawMessage = ex.Message;
+                apiResult.Message = ex.Message;
+            }
+
+            return apiResult;
+        }
+
+        public class CustConditionInfoReq
+        {
+            public string BonusCode { set; get; }
+            public int CustId { set; get; }
+            public int CurrencyId { set; get; }
+            public int SiteId { set; get; }
+            public int? DeviceType { set; get; }
+        }
+
+        [HttpPost]
+        public ApiResult<CustCondition> GetCustConditionInfo(CustConditionInfoReq custConditionInfoReq)
+        {
+            var apiResult = new ApiResult<CustCondition>();
+            try
+            {
+
+                int? deviceType = 1;
+                if (custConditionInfoReq.DeviceType != null)
+                {
+                    deviceType = custConditionInfoReq.DeviceType;
+                }
+
+                apiResult.Data = _bonusAPIBLLV2.GetCustConditionInfo(custConditionInfoReq.CustId, custConditionInfoReq.CurrencyId, custConditionInfoReq.SiteId, custConditionInfoReq.BonusCode, deviceType);
+                apiResult.ErrorCode = 0;
+            }
+            catch (Exception ex)
+            {
+                apiResult.RawMessage = ex.Message;
+                apiResult.Message = ex.Message;
+            }
+
+            return apiResult;
+        }
+
+        public class GetPromotionListConditionReq
+        {
+            public IEnumerable<CustPromotion> PromotionList { set; get; }
+            public int CustId { set; get; }
+            public int CurrencyId { set; get; }
+            public int SiteId { set; get; }
+            public int? DeviceType { set; get; }
+
+        }
+
+        [HttpPost]
+        public async Task<ApiResult<IEnumerable<CustPromotion>>> GetPromotionListConditionInfo(GetPromotionListConditionReq getPromotionListConditionReq)
+        {
+            var apiResult = new ApiResult<IEnumerable<CustPromotion>>();
+            try
+            {
+                int? deviceType = 1;
+                if (getPromotionListConditionReq.DeviceType != null)
+                {
+                    deviceType = getPromotionListConditionReq.DeviceType;
+                }
+                apiResult = await _bonusAPIBLLV2.GetPromotionListConditionInfoAsync(getPromotionListConditionReq.CustId, getPromotionListConditionReq.CurrencyId, getPromotionListConditionReq.SiteId, getPromotionListConditionReq.PromotionList, deviceType);
             }
             catch (Exception ex)
             {
