@@ -94,8 +94,8 @@ namespace BonusService.Service.DAL
             }
             return true;
         }
-        public CustCondition GetCustConditionInfo(int custId, int currencyId, int siteId, string bonusCode, int? deviceType, MySqlConnection conn,
-            MySqlTransaction trans)
+        public CustCondition GetCustConditionInfo(int custId, int currencyId, int siteId, string bonusCode, int? deviceType, MySqlConnection conn = null,
+            MySqlTransaction trans = null)
         {
             var rtn = new CustCondition();
             var p = new DynamicParameters(new { CustId = custId, CurrencyId = currencyId, SiteId = siteId, BonusCode = bonusCode, DeviceType = deviceType });
@@ -104,12 +104,19 @@ namespace BonusService.Service.DAL
             p.Add("RefId", dbType: DbType.String, direction: ParameterDirection.Output);
             p.Add("Result", dbType: DbType.Int32, direction: ParameterDirection.Output);
             p.Add("RefList", dbType: DbType.String, direction: ParameterDirection.Output);
-            _mainDbClient.Execute("Member_PromotionCanJoin_Get_V8", p, conn, trans);
-
+            if (conn != null && trans != null)
+            {
+                _mainDbClient.Execute("Member_PromotionCanJoin_Get_V8", p, conn, trans);
+            }
+            else
+            {
+                _mainDbClient.Execute("Member_PromotionCanJoin_Get_V8", p);
+            }
             rtn.Result = p.Get<int>("Result");
             rtn.CanJoin = p.Get<byte?>("CanJoin") ?? 0;
             rtn.Amount = p.Get<decimal?>("Amount") ?? 0;
             rtn.RefList = p.Get<string>("RefList");
+            rtn.RefId = p.Get<string>("RefId");
             rtn.reference = new List<Ref>();
             if (rtn.RefList != null && rtn.RefList.Contains("DepositId", StringComparison.OrdinalIgnoreCase))
             {
@@ -362,8 +369,6 @@ namespace BonusService.Service.DAL
                     && !_allowIp.Any(item => item.Type == AllowIpType.Bonus && item.IP == custIP))
                     _mainDbClient.Execute("Service_BlockFreeBet_Ins",
                                new DynamicParameters(new { BonusCode = bonusCode, SiteId = siteId, IP = custIP }), conn, trans);
-                //if(atPage != BonusInfoAtPage.Deposit)
-                //    CancelAllWaitingBonus(custId, conn, trans);
             }
             return result;
         }
@@ -376,17 +381,6 @@ namespace BonusService.Service.DAL
 
             return conn.Query<DepositBonus>("Service_DepositBonusQueueByCustId_Get", new { CustId = custId }, commandType: CommandType.StoredProcedure);
         }
-
-        //public void CancelAllWaitingBonus(int custId, MySqlConnection conn, MySqlTransaction trans)
-        //{//當領取BONUS成功   將客戶DepositBonusQueue中的BONUS CANCEL掉
-
-        //    var BonusList = GetDepositBonusQueueByCustId(custId,true);//改變狀態用mainDb取得資料，避免資料不同步
-
-        //    foreach (var depositBonus in BonusList)
-        //    {
-        //        _depositBonusService.SetDepositBonusStatus(depositBonus.TransId, (int)DepositBonusQueueStatus.Cancel_other_Bonus);
-        //    }
-        //}
         private static DateTime StartOfWeek(DateTime dateTime, DayOfWeek startOfWeek)
         {
             var diff = (7 + (dateTime.DayOfWeek - startOfWeek)) % 7;
