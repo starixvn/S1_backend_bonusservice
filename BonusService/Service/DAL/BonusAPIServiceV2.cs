@@ -659,6 +659,7 @@ namespace BonusService.Service.DAL
                 BonusAmount = CalculateBonus.BonusAmount,
                 LockedAmount = CalculateBonus.LockedAmount,
                 RollOver = CalculateBonus.RollOver,
+                FullFillType = promotion.FullFillType,
                 ExpiryTime = expiryTime,
                 ExpiryDays = promotion.ExpiryDays,
                 CustId = depositBonus.CustId,
