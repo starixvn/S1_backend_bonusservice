@@ -94,8 +94,7 @@ namespace BonusService.Service.DAL
             }
             return true;
         }
-        public CustCondition GetCustConditionInfo(int custId, int currencyId, int siteId, string bonusCode, int? deviceType, MySqlConnection conn = null,
-            MySqlTransaction trans = null)
+        public CustCondition GetCustConditionInfo(int custId, int currencyId, int siteId, string bonusCode, int? deviceType)
         {
             var rtn = new CustCondition();
             var p = new DynamicParameters(new { CustId = custId, CurrencyId = currencyId, SiteId = siteId, BonusCode = bonusCode, DeviceType = deviceType });
@@ -104,14 +103,8 @@ namespace BonusService.Service.DAL
             p.Add("RefId", dbType: DbType.String, direction: ParameterDirection.Output);
             p.Add("Result", dbType: DbType.Int32, direction: ParameterDirection.Output);
             p.Add("RefList", dbType: DbType.String, direction: ParameterDirection.Output);
-            if (conn != null && trans != null)
-            {
-                _mainDbClient.Execute("Member_PromotionCanJoin_Get_V8", p, conn, trans);
-            }
-            else
-            {
-                _mainDbClient.Execute("Member_PromotionCanJoin_Get_V8", p);
-            }
+            _mainDbClient.Execute("Member_PromotionCanJoin_Get_V8", p);
+            
             rtn.Result = p.Get<int>("Result");
             rtn.CanJoin = p.Get<byte?>("CanJoin") ?? 0;
             rtn.Amount = p.Get<decimal?>("Amount") ?? 0;
@@ -181,9 +174,13 @@ namespace BonusService.Service.DAL
 
             if (result > 0 && bonusRewardInput.PromotionType == PromotionType.Cashback)
             {
-                var currentTime = DateTime.UtcNow.AddHours(8);
-                var calculateDate = currentTime
-                    .AddDays(-(int)DateTime.UtcNow.AddHours(8).DayOfWeek + (int)DayOfWeek.Monday)
+                var offset = 8;
+                if (bonusRewardInput.SiteId == (int)SiteId.Goal123 || bonusRewardInput.SiteId == (int)SiteId.Bwing)
+                {
+                    offset = 7;
+                }
+                var currentTime = DateTime.UtcNow.AddHours(offset);
+                var calculateDate = StartOfWeek(currentTime, DayOfWeek.Monday)
                     .ToString("yyyy-MM-dd");
 
                 result = _bonusWalletService.RewardCashBack(
@@ -479,7 +476,7 @@ namespace BonusService.Service.DAL
             if (!CheckProfileFinish(custId, siteId))//Profile Finish & Phone Verified
                 return (int)BonusErrorCode.PROFILE_OR_PHONE_NOT_FINISH;
 
-            var custConditionInfo = GetCustConditionInfo(custId, currencyId, siteId, bonusCode, deviceType, conn, trans);
+            var custConditionInfo = GetCustConditionInfo(custId, currencyId, siteId, bonusCode, deviceType);
 
             if (custConditionInfo.CanJoin == 1)
             {
