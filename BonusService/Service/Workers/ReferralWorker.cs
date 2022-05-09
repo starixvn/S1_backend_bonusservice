@@ -24,15 +24,12 @@ namespace BonusService.Service.Workers
         }
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            //  Console.WriteLine(selLangBLL.GetResourceValue("lbl_HelloWorld", "en"));
             timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.Zero);
             return Task.CompletedTask;
         }
         private void DoWork(object state)
         {
             bool isError = false;
-
-            //_logger.LogCritical($"Worker running at: {environment.EnvironmentName}");
 
             try
             {

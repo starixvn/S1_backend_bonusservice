@@ -127,7 +127,9 @@
         Bonusreward = 5,
         LockedAmount = 6,
         CancelledBonus = 7,
-        Cashreward = 8
+        Cashreward = 8,
+        ReferFriendsRewards = 13,
+        VerificationReward = 20
     }
     public enum WalletStatus
     {

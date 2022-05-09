@@ -9,5 +9,6 @@
         public int AgentId { get; set; }
         public string AgentName { get; set; }
         public decimal BonusAmount { get; set; }
+        public decimal ReferralFreeCredit { get; set; }
     }
 }
