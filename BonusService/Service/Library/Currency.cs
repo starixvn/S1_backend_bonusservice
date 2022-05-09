@@ -6,7 +6,7 @@ namespace BonusService.Service.Library
     {
         private readonly Dictionary<int, string> _currency = new Dictionary<int, string>()
         {
-            {2, "MYR"}, {4, "THB"}, {13, "RMB"}, {15, "IDR"}, {51, "VND"}
+            {2, "MYR"}, {4, "THB"}, {13, "CNY"}, {15, "IDR"}, {51, "VND"}
         };
         public Currency()
         { }
