@@ -24,15 +24,12 @@ namespace BonusService.Service.Workers
         }
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            //  Console.WriteLine(selLangBLL.GetResourceValue("lbl_HelloWorld", "en"));
             timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.Zero);
             return Task.CompletedTask;
         }
         private void DoWork(object state)
         {
             bool isError = false;
-
-            //_logger.LogCritical($"Worker running at: {environment.EnvironmentName}");
 
             try
             {
@@ -50,7 +47,7 @@ namespace BonusService.Service.Workers
 
                 foreach(var rr in settlementList)
                 {
-                    if(referralBLL.PayoutReferral(rr.Value, out decimal payAmount, out List<ReferralInfo> paidReferralList) > 0)
+                    if(referralBLL.PayoutReferral(rr.Key, rr.Value, out decimal payAmount, out List<ReferralInfo> paidReferralList) > 0)
                     {
                         _logger.LogInformation($"Referral:{JsonConvert.SerializeObject(paidReferralList)}");
                     }
