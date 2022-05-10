@@ -25,13 +25,12 @@ namespace BonusService.Service.BLL
             return referralService.GetReferralSettlement();
         }
 
-        public int PayoutReferral(IEnumerable<ReferralInfo> referralInfos, out decimal payAmount, out List<ReferralInfo> paidReferralList)
+        public int PayoutReferral(int agentId, IEnumerable<ReferralInfo> referralInfos, out decimal payAmount, out List<ReferralInfo> paidReferralList)
         {
             var result = referralService.PayoutReferral(referralInfos, out payAmount, out paidReferralList);
             if (result > 0)
             {
-                var agent = referralInfos.FirstOrDefault();
-                var custInfo = custInfoService.GetCustInfo(agent.AgentId);
+                var custInfo = custInfoService.GetCustInfo(agentId);
 
                 var msg = new StringBuilder();
 

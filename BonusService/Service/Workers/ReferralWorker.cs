@@ -47,7 +47,7 @@ namespace BonusService.Service.Workers
 
                 foreach(var rr in settlementList)
                 {
-                    if(referralBLL.PayoutReferral(rr.Value, out decimal payAmount, out List<ReferralInfo> paidReferralList) > 0)
+                    if(referralBLL.PayoutReferral(rr.Key, rr.Value, out decimal payAmount, out List<ReferralInfo> paidReferralList) > 0)
                     {
                         _logger.LogInformation($"Referral:{JsonConvert.SerializeObject(paidReferralList)}");
                     }
