@@ -7,19 +7,20 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using BonusService.Service.DAL.Interface;
 using BonusService.Service.Library;
 using BonusService.Service.Model.enums;
 
 namespace BonusService.Service.DAL
 {
-    public class ReferralService
+    public class ReferralService : IReferralService
     {
         private readonly IConfiguration configuration;
         private readonly ILogger<RebateService> _logger;
         private readonly WalletService walletService;
         private readonly WithdrawalLimitService withdrawalLimitService;
         private readonly MySqlClient _reportDbClient;
-        public ReferralService(IConfiguration configuration, ILogger<RebateService> logger, WalletService walletService, WithdrawalLimitService withdrawalLimitService, IReadOnlyCollection<MySqlClient> dbClients)
+        public ReferralService(IConfiguration configuration, ILogger<RebateService> logger, WalletService walletService, WithdrawalLimitService withdrawalLimitService, IEnumerable<MySqlClient> dbClients)
         {
             this.configuration = configuration;
             this.walletService = walletService;

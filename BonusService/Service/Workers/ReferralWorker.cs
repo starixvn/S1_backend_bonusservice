@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Linq;
 using BonusService.Service.Model;
 using Newtonsoft.Json;
 
@@ -33,21 +34,10 @@ namespace BonusService.Service.Workers
 
             try
             {
-                Dictionary<int, List<ReferralInfo>> settlementList = new Dictionary<int, List<ReferralInfo>>();
-
-                foreach(var referralInfo in referralBLL.GetReferralSettlement())
+                var settlementList = referralBLL.GetReferralSettlement().ToLookup(a => a.AgentId);
+                foreach(var referralInfos in settlementList)
                 {
-                    if (!settlementList.ContainsKey(referralInfo.AgentId))
-                    {
-                        settlementList.Add(referralInfo.AgentId, new List<ReferralInfo>());
-                    }
-
-                    settlementList[referralInfo.AgentId].Add(referralInfo);
-                }
-
-                foreach(var rr in settlementList)
-                {
-                    if(referralBLL.PayoutReferral(rr.Key, rr.Value, out decimal payAmount, out List<ReferralInfo> paidReferralList) > 0)
+                    if(referralBLL.PayoutReferral(referralInfos.Key, referralInfos, out decimal payAmount, out List<ReferralInfo> paidReferralList) > 0)
                     {
                         _logger.LogInformation($"Referral:{JsonConvert.SerializeObject(paidReferralList)}");
                     }
