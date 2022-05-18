@@ -413,35 +413,5 @@ namespace BonusService.Service.BLL
                 return true;
             return false;
         }
-        public CustCondition GetCustConditionInfo(int custId, int currencyId, int siteId, string bonusCode, int? deviceType)
-        {
-            return _bonusAPIServiceV2.GetCustConditionInfo( custId, currencyId, siteId, bonusCode, deviceType);
-        }
-        public async Task<ApiResult<List<PromotionCondition>>> GetPromotionListConditionInfoAsync(int custId, int currencyId, int siteId, List<string> bonusCodeListt, int? deviceType)
-        {
-            var apiResult = new ApiResult<List<PromotionCondition>>();
-            var promotionConditionList = new List<PromotionCondition>();
-            await Task.Run(() =>
-            {
-                foreach (var bonusCode in bonusCodeListt)
-                {
-                    var CustCondition = _bonusAPIServiceV2.GetCustConditionInfo(custId, currencyId, siteId, bonusCode, deviceType);
-                    promotionConditionList.Add(new PromotionCondition
-                    {
-                        BonusCode = bonusCode,
-                        DepositId = CustCondition.RefId,
-                        DepositAmount = CustCondition.Amount,
-                        RefList = CustCondition.reference.Any() ? CustCondition.reference : null,
-                        CanJoin = CustCondition.CanJoin == 1,
-                        Result = CustCondition.Result
-                    });
-                }
-            });
-            apiResult.ErrorCode = 0;
-            apiResult.Data = promotionConditionList;
-            return apiResult;
-        }
-
-
     }
 }
