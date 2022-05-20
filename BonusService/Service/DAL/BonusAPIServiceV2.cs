@@ -456,7 +456,7 @@ namespace BonusService.Service.DAL
             details.First().CashBackDetail = detail;
             promotion.CashBackDetails = details.First();
         }
-        public int SetClaimPromotionV2(int custId, string userName, int siteId, string bonusCode, int currencyId, string custIP, int? deviceType, BonusInfoAtPage atPage, out decimal bonusAmount, ref decimal lockedAmount, out decimal rollOver, out long expiryTime, out Promotion promotion, string DepositTransId = null)
+        public int SetClaimPromotionV2(int custId, string userName, int siteId, string bonusCode, int currencyId, string custIP, int? deviceType, BonusInfoAtPage atPage, out decimal bonusAmount, ref decimal lockedAmount, out decimal rollOver, out long expiryTime, out Promotion promotion, string depositTransId = null)
         {
             bonusAmount = 0;
             rollOver = 0;
@@ -490,11 +490,15 @@ namespace BonusService.Service.DAL
                 
                 if (atPage == BonusInfoAtPage.Deposit) //由Deposit頁面進來的 reference紀錄指定TransId、Amount
                 {
+                    if (promotion.PromotionType == PromotionType.FstDeposit && depositTransId != custConditionInfo.RefId)
+                    {
+                        return custConditionInfo.Result;
+                    }
                     custConditionInfo.reference = new List<Ref>
                     {
                         new Ref
                         {
-                            DepositId = DepositTransId,
+                            DepositId = depositTransId,
                             Amount = lockedAmount
                         }
                     };
@@ -518,11 +522,11 @@ namespace BonusService.Service.DAL
                     UserName = userName,
                     CurrencyId = currencyId,
                     SiteId = siteId,
-                    Memo = (string)null,
+                    Memo = null,
                     Prefix = $"B{_common.GetEnv()}",
                     RefList = custConditionInfo.reference.Any() ? JsonConvert.SerializeObject(custConditionInfo.reference) : null,
-                    SetBalanceMemo = $"Claim {Enum.GetName(typeof(PromotionType), (PromotionType)promotion.PromotionType)} BonusCode: {bonusCode}, Locked Amount: {CalculateBonus.LockedAmount:#,##0.##}",
-                    RewardBonusMemo = $"Claim {Enum.GetName(typeof(PromotionType), (PromotionType)promotion.PromotionType)} BonusCode: {bonusCode}",
+                    SetBalanceMemo = $"Claim {Enum.GetName(typeof(PromotionType), promotion.PromotionType)} BonusCode: {bonusCode}, Locked Amount: {CalculateBonus.LockedAmount:#,##0.##}",
+                    RewardBonusMemo = $"Claim {Enum.GetName(typeof(PromotionType), promotion.PromotionType)} BonusCode: {bonusCode}",
                     FinancialType = FinancialType.Bonusreward,
                     AtPage = atPage
                 };
@@ -534,10 +538,9 @@ namespace BonusService.Service.DAL
                         trans.Commit();
                 }
                 return result;
-            }else
-            {
-                return custConditionInfo.Result;
             }
+            
+            return custConditionInfo.Result;
 
         }
         public async Task<ApiResult<TransferResult>> TransferTpBonus(TpBonusTransfer tpBonusTransfer)
