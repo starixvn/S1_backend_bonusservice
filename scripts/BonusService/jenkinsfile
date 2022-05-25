@@ -20,7 +20,7 @@ pipeline {
         stage('Deploy') {
             agent { node { label 'master' } }
             steps {
-                sh 'ansible-playbook -i DEV.AWS.yml deploy.docker.yml --extra-vars "host=linux-dev docker_name=dev_bonusservice ver=${proj}:${version} env=${env} docker_ports=50997:50997 volume=/logs/bonus:/bonus"'
+                sh 'ansible-playbook -i DEV.AWS.yml deploy.docker.yml --extra-vars "host=linux-dev-worker docker_name=dev_bonusservice ver=${proj}:${version} env=${env} docker_ports=50997:50997 volume=/logs/bonus:/bonus"'
             }
         }
     }
