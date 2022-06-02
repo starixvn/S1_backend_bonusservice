@@ -54,7 +54,7 @@ namespace BonusService.Controllers
                     result.Message = "Please complete your profile and verify your phone number to enjoy our promotions.";
                     return result;
                 }
-                string Memo = JsonConvert.SerializeObject(new { Operator = setAdjustBonusReq.Operator }); 
+                string Memo = JsonConvert.SerializeObject(new { setAdjustBonusReq.Operator }); 
 
                 result = await _bonusAPIBLLV2.SetAdjustmentBonusV2Async(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode, Memo, setAdjustBonusReq.Amount, setAdjustBonusReq.PromotionType);
 

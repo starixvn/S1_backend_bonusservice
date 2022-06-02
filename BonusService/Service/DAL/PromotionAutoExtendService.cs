@@ -23,7 +23,7 @@ namespace BonusService.Service.DAL
         public int SetPromotionExtend(PromotionAutoExtend PromotionExtend)
         {
             using var conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
-            return conn.Execute("Service_PromotionAutoExtend_Set", new { BonusCode = PromotionExtend.BonusCode, SiteId = PromotionExtend.SiteId, PeriodTo = PromotionExtend.ExtendTime, LastUpdateUser = "ServiceAuto" }, commandType: CommandType.StoredProcedure);
+            return conn.Execute("Service_PromotionAutoExtend_Set", new { PromotionExtend.BonusCode, PromotionExtend.SiteId, PeriodTo = PromotionExtend.ExtendTime, LastUpdateUser = "ServiceAuto" }, commandType: CommandType.StoredProcedure);
         }
     }
 }

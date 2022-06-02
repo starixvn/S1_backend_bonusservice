@@ -113,7 +113,7 @@ namespace BonusService.Service.DAL
 
                 if (result > 0)
                 {
-                    conn.Execute("Common_RebateMLog_Ins", new { CustId = custId, CurrencyId = rebateInfo.CurrencyId, RebateType = promotionType - 5, UserName = userName, SiteId = siteId, RedeemAmount = payAmount, Memo = "", BonusCode = "VipRebate", RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
+                    conn.Execute("Common_RebateMLog_Ins", new { CustId = custId, rebateInfo.CurrencyId, RebateType = promotionType - 5, UserName = userName, SiteId = siteId, RedeemAmount = payAmount, Memo = "", BonusCode = "VipRebate", RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
                     int rebateSetting1_RollOver = 0;
                     var rollOver = rebateSetting1_RollOver * payAmount;
                     if (rollOver > 0)
@@ -123,12 +123,12 @@ namespace BonusService.Service.DAL
                     {
                         foreach (var rebateLog in rebateLogList)
                         {
-                            conn.Execute("Common_RebateLog_Ins", new { CustId = custId, CurrencyId = rebateInfo.CurrencyId, GameType = rebateLog.Key, RebateType = promotionType - 5, UserName = userName, SiteId = siteId, RedeemAmount = rebateLog.Value, Memo = "", BonusCode = "VipRebate", RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
+                            conn.Execute("Common_RebateLog_Ins", new { CustId = custId, rebateInfo.CurrencyId, GameType = rebateLog.Key, RebateType = promotionType - 5, UserName = userName, SiteId = siteId, RedeemAmount = rebateLog.Value, Memo = "", BonusCode = "VipRebate", RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
                         }
 
                         foreach (var rebateLog in rebateCLogList)
                         {
-                            conn.Execute("Common_RebateCLog_Ins", new { CustId = custId, CurrencyId = rebateInfo.CurrencyId, CategoryId = rebateLog.Key, RebateType = promotionType - 5, UserName = userName, SiteId = siteId, RedeemAmount = rebateLog.Value, Memo = "", RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
+                            conn.Execute("Common_RebateCLog_Ins", new { CustId = custId, rebateInfo.CurrencyId, CategoryId = rebateLog.Key, RebateType = promotionType - 5, UserName = userName, SiteId = siteId, RedeemAmount = rebateLog.Value, Memo = "", RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
                         }
 
                         trans.Commit();

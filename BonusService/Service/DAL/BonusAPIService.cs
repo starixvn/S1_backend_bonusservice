@@ -54,10 +54,10 @@ namespace BonusService.Service.DAL
             var Adjustment_p = new DynamicParameters(
                 new {
                     AdjustType = 5,//Retention Bonus
-                    CustId = depositBonus.CustId,
-                    UserName = depositBonus.UserName,
-                    CurrencyId = depositBonus.CurrencyId,
-                    SiteId = depositBonus.SiteId,
+                    depositBonus.CustId,
+                    depositBonus.UserName,
+                    depositBonus.CurrencyId,
+                    depositBonus.SiteId,
                     AdjustIdInfo = sBonusInfo,
                     Amount = bonusAmount,
                     Prefix = $"A{_common.GetEnv()}",
@@ -126,7 +126,8 @@ namespace BonusService.Service.DAL
         private int SetAdjustmentLog(int adjustId, int siteId, string comment, int status, string Operator)
         {
             using var conn = new MySqlConnection(_configuration.GetConnectionString("ConnectionString"));
-            return conn.Execute("AdjustmentLog_Ins", new { AdjustId = adjustId, SiteId = siteId, Comment = comment, Action = status, Operator = Operator }, commandType: CommandType.StoredProcedure);
+            return conn.Execute("AdjustmentLog_Ins", new { AdjustId = adjustId, SiteId = siteId, Comment = comment, Action = status,
+                Operator }, commandType: CommandType.StoredProcedure);
         }
         public VerificationRewardData GetVerificationReward(int siteId, int currencyId)
         {

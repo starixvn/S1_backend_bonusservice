@@ -124,18 +124,18 @@ namespace BonusService.Service.DAL
             var p = new DynamicParameters(new
             {
                 PromotionType = (int)bonusRewardInput.PromotionType,
-                BonusCode = bonusRewardInput.BonusCode,
-                CustId = bonusRewardInput.CustId,
-                UserName = bonusRewardInput.UserName,
-                CurrencyId = bonusRewardInput.CurrencyId,
-                SiteId = bonusRewardInput.SiteId,
-                BonusInfo = bonusRewardInput.BonusInfo,
-                LockedAmount = bonusRewardInput.LockedAmount,
-                BonusAmount = bonusRewardInput.BonusAmount,
-                ExpiryDays = bonusRewardInput.ExpiryDays,
-                Memo = bonusRewardInput.Memo,
-                Prefix = bonusRewardInput.Prefix,
-                RefList = bonusRewardInput.RefList,
+                bonusRewardInput.BonusCode,
+                bonusRewardInput.CustId,
+                bonusRewardInput.UserName,
+                bonusRewardInput.CurrencyId,
+                bonusRewardInput.SiteId,
+                bonusRewardInput.BonusInfo,
+                bonusRewardInput.LockedAmount,
+                bonusRewardInput.BonusAmount,
+                bonusRewardInput.ExpiryDays,
+                bonusRewardInput.Memo,
+                bonusRewardInput.Prefix,
+                bonusRewardInput.RefList,
                 AtPage = (int)bonusRewardInput.AtPage
             });
             p.Add("TransId", dbType: DbType.String, direction: ParameterDirection.Output);
