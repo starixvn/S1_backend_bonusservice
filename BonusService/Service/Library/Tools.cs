@@ -19,7 +19,7 @@ namespace BonusService.Service.Library
         public decimal Floor(decimal d, int decimals)
         {
             var value = (long)Math.Pow(10.0, decimals);
-            return Convert.ToDecimal(Math.Floor(d * (decimal)value) / (decimal)value);
+            return Convert.ToDecimal(Math.Floor(d * value) / value);
         }
         public string GetEnv()
         {

@@ -669,8 +669,8 @@ namespace BonusService.Service.DAL
                 Memo = memo,
                 Prefix = $"B{_common.GetEnv()}",
                 RefList =  null,
-                SetBalanceMemo = $"Claim {Enum.GetName(typeof(PromotionType), (PromotionType)promotion.PromotionType)} BonusCode: {depositBonus.BonusCode}, Locked Amount: {CalculateBonus.LockedAmount:#,##0.##}",
-                RewardBonusMemo = $"Claim {Enum.GetName(typeof(PromotionType), (PromotionType)promotion.PromotionType)} BonusCode: {depositBonus.BonusCode}",
+                SetBalanceMemo = $"Claim {Enum.GetName(typeof(PromotionType), promotion.PromotionType)} BonusCode: {depositBonus.BonusCode}, Locked Amount: {CalculateBonus.LockedAmount:#,##0.##}",
+                RewardBonusMemo = $"Claim {Enum.GetName(typeof(PromotionType), promotion.PromotionType)} BonusCode: {depositBonus.BonusCode}",
                 FinancialType = FinancialType.Bonusreward,
                 AtPage = BonusInfoAtPage.Promotion
             };
