@@ -45,7 +45,7 @@ namespace BonusService.Service.BLL
         }
         public string GetDepositBonusQueueStatusComment(int status)
         {
-            string Comment = "UnKnowStatus";
+            var Comment = "UnKnowStatus";
             switch (status)
             {
                 case (int)DepositBonusQueueStatus.Undo:

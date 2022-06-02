@@ -54,7 +54,7 @@ namespace BonusService.Controllers
                     result.Message = "Please complete your profile and verify your phone number to enjoy our promotions.";
                     return result;
                 }
-                string Memo = JsonConvert.SerializeObject(new { setAdjustBonusReq.Operator }); 
+                var Memo = JsonConvert.SerializeObject(new { setAdjustBonusReq.Operator }); 
 
                 result = await _bonusAPIBLLV2.SetAdjustmentBonusV2Async(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode, Memo, setAdjustBonusReq.Amount, setAdjustBonusReq.PromotionType);
 
@@ -83,7 +83,7 @@ namespace BonusService.Controllers
         [HttpPost]
         public ApiResult SetVerificationReward(SetVerificationRewardReq verificationRewardReq)
         {
-            OTPTypeEnum item = OTPTypeEnum.SMS;
+            var item = OTPTypeEnum.SMS;
             if(verificationRewardReq.OTPType == 1)
                 item = OTPTypeEnum.Email;
 
@@ -93,7 +93,7 @@ namespace BonusService.Controllers
         [HttpPost]
         public ApiResult CheckRewardCondination(SetVerificationRewardReq verificationRewardReq)
         {
-            OTPTypeEnum item = OTPTypeEnum.SMS;
+            var item = OTPTypeEnum.SMS;
             if (verificationRewardReq.OTPType == 1)
                 item = OTPTypeEnum.Email;
 

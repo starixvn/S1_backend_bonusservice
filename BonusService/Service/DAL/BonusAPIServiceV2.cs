@@ -191,7 +191,7 @@ namespace BonusService.Service.DAL
         }
         public int Reward(BonusRewardInput bonusRewardInput, MySqlConnection conn, MySqlTransaction trans)
         {
-            int result = (int)BonusErrorCode.UNKNOWERROR;
+            var result = (int)BonusErrorCode.UNKNOWERROR;
             switch (bonusRewardInput.PromotionType)
             {
                 case PromotionType.FstDeposit:
@@ -374,7 +374,7 @@ namespace BonusService.Service.DAL
             var ConnectionString = _configuration.GetConnectionString("ConnectionStringReport");
             if (useMainDb)
                 ConnectionString = _configuration.GetConnectionString("ConnectionString");//避免時間差造成資料不同步
-            using MySqlConnection conn = new MySqlConnection(ConnectionString);
+            using var conn = new MySqlConnection(ConnectionString);
 
             return conn.Query<DepositBonus>("Service_DepositBonusQueueByCustId_Get", new { CustId = custId }, commandType: CommandType.StoredProcedure);
         }

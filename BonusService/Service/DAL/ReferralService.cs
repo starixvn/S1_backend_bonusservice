@@ -25,19 +25,19 @@ namespace BonusService.Service.DAL
         }
         public IEnumerable<ReferralInfo> GetReferralSettlement()
         {
-            using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
+            using var conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
             return conn.Query<ReferralInfo>("Service_ReferralSettlement_Get", commandType: CommandType.StoredProcedure);
         }
 
         public int PayoutReferral(IEnumerable<ReferralInfo> referralInfos, out decimal payAmount, out List<ReferralInfo> paidReferralList)
         {
-            int result = 0;
+            var result = 0;
             paidReferralList = new List<ReferralInfo>();
-            using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
+            using var conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
             conn.Open();
             using var trans = conn.BeginTransaction();
             payAmount = 0m;
-            long tc = DateTime.Now.Ticks;
+            var tc = DateTime.Now.Ticks;
 
             foreach (var rr in referralInfos)
             {

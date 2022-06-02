@@ -32,7 +32,7 @@ namespace BonusService.Service.Workers
         }
         private async void PromotionAutoExtendTaskAsync(object state)
         {
-            int nCount = 0;
+            var nCount = 0;
             try
             {
                 if (GetUTC8Time().Date != this.ExecutTime.Date)
@@ -42,7 +42,7 @@ namespace BonusService.Service.Workers
                     nCount = data.Count();
                     if (data.Any())
                     {
-                        List<Task> allTasks = new List<Task>();
+                        var allTasks = new List<Task>();
                         foreach (var item in data)
                         {
                             //promotionAutoExtendBLL.SetPromotionExtend(item);

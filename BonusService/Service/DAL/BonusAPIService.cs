@@ -85,7 +85,7 @@ namespace BonusService.Service.DAL
 
         public int SetAdjustmentInfo(string transId, int siteId, string comment, string Operator, IEnumerable<int> forStatus, AdjustStatus status, MySqlConnection conn, MySqlTransaction trans)
         {
-            int adjustId = 0;
+            var adjustId = 0;
             var m = Regex.Match(transId, @"\d+");
             int.TryParse(m.Value, out adjustId);
 
@@ -164,12 +164,12 @@ namespace BonusService.Service.DAL
                 using var conn = new MySqlConnection(_connectionString);
                 conn.Open();
 
-                int Type = 20;
+                var Type = 20;
                 using var trans = conn.BeginTransaction();
 
                 var transId = "";
                 var result = 0;
-                string comment = "";
+                var comment = "";
                 if (OTPVerificationtype == OTPVerificationType.Email)
                 {
                     comment = $"email verification reward: {reward:#,##0.##}";

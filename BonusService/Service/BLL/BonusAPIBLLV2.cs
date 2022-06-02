@@ -35,7 +35,7 @@ namespace BonusService.Service.BLL
             var apiResult1 = new ApiResult();
             //defult Message display
             apiResult1.ErrorCode = input.Result;
-            string showLangId = "en";//default
+            var showLangId = "en";//default
             if(isMessageUserLang)
             {
                 showLangId = input.CustInfo.UserLang;

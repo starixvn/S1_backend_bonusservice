@@ -17,7 +17,7 @@ namespace BonusService.Service.DAL
         }
         public IEnumerable<PromotionAutoExtend> GetAutoExtendPromotionExpiredList( string specificDate = null)
         {
-            using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
+            using var conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
             return conn.Query<PromotionAutoExtend>("Service_PromotionAutoExtend_Get", new { SpecificDate = specificDate }, commandType: CommandType.StoredProcedure);
         }
         public int SetPromotionExtend(PromotionAutoExtend PromotionExtend)

@@ -30,13 +30,13 @@ namespace BonusService.Service.Workers
         }
         private void DoWork(object state)
         {
-            bool isError = false;
+            var isError = false;
 
             //_logger.LogCritical($"Worker running at: {environment.EnvironmentName}");
 
             try
             {
-                Dictionary<int, List<ReferralInfo>> settlementList = new Dictionary<int, List<ReferralInfo>>();
+                var settlementList = new Dictionary<int, List<ReferralInfo>>();
 
                 foreach(var referralInfo in referralBLL.GetReferralSettlement())
                 {
@@ -50,7 +50,7 @@ namespace BonusService.Service.Workers
 
                 foreach(var rr in settlementList)
                 {
-                    if(referralBLL.PayoutReferral(rr.Value, out decimal payAmount, out List<ReferralInfo> paidReferralList) > 0)
+                    if(referralBLL.PayoutReferral(rr.Value, out var payAmount, out var paidReferralList) > 0)
                     {
                         _logger.LogInformation($"Referral:{JsonConvert.SerializeObject(paidReferralList)}");
                     }
@@ -63,7 +63,7 @@ namespace BonusService.Service.Workers
             }
             finally
             {
-                TimeSpan dueTimeSpan = TimeSpan.FromMinutes(30);
+                var dueTimeSpan = TimeSpan.FromMinutes(30);
                 if (environment.IsDevelopment())
                 {
                     dueTimeSpan = TimeSpan.FromMinutes(1);
