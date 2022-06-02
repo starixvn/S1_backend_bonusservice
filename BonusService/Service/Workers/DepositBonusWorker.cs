@@ -41,25 +41,24 @@ namespace BonusService.Service.Workers
                 }
 
                 var depositBonusQueueCustList = depositBonusBLL.GetDepositBonusQueueCustList();
-                foreach (var CudepositBonusQueueCuststList in depositBonusQueueCustList)
+                foreach (var depositBonusQueue in depositBonusQueueCustList)
                 {
-                    var depositBonusList = depositBonusBLL.GetDepositBonusQueueByCustId(CudepositBonusQueueCuststList.CustId);
+                    var depositBonusList = depositBonusBLL.GetDepositBonusQueueByCustId(depositBonusQueue.CustId);
                     foreach (var depositBonus in depositBonusList)
                     {
                         
                         if (depositBonus.DepositStatus == (int)DepositStatusEnum.Approved)
                         {
-                            var rtn = await bonusAPIBLLV2.SetClaimPromotionV2Async(depositBonus);
-                            if (rtn)
+                            var result = await bonusAPIBLLV2.SetClaimPromotionV2Async(depositBonus.CustId, depositBonus.BonusCode, depositBonus.IP,
+                                depositBonus.LockedAmount, 1, BonusInfoAtPage.Deposit, false, depositBonus.TransId);
+                            if (result.ErrorCode == 0)
                             {
                                 logger.LogInformation($"DoDepositBonus success TransId: {depositBonus.TransId}");
-                                depositBonusBLL.SetDepositBonusFinish(depositBonus.TransId, CudepositBonusQueueCuststList.CustId);
+                                depositBonusBLL.SetDepositBonusFinish(depositBonus.TransId, depositBonusQueue.CustId);
                                 break;
                             }
-                            else
-                            {
-                                depositBonusBLL.SetDepositBonusStatus(depositBonus.TransId, (int)DepositBonusQueueStatus.Cancel_not_eligible);
-                            }
+
+                            depositBonusBLL.SetDepositBonusStatus(depositBonus.TransId, (int)DepositBonusQueueStatus.Cancel_not_eligible);
                         }
                        
                         else if (depositBonus.DepositStatus == (int)DepositStatusEnum.Rejected || depositBonus.DepositStatus == (int)DepositStatusEnum.Canceled || depositBonus.DepositStatus == (int)DepositStatusEnum.Expired || depositBonus.DepositStatus == (int)DepositStatusEnum.Error )
@@ -83,7 +82,7 @@ namespace BonusService.Service.Workers
  
         private DateTime GetUTC8Time()
         {
-            return new DateTimeOffset(DateTime.Now).ToOffset(new TimeSpan(8, 0, 0)).DateTime;
+            return DateTime.UtcNow.AddHours(8);
         }
         public override Task StopAsync(CancellationToken cancellationToken)
         {

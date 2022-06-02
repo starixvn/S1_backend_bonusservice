@@ -58,7 +58,7 @@ namespace BonusService.Controllers
                 }
                 string Memo = JsonConvert.SerializeObject(new { Operator = setAdjustBonusReq.Operator }); 
 
-                result = await _bonusAPIBLLV2.SetAdjustmentBonusV2Async(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode, setAdjustBonusReq.Operator, Memo, setAdjustBonusReq.Amount, setAdjustBonusReq.PromotionType);
+                result = await _bonusAPIBLLV2.SetAdjustmentBonusV2Async(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode, Memo, setAdjustBonusReq.Amount, setAdjustBonusReq.PromotionType);
 
             }
             catch (Exception ex)
@@ -117,7 +117,6 @@ namespace BonusService.Controllers
             var apiResult = new ApiResult();
             try
             {
-                
                 int? deviceType = 1;
                 if (promotionReq.DeviceType != null)
                 {

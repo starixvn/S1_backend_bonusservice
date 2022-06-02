@@ -6,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace BonusService.Service.BLL
@@ -252,13 +251,18 @@ namespace BonusService.Service.BLL
             if(input.atPage != BonusInfoAtPage.Deposit) 
                 CancelAllWaitingBonus(input.CustId);
         }
-        public async Task<ApiResult> SetClaimPromotionV2Async(int custId, string bonusCode, string custIP, decimal lockedAmount, int? deviceType, BonusInfoAtPage atPage, bool isMessageUserLang, string DepositTransId = null)
+        
+        public async Task<ApiResult> SetClaimPromotionV2Async(int custId, string bonusCode, string custIp,
+            decimal lockedAmount, int? deviceType, BonusInfoAtPage atPage, bool isMessageUserLang,
+            string depositTransId = null)
         {
             var apiResult1 = new ApiResult();
-            
+
             bonusCode = bonusCode.Trim();
             var custInfo = _custInfoService.GetCustInfo(custId);
-            var result = _bonusAPIServiceV2.SetClaimPromotionV2(custId, custInfo.UserName, custInfo.SiteId, bonusCode, custInfo.CurrencyId, custIP, deviceType, atPage, out var bonusAmount, ref lockedAmount, out var rollOver, out var expiryTime, out var promotion, DepositTransId);
+            var result = _bonusAPIServiceV2.SetClaimPromotionV2(custId, custInfo.UserName, custInfo.SiteId, bonusCode,
+                custInfo.CurrencyId, custIp, deviceType, atPage, out var bonusAmount, ref lockedAmount,
+                out var rollOver, out var expiryTime, out var promotion, depositTransId);
 
             if (result > 0)
             {
@@ -293,10 +297,14 @@ namespace BonusService.Service.BLL
 
                 if (apiResult1.ErrorCode == 0 && promotion is { PromotionType: PromotionType.Cashback })
                 {
-                    var content = string.Format(_selLangBll.GetMsg("msg_ClaimCashBackBonus", custInfo.SiteId, custInfo.SiteName, custInfo.UserLang),
+                    var content = string.Format(
+                        _selLangBll.GetMsg("msg_ClaimCashBackBonus", custInfo.SiteId, custInfo.SiteName,
+                            custInfo.UserLang),
                         bonusAmount.ToString("#,##0.##"));
-                    _messageService.SendMessage(custInfo.SiteId, "System", content, content, custInfo.CustId, custInfo.UserName, custInfo.UserLang);
+                    _messageService.SendMessage(custInfo.SiteId, "System", content, content, custInfo.CustId,
+                        custInfo.UserName, custInfo.UserLang);
                 }
+
                 if (apiResult1.ErrorCode == 0)
                 {
                     var input = new AfterRewardSuccessInput
@@ -309,7 +317,7 @@ namespace BonusService.Service.BLL
             }
             else
             {
-                var P = new Promotion { };//for fix NullReferenceException
+                var P = new Promotion { }; //for fix NullReferenceException
                 if (promotion != null)
                     P = promotion;
                 var errorInfo = new ErrorMessageMakerInput
@@ -320,26 +328,29 @@ namespace BonusService.Service.BLL
                     CustInfo = custInfo,
                     Promotion = P
                 };
-              
+
                 apiResult1 = MakeErrorMessage(errorInfo, isMessageUserLang);
             }
+
             return apiResult1;
         }
-        
-        public async Task<ApiResult> SetAdjustmentBonusV2Async(int custId, string bonusCode, string Operator, string memo, decimal amount, int promotionType)
+
+        public async Task<ApiResult> SetAdjustmentBonusV2Async(int custId, string bonusCode, string memo, decimal amount, int promotionType)
         {
             var apiResult1 = new ApiResult();
             var lockedAmount = (decimal) 0;
             bonusCode = bonusCode.Trim();
             var custInfo = _custInfoService.GetCustInfo(custId);
 
-            DepositBonus depositBonus = new DepositBonus();
-            depositBonus.CustId = custId;
-            depositBonus.UserName = custInfo.UserName;
-            depositBonus.SiteId = custInfo.SiteId;
-            depositBonus.BonusCode = bonusCode;
-            depositBonus.CurrencyId = custInfo.CurrencyId;
-            depositBonus.DeviceType = 1;
+            var depositBonus = new DepositBonus
+            {
+                CustId = custId,
+                UserName = custInfo.UserName,
+                SiteId = custInfo.SiteId,
+                BonusCode = bonusCode,
+                CurrencyId = custInfo.CurrencyId,
+                DeviceType = 1
+            };
 
             var result = _bonusAPIServiceV2.SetAdjustmentBonusV2(depositBonus, amount, promotionType, memo, out var bonusAmount, ref lockedAmount, out var rollOver, out var expiryTime, out var promotion);
             if (result > 0)
@@ -403,15 +414,6 @@ namespace BonusService.Service.BLL
             }
 
             return apiResult1;
-        }
-        public async Task<Boolean> SetClaimPromotionV2Async(DepositBonus depositBonus)
-        {
-            var apiResult1 = new ApiResult();
-            int? deviceType = 1;
-            apiResult1 = await SetClaimPromotionV2Async(depositBonus.CustId, depositBonus.BonusCode, depositBonus.IP, depositBonus.LockedAmount, deviceType, BonusInfoAtPage.Deposit, false, depositBonus.TransId);
-            if (apiResult1.ErrorCode == 0)
-                return true;
-            return false;
         }
     }
 }
