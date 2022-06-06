@@ -15,24 +15,12 @@ namespace BonusService.Service.DAL
     public class DepositBonusService
     {
         private readonly IConfiguration configuration;
-        private readonly MySqlClient _mainDbClient;
         private readonly MySqlClient _reportDbClient;
-        private readonly string _connectionString;
-        private readonly Common common;
-        private readonly WalletService walletService;
-        private readonly WithdrawalLimitService withdrawalLimitService;
-        private readonly BonusWalletService _bonusWalletService;
 
         public DepositBonusService(IServiceProvider serviceProvider)
         {
             configuration = serviceProvider.GetRequiredService<IConfiguration>();
-            _connectionString = configuration.GetConnectionString("ConnectionString");
-            common = serviceProvider.GetRequiredService<Common>();
-            walletService = serviceProvider.GetRequiredService<WalletService>();
-            withdrawalLimitService = serviceProvider.GetRequiredService<WithdrawalLimitService>();
-            _mainDbClient = serviceProvider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);
             _reportDbClient = serviceProvider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Report);
-            _bonusWalletService = serviceProvider.GetRequiredService<BonusWalletService>();
         }
         public IEnumerable<DepositBonus> GetDepositBonusQueue()
         {

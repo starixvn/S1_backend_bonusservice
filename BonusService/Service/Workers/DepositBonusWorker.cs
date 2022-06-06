@@ -34,7 +34,6 @@ namespace BonusService.Service.Workers
         {
             try
             {
-                //logger.LogInformation("DoDepositBonusTaskAsync start");
                 if (LastChickDate != GetUTC8Time().Date)
                 {
                     LastChickDate = GetUTC8Time().Date;
@@ -53,7 +52,7 @@ namespace BonusService.Service.Workers
                             var rtn = await bonusAPIBLLV2.SetClaimPromotionV2Async(depositBonus);
                             if (rtn)
                             {
-                                logger.LogInformation($"DoDepositBonus  success TransId: {depositBonus.TransId}");
+                                logger.LogInformation($"DoDepositBonus success TransId: {depositBonus.TransId}");
                                 depositBonusBLL.SetDepositBonusFinish(depositBonus.TransId, CudepositBonusQueueCuststList.CustId);
                                 break;
                             }
