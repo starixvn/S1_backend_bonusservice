@@ -218,8 +218,10 @@ namespace BonusService.Service.DAL
         }
         public CalculateBonusOutput CalculateBonus(ClaimPromotion claimPromotion, decimal amount, decimal lockedAmount, int custId, int siteId, int currencyId)
         {
-            var output = new CalculateBonusOutput();
-            output.result = 1;
+            var output = new CalculateBonusOutput
+            {
+                result = 1
+            };
 
             decimal dBonus = 0;
             var dLockedAmount = amount;
@@ -567,8 +569,10 @@ namespace BonusService.Service.DAL
         }
         public CalculateBonusOutput CalculateAdjustmentBonus(ClaimPromotion claimPromotion, decimal amount, decimal lockedAmount, int custId, int siteId, int currencyId)
         {
-            var output = new CalculateBonusOutput();
-            output.result = (int)BonusErrorCode.UNKNOWERROR;
+            var output = new CalculateBonusOutput
+            {
+                result = (int)BonusErrorCode.UNKNOWERROR
+            };
 
             decimal dBonus = 0;
             var dLockedAmount = 0;

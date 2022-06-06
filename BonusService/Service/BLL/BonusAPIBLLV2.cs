@@ -33,9 +33,11 @@ namespace BonusService.Service.BLL
         }
         public ApiResult MakeErrorMessage(ErrorMessageMakerInput input, bool isMessageUserLang = false)
         {
-            var apiResult1 = new ApiResult();
-            //defult Message display
-            apiResult1.ErrorCode = input.Result;
+            var apiResult1 = new ApiResult
+            {
+                //defult Message display
+                ErrorCode = input.Result
+            };
             var showLangId = "en";//default
             if(isMessageUserLang)
             {
