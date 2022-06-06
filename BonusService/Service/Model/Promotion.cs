@@ -11,10 +11,7 @@ namespace BonusService.Service.Model
         public string Description { get; set; }
         public PromotionType PromotionType { get; set; }
         public int CategoryId { get; set; }
-        public string CategoryName { get; set; }
-        public int ExpiryDays { get; set; }
-        public int PeriodTo { get; set; }
-        public int CurrencyId { get; set; }
+        public long PeriodTo { get; set; }
         public int RollOver { get; set; }
         public int WinOver { get; set; }
         public int FullFillType { get; set; }
@@ -23,18 +20,25 @@ namespace BonusService.Service.Model
         public LockedType LockedType { get; set; }
         public decimal RequiredAmount { get; set; }
         public decimal MaxBonus { get; set; }
+        public int Sort { get; set; }
+        public int TpId { get; set; }
+        public string Details { get; set; }
+        public int PromotionAction { get; set; }
+    }
+    
+    public class ClaimPromotion : Promotion
+    {
+        public string CategoryName { get; set; }
+        public int ExpiryDays { get; set; }
+        public int CurrencyId { get; set; }
         public decimal LockedAmount { get; set; }
         public decimal BonusAmount { get; set; }
         public DateTime ExpiryTime { get; set; }
         public int BonusInfoStatus { get; set; }
-        public int Sort { get; set; }
-        public CustRollOver custRollOver { get; set; }
-        public string Details { get; set; }
-        public int TpId { get; set; }
+        public CustRollOver custRollOver { get; set; } 
         public bool IsSpecial { get; set; }
         public string SpecialCode { get; set; }
         public decimal MinPayout { get; set; }
-        public int PromotionAction { get; set; }
     }
     
     public class CustPromotionRequest
@@ -47,31 +51,19 @@ namespace BonusService.Service.Model
         public string LangId { set; get; }
         public string DefLang { set; get; }
     }
-
-
-    public class CustPromotion
+    
+    public class PromotionDetailRequest : CustPromotionRequest
     {
-        public string BonusCode { get; set; }
-        public int PromotionType { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
+        public string BonusCode { set; get; }
+    }
+
+
+    public class CustPromotion : Promotion
+    {
         public string Banner { get; set; }
         public long PeriodFrom { get; set; }
-        public long PeriodTo { get; set; }
-        public int WinOver { get; set; }
-        public int RollOver { get; set; }
-        public string Details { get; set; }
-        public decimal Bonus { get; set; }
-        public LockedType LockedType { get; set; }
-        public decimal RequiredAmount { get; set; }
-        public decimal MaxBonus { get; set; }
-        public int BonusType { get; set; }
-        public int Sort { get; set; }
-        public int CategoryId { get; set; }
-        public int WalletType { get; set; }
-        public int TpId { get; set; }
+        public int WalletType { get; set; }        
         public decimal CustRollOver { get; set; }
-        public int FullFillType { get; set; }
         public decimal CustTurnOver { get; set; }
         public int Status { get; set; }
         public DateTime? CustExpiryTime { get; set; }
@@ -84,19 +76,10 @@ namespace BonusService.Service.Model
         public IEnumerable<Ref> RefList { get; set; }
         public string PromotionLink { get; set; }
         public int? DeviceType { set; get; }
-        public int? PromotionAction { set; get; }
         public CashBackDetails CashBackDetails { get; set; }
         public bool BeenUsed { get; set; }
     }
-    public class PromotionCondition
-    {
-        public string BonusCode { get; set; }
-        public string DepositId { get; set; }
-        public decimal DepositAmount { get; set; }
-        public IEnumerable<Ref> RefList { get; set; }
-        public bool CanJoin { get; set; }
-        public int Result { get; set; }
-    }
+
     public class CashBackDetails
     {
         public decimal TotalBonus { get; set; }
@@ -179,7 +162,7 @@ namespace BonusService.Service.Model
         public int InputPromotionType { set; get; }
         public decimal InputAmount { set; get; }
         public Customer CustInfo { set; get; }
-        public Promotion Promotion { set; get; }
+        public ClaimPromotion ClaimPromotion { set; get; }
         
     }
 

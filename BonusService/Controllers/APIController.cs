@@ -130,6 +130,7 @@ namespace BonusService.Controllers
             {
                 apiResult.RawMessage = ex.Message;
                 apiResult.Message = ex.Message;
+                _logger.LogError(ex, MethodExtension.GetCurrentAsyncMethod());
             }
 
             return apiResult;
@@ -140,9 +141,37 @@ namespace BonusService.Controllers
         {
             var result = new ApiResult<List<CustPromotion>>
             {
-                Data = _bonusAPIBLLV2.GetPromotionList(request),
                 ErrorCode = 0
             };
+            
+            try
+            {
+                result.Data = _bonusAPIBLLV2.GetPromotionList(request);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, MethodExtension.GetCurrentMethod());
+            }
+
+            return result;
+        }
+        
+        [HttpPost]
+        public ApiResult<CustPromotion> GetPromotionDetail(PromotionDetailRequest request)
+        {
+            var result = new ApiResult<CustPromotion>
+            {
+                ErrorCode = 0
+            };
+
+            try
+            {
+                result.Data = _bonusAPIBLLV2.GetPromotionDetail(request);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, MethodExtension.GetCurrentMethod());
+            }
 
             return result;
         }
