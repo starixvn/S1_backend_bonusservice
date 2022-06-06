@@ -109,7 +109,7 @@ namespace BonusService.Service.DAL
 
             if (payAmount > 0)
             {
-                result = walletService.SetBalance(custId, siteId, userName, payAmount, 17 - promotionType, $"{(promotionType == 6 ? "Rebate" : "Cashback")}: {payAmount:#,##0.##}", "", out _, out _, conn, trans);
+                result = walletService.SetBalance(custId, siteId, userName, payAmount, 17 - promotionType, $"{(promotionType == 6 ? "Rebate" : "Cashback")}: {payAmount:#,##0.##}", "", out _, out _, trans);
 
                 if (result > 0)
                 {
@@ -117,7 +117,7 @@ namespace BonusService.Service.DAL
                     var rebateSetting1_RollOver = 0;
                     var rollOver = rebateSetting1_RollOver * payAmount;
                     if (rollOver > 0)
-                        result = withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, rollOver, $"{(promotionType == 6 ? "Rebate" : "Cashback")}: {rollOver:#,##0.##}", "", out _, conn, trans);
+                        result = withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, rollOver, $"{(promotionType == 6 ? "Rebate" : "Cashback")}: {rollOver:#,##0.##}", "", out _, trans);
 
                     if (result > 0)
                     {

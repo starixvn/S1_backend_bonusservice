@@ -7,28 +7,29 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace BonusService.Service.BLL
 {
     public class BonusAPIBLLV2
     {
         private readonly CustInfoService _custInfoService;
-        private readonly BonusAPIServiceV2 _bonusAPIServiceV2;
+        private readonly BonusAPIServiceV2 _bonusApiServiceV2;
         private readonly SelLangBLL _selLangBll;
         private readonly MessageService _messageService;
-        private readonly DepositBonusService _depositBonusService;
-        private readonly DepositBonusBLL _depositBonusBLL;
-        ILogger<BonusAPIBLLV2> _logger;
+        private readonly DepositBonusBLL _depositBonusBll;
+        private readonly WalletService _walletService;
+        private readonly ILogger<BonusAPIBLLV2> _logger;
 
-        public BonusAPIBLLV2(IServiceProvider provider, ILogger<BonusAPIBLLV2> logger)
+        public BonusAPIBLLV2(IServiceProvider provider)
         {
             _custInfoService = provider.GetRequiredService<CustInfoService>();
-            _bonusAPIServiceV2 = provider.GetRequiredService<BonusAPIServiceV2>();
+            _bonusApiServiceV2 = provider.GetRequiredService<BonusAPIServiceV2>();
             _selLangBll = provider.GetRequiredService<SelLangBLL>();
             _messageService = provider.GetRequiredService<MessageService>();
-            _depositBonusService = provider.GetRequiredService<DepositBonusService>();
-            _depositBonusBLL = provider.GetRequiredService<DepositBonusBLL>();
-            _logger = logger;
+            _depositBonusBll = provider.GetRequiredService<DepositBonusBLL>();
+            _walletService = provider.GetRequiredService<WalletService>();
+            _logger = provider.GetRequiredService<ILogger<BonusAPIBLLV2>>();;
         }
         public ApiResult MakeErrorMessage(ErrorMessageMakerInput input, bool isMessageUserLang = false)
         {
@@ -239,11 +240,11 @@ namespace BonusService.Service.BLL
         public void CancelAllWaitingBonus(int custId)
         {//當領取BONUS成功   將客戶DepositBonusQueue中的BONUS CANCEL掉
 
-            var BonusList = _bonusAPIServiceV2.GetDepositBonusQueueByCustId(custId, true);//改變狀態用mainDb取得資料，避免資料不同步
+            var BonusList = _bonusApiServiceV2.GetDepositBonusQueueByCustId(custId, true);//改變狀態用mainDb取得資料，避免資料不同步
 
             foreach (var depositBonus in BonusList)
             {
-                _depositBonusBLL.SetDepositBonusStatus(depositBonus.TransId, (int)DepositBonusQueueStatus.Cancel_other_Bonus);
+                _depositBonusBll.SetDepositBonusStatus(depositBonus.TransId, (int)DepositBonusQueueStatus.Cancel_other_Bonus);
             }
         }
         public void AfterRewardSuccess(AfterRewardSuccessInput input)
@@ -260,7 +261,7 @@ namespace BonusService.Service.BLL
 
             bonusCode = bonusCode.Trim();
             var custInfo = _custInfoService.GetCustInfo(custId);
-            var result = _bonusAPIServiceV2.SetClaimPromotionV2(custId, custInfo.UserName, custInfo.SiteId, bonusCode,
+            var result = _bonusApiServiceV2.SetClaimPromotionV2(custId, custInfo.UserName, custInfo.SiteId, bonusCode,
                 custInfo.CurrencyId, custIp, deviceType, atPage, out var bonusAmount, ref lockedAmount,
                 out var rollOver, out var expiryTime, out var promotion, depositTransId);
 
@@ -279,7 +280,7 @@ namespace BonusService.Service.BLL
                         ExpiryTime = expiryTime,
                         inputs = new Dictionary<string, string>()
                     };
-                    var apiResult = await _bonusAPIServiceV2.TransferTpBonus(tpBonusTransfer);
+                    var apiResult = await _bonusApiServiceV2.TransferTpBonus(tpBonusTransfer);
                     if (apiResult.ErrorCode != 0)
                     {
                         //ErrorCode:1205 TPService Pending
@@ -352,7 +353,7 @@ namespace BonusService.Service.BLL
                 DeviceType = 1
             };
 
-            var result = _bonusAPIServiceV2.SetAdjustmentBonusV2(depositBonus, amount, promotionType, memo, out var bonusAmount, ref lockedAmount, out var rollOver, out var expiryTime, out var promotion);
+            var result = _bonusApiServiceV2.SetAdjustmentBonusV2(depositBonus, amount, promotionType, memo, out var bonusAmount, ref lockedAmount, out var rollOver, out var expiryTime, out var promotion);
             if (result > 0)
             {
                 if (promotion?.TpId > 0)
@@ -368,7 +369,7 @@ namespace BonusService.Service.BLL
                         ExpiryTime = expiryTime,
                         inputs = new Dictionary<string, string>()
                     };
-                    var apiResult = await _bonusAPIServiceV2.TransferTpBonus(tpBonusTransfer);
+                    var apiResult = await _bonusApiServiceV2.TransferTpBonus(tpBonusTransfer);
                     if (apiResult.ErrorCode != 0)
                     {
                         //ErrorCode:1205 TPService Pending
@@ -414,6 +415,150 @@ namespace BonusService.Service.BLL
             }
 
             return apiResult1;
+        }
+        
+        public List<CustPromotion> GetPromotionList(CustPromotionRequest request)
+        {
+            var promotionList =  _bonusApiServiceV2.GetPromotionList(request);
+            var promotion = new List<CustPromotion>();
+
+            foreach (var promo in promotionList)
+            {
+                if (request.IsLogin)
+                {
+                    var custCondition = _bonusApiServiceV2.GetCustConditionInfo(request.CustId, request.CurrencyId,
+                        request.SiteId, promo.BonusCode, request.DeviceType);
+                    promo.canJoin = custCondition.CanJoin == 1;
+                    promo.Result = custCondition.Result;
+                    SetPromotion(request.SiteId, request.CustId, request.CurrencyId, false, promo, custCondition);
+                }
+
+                SetPromotionDetail(request.LangId, request.DefLang, true, promo);
+
+                promotion.Add(promo);
+            }
+
+            return promotion;
+        }
+        
+        private void SetPromotion(int siteId, int custId, int currencyId, bool getCashbackDetail, CustPromotion promo, CustCondition custCondition)
+        {
+            if ((promo.PromotionType == (int)PromotionType.FstDeposit || promo.PromotionType == (int)PromotionType.ReDeposit)
+                && promo.canJoin)
+            {
+                promo.DepositId = custCondition.RefId;
+                promo.DepositAmount = custCondition.Amount;
+                promo.RefList = custCondition.reference;
+        
+                promo.MaxAmount = promo.PromotionType == (int)PromotionType.FstDeposit
+                    ? _walletService.GetBalance(custId)
+                    : promo.DepositAmount;
+                
+                if (promo.PromotionType == (int)PromotionType.FstDeposit
+                    && promo.MaxAmount > promo.DepositAmount)
+                {
+                    promo.MaxAmount = promo.DepositAmount;
+                }
+        
+                if (promo.RequiredAmount == 0)
+                {
+                    promo.RequiredAmount = 1;
+                }
+        
+                if (promo.BonusType == (int)BonusType.Amount)
+                {
+                    promo.MaxAmount = promo.RequiredAmount;
+                }
+                else
+                {
+                    if (promo.MaxBonus > 0)
+                    {
+                        var dBonus = Math.Ceiling(promo.Bonus * promo.DepositAmount / 100);
+                        if (dBonus > promo.MaxBonus)
+                        {
+                            promo.MaxAmount = promo.MaxBonus * 100 / promo.Bonus;
+                        }
+                    }
+                }
+        
+                if (promo.RequiredAmount > promo.DepositAmount)
+                {
+                    promo.canJoin = false;
+                }
+            }
+        
+            if (promo.PromotionType == (int)PromotionType.Rebate)
+            {
+                promo.isJoin = _bonusApiServiceV2.GetRebateInfo(custId, promo);
+        
+            }
+            else
+            {
+                var custBonusInfo = _bonusApiServiceV2.GetBonusInfoByCust(custId, promo);
+                if (custBonusInfo != null)
+                {
+                    promo.CustExpiryTime = custBonusInfo.ExpiryTime;
+                    promo.CustRollOver = custBonusInfo.Rollover;
+                    promo.CustTurnOver = custBonusInfo.Turnover < 0 ? 0 : custBonusInfo.Turnover;
+                    promo.FullFillType = custBonusInfo.FullFillType;
+                    promo.Status = custBonusInfo.Status;
+                    promo.isJoin = true;
+                }
+                
+                if (promo.PromotionType == (int)PromotionType.Cashback)
+                {
+                    _bonusApiServiceV2.GetCashbackInfo(custId, siteId, currencyId, promo, getCashbackDetail);
+                }
+            }
+        }
+        
+        private void SetPromotionDetail(string langId, string defLang, bool clearDetails, CustPromotion promo)
+        {
+            if (!string.IsNullOrEmpty(promo.Details))
+            {
+                var details = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(promo.Details);
+                Dictionary<string, string> settings = null;
+                if (details.ContainsKey(langId))
+                {
+                    settings = details[langId];
+                }
+                else if (details.ContainsKey(defLang))
+                {
+                    settings = details[defLang];
+                }
+                else
+                {
+                    foreach (var item in details)
+                    {
+                        settings = item.Value;
+                        break;
+                    }
+                }
+
+                if (clearDetails)
+                {
+                    promo.Details = null;
+                }
+
+                if (settings != null)
+                {
+                    settings.TryGetValue("title", out var title);
+                    settings.TryGetValue("bannerUrl", out var bannerUrl);
+                    settings.TryGetValue("description", out var description);
+                    settings.TryGetValue("promotionLink", out var promotionLink);
+
+                    promo.Title = title;
+                    promo.Banner = bannerUrl;
+                    promo.Description = description;
+                    promo.PromotionLink = promotionLink;
+
+                    if (!clearDetails)
+                    {
+                        settings.TryGetValue("detail", out var detail);
+                        promo.Details = detail;
+                    }
+                }
+            }
         }
     }
 }

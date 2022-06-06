@@ -161,12 +161,11 @@ namespace BonusService.Service.DAL
             var apiResult = new ApiResult();
             try
             {
-                using var conn = new MySqlConnection(_connectionString);
+                using var conn = _mainDbClient.GetMySqlConnection();
                 conn.Open();
-
-                var Type = 20;
                 using var trans = conn.BeginTransaction();
 
+                var Type = 20;
                 var transId = "";
                 var result = 0;
                 var comment = "";
@@ -185,13 +184,13 @@ namespace BonusService.Service.DAL
 
 
                 result = _walletService.SetBalance(custId, siteId, userName, reward, Type,
-                    comment, transId, out _, out _, conn, trans);
+                    comment, transId, out _, out _, trans);
                 if (result <= 0)
                 {
                     apiResult.Message = "SetBalance fail";
                     return apiResult;
                 }
-                result = _withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, reward, null, transId, out _, conn, trans);
+                result = _withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, reward, null, transId, out _, trans);
                 if (result <= 0)
                 {
                     apiResult.Message = "SetWithdrawalLimit fail";

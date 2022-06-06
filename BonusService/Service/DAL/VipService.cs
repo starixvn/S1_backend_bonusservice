@@ -43,7 +43,7 @@ namespace BonusService.Service.DAL
             parameter.Add("_LastUpdateTime", vipSetting.LastUpdateTime);
             parameter.Add("_LastReviewedTime", vipSetting.LastReviewedTime);
             parameter.Add("_LastSettledTime", vipSetting.LastSettledTime);
-            return _mainDbClient.Execute("Service_VipSettingV3_Set", parameter);
+            return _mainDbClient.Execute("Service_VipSettingV3_Set", parameter) >= 0;
         }
 
 
@@ -83,7 +83,7 @@ namespace BonusService.Service.DAL
             parameter.Add("_DepositAmount", vipUpgradeInfo.DepositAmount);
             parameter.Add("_UpgradeAmount", vipUpgradeInfo.UpgradeAmount);
             parameter.Add("_Status", vipUpgradeInfo.Status);
-            return _mainDbClient.Execute("Service_VipUpgradeReviewV2_Ins", parameter);
+            return _mainDbClient.Execute("Service_VipUpgradeReviewV2_Ins", parameter) >= 0;
         }
 
         public bool SetCustVip(CustomerVipInfo customerVipInfo)
@@ -99,7 +99,7 @@ namespace BonusService.Service.DAL
             parameter.Add("_FinancialMemo", customerVipInfo.FinancialMemo);
             parameter.Add("_WithdrawalLimitMemo", customerVipInfo.WithdrawalLimitMemo);
             parameter.Add("_CalculateMonth", customerVipInfo.CalculateMonth);
-            return _mainDbClient.Execute("Service_CustVipV3_Set", parameter);
+            return _mainDbClient.Execute("Service_CustVipV3_Set", parameter) >= 0;
         }
 
         public IEnumerable<CustVipForDowngrade> GetCustDowngrade(CustomerDowngradeInfo customerDowngradeInfo)
@@ -131,7 +131,7 @@ namespace BonusService.Service.DAL
             parameter.Add("_TurnoverAmount", vipDowngradeInfo.TurnoverAmount);
             parameter.Add("_DowngradeTurnoverAmount", vipDowngradeInfo.DowngradeTurnoverAmount);
             parameter.Add("_Status", vipDowngradeInfo.Status);
-            return _mainDbClient.Execute("Service_VipDowngradeReviewV2_Ins", parameter);
+            return _mainDbClient.Execute("Service_VipDowngradeReviewV2_Ins", parameter) >= 0;
         }
 
         public IEnumerable<VipDowngradeReview> GetVipDowngradeReview(VipDowngradeInfo vipDowngradeInfo)
@@ -153,7 +153,7 @@ namespace BonusService.Service.DAL
             parameter.Add("_OldLevel", customerVipInfo.OldLevel);
             parameter.Add("_NewLevel", customerVipInfo.NewLevel);
             parameter.Add("_CalculateMonth", customerVipInfo.CalculateMonth);
-            return _mainDbClient.Execute("Service_CustVip_DowngradeV2_Set", parameter);
+            return _mainDbClient.Execute("Service_CustVip_DowngradeV2_Set", parameter) >= 0;
         }
     }
 }

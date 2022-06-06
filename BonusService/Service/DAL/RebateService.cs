@@ -97,7 +97,7 @@ namespace BonusService.Service.DAL
                     WinlostAmountCountCalculationTotal = bonusCashBackInfo.WinlostAmountCountCalculationTotal - WinlostAmountCountCalculationTotal;
                     var WithdrawBonusCashBack = WinlostAmountCountCalculationTotal * bonusCashBackInfo.WithdrawCondition;
 
-                    result = walletService.SetBalance(bonusCashBackInfo.CustId, bonusCashBackInfo.SiteId, bonusCashBackInfo.UserName, WinlostAmountCountCalculationTotal, 7, memo, null, out afterAmount, out is1stDepoist, conn, trans);
+                    result = walletService.SetBalance(bonusCashBackInfo.CustId, bonusCashBackInfo.SiteId, bonusCashBackInfo.UserName, WinlostAmountCountCalculationTotal, 7, memo, null, out afterAmount, out is1stDepoist, trans);
 
                     if (result > 0)
                     {
@@ -115,7 +115,7 @@ namespace BonusService.Service.DAL
                         {
                             var TransId = p.Get<string>("TransId");
                             decimal withdrawalLimit = 0;
-                            result = withdrawalLimitService.SetWithdrawalLimit(bonusCashBackInfo.CustId, bonusCashBackInfo.UserName, bonusCashBackInfo.SiteId, WithdrawBonusCashBack, $"BonusCashBack: {WithdrawBonusCashBack}", TransId, out withdrawalLimit, conn, trans);
+                            result = withdrawalLimitService.SetWithdrawalLimit(bonusCashBackInfo.CustId, bonusCashBackInfo.UserName, bonusCashBackInfo.SiteId, WithdrawBonusCashBack, $"BonusCashBack: {WithdrawBonusCashBack}", TransId, out withdrawalLimit, trans);
                         }
                         if (result > 0)
                         {

@@ -7,7 +7,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using BonusService.Service.Model;
 
 namespace BonusService.Controllers
 {
@@ -132,6 +134,19 @@ namespace BonusService.Controllers
 
             return apiResult;
         }
+        
+        [HttpPost]
+        public ApiResult<List<CustPromotion>> GetPromotionListV3(CustPromotionRequest request)
+        {
+            var result = new ApiResult<List<CustPromotion>>
+            {
+                Data = _bonusAPIBLLV2.GetPromotionList(request),
+                ErrorCode = 0
+            };
+
+            return result;
+        }
+
     }
 
 
