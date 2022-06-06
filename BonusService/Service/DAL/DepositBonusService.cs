@@ -33,9 +33,9 @@ namespace BonusService.Service.DAL
             return conn.Query<DepositBonusCustList>("Service_DepositBonusQueueCustList_Get", commandType: CommandType.StoredProcedure);
         }
 
-        public Promotion GetMemberPromotion(DynamicParameters parameters)
+        public ClaimPromotion GetMemberPromotion(DynamicParameters parameters)
         {
-            return _reportDbClient.QueryFirst<Promotion>("Service_Promotion_Get", parameters);
+            return _reportDbClient.QueryFirst<ClaimPromotion>("Service_Promotion_Get", parameters);
         }
         public void CheckDepositBonusExpired()
         {
