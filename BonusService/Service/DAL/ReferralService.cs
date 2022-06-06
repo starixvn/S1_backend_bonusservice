@@ -44,7 +44,7 @@ namespace BonusService.Service.DAL
 
         public int PayoutReferral(IEnumerable<ReferralInfo> referralInfos, out decimal payAmount, out List<ReferralInfo> paidReferralList)
         {
-            int result = 0;
+            var result = 0;
             paidReferralList = new List<ReferralInfo>();
             var agent = referralInfos.FirstOrDefault();
             payAmount = 0m;
@@ -66,8 +66,8 @@ namespace BonusService.Service.DAL
                 {
                     if (remaining > 0)
                     {
-                        result = walletService.SetBalance(rr.CustId, rr.SiteId, rr.UserName, rr.ReferralFreeCredit, (int)FinancialType.ReferFriendsRewards, $"Referral Free Credit: {rr.ReferralFreeCredit:#,##0.##}", "N/A", out _, out _, conn, trans);
-                        result = withdrawalLimitService.SetWithdrawalLimit(rr.CustId, rr.UserName, rr.SiteId, rr.ReferralFreeCredit, $"Referral Free Credit: {rr.ReferralFreeCredit:#,##0.##}", "N/A", out _, conn, trans);
+                        result = walletService.SetBalance(rr.CustId, rr.SiteId, rr.UserName, rr.ReferralFreeCredit, (int)FinancialType.ReferFriendsRewards, $"Referral Free Credit: {rr.ReferralFreeCredit:#,##0.##}", "N/A", out _, out _, trans);
+                        result = withdrawalLimitService.SetWithdrawalLimit(rr.CustId, rr.UserName, rr.SiteId, rr.ReferralFreeCredit, $"Referral Free Credit: {rr.ReferralFreeCredit:#,##0.##}", "N/A", out _, trans);
                         conn.Execute("Common_ReferralLog_Ins_V2",
                             new
                             {
@@ -109,15 +109,15 @@ namespace BonusService.Service.DAL
             if (payAmount > 0)
             {
                 
-                result = walletService.SetBalance(agent.AgentId, agent.SiteId, agent.AgentName, payAmount, (int)FinancialType.ReferFriendsRewards, $"Referral Bonus: {payAmount:#,##0.##}", "N/A", out _, out _, conn, trans);
+                result = walletService.SetBalance(agent.AgentId, agent.SiteId, agent.AgentName, payAmount, (int)FinancialType.ReferFriendsRewards, $"Referral Bonus: {payAmount:#,##0.##}", "N/A", out _, out _, trans);
 
                 if (result > 0)
                 {
-                    conn.Execute("Common_ReferralMLog_Ins", new { CustId = agent.AgentId, CurrencyId = agent.CurrencyId, UserName = agent.AgentName, SiteId = agent.SiteId, ReferralAmount = payAmount, Memo = "", RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
+                    conn.Execute("Common_ReferralMLog_Ins", new { CustId = agent.AgentId, agent.CurrencyId, UserName = agent.AgentName, agent.SiteId, ReferralAmount = payAmount, Memo = "", RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
 
                     var rollOver = 1 * payAmount;
                     if (rollOver > 0)
-                        result = withdrawalLimitService.SetWithdrawalLimit(agent.AgentId, agent.AgentName, agent.SiteId, rollOver, $"Referral Bonus: {rollOver:#,##0.##}", "N/A", out _, conn, trans);
+                        result = withdrawalLimitService.SetWithdrawalLimit(agent.AgentId, agent.AgentName, agent.SiteId, rollOver, $"Referral Bonus: {rollOver:#,##0.##}", "N/A", out _, trans);
 
                     if (result > 0)
                     {

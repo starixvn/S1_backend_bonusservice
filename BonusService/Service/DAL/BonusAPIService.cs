@@ -8,7 +8,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -55,10 +54,10 @@ namespace BonusService.Service.DAL
             var Adjustment_p = new DynamicParameters(
                 new {
                     AdjustType = 5,//Retention Bonus
-                    CustId = depositBonus.CustId,
-                    UserName = depositBonus.UserName,
-                    CurrencyId = depositBonus.CurrencyId,
-                    SiteId = depositBonus.SiteId,
+                    depositBonus.CustId,
+                    depositBonus.UserName,
+                    depositBonus.CurrencyId,
+                    depositBonus.SiteId,
                     AdjustIdInfo = sBonusInfo,
                     Amount = bonusAmount,
                     Prefix = $"A{_common.GetEnv()}",
@@ -86,7 +85,7 @@ namespace BonusService.Service.DAL
 
         public int SetAdjustmentInfo(string transId, int siteId, string comment, string Operator, IEnumerable<int> forStatus, AdjustStatus status, MySqlConnection conn, MySqlTransaction trans)
         {
-            int adjustId = 0;
+            var adjustId = 0;
             var m = Regex.Match(transId, @"\d+");
             int.TryParse(m.Value, out adjustId);
 
@@ -127,7 +126,8 @@ namespace BonusService.Service.DAL
         private int SetAdjustmentLog(int adjustId, int siteId, string comment, int status, string Operator)
         {
             using var conn = new MySqlConnection(_configuration.GetConnectionString("ConnectionString"));
-            return conn.Execute("AdjustmentLog_Ins", new { AdjustId = adjustId, SiteId = siteId, Comment = comment, Action = status, Operator = Operator }, commandType: CommandType.StoredProcedure);
+            return conn.Execute("AdjustmentLog_Ins", new { AdjustId = adjustId, SiteId = siteId, Comment = comment, Action = status,
+                Operator }, commandType: CommandType.StoredProcedure);
         }
         public VerificationRewardData GetVerificationReward(int siteId, int currencyId)
         {
@@ -161,15 +161,14 @@ namespace BonusService.Service.DAL
             var apiResult = new ApiResult();
             try
             {
-                using var conn = new MySqlConnection(_connectionString);
+                using var conn = _mainDbClient.GetMySqlConnection();
                 conn.Open();
-
-                int Type = 20;
                 using var trans = conn.BeginTransaction();
 
+                var Type = 20;
                 var transId = "";
                 var result = 0;
-                string comment = "";
+                var comment = "";
                 if (OTPVerificationtype == OTPVerificationType.Email)
                 {
                     comment = $"email verification reward: {reward:#,##0.##}";
@@ -185,13 +184,13 @@ namespace BonusService.Service.DAL
 
 
                 result = _walletService.SetBalance(custId, siteId, userName, reward, Type,
-                    comment, transId, out _, out _, conn, trans);
+                    comment, transId, out _, out _, trans);
                 if (result <= 0)
                 {
                     apiResult.Message = "SetBalance fail";
                     return apiResult;
                 }
-                result = _withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, reward, null, transId, out _, conn, trans);
+                result = _withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, reward, null, transId, out _, trans);
                 if (result <= 0)
                 {
                     apiResult.Message = "SetWithdrawalLimit fail";

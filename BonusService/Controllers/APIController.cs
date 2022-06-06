@@ -1,6 +1,5 @@
 ﻿using BonusService.Service.BLL;
 using BonusService.Service.Extensions;
-using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
 using MemberSite.Service.Model;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +9,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using BonusService.Service.Model;
 
 namespace BonusService.Controllers
 {
@@ -56,9 +56,9 @@ namespace BonusService.Controllers
                     result.Message = "Please complete your profile and verify your phone number to enjoy our promotions.";
                     return result;
                 }
-                string Memo = JsonConvert.SerializeObject(new { Operator = setAdjustBonusReq.Operator }); 
+                var Memo = JsonConvert.SerializeObject(new { setAdjustBonusReq.Operator }); 
 
-                result = await _bonusAPIBLLV2.SetAdjustmentBonusV2Async(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode, setAdjustBonusReq.Operator, Memo, setAdjustBonusReq.Amount, setAdjustBonusReq.PromotionType);
+                result = await _bonusAPIBLLV2.SetAdjustmentBonusV2Async(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode, Memo, setAdjustBonusReq.Amount, setAdjustBonusReq.PromotionType);
 
             }
             catch (Exception ex)
@@ -85,7 +85,7 @@ namespace BonusService.Controllers
         [HttpPost]
         public ApiResult SetVerificationReward(SetVerificationRewardReq verificationRewardReq)
         {
-            OTPTypeEnum item = OTPTypeEnum.SMS;
+            var item = OTPTypeEnum.SMS;
             if(verificationRewardReq.OTPType == 1)
                 item = OTPTypeEnum.Email;
 
@@ -95,7 +95,7 @@ namespace BonusService.Controllers
         [HttpPost]
         public ApiResult CheckRewardCondination(SetVerificationRewardReq verificationRewardReq)
         {
-            OTPTypeEnum item = OTPTypeEnum.SMS;
+            var item = OTPTypeEnum.SMS;
             if (verificationRewardReq.OTPType == 1)
                 item = OTPTypeEnum.Email;
 
@@ -117,7 +117,6 @@ namespace BonusService.Controllers
             var apiResult = new ApiResult();
             try
             {
-                
                 int? deviceType = 1;
                 if (promotionReq.DeviceType != null)
                 {
@@ -135,6 +134,19 @@ namespace BonusService.Controllers
 
             return apiResult;
         }
+        
+        [HttpPost]
+        public ApiResult<List<CustPromotion>> GetPromotionListV3(CustPromotionRequest request)
+        {
+            var result = new ApiResult<List<CustPromotion>>
+            {
+                Data = _bonusAPIBLLV2.GetPromotionList(request),
+                ErrorCode = 0
+            };
+
+            return result;
+        }
+
     }
 
 

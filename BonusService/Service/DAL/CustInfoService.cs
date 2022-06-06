@@ -28,7 +28,7 @@ namespace BonusService.Service.DAL
         }
         public Customer GetCustInfo(int custId)
         {
-            using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
+            using var conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
             return conn.QueryFirstOrDefault<Customer>("Customer_Get", new { CustId = custId }, commandType: CommandType.StoredProcedure);
         }
         public CustInfoProfile GetCustInfoProfile(int custId, int siteId)

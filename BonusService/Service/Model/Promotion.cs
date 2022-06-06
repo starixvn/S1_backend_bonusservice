@@ -36,6 +36,18 @@ namespace BonusService.Service.Model
         public decimal MinPayout { get; set; }
         public int PromotionAction { get; set; }
     }
+    
+    public class CustPromotionRequest
+    {
+        public int SiteId { set; get; }
+        public int CustId { set; get; }
+        public int CurrencyId { set; get; }
+        public int DeviceType { set; get; }
+        public bool IsLogin { set; get; }
+        public string LangId { set; get; }
+        public string DefLang { set; get; }
+    }
+
 
     public class CustPromotion
     {
@@ -46,6 +58,7 @@ namespace BonusService.Service.Model
         public string Banner { get; set; }
         public long PeriodFrom { get; set; }
         public long PeriodTo { get; set; }
+        public int WinOver { get; set; }
         public int RollOver { get; set; }
         public string Details { get; set; }
         public decimal Bonus { get; set; }
@@ -58,6 +71,7 @@ namespace BonusService.Service.Model
         public int WalletType { get; set; }
         public int TpId { get; set; }
         public decimal CustRollOver { get; set; }
+        public int FullFillType { get; set; }
         public decimal CustTurnOver { get; set; }
         public int Status { get; set; }
         public DateTime? CustExpiryTime { get; set; }
