@@ -195,6 +195,25 @@ namespace BonusService.Controllers
 
             return result;
         }
+        
+        public ApiResult<List<CustPromotion>> GetDepositPromotionList(CustPromotionRequest request)
+        {
+            var result = new ApiResult<List<CustPromotion>>
+            {
+                ErrorCode = 0
+            };
+           
+            try
+            {
+                result.Data = _bonusAPIBLLV2.GetDepositPromotionList(request);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, MethodExtension.GetCurrentMethod());
+            }
+
+            return result;
+        }
     }
 
 
