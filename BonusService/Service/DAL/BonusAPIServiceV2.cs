@@ -707,6 +707,12 @@ namespace BonusService.Service.DAL
                 new { request.CustId, request.SiteId, request.CurrencyId, request.DeviceType, request.LangId });
         }
         
+        public IEnumerable<CustPromotion> GetDepositPromotionList(CustPromotionRequest request)
+        {
+            return _reportDbClient.Query<CustPromotion>("Member_DepositPromotion_Get_V4", 
+                new { request.CustId, request.DeviceType });
+        }
+        
         public IEnumerable<CustPromotion> GetSpecialPromotionList(CustPromotionRequest request)
         {
             return _reportDbClient.Query<CustPromotion>("Member_SPCodePromotionList_Get_V4",

@@ -479,6 +479,20 @@ namespace BonusService.Service.BLL
             return promotion;
         }
         
+        public List<CustPromotion> GetDepositPromotionList(CustPromotionRequest request)
+        {
+            var promotionList = _bonusApiServiceV2.GetDepositPromotionList(request);
+            
+            var promotion = new List<CustPromotion>();
+            foreach (var promo in promotionList)
+            { 
+                SetPromotionDetail(request.LangId, request.DefLang, true, promo);
+                promotion.Add(promo);
+            }
+
+            return promotion;
+        }
+        
         private static void SetResult(CustPromotion promo, CustCondition custCondition)
         {
             promo.canJoin = custCondition.CanJoin == 1;
