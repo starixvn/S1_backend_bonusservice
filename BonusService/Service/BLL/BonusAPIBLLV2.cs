@@ -434,8 +434,6 @@ namespace BonusService.Service.BLL
                     SetPromotion(request.SiteId, request.CustId, request.CurrencyId, false, promo, custCondition);
                 }
 
-                SetPromotionDetail(request.LangId, request.DefLang, true, promo);
-
                 promotion.Add(promo);
             }
 
