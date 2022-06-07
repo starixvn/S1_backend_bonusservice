@@ -460,6 +460,25 @@ namespace BonusService.Service.BLL
             return promo;
         }
         
+        public List<CustPromotion> GetSpecialPromotionList(CustPromotionRequest request)
+        {
+            var promotionList = _bonusApiServiceV2.GetSpecialPromotionList(request);
+
+            var promotion = new List<CustPromotion>();
+            foreach (var promo in promotionList)
+            {
+                var custCondition = _bonusApiServiceV2.GetCustConditionInfo(request.CustId, request.CurrencyId,
+                    request.SiteId, promo.BonusCode, request.DeviceType);
+                SetResult(promo, custCondition);
+                SetPromotion(request.SiteId, request.CustId, request.CurrencyId, false, promo, custCondition);
+                SetPromotionDetail(request.LangId, request.DefLang, true, promo);
+
+                promotion.Add(promo);
+            }
+
+            return promotion;
+        }
+        
         private static void SetResult(CustPromotion promo, CustCondition custCondition)
         {
             promo.canJoin = custCondition.CanJoin == 1;
