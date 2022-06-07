@@ -704,7 +704,13 @@ namespace BonusService.Service.DAL
         public IEnumerable<CustPromotion> GetPromotionList(CustPromotionRequest request)
         {
             return _reportDbClient.Query<CustPromotion>("Member_PromotionList_Get_V7",
-                new DynamicParameters(new { request.CustId, request.SiteId, request.CurrencyId, request.DeviceType, request.LangId }));
+                new { request.CustId, request.SiteId, request.CurrencyId, request.DeviceType, request.LangId });
+        }
+        
+        public IEnumerable<CustPromotion> GetSpecialPromotionList(CustPromotionRequest request)
+        {
+            return _reportDbClient.Query<CustPromotion>("Member_SPCodePromotionList_Get_V4",
+                new { request.CustId, request.DeviceType });
         }
         
         public bool GetRebateInfo(int custId, CustPromotion promo)
