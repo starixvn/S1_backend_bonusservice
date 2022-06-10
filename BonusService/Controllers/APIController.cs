@@ -21,11 +21,11 @@ namespace BonusService.Controllers
         private readonly BonusAPIBLLV2 _bonusAPIBLLV2;
         private readonly ILogger<APIController> _logger;
 
-        public APIController(IServiceProvider provider, ILogger<APIController> logger)
+        public APIController(IServiceProvider provider)
         {
             _bonusAPIBLL = provider.GetRequiredService<BonusAPIBLL>();
             _bonusAPIBLLV2 = provider.GetRequiredService<BonusAPIBLLV2>();
-            this._logger = logger;
+            _logger = provider.GetRequiredService<ILogger<APIController>>();
         }
 
         public class SetAdjustBonusAsyncReq

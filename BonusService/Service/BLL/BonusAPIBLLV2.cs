@@ -29,7 +29,7 @@ namespace BonusService.Service.BLL
             _messageService = provider.GetRequiredService<MessageService>();
             _depositBonusBll = provider.GetRequiredService<DepositBonusBLL>();
             _walletService = provider.GetRequiredService<WalletService>();
-            _logger = provider.GetRequiredService<ILogger<BonusAPIBLLV2>>();;
+            _logger = provider.GetRequiredService<ILogger<BonusAPIBLLV2>>();
         }
         public ApiResult MakeErrorMessage(ErrorMessageMakerInput input, bool isMessageUserLang = false)
         {
