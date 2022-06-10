@@ -731,7 +731,7 @@ namespace BonusService.Service.DAL
                 new DynamicParameters(new { promo.BonusCode, PromoCategoryId = promo.CategoryId, promo.TpId, CustId = custId }));
         }
         
-        public int SetScratchCardCode(SetSpecialCodeRequest request)
+        public int SetScratchCardCode(SpecialCodeRequest request)
         {
             var p = new DynamicParameters(new { request.CustId, ScratchCardCode = request.SpecialCode, request.DeviceType });
             p.Add("Result", dbType: DbType.Int32, direction: ParameterDirection.Output);
@@ -739,10 +739,25 @@ namespace BonusService.Service.DAL
             return p.Get<int>("Result");
         }
         
-        public bool SetSpecialCode(SetSpecialCodeRequest request)
+        public bool SetSpecialCode(SpecialCodeRequest request)
         {
             var result = _mainDbClient.Execute("Member_CustSpecialCodeV3_Ins", new { request.CustId, request.SpecialCode, request.DeviceType });
             return result > 0;
+        }
+        
+        public PromotionBySpecialCode GetPromotionBySpecialCode(int siteid,string specialCode)
+        {
+            return _reportDbClient.QueryFirst<PromotionBySpecialCode>("Member_PromotionBySpecialCode_Get", new DynamicParameters(new { SpecialCode = specialCode, SiteId = siteid }));
+        }
+        
+        public PromotionBySpecialScratchCard GetPromotionBySpecialScratchCard(int siteid, string specialCode)
+        {
+            return _reportDbClient.QueryFirst<PromotionBySpecialScratchCard>("Member_PromotionBySpecialScratchCard_Get", new DynamicParameters(new { ScratchCardCode = specialCode, SiteId = siteid }));
+        }
+        
+        public BonusInfoByBonusCode GetBonusInfoByBonusCode(int CustId, string BonusCode)
+        {
+            return _reportDbClient.QueryFirst<BonusInfoByBonusCode>("Member_BonusinfoByBonusCode_Get", new DynamicParameters(new { CustId = CustId, BonusCode = BonusCode }));
         }
     }
 }

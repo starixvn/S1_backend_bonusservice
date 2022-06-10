@@ -620,13 +620,13 @@ namespace BonusService.Service.BLL
             }
         }
         
-        public int SetScratchCardCode(SetSpecialCodeRequest request)
+        public int SetScratchCardCode(SpecialCodeRequest request)
         {
             request.SpecialCode = request.SpecialCode.ToUpper();
             return _bonusApiServiceV2.SetScratchCardCode(request);
         }
         
-        public bool SetSpecialCode(SetSpecialCodeRequest request)
+        public bool SetSpecialCode(SpecialCodeRequest request)
         {
             return _bonusApiServiceV2.SetSpecialCode(request);
         }
@@ -650,6 +650,21 @@ namespace BonusService.Service.BLL
             var mPwd = regex.Match(specialCode);
 
             return mPwd.Success;
+        }
+        
+        public PromotionBySpecialCode GetPromotionBySpecialCode(int siteId, string SpecialCode)
+        {
+            return _bonusApiServiceV2.GetPromotionBySpecialCode(siteId,SpecialCode);
+        }
+        
+        public PromotionBySpecialScratchCard GetPromotionBySpecialScratchCard(int siteId, string SpecialCode)
+        {
+            return _bonusApiServiceV2.GetPromotionBySpecialScratchCard(siteId, SpecialCode);
+        }
+        
+        public BonusInfoByBonusCode GetBonusInfoByBonusCode(int CustId, string BonusCode)
+        {
+            return _bonusApiServiceV2.GetBonusInfoByBonusCode(CustId, BonusCode);
         }
     }
 }
