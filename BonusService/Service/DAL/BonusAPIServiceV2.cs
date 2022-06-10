@@ -730,5 +730,19 @@ namespace BonusService.Service.DAL
            return _reportDbClient.QueryFirst<BonusWallet>("Member_BonusInfo_GetByCust",
                 new DynamicParameters(new { promo.BonusCode, PromoCategoryId = promo.CategoryId, promo.TpId, CustId = custId }));
         }
+        
+        public int SetScratchCardCode(SetSpecialCodeRequest request)
+        {
+            var p = new DynamicParameters(new { request.CustId, ScratchCardCode = request.SpecialCode, request.DeviceType });
+            p.Add("Result", dbType: DbType.Int32, direction: ParameterDirection.Output);
+            _mainDbClient.Execute("Member_CustScratchCardCodeV3_Ins", p);
+            return p.Get<int>("Result");
+        }
+        
+        public bool SetSpecialCode(SetSpecialCodeRequest request)
+        {
+            var result = _mainDbClient.Execute("Member_CustSpecialCodeV3_Ins", new { request.CustId, request.SpecialCode, request.DeviceType });
+            return result > 0;
+        }
     }
 }

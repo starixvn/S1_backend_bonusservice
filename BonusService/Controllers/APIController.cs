@@ -214,6 +214,57 @@ namespace BonusService.Controllers
 
             return result;
         }
+        
+        [HttpPost]
+        public ApiResult SetSpecialCode(SetSpecialCodeRequest request)
+        {
+            var result = new ApiResult
+            {
+                ErrorCode = (int)SpecialCode.SpecialCodeError
+            };
+
+            try
+            {
+                if (!_bonusAPIBLLV2.CheckSpecialCode(request.SpecialCode))
+                {
+                    result.ErrorCode = (int)SpecialCode.SpecialCodeError;
+                }
+                else if (_bonusAPIBLLV2.CheckScratchCardCode(request.SpecialCode.ToUpper()))
+                {
+                    result.ErrorCode = _bonusAPIBLLV2.SetScratchCardCode(request);
+                }
+                else
+                {
+                    if (_bonusAPIBLLV2.SetSpecialCode(request))
+                    {
+                        result.ErrorCode = (int)SpecialCode.Success;
+                    }
+                    else
+                    {
+                        result.ErrorCode = (int)SpecialCode.SpecialCodeError;
+                    }
+                }
+            }
+            catch (MySql.Data.MySqlClient.MySqlException mySqlEx)
+            {
+                if (mySqlEx.Number == 1062)/*Duplicate for key 'PRIMARY'*/
+                {
+                    result.ErrorCode = (int)SpecialCode.Success;
+                }
+                else
+                {
+                    result.ErrorCode = 9000;
+                    result.Message = mySqlEx.ToString();
+                }
+            }
+            catch (Exception ex)
+            {
+                result.ErrorCode = 9000;
+                result.Message = ex.ToString();
+            }
+
+            return result;
+        }
     }
 
 

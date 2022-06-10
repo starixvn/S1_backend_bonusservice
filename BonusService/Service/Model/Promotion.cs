@@ -56,8 +56,7 @@ namespace BonusService.Service.Model
     {
         public string BonusCode { set; get; }
     }
-
-
+    
     public class CustPromotion : Promotion
     {
         public string Banner { get; set; }
@@ -78,6 +77,13 @@ namespace BonusService.Service.Model
         public int? DeviceType { set; get; }
         public CashBackDetails CashBackDetails { get; set; }
         public bool BeenUsed { get; set; }
+    }
+    
+    public class SetSpecialCodeRequest
+    {
+        public int CustId { set; get; }
+        public string SpecialCode { set; get; }
+        public int DeviceType { set; get; }
     }
 
     public class CashBackDetails

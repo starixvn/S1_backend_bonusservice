@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
@@ -617,6 +618,38 @@ namespace BonusService.Service.BLL
                     }
                 }
             }
+        }
+        
+        public int SetScratchCardCode(SetSpecialCodeRequest request)
+        {
+            request.SpecialCode = request.SpecialCode.ToUpper();
+            return _bonusApiServiceV2.SetScratchCardCode(request);
+        }
+        
+        public bool SetSpecialCode(SetSpecialCodeRequest request)
+        {
+            return _bonusApiServiceV2.SetSpecialCode(request);
+        }
+        
+        public bool CheckSpecialCode(string specialCode)
+        {
+            if (string.IsNullOrEmpty(specialCode) || specialCode.Length > 20)
+                return false;
+            var regex = new Regex("^[- !@#$%^&*a-zA-Z0-9]{1,20}$", RegexOptions.Singleline);
+            var mPwd = regex.Match(specialCode);
+
+            return mPwd.Success;
+        }
+        
+        public bool CheckScratchCardCode(string specialCode)
+        {
+            if (string.IsNullOrEmpty(specialCode) || specialCode.Length != 12)
+                return false;
+
+            var regex = new Regex("^[a-zA-Z]{5}-[a-zA-Z0-9]{6}$", RegexOptions.Singleline);
+            var mPwd = regex.Match(specialCode);
+
+            return mPwd.Success;
         }
     }
 }
