@@ -162,6 +162,8 @@
     public enum SpecialCode
     {
         Success = 0,
-        SpecialCodeError = 99
+        SpecialCodeError = 99,
+        SpecialCodeErrorForCheck = 1000,
+        PromoCodeHasBeenUsed = 3000
     }
 }
