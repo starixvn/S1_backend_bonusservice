@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace BonusService.Service.DAL
 {
-    public class BonusAPIServiceV2
+    public class PromotionService
     {
         private readonly MySqlClient _mainDbClient;
         private readonly MySqlClient _reportDbClient;
@@ -32,7 +32,7 @@ namespace BonusService.Service.DAL
         private readonly CourierAdapter _courierAdapter;
         private readonly IEnumerable<AllowIp> _allowIp;
 
-        public BonusAPIServiceV2(IServiceProvider serviceProvider)
+        public PromotionService(IServiceProvider serviceProvider)
         {
             var configuration = serviceProvider.GetRequiredService<IConfiguration>();
             _common = serviceProvider.GetRequiredService<Common>();
