@@ -280,7 +280,7 @@ namespace BonusService.Controllers
 
             try
             {
-//檢核SpecialCode格式是否正確
+                //檢核SpecialCode格式是否正確
                 var isSpecialCode = _bonusAPIBLLV2.CheckSpecialCode(request.SpecialCode);
                 var isScratchCardCode = _bonusAPIBLLV2.CheckScratchCardCode(request.SpecialCode.ToUpper());
                 if (!isSpecialCode && !isScratchCardCode)
