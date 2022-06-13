@@ -1,11 +1,8 @@
-﻿using BonusService.Service.BLL;
-using BonusService.Service.Library;
+﻿using BonusService.Service.Library;
 using BonusService.Service.Model.enums;
 using Dapper;
 using MemberSite.Service.Model;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
 using System;
 using System.Linq;
@@ -14,7 +11,6 @@ namespace BonusService.Service.DAL
 {
     public class BonusAPIService
     {
-        private readonly IConfiguration _configuration;
         private readonly MySqlClient _mainDbClient;
         private readonly MySqlClient _reportDbClient;
         private readonly WalletService _walletService;
@@ -22,7 +18,6 @@ namespace BonusService.Service.DAL
 
         public BonusAPIService(IServiceProvider serviceProvider)
         {
-            _configuration = serviceProvider.GetRequiredService<IConfiguration>();
             _walletService = serviceProvider.GetRequiredService<WalletService>();
             _withdrawalLimitService = serviceProvider.GetRequiredService<WithdrawalLimitService>();
             _mainDbClient = serviceProvider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);

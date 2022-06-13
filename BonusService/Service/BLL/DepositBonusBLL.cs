@@ -1,8 +1,6 @@
 ﻿using BonusService.Service.DAL;
 using BonusService.Service.Model;
-using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
-using BonusService.Service.Library;
 using BonusService.Service.Model.enums;
 using Microsoft.Extensions.Logging;
 
