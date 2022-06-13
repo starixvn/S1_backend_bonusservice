@@ -260,56 +260,102 @@ namespace BonusService.Controllers
                 {
                     result.ErrorCode = 9000;
                     result.Message = mySqlEx.ToString();
+                    _logger.LogError(mySqlEx, MethodExtension.GetCurrentMethod());
                 }
             }
             catch (Exception ex)
             {
                 result.ErrorCode = 9000;
                 result.Message = ex.ToString();
+                _logger.LogError(ex, MethodExtension.GetCurrentMethod());
             }
 
             return result;
         }
-        
+
         [HttpPost]
         public ApiResult<SpecialCodeResponse> CheckDepositSpecialCode(SpecialCodeRequest request)
         {
             var apiResult = new ApiResult<SpecialCodeResponse>();
 
-            //檢核SpecialCode格式是否正確
-            var isSpecialCode = _bonusAPIBLLV2.CheckSpecialCode(request.SpecialCode);
-            var isScratchCardCode = _bonusAPIBLLV2.CheckScratchCardCode(request.SpecialCode.ToUpper());
-            if (!isSpecialCode && !isScratchCardCode)
+            try
             {
-                apiResult.ErrorCode = (int)SpecialCode.SpecialCodeErrorForCheck;
-                return apiResult;
-            }
-
-            if (isScratchCardCode)
-            {
-                //檢核是否真有這筆ScratchCardCode
-                var promotion = _bonusAPIBLLV2.GetPromotionBySpecialScratchCard(request.SiteId, request.SpecialCode);
-                if (promotion != null)
+//檢核SpecialCode格式是否正確
+                var isSpecialCode = _bonusAPIBLLV2.CheckSpecialCode(request.SpecialCode);
+                var isScratchCardCode = _bonusAPIBLLV2.CheckScratchCardCode(request.SpecialCode.ToUpper());
+                if (!isSpecialCode && !isScratchCardCode)
                 {
-                    if (promotion.PromotionType != (int)PromotionType.FstDeposit &&
-                        promotion.PromotionType != (int)PromotionType.ReDeposit)
+                    apiResult.ErrorCode = (int)SpecialCode.SpecialCodeErrorForCheck;
+                    return apiResult;
+                }
+
+                if (isScratchCardCode)
+                {
+                    //檢核是否真有這筆ScratchCardCode
+                    var promotion =
+                        _bonusAPIBLLV2.GetPromotionBySpecialScratchCard(request.SiteId, request.SpecialCode);
+                    if (promotion != null)
+                    {
+                        if (promotion.PromotionType != (int)PromotionType.FstDeposit &&
+                            promotion.PromotionType != (int)PromotionType.ReDeposit)
+                        {
+                            apiResult.ErrorCode = (int)SpecialCode.SpecialCodeErrorForCheck;
+                            return apiResult;
+                        }
+
+                        if (promotion.CustId != 0 && promotion.CustId != request.CustId)
+                        {
+                            apiResult.ErrorCode = (int)SpecialCode.PromoCodeHasBeenUsed;
+                            return apiResult;
+                        }
+
+                        //寫入CustSpecialCode Table,並檢核是否輸入相同ScratchCard過
+                        //有輸入相同ScratchCard過
+                        if (_bonusAPIBLLV2.SetScratchCardCode(request) != 0)
+                        {
+                            //檢核是否領過這個BonusCode
+                            if (_bonusAPIBLLV2.GetBonusInfoByBonusCode(request.CustId, promotion.BonusCode) != null)
+                            {
+                                apiResult.ErrorCode = (int)SpecialCode.PromoCodeHasBeenUsed;
+                                return apiResult;
+                            }
+
+                            apiResult.ErrorCode = (int)SpecialCode.SpecialCodeErrorForCheck;
+                            return apiResult;
+                        }
+
+                        apiResult.ErrorCode = (int)SpecialCode.Success;
+                        apiResult.Data = new SpecialCodeResponse() { BonusCode = promotion.BonusCode };
+
+                        return apiResult;
+                    }
+                }
+
+                if (!isSpecialCode)
+                {
+                    apiResult.ErrorCode = (int)SpecialCode.SpecialCodeErrorForCheck;
+                    return apiResult;
+                }
+
+                //檢核是否真有這筆specialCode
+                var promotionBySpecialCode =
+                    _bonusAPIBLLV2.GetPromotionBySpecialCode(request.SiteId, request.SpecialCode);
+                if (promotionBySpecialCode != null)
+                {
+                    if (promotionBySpecialCode.PromotionType != (int)PromotionType.FstDeposit &&
+                        promotionBySpecialCode.PromotionType != (int)PromotionType.ReDeposit)
                     {
                         apiResult.ErrorCode = (int)SpecialCode.SpecialCodeErrorForCheck;
                         return apiResult;
                     }
 
-                    if (promotion.CustId != 0 && promotion.CustId != request.CustId)
-                    {
-                        apiResult.ErrorCode = (int)SpecialCode.PromoCodeHasBeenUsed;
-                        return apiResult;
-                    }
-
-                    //寫入CustSpecialCode Table,並檢核是否輸入相同ScratchCard過
-                    //有輸入相同ScratchCard過
-                    if (_bonusAPIBLLV2.SetScratchCardCode(request) != 0)
+                    //寫入CustSpecialCode Table,並檢核是否輸入相同specialCode過
+                    //有輸入相同specialCode過
+                    if (!_bonusAPIBLLV2.SetSpecialCode(request))
                     {
                         //檢核是否領過這個BonusCode
-                        if (_bonusAPIBLLV2.GetBonusInfoByBonusCode(request.CustId, promotion.BonusCode) != null)
+                        if (_bonusAPIBLLV2.GetBonusInfoByBonusCode(request.CustId, promotionBySpecialCode.BonusCode) !=
+                            null)
                         {
                             apiResult.ErrorCode = (int)SpecialCode.PromoCodeHasBeenUsed;
                             return apiResult;
@@ -320,48 +366,19 @@ namespace BonusService.Controllers
                     }
 
                     apiResult.ErrorCode = (int)SpecialCode.Success;
-                    apiResult.Data.BonusCode = promotion.BonusCode;
+                    apiResult.Data = new SpecialCodeResponse() { BonusCode = promotionBySpecialCode.BonusCode };
                     return apiResult;
                 }
-            }
-            
-            if (!isSpecialCode)
-            {
+
                 apiResult.ErrorCode = (int)SpecialCode.SpecialCodeErrorForCheck;
-                return apiResult;
             }
-
-            //檢核是否真有這筆specialCode
-            var promotionBySpecialCode = _bonusAPIBLLV2.GetPromotionBySpecialCode(request.SiteId, request.SpecialCode);
-            if (promotionBySpecialCode != null)
+            catch (Exception e)
             {
-                if (promotionBySpecialCode.PromotionType != (int)PromotionType.FstDeposit &&
-                    promotionBySpecialCode.PromotionType != (int)PromotionType.ReDeposit)
-                {
-                    apiResult.ErrorCode = (int)SpecialCode.SpecialCodeErrorForCheck;
-                    return apiResult;
-                }
-
-                //寫入CustSpecialCode Table,並檢核是否輸入相同specialCode過
-                //有輸入相同specialCode過
-                if (!_bonusAPIBLLV2.SetSpecialCode(request))
-                {
-                    //檢核是否領過這個BonusCode
-                    if (_bonusAPIBLLV2.GetBonusInfoByBonusCode(request.CustId, promotionBySpecialCode.BonusCode) != null)
-                    {
-                        apiResult.ErrorCode = (int)SpecialCode.PromoCodeHasBeenUsed;
-                        return apiResult;
-                    }
-
-                    apiResult.ErrorCode = (int)SpecialCode.SpecialCodeErrorForCheck;
-                    return apiResult;
-                }
-                apiResult.ErrorCode = (int)SpecialCode.Success;
-                apiResult.Data.BonusCode = promotionBySpecialCode.BonusCode;
-                return apiResult;
+                apiResult.ErrorCode = 9000;
+                apiResult.Message = e.ToString();
+                _logger.LogError(e, MethodExtension.GetCurrentMethod());
             }
 
-            apiResult.ErrorCode = (int)SpecialCode.SpecialCodeErrorForCheck;
             return apiResult;
         }
     }
