@@ -1,8 +1,6 @@
 ﻿using BonusService.Service.DAL;
 using BonusService.Service.Model;
-using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
-using BonusService.Service.Library;
 using BonusService.Service.Model.enums;
 using Microsoft.Extensions.Logging;
 
@@ -11,13 +9,13 @@ namespace BonusService.Service.BLL
     public class DepositBonusBLL
     {
         private readonly DepositBonusService depositBonusService;
-        private readonly BonusAPIServiceV2 bonusAPIServiceV2;
+        private readonly PromotionService _promotionService;
         private readonly ILogger<DepositBonusBLL> _logger;
 
-        public DepositBonusBLL(DepositBonusService depositBonusService, BonusAPIServiceV2 bonusAPIServiceV2, ILogger<DepositBonusBLL> logger)
+        public DepositBonusBLL(DepositBonusService depositBonusService, PromotionService promotionService, ILogger<DepositBonusBLL> logger)
         {
             this.depositBonusService = depositBonusService;
-            this.bonusAPIServiceV2 = bonusAPIServiceV2;
+            this._promotionService = promotionService;
             _logger = logger;
         }
 
@@ -27,7 +25,7 @@ namespace BonusService.Service.BLL
         }
         public IEnumerable<DepositBonus> GetDepositBonusQueueByCustId(int custId, bool useMainDb = false)
         {
-                return bonusAPIServiceV2.GetDepositBonusQueueByCustId(custId, useMainDb);
+                return _promotionService.GetDepositBonusQueueByCustId(custId, useMainDb);
         }
 
         public void CheckDepositBonusExpired()

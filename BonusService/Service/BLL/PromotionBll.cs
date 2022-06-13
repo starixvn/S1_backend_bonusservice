@@ -12,25 +12,25 @@ using Newtonsoft.Json;
 
 namespace BonusService.Service.BLL
 {
-    public class BonusAPIBLLV2
+    public class PromotionBll
     {
         private readonly CustInfoService _custInfoService;
-        private readonly BonusAPIServiceV2 _bonusApiServiceV2;
+        private readonly PromotionService _promotionService;
         private readonly SelLangBLL _selLangBll;
         private readonly MessageService _messageService;
         private readonly DepositBonusBLL _depositBonusBll;
         private readonly WalletService _walletService;
-        private readonly ILogger<BonusAPIBLLV2> _logger;
+        private readonly ILogger<PromotionBll> _logger;
 
-        public BonusAPIBLLV2(IServiceProvider provider)
+        public PromotionBll(IServiceProvider provider)
         {
             _custInfoService = provider.GetRequiredService<CustInfoService>();
-            _bonusApiServiceV2 = provider.GetRequiredService<BonusAPIServiceV2>();
+            _promotionService = provider.GetRequiredService<PromotionService>();
             _selLangBll = provider.GetRequiredService<SelLangBLL>();
             _messageService = provider.GetRequiredService<MessageService>();
             _depositBonusBll = provider.GetRequiredService<DepositBonusBLL>();
             _walletService = provider.GetRequiredService<WalletService>();
-            _logger = provider.GetRequiredService<ILogger<BonusAPIBLLV2>>();
+            _logger = provider.GetRequiredService<ILogger<PromotionBll>>();
         }
         public ApiResult MakeErrorMessage(ErrorMessageMakerInput input, bool isMessageUserLang = false)
         {
@@ -243,7 +243,7 @@ namespace BonusService.Service.BLL
         public void CancelAllWaitingBonus(int custId)
         {//當領取BONUS成功   將客戶DepositBonusQueue中的BONUS CANCEL掉
 
-            var BonusList = _bonusApiServiceV2.GetDepositBonusQueueByCustId(custId, true);//改變狀態用mainDb取得資料，避免資料不同步
+            var BonusList = _promotionService.GetDepositBonusQueueByCustId(custId, true);//改變狀態用mainDb取得資料，避免資料不同步
 
             foreach (var depositBonus in BonusList)
             {
@@ -264,7 +264,7 @@ namespace BonusService.Service.BLL
 
             bonusCode = bonusCode.Trim();
             var custInfo = _custInfoService.GetCustInfo(custId);
-            var result = _bonusApiServiceV2.SetClaimPromotionV2(custId, custInfo.UserName, custInfo.SiteId, bonusCode,
+            var result = _promotionService.SetClaimPromotionV2(custId, custInfo.UserName, custInfo.SiteId, bonusCode,
                 custInfo.CurrencyId, custIp, deviceType, atPage, out var bonusAmount, ref lockedAmount,
                 out var rollOver, out var expiryTime, out var promotion, depositTransId);
 
@@ -283,7 +283,7 @@ namespace BonusService.Service.BLL
                         ExpiryTime = expiryTime,
                         inputs = new Dictionary<string, string>()
                     };
-                    var apiResult = await _bonusApiServiceV2.TransferTpBonus(tpBonusTransfer);
+                    var apiResult = await _promotionService.TransferTpBonus(tpBonusTransfer);
                     if (apiResult.ErrorCode != 0)
                     {
                         //ErrorCode:1205 TPService Pending
@@ -356,7 +356,7 @@ namespace BonusService.Service.BLL
                 DeviceType = 1
             };
 
-            var result = _bonusApiServiceV2.SetAdjustmentBonusV2(depositBonus, amount, promotionType, memo, out var bonusAmount, ref lockedAmount, out var rollOver, out var expiryTime, out var promotion);
+            var result = _promotionService.SetAdjustmentBonusV2(depositBonus, amount, promotionType, memo, out var bonusAmount, ref lockedAmount, out var rollOver, out var expiryTime, out var promotion);
             if (result > 0)
             {
                 if (promotion?.TpId > 0)
@@ -372,7 +372,7 @@ namespace BonusService.Service.BLL
                         ExpiryTime = expiryTime,
                         inputs = new Dictionary<string, string>()
                     };
-                    var apiResult = await _bonusApiServiceV2.TransferTpBonus(tpBonusTransfer);
+                    var apiResult = await _promotionService.TransferTpBonus(tpBonusTransfer);
                     if (apiResult.ErrorCode != 0)
                     {
                         //ErrorCode:1205 TPService Pending
@@ -422,14 +422,14 @@ namespace BonusService.Service.BLL
         
         public List<CustPromotion> GetPromotionList(CustPromotionRequest request)
         {
-            var promotionList =  _bonusApiServiceV2.GetPromotionList(request);
+            var promotionList =  _promotionService.GetPromotionList(request);
             var promotion = new List<CustPromotion>();
 
             foreach (var promo in promotionList)
             {
                 if (request.IsLogin)
                 {
-                    var custCondition = _bonusApiServiceV2.GetCustConditionInfo(request.CustId, request.CurrencyId,
+                    var custCondition = _promotionService.GetCustConditionInfo(request.CustId, request.CurrencyId,
                         request.SiteId, promo.BonusCode, request.DeviceType);
                     SetResult(promo, custCondition);
                     SetPromotion(request.SiteId, request.CustId, request.CurrencyId, false, promo, custCondition);
@@ -443,7 +443,7 @@ namespace BonusService.Service.BLL
 
         public CustPromotion GetPromotionDetail(PromotionDetailRequest request)
         {
-            var promo = _bonusApiServiceV2.GetPromotion<CustPromotion>(request.CustId, request.CurrencyId, request.SiteId, request.BonusCode, request.DeviceType);
+            var promo = _promotionService.GetPromotion<CustPromotion>(request.CustId, request.CurrencyId, request.SiteId, request.BonusCode, request.DeviceType);
 
             if (promo != null)
             {
@@ -451,7 +451,7 @@ namespace BonusService.Service.BLL
 
                 if (request.IsLogin)
                 {
-                    var custCondition = _bonusApiServiceV2.GetCustConditionInfo(request.CustId, request.CurrencyId,
+                    var custCondition = _promotionService.GetCustConditionInfo(request.CustId, request.CurrencyId,
                         request.SiteId, promo.BonusCode, request.DeviceType);
                     SetResult(promo, custCondition);
                     SetPromotion(request.SiteId, request.CustId, request.CurrencyId, true, promo, custCondition);
@@ -463,12 +463,12 @@ namespace BonusService.Service.BLL
         
         public List<CustPromotion> GetSpecialPromotionList(CustPromotionRequest request)
         {
-            var promotionList = _bonusApiServiceV2.GetSpecialPromotionList(request);
+            var promotionList = _promotionService.GetSpecialPromotionList(request);
 
             var promotion = new List<CustPromotion>();
             foreach (var promo in promotionList)
             {
-                var custCondition = _bonusApiServiceV2.GetCustConditionInfo(request.CustId, request.CurrencyId,
+                var custCondition = _promotionService.GetCustConditionInfo(request.CustId, request.CurrencyId,
                     request.SiteId, promo.BonusCode, request.DeviceType);
                 SetResult(promo, custCondition);
                 SetPromotion(request.SiteId, request.CustId, request.CurrencyId, false, promo, custCondition);
@@ -482,7 +482,7 @@ namespace BonusService.Service.BLL
         
         public List<CustPromotion> GetDepositPromotionList(CustPromotionRequest request)
         {
-            var promotionList = _bonusApiServiceV2.GetDepositPromotionList(request);
+            var promotionList = _promotionService.GetDepositPromotionList(request);
             
             var promotion = new List<CustPromotion>();
             foreach (var promo in promotionList)
@@ -548,12 +548,12 @@ namespace BonusService.Service.BLL
         
             if (promo.PromotionType == PromotionType.Rebate)
             {
-                promo.isJoin = _bonusApiServiceV2.GetRebateInfo(custId, promo);
+                promo.isJoin = _promotionService.GetRebateInfo(custId, promo);
         
             }
             else
             {
-                var custBonusInfo = _bonusApiServiceV2.GetBonusInfoByCust(custId, promo);
+                var custBonusInfo = _promotionService.GetBonusInfoByCust(custId, promo);
                 if (custBonusInfo != null)
                 {
                     promo.CustExpiryTime = custBonusInfo.ExpiryTime;
@@ -566,7 +566,7 @@ namespace BonusService.Service.BLL
                 
                 if (promo.PromotionType == PromotionType.Cashback)
                 {
-                    _bonusApiServiceV2.GetCashbackInfo(custId, siteId, currencyId, promo, getCashbackDetail);
+                    _promotionService.GetCashbackInfo(custId, siteId, currencyId, promo, getCashbackDetail);
                 }
             }
         }
@@ -623,12 +623,12 @@ namespace BonusService.Service.BLL
         public int SetScratchCardCode(SpecialCodeRequest request)
         {
             request.SpecialCode = request.SpecialCode.ToUpper();
-            return _bonusApiServiceV2.SetScratchCardCode(request);
+            return _promotionService.SetScratchCardCode(request);
         }
         
         public bool SetSpecialCode(SpecialCodeRequest request)
         {
-            return _bonusApiServiceV2.SetSpecialCode(request);
+            return _promotionService.SetSpecialCode(request);
         }
         
         public bool CheckSpecialCode(string specialCode)
@@ -654,17 +654,17 @@ namespace BonusService.Service.BLL
         
         public PromotionBySpecialCode GetPromotionBySpecialCode(int siteId, string SpecialCode)
         {
-            return _bonusApiServiceV2.GetPromotionBySpecialCode(siteId,SpecialCode);
+            return _promotionService.GetPromotionBySpecialCode(siteId,SpecialCode);
         }
         
         public PromotionBySpecialScratchCard GetPromotionBySpecialScratchCard(int siteId, string SpecialCode)
         {
-            return _bonusApiServiceV2.GetPromotionBySpecialScratchCard(siteId, SpecialCode);
+            return _promotionService.GetPromotionBySpecialScratchCard(siteId, SpecialCode);
         }
         
         public BonusInfoByBonusCode GetBonusInfoByBonusCode(int CustId, string BonusCode)
         {
-            return _bonusApiServiceV2.GetBonusInfoByBonusCode(CustId, BonusCode);
+            return _promotionService.GetBonusInfoByBonusCode(CustId, BonusCode);
         }
     }
 }
