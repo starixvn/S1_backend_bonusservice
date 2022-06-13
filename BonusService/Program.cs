@@ -95,7 +95,7 @@ namespace BonusService
                     services.AddSingleton<BonusAPIService>();
                     services.AddSingleton<BonusWalletService>();
                     services.AddSingleton<PromotionService>();
-                    services.AddSingleton<BonusAPIBLLV2>();
+                    services.AddSingleton<PromotionBll>();
 
 
                     var serviceType = Environment.GetEnvironmentVariable("ServiceType");

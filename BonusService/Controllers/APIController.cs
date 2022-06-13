@@ -18,13 +18,13 @@ namespace BonusService.Controllers
     public class APIController : ControllerBase
     {
         private readonly BonusAPIBLL _bonusAPIBLL;
-        private readonly BonusAPIBLLV2 _bonusAPIBLLV2;
+        private readonly PromotionBll _promotionBll;
         private readonly ILogger<APIController> _logger;
 
         public APIController(IServiceProvider provider)
         {
             _bonusAPIBLL = provider.GetRequiredService<BonusAPIBLL>();
-            _bonusAPIBLLV2 = provider.GetRequiredService<BonusAPIBLLV2>();
+            _promotionBll = provider.GetRequiredService<PromotionBll>();
             _logger = provider.GetRequiredService<ILogger<APIController>>();
         }
         
@@ -63,7 +63,7 @@ namespace BonusService.Controllers
                 }
                 var Memo = JsonConvert.SerializeObject(new { setAdjustBonusReq.Operator }); 
 
-                result = await _bonusAPIBLLV2.SetAdjustmentBonusV2Async(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode, Memo, setAdjustBonusReq.Amount, setAdjustBonusReq.PromotionType);
+                result = await _promotionBll.SetAdjustmentBonusV2Async(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode, Memo, setAdjustBonusReq.Amount, setAdjustBonusReq.PromotionType);
 
             }
             catch (Exception ex)
@@ -129,7 +129,7 @@ namespace BonusService.Controllers
                 }
                 var lockedAmount = promotionReq.LockedAmount ?? 0;
                 
-                apiResult = await _bonusAPIBLLV2.SetClaimPromotionV2Async(promotionReq.CustId, promotionReq.BonusCode, promotionReq.custIP, lockedAmount, deviceType, BonusInfoAtPage.Promotion,true);
+                apiResult = await _promotionBll.SetClaimPromotionV2Async(promotionReq.CustId, promotionReq.BonusCode, promotionReq.custIP, lockedAmount, deviceType, BonusInfoAtPage.Promotion,true);
             }
             catch (Exception ex)
             {
@@ -151,7 +151,7 @@ namespace BonusService.Controllers
             
             try
             {
-                result.Data = _bonusAPIBLLV2.GetPromotionList(request);
+                result.Data = _promotionBll.GetPromotionList(request);
             }
             catch (Exception e)
             {
@@ -171,7 +171,7 @@ namespace BonusService.Controllers
 
             try
             {
-                result.Data = _bonusAPIBLLV2.GetPromotionDetail(request);
+                result.Data = _promotionBll.GetPromotionDetail(request);
             }
             catch (Exception e)
             {
@@ -191,7 +191,7 @@ namespace BonusService.Controllers
             
             try
             {
-                result.Data = _bonusAPIBLLV2.GetSpecialPromotionList(request);
+                result.Data = _promotionBll.GetSpecialPromotionList(request);
             }
             catch (Exception e)
             {
@@ -210,7 +210,7 @@ namespace BonusService.Controllers
            
             try
             {
-                result.Data = _bonusAPIBLLV2.GetDepositPromotionList(request);
+                result.Data = _promotionBll.GetDepositPromotionList(request);
             }
             catch (Exception e)
             {
@@ -230,17 +230,17 @@ namespace BonusService.Controllers
 
             try
             {
-                if (!_bonusAPIBLLV2.CheckSpecialCode(request.SpecialCode))
+                if (!_promotionBll.CheckSpecialCode(request.SpecialCode))
                 {
                     result.ErrorCode = (int)SpecialCode.SpecialCodeError;
                 }
-                else if (_bonusAPIBLLV2.CheckScratchCardCode(request.SpecialCode.ToUpper()))
+                else if (_promotionBll.CheckScratchCardCode(request.SpecialCode.ToUpper()))
                 {
-                    result.ErrorCode = _bonusAPIBLLV2.SetScratchCardCode(request);
+                    result.ErrorCode = _promotionBll.SetScratchCardCode(request);
                 }
                 else
                 {
-                    if (_bonusAPIBLLV2.SetSpecialCode(request))
+                    if (_promotionBll.SetSpecialCode(request))
                     {
                         result.ErrorCode = (int)SpecialCode.Success;
                     }
@@ -281,8 +281,8 @@ namespace BonusService.Controllers
             try
             {
                 //檢核SpecialCode格式是否正確
-                var isSpecialCode = _bonusAPIBLLV2.CheckSpecialCode(request.SpecialCode);
-                var isScratchCardCode = _bonusAPIBLLV2.CheckScratchCardCode(request.SpecialCode.ToUpper());
+                var isSpecialCode = _promotionBll.CheckSpecialCode(request.SpecialCode);
+                var isScratchCardCode = _promotionBll.CheckScratchCardCode(request.SpecialCode.ToUpper());
                 if (!isSpecialCode && !isScratchCardCode)
                 {
                     apiResult.ErrorCode = (int)SpecialCode.SpecialCodeErrorForCheck;
@@ -293,7 +293,7 @@ namespace BonusService.Controllers
                 {
                     //檢核是否真有這筆ScratchCardCode
                     var promotion =
-                        _bonusAPIBLLV2.GetPromotionBySpecialScratchCard(request.SiteId, request.SpecialCode);
+                        _promotionBll.GetPromotionBySpecialScratchCard(request.SiteId, request.SpecialCode);
                     if (promotion != null)
                     {
                         if (promotion.PromotionType != (int)PromotionType.FstDeposit &&
@@ -311,10 +311,10 @@ namespace BonusService.Controllers
 
                         //寫入CustSpecialCode Table,並檢核是否輸入相同ScratchCard過
                         //有輸入相同ScratchCard過
-                        if (_bonusAPIBLLV2.SetScratchCardCode(request) != 0)
+                        if (_promotionBll.SetScratchCardCode(request) != 0)
                         {
                             //檢核是否領過這個BonusCode
-                            if (_bonusAPIBLLV2.GetBonusInfoByBonusCode(request.CustId, promotion.BonusCode) != null)
+                            if (_promotionBll.GetBonusInfoByBonusCode(request.CustId, promotion.BonusCode) != null)
                             {
                                 apiResult.ErrorCode = (int)SpecialCode.PromoCodeHasBeenUsed;
                                 return apiResult;
@@ -339,7 +339,7 @@ namespace BonusService.Controllers
 
                 //檢核是否真有這筆specialCode
                 var promotionBySpecialCode =
-                    _bonusAPIBLLV2.GetPromotionBySpecialCode(request.SiteId, request.SpecialCode);
+                    _promotionBll.GetPromotionBySpecialCode(request.SiteId, request.SpecialCode);
                 if (promotionBySpecialCode != null)
                 {
                     if (promotionBySpecialCode.PromotionType != (int)PromotionType.FstDeposit &&
@@ -351,10 +351,10 @@ namespace BonusService.Controllers
 
                     //寫入CustSpecialCode Table,並檢核是否輸入相同specialCode過
                     //有輸入相同specialCode過
-                    if (!_bonusAPIBLLV2.SetSpecialCode(request))
+                    if (!_promotionBll.SetSpecialCode(request))
                     {
                         //檢核是否領過這個BonusCode
-                        if (_bonusAPIBLLV2.GetBonusInfoByBonusCode(request.CustId, promotionBySpecialCode.BonusCode) !=
+                        if (_promotionBll.GetBonusInfoByBonusCode(request.CustId, promotionBySpecialCode.BonusCode) !=
                             null)
                         {
                             apiResult.ErrorCode = (int)SpecialCode.PromoCodeHasBeenUsed;

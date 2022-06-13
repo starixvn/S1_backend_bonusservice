@@ -12,7 +12,7 @@ using Newtonsoft.Json;
 
 namespace BonusService.Service.BLL
 {
-    public class BonusAPIBLLV2
+    public class PromotionBll
     {
         private readonly CustInfoService _custInfoService;
         private readonly PromotionService _promotionService;
@@ -20,9 +20,9 @@ namespace BonusService.Service.BLL
         private readonly MessageService _messageService;
         private readonly DepositBonusBLL _depositBonusBll;
         private readonly WalletService _walletService;
-        private readonly ILogger<BonusAPIBLLV2> _logger;
+        private readonly ILogger<PromotionBll> _logger;
 
-        public BonusAPIBLLV2(IServiceProvider provider)
+        public PromotionBll(IServiceProvider provider)
         {
             _custInfoService = provider.GetRequiredService<CustInfoService>();
             _promotionService = provider.GetRequiredService<PromotionService>();
@@ -30,7 +30,7 @@ namespace BonusService.Service.BLL
             _messageService = provider.GetRequiredService<MessageService>();
             _depositBonusBll = provider.GetRequiredService<DepositBonusBLL>();
             _walletService = provider.GetRequiredService<WalletService>();
-            _logger = provider.GetRequiredService<ILogger<BonusAPIBLLV2>>();
+            _logger = provider.GetRequiredService<ILogger<PromotionBll>>();
         }
         public ApiResult MakeErrorMessage(ErrorMessageMakerInput input, bool isMessageUserLang = false)
         {
