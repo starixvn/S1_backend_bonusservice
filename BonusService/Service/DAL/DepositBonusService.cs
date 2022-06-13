@@ -22,11 +22,7 @@ namespace BonusService.Service.DAL
             configuration = serviceProvider.GetRequiredService<IConfiguration>();
             _reportDbClient = serviceProvider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Report);
         }
-        public IEnumerable<DepositBonus> GetDepositBonusQueue()
-        {
-            using var conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
-            return conn.Query<DepositBonus>("Service_DepositBonusQueue_Get", commandType: CommandType.StoredProcedure);
-        }
+
         public IEnumerable<DepositBonusCustList> GetDepositBonusQueueCustList()
         {
             using var conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));

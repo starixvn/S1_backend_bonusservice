@@ -11,25 +11,16 @@ namespace BonusService.Service.BLL
     public class DepositBonusBLL
     {
         private readonly DepositBonusService depositBonusService;
-        private readonly string apiUrl;
-        private readonly CourierAdapter courierAdapter;
-        private readonly BonusAPIBLL bonusAPIBLL;
         private readonly BonusAPIServiceV2 bonusAPIServiceV2;
         private readonly ILogger<DepositBonusBLL> _logger;
 
-        public DepositBonusBLL(DepositBonusService depositBonusService, IConfiguration configuration, CourierAdapter courierAdapter, BonusAPIBLL bonusAPIBLL, BonusAPIServiceV2 bonusAPIServiceV2, ILogger<DepositBonusBLL> logger)
+        public DepositBonusBLL(DepositBonusService depositBonusService, BonusAPIServiceV2 bonusAPIServiceV2, ILogger<DepositBonusBLL> logger)
         {
             this.depositBonusService = depositBonusService;
-            this.apiUrl = configuration.GetValue<string>("TpService");
-            this.courierAdapter = courierAdapter;
-            this.bonusAPIBLL = bonusAPIBLL;
             this.bonusAPIServiceV2 = bonusAPIServiceV2;
             _logger = logger;
         }
-        public IEnumerable<DepositBonus> GetDepositBonusQueue()
-        {
-            return depositBonusService.GetDepositBonusQueue();
-        }
+
         public IEnumerable<DepositBonusCustList> GetDepositBonusQueueCustList()
         {
             return depositBonusService.GetDepositBonusQueueCustList();

@@ -757,7 +757,7 @@ namespace BonusService.Service.DAL
         
         public BonusInfoByBonusCode GetBonusInfoByBonusCode(int CustId, string BonusCode)
         {
-            return _reportDbClient.QueryFirst<BonusInfoByBonusCode>("Member_BonusinfoByBonusCode_Get", new DynamicParameters(new { CustId = CustId, BonusCode = BonusCode }));
+            return _reportDbClient.QueryFirst<BonusInfoByBonusCode>("Member_BonusinfoByBonusCode_Get", new DynamicParameters(new { CustId, BonusCode }));
         }
     }
 }
