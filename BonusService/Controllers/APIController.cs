@@ -382,6 +382,4 @@ namespace BonusService.Controllers
             return apiResult;
         }
     }
-
-
 }
