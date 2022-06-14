@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using BonusService.Service.Library;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace BonusService.Service.BLL
 {
@@ -18,9 +20,11 @@ namespace BonusService.Service.BLL
         private readonly MessageService _messageService;
         private readonly CustInfoService _custInfoService;
         private readonly CacheHelper _cacheHelper;
-        
+        private readonly ILogger<RebateBLL> _logger;
+
         public RebateBLL(IServiceProvider provider)
         {
+            _logger = provider.GetRequiredService<ILogger<RebateBLL>>();
             _rebateService = provider.GetRequiredService<RebateService>();
             _vipRebateService = provider.GetRequiredService<VipRebateService>();
             _selLangBll = provider.GetRequiredService<SelLangBLL>();
@@ -29,31 +33,107 @@ namespace BonusService.Service.BLL
             _cacheHelper = provider.GetRequiredService<CacheHelper>();
         }
 
-        public IEnumerable<RebateTask> GetVipRebateTask()
+        public IEnumerable<RebateTask> VerifyRebateTask()
         {
-            return _vipRebateService.GetVipRebateTask();
-        }
-        public int SetVipRebateTaskDone(int siteId)
-        {
-            return _vipRebateService.SetVipRebateTaskDone(siteId);
+            //檢查參數
+            //0.檢查參數是否正確
+            //1.有設定指定日期，且日期大於2020/01/01，屬於重跑流程(目前因為系統也只有設定daily，故只有daily有再用，其他類型的要用嗎？)
+            //2.檢查期間型別需檢查項目是否符合(每月rebate檢核尚須確認)
+
+            var rebateTaskList = _vipRebateService.GetVipRebateTask();
+
+            var doTaskList = new List<RebateTask>();
+
+            foreach (var task in rebateTaskList)
+            {
+                //Step1：有設定指定日期，且日期大於2020/01/01，屬於重跑流程
+                if (task.SpecificDate > new DateTime(2020, 01, 01))
+                {
+                    _logger.LogInformation($"This Task Has SpecificDate To Redo Task in {task.SpecificDate.ToString()}.");
+                    doTaskList.Add(task);
+                    continue;
+                }
+
+                //Step2：檢查期間型別需檢查項目是否符合
+                switch (task.PeriodType)
+                {
+                    case 1:  //1: Daily
+                        break;
+                    case 2:  //2:Weekly
+                        var weekDay = (int)task.CurrencyNowTime.DayOfWeek; //Week 1234560 = Monday To Sunday
+                        if (weekDay == 0) weekDay = 7; //7=Sunday
+
+                        //幣別時區日期 必須為 指定星期，排程才可執行
+                        if (weekDay != task.PeriodDay)
+                        {
+                            _logger.LogWarning($"task.PeriodDay is Invaild. task value={JsonConvert.SerializeObject(task)}.");
+                            continue;
+                        }
+                        break;
+                    case 3:  //3: Monthly
+                        //每月rebate邏輯需要再確認，目前暫無使用
+                        //var currencyNowDay = task.CurrencyNowTime.Day; //幣別時區當月N日
+                        //var lastDay = DateTime.DaysInMonth(task.CurrencyNowTime.Year, task.CurrencyNowTime.Month); //當月最後一日
+                        //if (currencyNowDay != task.PeriodDay)
+                        //{
+                        //    _logger.LogWarning($"task.PeriodDay is Invaild. task value={JsonConvert.SerializeObject(task)}.");
+                        //}
+                        //if ((lastDay == currencyNowDay) && (currencyNowDay < task.PeriodDay))
+                        //{
+                        //    _logger.LogWarning($"task.PeriodDay is Invaild. task value={JsonConvert.SerializeObject(task)}.");
+                        //}
+                        break;
+                    default:
+                        _logger.LogError($"task.PeriodType is Invaild. task value={JsonConvert.SerializeObject(task)}.");
+                        continue;
+                }
+
+                //Step3：檢查小時是否符合
+                //幣別時區小時 <= 指定小時，不執行排程
+                if (task.CurrencyNowTime.Hour <= task.RedeemHours)
+                {
+                    _logger.LogWarning($"task.RedeemsHours Invaild. task value={JsonConvert.SerializeObject(task)}");
+                    continue;
+                }
+
+                //Step4：檢查最近一次執行時間是否符合
+                //LastCurrencySettledTime 是 Null，代表第一次執行排程
+                //LastCurrencySettledTime.Date >= CurrencyNowTime.Date，上次執行時間大於幣別時區時間，不可再執行
+                if (task.LastCurrencySettledTime != null)
+                {
+                    if (task.LastCurrencySettledTime.Date >= task.CurrencyNowTime.Date)
+                    {
+                        _logger.LogWarning($"task.LastCurrencySettledTime Invaild. task value={JsonConvert.SerializeObject(task)}");
+                        continue;
+                    }
+                }
+
+                doTaskList.Add(task);
+            }
+
+            return doTaskList;
         }
 
-        public IEnumerable<VipRebateTpBetRecord> GetVipRebateTpBetRecord(int siteId, int custId, DateTime specificDate, int is14)
+        public int SetVipRebateTaskDone(int siteId, int currencyId)
         {
-            return _vipRebateService.GetVipRebateTpBetRecord(siteId, custId, specificDate, is14);
+            return _vipRebateService.SetVipRebateTaskDone(siteId, currencyId);
         }
-        public IEnumerable<VipRebateInfo> GetVipRebateCustList(int siteId, int pageSize, int pageNumber, DateTime specificDate)
+
+        public IEnumerable<VipRebateTpBetRecord> GetVipRebateTpBetRecord(int periodType, int custId, DateTime specificDate, string timeZone, int is14)
         {
-            return _vipRebateService.GetVipRebateCustList(siteId, pageSize, pageNumber, specificDate);
+            return _vipRebateService.GetVipRebateTpBetRecord(periodType, custId, specificDate, timeZone, is14);
         }
-        public int PayoutVipRebate(int siteId, int custId, string userName, VipRebateInfo vipRebateInfo, IEnumerable<VipRebateTpBetRecord> vipRebateTpBetRecords, IEnumerable<RebatePayoutLimit> rebatePayoutLimits)
+        public IEnumerable<VipRebateInfo> GetVipRebateCustList(int siteId, int currencyId, int periodType, DateTime specificDate, string currencyTimeZone)
         {
-            var result = _vipRebateService.PayoutVipRebate(siteId, custId, userName, vipRebateInfo, vipRebateTpBetRecords, out decimal payAmount, out Dictionary<int, decimal> rebateLogList, out Dictionary<int, decimal> rebateCLogList, rebatePayoutLimits);
+            return _vipRebateService.GetVipRebateCustList(siteId, currencyId, periodType, specificDate, currencyTimeZone);
+        }
+        public int PayoutVipRebate(int siteId, VipRebateInfo vipRebateInfo, IEnumerable<VipRebateTpBetRecord> vipRebateTpBetRecords, IEnumerable<RebatePayoutLimit> rebatePayoutLimits)
+        {
+            var result = _vipRebateService.PayoutVipRebate(siteId, vipRebateInfo, vipRebateTpBetRecords, out decimal payAmount, out Dictionary<int, decimal> rebateLogList, out Dictionary<int, decimal> rebateCLogList, rebatePayoutLimits);
 
             if (result > 0)
             {
-                var promotionType = 6;
-                var custInfo = _custInfoService.GetCustInfo(custId);
+                var custInfo = _custInfoService.GetCustInfo(vipRebateInfo.CustId);
                 var msg = new StringBuilder();
 
                 var dpayAmount = payAmount.ToString("#,##0.##");
@@ -62,24 +142,22 @@ namespace BonusService.Service.BLL
                     dpayAmount = $"{payAmount / 1000:#,##0.##}";
                 }
 
-                var title = string.Format($"{custInfo.UserName} {_selLangBll.GetResourceValue(promotionType == 6 ? "lbl_RebateMsg" : "lbl_CashbackMsg", custInfo.UserLang)}", dpayAmount);
+                var title = string.Format($"{custInfo.UserName} {_selLangBll.GetResourceValue("lbl_RebateMsg", custInfo.UserLang)}", dpayAmount);
                 msg.AppendLine(title);
 
-                if (promotionType == 6)
+                foreach (var rebateLog in rebateCLogList)
                 {
-                    foreach (var rebateLog in rebateCLogList)
+                    var dAmount = rebateLog.Value.ToString("#,##0.##");
+                    if (_custInfoService.IsConvertRequired(custInfo.CurrencyId))
                     {
-                        var dAmount = rebateLog.Value.ToString("#,##0.##");
-                        if (_custInfoService.IsConvertRequired(custInfo.CurrencyId))
-                        {
-                            dAmount = $"{rebateLog.Value / 1000:#,##0.##}";
-                        }
-
-                        var rebateTpBetRecord = vipRebateTpBetRecords.FirstOrDefault(x => x.CategoryId == rebateLog.Key);
-
-                        msg.AppendLine($"{GetTpCategoryList()[rebateLog.Key]} ({rebateTpBetRecord.Percentage}): {dAmount}");
+                        dAmount = $"{rebateLog.Value / 1000:#,##0.##}";
                     }
+
+                    var rebateTpBetRecord = vipRebateTpBetRecords.FirstOrDefault(x => x.CategoryId == rebateLog.Key);
+
+                    msg.AppendLine($"{GetTpCategoryList()[rebateLog.Key]} ({rebateTpBetRecord.Percentage}): {dAmount}");
                 }
+
 
                 _messageService.SendMessage(custInfo.SiteId, "Bonus Service", title, msg.ToString(), custInfo.CustId, custInfo.UserName, custInfo.UserLang);
             }

@@ -1,7 +1,9 @@
 ﻿using BonusService.Service.Library;
 using BonusService.Service.Model;
+using BonusService.Service.Model.enums;
 using Dapper;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
@@ -16,39 +18,60 @@ namespace BonusService.Service.DAL
         private readonly WalletService walletService;
         private readonly WithdrawalLimitService withdrawalLimitService;
         private readonly Common common;
-        public VipRebateService(IConfiguration configuration, WalletService walletService, Common common, WithdrawalLimitService withdrawalLimitService)
+        private readonly MySqlClient _mainDbClient;
+        private readonly MySqlClient _reportDbClient;
+        public VipRebateService(IConfiguration configuration,
+                             WalletService walletService,
+            Common common,
+            WithdrawalLimitService withdrawalLimitService,
+            IServiceProvider provider)
         {
+            _mainDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);
+            _reportDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Report);
             this.configuration = configuration;
             this.walletService = walletService;
             this.withdrawalLimitService = withdrawalLimitService;
             this.common = common;
         }
-        public IEnumerable<VipRebateTpBetRecord> GetVipRebateTpBetRecord(int siteId, int custId, DateTime specificDate, int is14)
+        public IEnumerable<VipRebateTpBetRecord> GetVipRebateTpBetRecord(int custId,int periodType, DateTime specificDate,string timeZone, int is14)
         {
-            using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
-            return conn.Query<VipRebateTpBetRecord>("Service_VipRebateTpBetRecordV2_Get", new { SiteId = siteId, CustId = custId, SpecificDate = specificDate, Is14 = is14 }, commandType: CommandType.StoredProcedure);
+            var p = new
+            {
+                _CustId = custId,
+                _PeriodType = periodType,
+                _SpecificDate = specificDate,
+                _CurrencyTimeZone = timeZone,
+                _Is14 = is14
+            };
+
+            return _reportDbClient.Query<VipRebateTpBetRecord>("Service_VipRebateTpBetRecord_Get_V3", p);
         }
-        public IEnumerable<VipRebateInfo> GetVipRebateCustList(int siteId, int pageSize, int pageNumber, DateTime specificDate )
+        public IEnumerable<VipRebateInfo> GetVipRebateCustList(int siteId, int currencyId, int periodType, DateTime specificDate, string timeZone)
         {
-            using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
-            return conn.Query<VipRebateInfo>("Service_VipRebateCustListV2_Get", new { SiteId = siteId, PageSize = pageSize, PageNumber = pageNumber, SpecificDate = specificDate }, commandType: CommandType.StoredProcedure);
+            var p = new
+            {
+                _SiteId = siteId,
+                _CurrencyId = currencyId,
+                _PeriodType = periodType,
+                _SpecificDate = specificDate,
+                _CurrencyTimeZone = timeZone
+            };
+            return _reportDbClient.Query<VipRebateInfo>("Service_VipRebateCustList_Get_V3", p);
         }
         public IEnumerable<RebateTask> GetVipRebateTask()
         {
-            using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
-            return conn.Query<RebateTask>("Service_VipRebateTask_Get", commandType: CommandType.StoredProcedure);
+            return _reportDbClient.Query<RebateTask>("Service_VipRebateTask_Get_V2");
         }
-        public int PayoutVipRebate(int siteId, int custId, string userName, VipRebateInfo rebateInfo, IEnumerable<VipRebateTpBetRecord> rebateTpBetRecords, out decimal payAmount, out Dictionary<int, decimal> rebateLogList, out Dictionary<int, decimal> rebateCLogList, IEnumerable<RebatePayoutLimit> rebatePayoutLimits)
+        public int PayoutVipRebate(int siteId,VipRebateInfo rebateInfo, IEnumerable<VipRebateTpBetRecord> rebateTpBetRecords, out decimal payAmount, out Dictionary<int, decimal> rebateLogList, out Dictionary<int, decimal> rebateCLogList, IEnumerable<RebatePayoutLimit> rebatePayoutLimits)
         {
             int result = 0;
             using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
             conn.Open();
             using var trans = conn.BeginTransaction();
             payAmount = 0m;
-            int promotionType = 0;
+            var promotionType = PromotionType.Rebate;
             rebateLogList = new Dictionary<int, decimal>();
             rebateCLogList = new Dictionary<int, decimal>();
-            
 
             long tc = DateTime.Now.Ticks;
 
@@ -57,11 +80,10 @@ namespace BonusService.Service.DAL
                 var sum = rr.ValidBet;
                 if (sum != 0)
                 {
-                    promotionType = 6;
-                    var rebateRecord = GetRebateRecord(custId, int.Parse(rr.SettledDate.ToString("yyyyMMdd")), rr.GameType, promotionType, conn, trans);
+                    var rebateRecord = GetRebateRecord(rebateInfo.CustId, int.Parse(rr.SettledDate.ToString("yyyyMMdd")), rr.GameType, (int)promotionType, conn, trans);
                     if (rebateRecord == null)
                     {
-                        SetRebateRecord(custId, int.Parse(rr.SettledDate.ToString("yyyyMMdd")), rr.GameType, rr.Percentage, sum, promotionType, tc, conn, trans);
+                        SetRebateRecord(rebateInfo.CustId, int.Parse(rr.SettledDate.ToString("yyyyMMdd")), rr.GameType, rr.Percentage, sum, (int)promotionType, tc, conn, trans);
                         var amount = sum;
                         amount = common.Floor(amount, 2);
 
@@ -109,26 +131,22 @@ namespace BonusService.Service.DAL
 
             if (payAmount > 0)
             {
-                result = walletService.SetBalance(custId, siteId, userName, payAmount, 17 - promotionType, $"{(promotionType == 6 ? "Rebate" : "Cashback")}: {payAmount:#,##0.##}", "", out _, out _, conn, trans);
+                result = walletService.SetBalance(rebateInfo.CustId, siteId, rebateInfo.UserName, payAmount, 17 - (int)promotionType, $"Rebate: {payAmount:#,##0.##}", "", out _, out _, conn, trans);
 
                 if (result > 0)
                 {
-                    conn.Execute("Common_RebateMLog_Ins", new { CustId = custId, CurrencyId = rebateInfo.CurrencyId, RebateType = promotionType - 5, UserName = userName, SiteId = siteId, RedeemAmount = payAmount, Memo = "", BonusCode = "VipRebate", RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
-                    int rebateSetting1_RollOver = 0;
-                    var rollOver = rebateSetting1_RollOver * payAmount;
-                    if (rollOver > 0)
-                        result = withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, rollOver, $"{(promotionType == 6 ? "Rebate" : "Cashback")}: {rollOver:#,##0.##}", "", out _, conn, trans);
+                    conn.Execute("Common_RebateMLog_Ins", new { CustId = rebateInfo.CustId, CurrencyId = rebateInfo.CurrencyId, RebateType = RebateType.VipRebate, UserName = rebateInfo.UserName, SiteId = siteId, RedeemAmount = payAmount, Memo = "", BonusCode = "VipRebate", RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
 
                     if (result > 0)
                     {
                         foreach (var rebateLog in rebateLogList)
                         {
-                            conn.Execute("Common_RebateLog_Ins", new { CustId = custId, CurrencyId = rebateInfo.CurrencyId, GameType = rebateLog.Key, RebateType = promotionType - 5, UserName = userName, SiteId = siteId, RedeemAmount = rebateLog.Value, Memo = "", BonusCode = "VipRebate", RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
+                            conn.Execute("Common_RebateLog_Ins", new { CustId = rebateInfo.CustId, CurrencyId = rebateInfo.CurrencyId, GameType = rebateLog.Key, RebateType = RebateType.VipRebate, UserName = rebateInfo.UserName, SiteId = siteId, RedeemAmount = rebateLog.Value, Memo = "", BonusCode = "VipRebate", RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
                         }
 
                         foreach (var rebateLog in rebateCLogList)
                         {
-                            conn.Execute("Common_RebateCLog_Ins", new { CustId = custId, CurrencyId = rebateInfo.CurrencyId, CategoryId = rebateLog.Key, RebateType = promotionType - 5, UserName = userName, SiteId = siteId, RedeemAmount = rebateLog.Value, Memo = "", RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
+                            conn.Execute("Common_RebateCLog_Ins", new { CustId = rebateInfo.CustId, CurrencyId = rebateInfo.CurrencyId, CategoryId = rebateLog.Key, RebateType = RebateType.VipRebate, UserName = rebateInfo.UserName, SiteId = siteId, RedeemAmount = rebateLog.Value, Memo = "", RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
                         }
 
                         trans.Commit();
@@ -148,13 +166,12 @@ namespace BonusService.Service.DAL
         }
         public IEnumerable<RebatePayoutLimit> GetRebatePayoutLimit()
         {
-            using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
-            return conn.Query<RebatePayoutLimit>("Service_RebatePayoutLimit_Get", commandType: CommandType.StoredProcedure);
+            return _reportDbClient.Query<RebatePayoutLimit>("Service_RebatePayoutLimit_Get");
         }
-        public int SetVipRebateTaskDone(int siteId)
+        public int SetVipRebateTaskDone(int siteId, int currencyId)
         {
             using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
-            return conn.Execute("Service_VipRebateTaskDone_Set", new { SiteId = siteId }, commandType: CommandType.StoredProcedure);
+            return conn.Execute("Service_VipRebateTaskDone_Set_V2", new { _SiteId = siteId, _Currency = currencyId }, commandType: CommandType.StoredProcedure);
         }
     }
 }
