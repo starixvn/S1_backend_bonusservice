@@ -4,6 +4,7 @@ pipeline {
         env = 'Development'
         registry = '13.213.82.69:8082'
         proj = 'bonusservice'
+        ansible_path = '/var/jenkins_home/ansible/backend'
     }
     stages {
         stage('Build') {
@@ -20,7 +21,7 @@ pipeline {
         stage('Deploy') {
             agent { node { label 'master' } }
             steps {
-                sh 'ansible-playbook -i DEV.AWS.yml deploy.docker.yml --extra-vars "host=linux-dev docker_name=dev_bonusservice ver=${proj}:${version} env=${env} docker_ports=50997:50997 volume=/logs/bonus:/bonus"'
+                sh 'ansible-playbook -i ${ansible_path}/DEV.AWS.yml ${ansible_path}/deploy.docker.yml --extra-vars "host=linux-dev docker_name=dev_bonusservice ver=${proj}:${version} env=${env} docker_ports=50997:50997 volume=/logs/bonus:/bonus"'
             }
         }
     }
