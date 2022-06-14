@@ -4,7 +4,7 @@ pipeline {
         env = 'Development'
         registry = '13.213.82.69:8082'
         proj = 'bonusservice'
-        ansible_path = '/var/jenkins_home/ansible/backend'
+        ansible_path = '/var/jenkins_home/ansible/bonus'
     }
     stages {
         stage('Build') {
