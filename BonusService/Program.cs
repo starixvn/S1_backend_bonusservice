@@ -94,23 +94,28 @@ namespace BonusService
                     services.AddSingleton<BonusAPIBLL>();
                     services.AddSingleton<BonusAPIService>();
                     services.AddSingleton<BonusWalletService>();
-                    services.AddSingleton<BonusAPIServiceV2>();
-                    services.AddSingleton<BonusAPIBLLV2>();
-                    
+                    services.AddSingleton<PromotionService>();
+                    services.AddSingleton<PromotionBll>();
 
-                    services.AddHostedService<ExpiredBonusWorker>();
-                    services.AddHostedService<ReferralWorker>();
-                    services.AddHostedService<VipUpgradeWorker>();
-                    services.AddHostedService<VipRebateWorker>();
-                    services.AddHostedService<VipCashBackWorker>();
-                    services.AddHostedService<PromotionAutoExtendWorker>();
-                    services.AddHostedService<DepositBonusWorker>();
-                    services.AddHostedService<RewardWorker>();
 
-                    if (hostContext.Configuration.GetSection("RunVipDowngradeWorker").Get<bool>())
+                    var serviceType = Environment.GetEnvironmentVariable("ServiceType");
+                    if (!string.IsNullOrEmpty(serviceType) && serviceType.Equals("worker", StringComparison.OrdinalIgnoreCase))
                     {
-                        services.AddHostedService<VipDowngradeWorker>();
+                        services.AddHostedService<ExpiredBonusWorker>();
+                        services.AddHostedService<ReferralWorker>();
+                        services.AddHostedService<VipUpgradeWorker>();
+                        services.AddHostedService<VipRebateWorker>();
+                        services.AddHostedService<VipCashBackWorker>();
+                        services.AddHostedService<PromotionAutoExtendWorker>();
+                        services.AddHostedService<DepositBonusWorker>();
+                        services.AddHostedService<RewardWorker>();
+
+                        if (hostContext.Configuration.GetSection("RunVipDowngradeWorker").Get<bool>())
+                        {
+                            services.AddHostedService<VipDowngradeWorker>();
+                        }
                     }
+
                     services.AddControllers();
                     
                     services.AddOptionListByDB<AllowIp>("Service_MemberAllowIP_Get");

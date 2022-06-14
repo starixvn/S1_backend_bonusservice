@@ -32,7 +32,7 @@ namespace BonusService.Service.DAL
                 cashBackSettingInput.SiteId,
                 cashBackSettingInput.SettleTime
             });
-            return _mainDbClient.Execute("Service_CashBackSetting_Set", parameter);
+            return _mainDbClient.Execute("Service_CashBackSetting_Set", parameter) >= 0;
         }
         
         public IEnumerable<CashBackPromotionOutput> GetVipCashBackPromotion(CashBackPromotionInput cashBackPromotionInput)
@@ -64,7 +64,7 @@ namespace BonusService.Service.DAL
             parameter.Add("Percentage", promotionCashBackSettingInputInsert.Percentage);
             parameter.Add("Status", promotionCashBackSettingInputInsert.Status);
             parameter.Add("LastUpdateUser", promotionCashBackSettingInputInsert.LastUpdateUser);
-            return _mainDbClient.Execute("Service_PromotionCashBackSetting_Ins", parameter);
+            return _mainDbClient.Execute("Service_PromotionCashBackSetting_Ins", parameter) >= 0;
         }
 
         public IEnumerable<PromotionCashBackSettingOutput> GetPromotionCashBackSetting(PromotionCashBackSettingInput promotionCashBackSettingInput)
@@ -113,7 +113,7 @@ namespace BonusService.Service.DAL
             parameter.Add("Percentage", cashBackInfoInput.Percentage);
             parameter.Add("WinlostAmount", cashBackInfoInput.WinlostAmount);
             parameter.Add("BonusAmount", cashBackInfoInput.BonusAmount);
-            return _mainDbClient.Execute("Service_CashBackInfo_Ins", parameter);
+            return _mainDbClient.Execute("Service_CashBackInfo_Ins", parameter) >= 0;
         }
 
         public bool SetCustCashBack(CustCashBackInput custCashBackInput)
@@ -127,7 +127,7 @@ namespace BonusService.Service.DAL
                 custCashBackInput.CalculateDate,
                 custCashBackInput.BonusAmount
             });
-            return _mainDbClient.Execute("Service_CustCashBack_Set", parameter);
+            return _mainDbClient.Execute("Service_CustCashBack_Set", parameter) >= 0;
         }
     }
 }

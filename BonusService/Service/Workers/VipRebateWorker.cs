@@ -28,8 +28,8 @@ namespace BonusService.Service.Workers
         }
         private void DoWork(object state)
         {
-            bool isError = false;
-            int startTick = 0;
+            var isError = false;
+            var startTick = 0;
             try
             {
                 var rebateTaskList = rebateBLL.GetVipRebateTask();
@@ -71,7 +71,7 @@ namespace BonusService.Service.Workers
                     }
 
                     rebateBLL.SetVipRebateTaskDone(rebateTask.SiteId);
-                    int spendTime = Environment.TickCount - startTick;
+                    var spendTime = Environment.TickCount - startTick;
                         
                     _logger.LogInformation($"VipRebateTask SiteId:{rebateTask.SiteId} SpecificDate:{rebateTask.SpecificDate} finish time: {spendTime / 60000}:{(spendTime % 60000) / 1000}.{(spendTime % 60000) % 1000}");
                 }
@@ -83,7 +83,7 @@ namespace BonusService.Service.Workers
             }
             finally
             {
-                TimeSpan dueTimeSpan = TimeSpan.FromMinutes(60);
+                var dueTimeSpan = TimeSpan.FromMinutes(60);
                 //  if (environment.IsDevelopment())
                 //  {
                 //      dueTimeSpan = TimeSpan.FromMinutes(1);
