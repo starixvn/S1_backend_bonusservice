@@ -443,7 +443,7 @@ namespace BonusService.Service.BLL
 
         public CustPromotion GetPromotionDetail(PromotionDetailRequest request)
         {
-            var promo = _promotionService.GetPromotion<CustPromotion>(request.CustId, request.CurrencyId, request.SiteId, request.BonusCode, request.DeviceType);
+            var promo = _promotionService.GetPromotion<CustPromotion>(request.CustId, request.CurrencyId, request.SiteId, request.BonusCode, request.DeviceType, true);
 
             if (promo != null)
             {
