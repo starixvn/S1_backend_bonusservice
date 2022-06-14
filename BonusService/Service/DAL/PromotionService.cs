@@ -188,7 +188,7 @@ namespace BonusService.Service.DAL
         }
         public int Reward(BonusRewardInput bonusRewardInput, MySqlTransaction trans)
         {
-            var result = (int)BonusErrorCode.UNKNOWERROR;
+            int result;
             switch (bonusRewardInput.PromotionType)
             {
                 case PromotionType.FstDeposit:
@@ -211,6 +211,7 @@ namespace BonusService.Service.DAL
                         : 0;
                     break;
 
+                case PromotionType.Special:
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -492,13 +493,13 @@ namespace BonusService.Service.DAL
 
             if (custConditionInfo.CanJoin == 1)
             {
-                var CalculateBonus = this.CalculateBonus(claimPromotion, custConditionInfo.Amount, lockedAmount, custId, siteId, currencyId);
-                if (CalculateBonus.result <= 0)
-                    return CalculateBonus.result;
+                var calculateBonus = CalculateBonus(claimPromotion, custConditionInfo.Amount, lockedAmount, custId, siteId, currencyId);
+                if (calculateBonus.result <= 0)
+                    return calculateBonus.result;
 
-                bonusAmount = CalculateBonus.BonusAmount;
-                rollOver = CalculateBonus.RollOver;
-                expiryTime = CalculateBonus.ExpiryTime;
+                bonusAmount = calculateBonus.BonusAmount;
+                rollOver = calculateBonus.RollOver;
+                expiryTime = calculateBonus.ExpiryTime;
                 
                 if (atPage == BonusInfoAtPage.Deposit) //由Deposit頁面進來的 reference紀錄指定TransId、Amount
                 {
@@ -516,17 +517,16 @@ namespace BonusService.Service.DAL
                     };
                 }
 
-                var result = (int)BonusErrorCode.UNKNOWERROR;
                 var bonusRewardInput = new BonusRewardInput
                 {
                     PromotionType = claimPromotion.PromotionType,
                     BonusCode = bonusCode,
                     CategoryId = claimPromotion.CategoryId,
                     TpId = claimPromotion.TpId,
-                    BonusInfo = CalculateBonus.BonusInfo,
-                    BonusAmount = CalculateBonus.BonusAmount,
-                    LockedAmount = CalculateBonus.LockedAmount,
-                    RollOver = CalculateBonus.RollOver,
+                    BonusInfo = calculateBonus.BonusInfo,
+                    BonusAmount = calculateBonus.BonusAmount,
+                    LockedAmount = calculateBonus.LockedAmount,
+                    RollOver = calculateBonus.RollOver,
                     FullFillType = claimPromotion.FullFillType,
                     ExpiryTime = expiryTime,
                     ExpiryDays = claimPromotion.ExpiryDays,
@@ -537,12 +537,12 @@ namespace BonusService.Service.DAL
                     Memo = null,
                     Prefix = $"B{_common.GetEnv()}",
                     RefList = custConditionInfo.reference.Any() ? JsonConvert.SerializeObject(custConditionInfo.reference) : null,
-                    SetBalanceMemo = $"Claim {Enum.GetName(typeof(PromotionType), claimPromotion.PromotionType)} BonusCode: {bonusCode}, Locked Amount: {CalculateBonus.LockedAmount:#,##0.##}",
+                    SetBalanceMemo = $"Claim {Enum.GetName(typeof(PromotionType), claimPromotion.PromotionType)} BonusCode: {bonusCode}, Locked Amount: {calculateBonus.LockedAmount:#,##0.##}",
                     RewardBonusMemo = $"Claim {Enum.GetName(typeof(PromotionType), claimPromotion.PromotionType)} BonusCode: {bonusCode}",
                     FinancialType = FinancialType.Bonusreward,
                     AtPage = atPage
                 };
-                result = Reward(bonusRewardInput, trans);
+                var result = Reward(bonusRewardInput, trans);
 
                 if (result > 0)
                 {
@@ -655,7 +655,7 @@ namespace BonusService.Service.DAL
             }
 
 
-            var CalculateBonus = this.CalculateAdjustmentBonus(claimPromotion, amount, lockedAmount, depositBonus.CustId, depositBonus.SiteId, depositBonus.CurrencyId);
+            var CalculateBonus = CalculateAdjustmentBonus(claimPromotion, amount, lockedAmount, depositBonus.CustId, depositBonus.SiteId, depositBonus.CurrencyId);
             if (CalculateBonus.result <= 0)
                 return CalculateBonus.result;
 
@@ -663,7 +663,6 @@ namespace BonusService.Service.DAL
             rollOver = CalculateBonus.RollOver;
             expiryTime = CalculateBonus.ExpiryTime;
 
-            var result = (int)BonusErrorCode.UNKNOWERROR;
             var bonusRewardInput = new BonusRewardInput
             {
                 PromotionType = claimPromotion.PromotionType,
@@ -689,7 +688,7 @@ namespace BonusService.Service.DAL
                 FinancialType = FinancialType.Bonusreward,
                 AtPage = BonusInfoAtPage.Promotion
             };
-            result = Reward(bonusRewardInput, trans);
+            var result = Reward(bonusRewardInput, trans);
 
             if (result > 0)
             {
