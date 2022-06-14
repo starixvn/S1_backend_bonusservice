@@ -21,7 +21,6 @@ namespace BonusService.Service.DAL
     {
         private readonly MySqlClient _mainDbClient;
         private readonly MySqlClient _reportDbClient;
-        private readonly DepositBonusService _depositBonusService;
         private readonly Common _common;
         private readonly WalletService _walletService;
         private readonly WithdrawalLimitService _withdrawalLimitService;
@@ -34,29 +33,28 @@ namespace BonusService.Service.DAL
 
         public PromotionService(IServiceProvider serviceProvider)
         {
-            var configuration = serviceProvider.GetRequiredService<IConfiguration>();
             _common = serviceProvider.GetRequiredService<Common>();
             _walletService = serviceProvider.GetRequiredService<WalletService>();
             _withdrawalLimitService = serviceProvider.GetRequiredService<WithdrawalLimitService>();
             _mainDbClient = serviceProvider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);
             _reportDbClient = serviceProvider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Report);
-            _depositBonusService = serviceProvider.GetRequiredService<DepositBonusService>();
             _bonusWalletService = serviceProvider.GetRequiredService<BonusWalletService>();
             _selLangBll = serviceProvider.GetRequiredService<SelLangBLL>();
             _custInfoService = serviceProvider.GetRequiredService<CustInfoService>();
-            _apiUrl = configuration.GetValue<string>("TpService");
+            _apiUrl = serviceProvider.GetRequiredService<IConfiguration>().GetValue<string>("TpService");
             _courierAdapter = serviceProvider.GetRequiredService<CourierAdapter>();
             _allowIp = serviceProvider.GetRequiredService<IEnumerable<AllowIp>>();
         }
-        public T GetPromotion<T>(int custId, int currencyId, int siteId, string bonusCode, int? deviceType)
+        public T GetPromotion<T>(int custId, int currencyId, int siteId, string bonusCode, int? deviceType, bool getDetail)
         {
-            return _reportDbClient.QueryFirst<T>("Member_PromotionV3_Get", new DynamicParameters(new
+            return _reportDbClient.QueryFirst<T>("Member_Promotion_Get_V4", new DynamicParameters(new
             {
                 CustId = custId,
                 CurrencyId = currencyId,
                 SiteId = siteId,
                 BonusCode = bonusCode,
-                DeviceType = deviceType
+                DeviceType = deviceType,
+                GetDetail = getDetail
             }));
         }
 
@@ -221,12 +219,12 @@ namespace BonusService.Service.DAL
         {
             var output = new CalculateBonusOutput
             {
-                result = 1
+                result = (int)BonusErrorCode.SUCCESS
             };
 
-            decimal dBonus = 0;
-            var dLockedAmount = amount;
-            decimal dRollOver = 0;
+            decimal bonusAmount;
+            var lockAmount = amount;
+            decimal rollover;
 
             switch (claimPromotion.PromotionType)
             {
@@ -243,7 +241,7 @@ namespace BonusService.Service.DAL
                                 output.result = (int)BonusErrorCode.CALCULATE_AMOUNT_IS_NEGATIVE;
                                 return output;
                             }
-                            dLockedAmount = amount;
+                            lockAmount = amount;
                         }
 
                         if (amount < claimPromotion.RequiredAmount)
@@ -259,20 +257,20 @@ namespace BonusService.Service.DAL
                                 throw new Exception("Required Amount can't be 0");
                             }
 
-                            dLockedAmount = claimPromotion.RequiredAmount;
-                            dBonus = claimPromotion.Bonus;
+                            lockAmount = claimPromotion.RequiredAmount;
+                            bonusAmount = claimPromotion.Bonus;
                         }
                         else
                         {
-                            dBonus = Math.Ceiling(claimPromotion.Bonus * amount / 100);
-                            if (claimPromotion.MaxBonus != 0 && dBonus > claimPromotion.MaxBonus)
+                            bonusAmount = Math.Ceiling(claimPromotion.Bonus * amount / 100);
+                            if (claimPromotion.MaxBonus != 0 && bonusAmount > claimPromotion.MaxBonus)
                             {
-                                dBonus = claimPromotion.MaxBonus;
-                                dLockedAmount = claimPromotion.MaxBonus * 100 / claimPromotion.Bonus;
+                                bonusAmount = claimPromotion.MaxBonus;
+                                lockAmount = claimPromotion.MaxBonus * 100 / claimPromotion.Bonus;
                             }
                         }
 
-                        dRollOver = (dLockedAmount + dBonus) * (claimPromotion.FullFillType == 1 ? claimPromotion.RollOver : claimPromotion.WinOver);
+                        rollover = (lockAmount + bonusAmount) * (claimPromotion.FullFillType == 1 ? claimPromotion.RollOver : claimPromotion.WinOver);
                         break;
                     }
 
@@ -289,21 +287,21 @@ namespace BonusService.Service.DAL
                         return output;
                     }
 
-                    dBonus = custPromotion.CashBackDetails?.TotalBonus ?? 0;
-                    if (claimPromotion.MaxBonus != 0 && dBonus > claimPromotion.MaxBonus)
+                    bonusAmount = custPromotion.CashBackDetails?.TotalBonus ?? 0;
+                    if (claimPromotion.MaxBonus != 0 && bonusAmount > claimPromotion.MaxBonus)
                     {
-                        dBonus = claimPromotion.MaxBonus;
+                        bonusAmount = claimPromotion.MaxBonus;
                     }
 
-                    dRollOver = ((dLockedAmount + dBonus) * claimPromotion.RollOver);
-                    dLockedAmount = 0;
+                    rollover = ((lockAmount + bonusAmount) * claimPromotion.RollOver);
+                    lockAmount = 0;
                     break;
 
                 case PromotionType.FreeBet:
-                    dBonus = claimPromotion.Bonus;
-                    dRollOver = dBonus * claimPromotion.RollOver;
+                    bonusAmount = claimPromotion.Bonus;
+                    rollover = bonusAmount * claimPromotion.RollOver;
 
-                    dLockedAmount = 0;
+                    lockAmount = 0;
                     break;
 
                 case PromotionType.WalletBonus when claimPromotion.RequiredAmount == 0:
@@ -322,37 +320,47 @@ namespace BonusService.Service.DAL
 
                         if (claimPromotion.BonusType == BonusType.Amount)
                         {
-                            dBonus = claimPromotion.Bonus;
-                            dLockedAmount = claimPromotion.RequiredAmount;
+                            bonusAmount = claimPromotion.Bonus;
+                            lockAmount = claimPromotion.RequiredAmount;
                         }
                         else
                         {
-                            dBonus = Math.Ceiling(claimPromotion.Bonus * amount / 100);
-                            if (claimPromotion.MaxBonus != 0 && dBonus > claimPromotion.MaxBonus)
+                            bonusAmount = Math.Ceiling(claimPromotion.Bonus * amount / 100);
+                            if (claimPromotion.MaxBonus != 0 && bonusAmount > claimPromotion.MaxBonus)
                             {
-                                dBonus = claimPromotion.MaxBonus;
-                                dLockedAmount = claimPromotion.MaxBonus * 100 / claimPromotion.Bonus;
+                                bonusAmount = claimPromotion.MaxBonus;
+                                lockAmount = claimPromotion.MaxBonus * 100 / claimPromotion.Bonus;
                             }
                         }
-                        dRollOver = ((dLockedAmount + dBonus) * claimPromotion.RollOver);
+                        rollover = ((lockAmount + bonusAmount) * claimPromotion.RollOver);
                         break;
                     }
 
                 case PromotionType.Rebate:
                     return output;
+                
+                case PromotionType.ManualBonus:
+                    bonusAmount = amount;
+                    lockAmount = 0;
+                    rollover = amount * claimPromotion.RollOver;
+                    break;
+                
+                case PromotionType.RetentionBonus:
+                    bonusAmount = claimPromotion.Bonus;
+                    lockAmount = 0;         
+                    rollover = bonusAmount * claimPromotion.RollOver;
+                    break;
 
                 default:
                     output.result = (int)BonusErrorCode.CALCULATE_UNKNOW_PROMOTION_TYPE;
                     return output;
             }
-            claimPromotion.Details = "";
             output.BonusInfo = JsonConvert.SerializeObject(claimPromotion,
                             new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
             output.ExpiryTime = DateTimeOffset.Now.AddDays(claimPromotion.ExpiryDays).ToUnixTimeSeconds();
-            output.BonusAmount = dBonus;
-            output.LockedAmount = dLockedAmount;
-            output.RollOver = dRollOver;
-
+            output.BonusAmount = bonusAmount;
+            output.LockedAmount = lockAmount;
+            output.RollOver = rollover;
             return output;
         }
         public int AfterReward(ClaimPromotion claimPromotion, int custId, int siteId, string bonusCode, int currencyId, string custIP, BonusInfoAtPage atPage, MySqlConnection conn, MySqlTransaction trans)
@@ -475,11 +483,7 @@ namespace BonusService.Service.DAL
             rollOver = 0;
             expiryTime = 0;
 
-            using var conn = _mainDbClient.GetMySqlConnection();
-            conn.Open();
-            using var trans = conn.BeginTransaction();
-
-            claimPromotion = GetPromotion<ClaimPromotion>(custId, currencyId, siteId, bonusCode, deviceType);
+            claimPromotion = GetPromotion<ClaimPromotion>(custId, currencyId, siteId, bonusCode, deviceType, false);
 
             if (claimPromotion == null)
                 return (int)BonusErrorCode.PROMOTION_NOT_FOUND;
@@ -493,6 +497,10 @@ namespace BonusService.Service.DAL
 
             if (custConditionInfo.CanJoin == 1)
             {
+                using var conn = _mainDbClient.GetMySqlConnection();
+                conn.Open();
+                using var trans = conn.BeginTransaction();
+                
                 var calculateBonus = CalculateBonus(claimPromotion, custConditionInfo.Amount, lockedAmount, custId, siteId, currencyId);
                 if (calculateBonus.result <= 0)
                     return calculateBonus.result;
@@ -567,80 +575,30 @@ namespace BonusService.Service.DAL
             return _mainDbClient.Query<CustRunningBonus>("Service_CustRunningBonus_Get", new DynamicParameters(new { CustId = custId }));
 
         }
-        public CalculateBonusOutput CalculateAdjustmentBonus(ClaimPromotion claimPromotion, decimal amount, decimal lockedAmount, int custId, int siteId, int currencyId)
-        {
-            var output = new CalculateBonusOutput
-            {
-                result = (int)BonusErrorCode.UNKNOWERROR
-            };
-
-            decimal dBonus = 0;
-            var dLockedAmount = 0;
-            decimal dRollOver = 0;
-
-            switch (claimPromotion.PromotionType)
-            {
-                case PromotionType.RetentionBonus:
-                    {
-                        dBonus = claimPromotion.Bonus;
-                        dRollOver = dBonus * claimPromotion.RollOver;
-                        output.result = (int)BonusErrorCode.SUCCESS;
-                    }
-                    break;
-                case PromotionType.ManualBonus:
-                    {
-                        dBonus = amount;
-                        dRollOver = amount * claimPromotion.RollOver;
-                        output.result = (int)BonusErrorCode.SUCCESS;
-                    }
-                    break;
-                default:
-                    output.result = (int)BonusErrorCode.CALCULATE_UNKNOW_PROMOTION_TYPE;
-                    return output;
-            }
-
-            claimPromotion.Details = "";
-            output.BonusInfo = JsonConvert.SerializeObject(claimPromotion,
-                            new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
-            output.ExpiryTime = DateTimeOffset.Now.AddDays(claimPromotion.ExpiryDays).ToUnixTimeSeconds();
-            output.BonusAmount = dBonus;
-            output.LockedAmount = dLockedAmount;
-            output.RollOver = dRollOver;
-
-            return output;
-        }
+        
         public int SetAdjustmentBonusV2(DepositBonus depositBonus, decimal amount, int promotionType, string memo, out decimal bonusAmount, ref decimal lockedAmount, out decimal rollOver, out long expiryTime, out ClaimPromotion claimPromotion)
         {
             bonusAmount = 0;
             rollOver = 0;
             expiryTime = 0;
-            using var conn = _mainDbClient.GetMySqlConnection();
-            conn.Open();
-            using var trans = conn.BeginTransaction();
-            var parameter = new DynamicParameters(new
-            {
-                depositBonus.CustId,
-                depositBonus.CurrencyId,
-                depositBonus.SiteId,
-                depositBonus.BonusCode,
-                depositBonus.DeviceType
-            });
 
-            claimPromotion = _depositBonusService.GetMemberPromotion(parameter);
+            claimPromotion = GetPromotion<ClaimPromotion>(depositBonus.CustId, depositBonus.CurrencyId, depositBonus.SiteId, depositBonus.BonusCode, depositBonus.DeviceType, false);
 
             if (claimPromotion == null)
             {
                 return (int)BonusErrorCode.PROMOTION_NOT_FOUND;
             }
-            else if (claimPromotion.PromotionType != (PromotionType)promotionType)
+
+            if (claimPromotion.PromotionType != (PromotionType)promotionType)
             {
                 return (int)BonusErrorCode.ADJUSTMENT_BONUS_PROMOTIONTYPE_NOT_MATCH;
             }
+            
             if (claimPromotion.PromotionType == PromotionType.ManualBonus )
             {
                 if (claimPromotion.PromotionAction != 1)
                     return (int)BonusErrorCode.ADJUSTMENT_BONUS_PROMOTION_NOT_ACTIVE;
-                else if(amount > claimPromotion.MaxBonus)
+                if(amount > claimPromotion.MaxBonus)
                     return (int)BonusErrorCode.ADJUSTMENT_BONUS_PROMOTION_AMOUNT_OVER_MAXBONUS;
             }
 
@@ -654,14 +612,17 @@ namespace BonusService.Service.DAL
                 return (int)BonusErrorCode.ADJUSTMENT_BONUS_CUSTOMER_HAS_RUNNING_BONUS;
             }
 
+            using var conn = _mainDbClient.GetMySqlConnection();
+            conn.Open();
+            using var trans = conn.BeginTransaction();
+            
+            var calculateBonus = CalculateBonus(claimPromotion, amount, lockedAmount, depositBonus.CustId, depositBonus.SiteId, depositBonus.CurrencyId);
+            if (calculateBonus.result <= 0)
+                return calculateBonus.result;
 
-            var CalculateBonus = CalculateAdjustmentBonus(claimPromotion, amount, lockedAmount, depositBonus.CustId, depositBonus.SiteId, depositBonus.CurrencyId);
-            if (CalculateBonus.result <= 0)
-                return CalculateBonus.result;
-
-            bonusAmount = CalculateBonus.BonusAmount;
-            rollOver = CalculateBonus.RollOver;
-            expiryTime = CalculateBonus.ExpiryTime;
+            bonusAmount = calculateBonus.BonusAmount;
+            rollOver = calculateBonus.RollOver;
+            expiryTime = calculateBonus.ExpiryTime;
 
             var bonusRewardInput = new BonusRewardInput
             {
@@ -669,10 +630,10 @@ namespace BonusService.Service.DAL
                 BonusCode = depositBonus.BonusCode,
                 CategoryId = claimPromotion.CategoryId,
                 TpId = claimPromotion.TpId,
-                BonusInfo = CalculateBonus.BonusInfo,
-                BonusAmount = CalculateBonus.BonusAmount,
-                LockedAmount = CalculateBonus.LockedAmount,
-                RollOver = CalculateBonus.RollOver,
+                BonusInfo = calculateBonus.BonusInfo,
+                BonusAmount = calculateBonus.BonusAmount,
+                LockedAmount = calculateBonus.LockedAmount,
+                RollOver = calculateBonus.RollOver,
                 FullFillType = claimPromotion.FullFillType,
                 ExpiryTime = expiryTime,
                 ExpiryDays = claimPromotion.ExpiryDays,
@@ -683,7 +644,7 @@ namespace BonusService.Service.DAL
                 Memo = memo,
                 Prefix = $"B{_common.GetEnv()}",
                 RefList =  null,
-                SetBalanceMemo = $"Claim {Enum.GetName(typeof(PromotionType), claimPromotion.PromotionType)} BonusCode: {depositBonus.BonusCode}, Locked Amount: {CalculateBonus.LockedAmount:#,##0.##}",
+                SetBalanceMemo = $"Claim {Enum.GetName(typeof(PromotionType), claimPromotion.PromotionType)} BonusCode: {depositBonus.BonusCode}, Locked Amount: {calculateBonus.LockedAmount:#,##0.##}",
                 RewardBonusMemo = $"Claim {Enum.GetName(typeof(PromotionType), claimPromotion.PromotionType)} BonusCode: {depositBonus.BonusCode}",
                 FinancialType = FinancialType.Bonusreward,
                 AtPage = BonusInfoAtPage.Promotion
