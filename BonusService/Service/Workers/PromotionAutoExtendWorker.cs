@@ -35,10 +35,10 @@ namespace BonusService.Service.Workers
             var nCount = 0;
             try
             {
-                if (GetUTC8Time().Date != this.ExecutTime.Date)
+                if (GetUTC8Time().Date != ExecutTime.Date)
                 {
                     nCount = 0;
-                    var data = promotionAutoExtendBLL.GetAutoExtendPromotionExpiredList(this.SpecificDate);
+                    var data = promotionAutoExtendBLL.GetAutoExtendPromotionExpiredList(SpecificDate);
                     nCount = data.Count();
                     if (data.Any())
                     {
@@ -68,8 +68,8 @@ namespace BonusService.Service.Workers
 
                     }
                    
-                    this.ExecutTime = GetUTC8Time();
-                    Console.WriteLine($"Promotion Auto Extend finish in {this.ExecutTime} nCount = {nCount}");
+                    ExecutTime = GetUTC8Time();
+                    Console.WriteLine($"Promotion Auto Extend finish in {ExecutTime} nCount = {nCount}");
                 }
             }
             catch (Exception ex)

@@ -21,7 +21,7 @@ namespace BonusService.Service.Workers
         {
             this.logger = logger;
             this.depositBonusBLL = depositBonusBLL;
-            this._promotionBll = promotionBll;
+            _promotionBll = promotionBll;
         }
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {

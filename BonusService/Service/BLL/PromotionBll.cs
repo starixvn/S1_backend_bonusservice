@@ -236,7 +236,7 @@ namespace BonusService.Service.BLL
                     }
                     break;
             }
-            _logger.LogInformation($"CustId={input.CustInfo.CustId} BonusCode={input.InputBonusCode} apiResult={Newtonsoft.Json.JsonConvert.SerializeObject(apiResult1)}");
+            _logger.LogInformation($"CustId={input.CustInfo.CustId} BonusCode={input.InputBonusCode} apiResult={JsonConvert.SerializeObject(apiResult1)}");
             return apiResult1;
         }
         

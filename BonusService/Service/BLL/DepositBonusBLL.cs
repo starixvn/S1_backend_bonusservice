@@ -15,7 +15,7 @@ namespace BonusService.Service.BLL
         public DepositBonusBLL(DepositBonusService depositBonusService, PromotionService promotionService, ILogger<DepositBonusBLL> logger)
         {
             this.depositBonusService = depositBonusService;
-            this._promotionService = promotionService;
+            _promotionService = promotionService;
             _logger = logger;
         }
 
