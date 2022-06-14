@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using BonusService.Service.Model;
+using MySql.Data.MySqlClient;
 
 namespace BonusService.Controllers
 {
@@ -74,7 +75,7 @@ namespace BonusService.Controllers
             }
             if (result.ErrorCode != 0)
             {
-                _logger.LogError($"SetAdjustBonusAsync { Newtonsoft.Json.JsonConvert.SerializeObject(result)}");
+                _logger.LogError($"SetAdjustBonusAsync { JsonConvert.SerializeObject(result)}");
             }
             return result;
         }
@@ -250,9 +251,9 @@ namespace BonusService.Controllers
                     }
                 }
             }
-            catch (MySql.Data.MySqlClient.MySqlException mySqlEx)
+            catch (MySqlException mySqlEx)
             {
-                if (mySqlEx.Number == 1062)/*Duplicate for key 'PRIMARY'*/
+                if (mySqlEx.Number == (int)MySqlErrorCode.DuplicateKeyEntry)/*Duplicate for key 'PRIMARY'*/
                 {
                     result.ErrorCode = (int)SpecialCode.Success;
                 }
