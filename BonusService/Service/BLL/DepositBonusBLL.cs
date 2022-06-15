@@ -23,7 +23,7 @@ namespace BonusService.Service.BLL
         {
             return depositBonusService.GetDepositBonusQueueCustList();
         }
-        public IEnumerable<DepositBonus> GetDepositBonusQueueByCustId(int custId, bool useMainDb = false)
+        public IEnumerable<DepositBonus> GetDepositBonusQueueByCustId(int custId, bool useMainDb)
         {
                 return _promotionService.GetDepositBonusQueueByCustId(custId, useMainDb);
         }
@@ -67,7 +67,7 @@ namespace BonusService.Service.BLL
         }
         public int SetDepositBonusFinish(string transId, int custId)
         {
-            var BonusList = GetDepositBonusQueueByCustId(custId,true); //改變狀態用mainDb取得資料，避免資料不同步
+            var BonusList = GetDepositBonusQueueByCustId(custId, true); //改變狀態用mainDb取得資料，避免資料不同步
             foreach (var depositBonus in BonusList)
             {
                 if (depositBonus.TransId == transId)

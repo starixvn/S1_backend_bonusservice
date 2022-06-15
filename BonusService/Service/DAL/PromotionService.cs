@@ -74,19 +74,7 @@ namespace BonusService.Service.DAL
             }
             return false;
         }
-        public bool CheckProfileFinish(int custId, int siteId) //Profile Finish & Phone Verified
-        {
-            var custInfoProfile = _custInfoService.GetCustInfoProfile( custId, siteId);
-            if (!custInfoProfile.PhoneVerified
-                || string.IsNullOrEmpty(custInfoProfile.AccountName)
-                || string.IsNullOrEmpty(custInfoProfile.Birth_y)
-                || string.IsNullOrEmpty(custInfoProfile.Birth_m)
-                || string.IsNullOrEmpty(custInfoProfile.Birth_d))
-            {
-                return false;
-            }
-            return true;
-        }
+
         public CustCondition GetCustConditionInfo(int custId, int currencyId, int siteId, string bonusCode, int? deviceType)
         {
             var p = new DynamicParameters(new { CustId = custId, CurrencyId = currencyId, SiteId = siteId, BonusCode = bonusCode, DeviceType = deviceType });
@@ -363,21 +351,20 @@ namespace BonusService.Service.DAL
             output.RollOver = rollover;
             return output;
         }
-        public int AfterReward(ClaimPromotion claimPromotion, int custId, int siteId, string bonusCode, int currencyId, string custIP, BonusInfoAtPage atPage, MySqlConnection conn, MySqlTransaction trans)
+        public int AfterReward(ClaimPromotion claimPromotion, int siteId, string bonusCode, int currencyId, string custIp, MySqlTransaction trans)
         {
-            var result = _mainDbClient.Execute("Member_PromotionBeenUsedV2_Set",
-                       new DynamicParameters(new { SiteId = siteId, BonusCode = bonusCode, CurrencyId = currencyId }), conn, trans);
+            var result = _mainDbClient.Execute("Member_PromotionBeenUsedV2_Set", trans,
+                new { SiteId = siteId, BonusCode = bonusCode, CurrencyId = currencyId });
             if (result > 0)
             {
                 if ((claimPromotion.PromotionType == PromotionType.FreeBet || (claimPromotion.IsSpecial && claimPromotion.PromotionType == PromotionType.FstDeposit)) 
-                    && !string.IsNullOrEmpty(custIP)
-                    && !_allowIp.Any(item => item.Type == AllowIpType.Bonus && item.IP == custIP))
-                    _mainDbClient.Execute("Service_BlockFreeBet_Ins",
-                               new DynamicParameters(new { BonusCode = bonusCode, SiteId = siteId, IP = custIP }), conn, trans);
+                    && !string.IsNullOrEmpty(custIp)
+                    && !_allowIp.Any(item => item.Type == AllowIpType.Bonus && item.IP == custIp))
+                    _mainDbClient.Execute("Service_BlockFreeBet_Ins", trans, new { BonusCode = bonusCode, SiteId = siteId, IP = custIp });
             }
             return result;
         }
-        public IEnumerable<DepositBonus> GetDepositBonusQueueByCustId(int custId, bool useMainDb = false)
+        public IEnumerable<DepositBonus> GetDepositBonusQueueByCustId(int custId, bool useMainDb)
         {
             var p = new { CustId = custId };
             return useMainDb
@@ -477,92 +464,6 @@ namespace BonusService.Service.DAL
                 }));
         }
 
-        public int SetClaimPromotionV2(int custId, string userName, int siteId, string bonusCode, int currencyId, string custIP, int? deviceType, BonusInfoAtPage atPage, out decimal bonusAmount, ref decimal lockedAmount, out decimal rollOver, out long expiryTime, out ClaimPromotion claimPromotion, string depositTransId = null)
-        {
-            bonusAmount = 0;
-            rollOver = 0;
-            expiryTime = 0;
-
-            claimPromotion = GetPromotion<ClaimPromotion>(custId, currencyId, siteId, bonusCode, deviceType, false);
-
-            if (claimPromotion == null)
-                return (int)BonusErrorCode.PROMOTION_NOT_FOUND;
-
-            if (IsBlockIP(claimPromotion, bonusCode, siteId, custIP))
-                return (int)BonusErrorCode.IP_IS_BLOCKED;
-            if (!CheckProfileFinish(custId, siteId))//Profile Finish & Phone Verified
-                return (int)BonusErrorCode.PROFILE_OR_PHONE_NOT_FINISH;
-
-            var custConditionInfo = GetCustConditionInfo(custId, currencyId, siteId, bonusCode, deviceType);
-
-            if (custConditionInfo.CanJoin == 1)
-            {
-                using var conn = _mainDbClient.GetMySqlConnection();
-                conn.Open();
-                using var trans = conn.BeginTransaction();
-                
-                var calculateBonus = CalculateBonus(claimPromotion, custConditionInfo.Amount, lockedAmount, custId, siteId, currencyId);
-                if (calculateBonus.result <= 0)
-                    return calculateBonus.result;
-
-                bonusAmount = calculateBonus.BonusAmount;
-                rollOver = calculateBonus.RollOver;
-                expiryTime = calculateBonus.ExpiryTime;
-                
-                if (atPage == BonusInfoAtPage.Deposit) //由Deposit頁面進來的 reference紀錄指定TransId、Amount
-                {
-                    if (claimPromotion.PromotionType == PromotionType.FstDeposit && depositTransId != custConditionInfo.RefId)
-                    {
-                        return custConditionInfo.Result;
-                    }
-                    custConditionInfo.reference = new List<Ref>
-                    {
-                        new Ref
-                        {
-                            DepositId = depositTransId,
-                            Amount = lockedAmount
-                        }
-                    };
-                }
-
-                var bonusRewardInput = new BonusRewardInput
-                {
-                    PromotionType = claimPromotion.PromotionType,
-                    BonusCode = bonusCode,
-                    CategoryId = claimPromotion.CategoryId,
-                    TpId = claimPromotion.TpId,
-                    BonusInfo = calculateBonus.BonusInfo,
-                    BonusAmount = calculateBonus.BonusAmount,
-                    LockedAmount = calculateBonus.LockedAmount,
-                    RollOver = calculateBonus.RollOver,
-                    FullFillType = claimPromotion.FullFillType,
-                    ExpiryTime = expiryTime,
-                    ExpiryDays = claimPromotion.ExpiryDays,
-                    CustId = custId,
-                    UserName = userName,
-                    CurrencyId = currencyId,
-                    SiteId = siteId,
-                    Memo = null,
-                    Prefix = $"B{_common.GetEnv()}",
-                    RefList = custConditionInfo.reference.Any() ? JsonConvert.SerializeObject(custConditionInfo.reference) : null,
-                    SetBalanceMemo = $"Claim {Enum.GetName(typeof(PromotionType), claimPromotion.PromotionType)} BonusCode: {bonusCode}, Locked Amount: {calculateBonus.LockedAmount:#,##0.##}",
-                    RewardBonusMemo = $"Claim {Enum.GetName(typeof(PromotionType), claimPromotion.PromotionType)} BonusCode: {bonusCode}",
-                    FinancialType = FinancialType.Bonusreward,
-                    AtPage = atPage
-                };
-                var result = Reward(bonusRewardInput, trans);
-
-                if (result > 0)
-                {
-                    if (AfterReward(claimPromotion, custId, siteId, bonusCode, currencyId, custIP, atPage, conn, trans) > 0)
-                        trans.Commit();
-                }
-                return result;
-            }
-            
-            return custConditionInfo.Result;
-
-        }
         public async Task<ApiResult<TransferResult>> TransferTpBonus(TpBonusTransfer tpBonusTransfer)
         {
             var myUrl = $"{_apiUrl}BonusTransfer";
@@ -575,92 +476,7 @@ namespace BonusService.Service.DAL
             return _mainDbClient.Query<CustRunningBonus>("Service_CustRunningBonus_Get", new DynamicParameters(new { CustId = custId }));
 
         }
-        
-        public int SetAdjustmentBonusV2(DepositBonus depositBonus, decimal amount, int promotionType, string memo, out decimal bonusAmount, ref decimal lockedAmount, out decimal rollOver, out long expiryTime, out ClaimPromotion claimPromotion)
-        {
-            bonusAmount = 0;
-            rollOver = 0;
-            expiryTime = 0;
 
-            claimPromotion = GetPromotion<ClaimPromotion>(depositBonus.CustId, depositBonus.CurrencyId, depositBonus.SiteId, depositBonus.BonusCode, depositBonus.DeviceType, false);
-
-            if (claimPromotion == null)
-            {
-                return (int)BonusErrorCode.PROMOTION_NOT_FOUND;
-            }
-
-            if (claimPromotion.PromotionType != (PromotionType)promotionType)
-            {
-                return (int)BonusErrorCode.ADJUSTMENT_BONUS_PROMOTIONTYPE_NOT_MATCH;
-            }
-            
-            if (claimPromotion.PromotionType == PromotionType.ManualBonus )
-            {
-                if (claimPromotion.PromotionAction != 1)
-                    return (int)BonusErrorCode.ADJUSTMENT_BONUS_PROMOTION_NOT_ACTIVE;
-                if(amount > claimPromotion.MaxBonus)
-                    return (int)BonusErrorCode.ADJUSTMENT_BONUS_PROMOTION_AMOUNT_OVER_MAXBONUS;
-            }
-
-            if (!CheckProfileFinish(depositBonus.CustId, depositBonus.SiteId))//Profile Finish & Phone Verified
-                return (int)BonusErrorCode.PROFILE_OR_PHONE_NOT_FINISH;
-
-            var runningBonusList = GetCustRunningBonus(depositBonus.CustId)
-;
-            if (runningBonusList.Any())
-            {
-                return (int)BonusErrorCode.ADJUSTMENT_BONUS_CUSTOMER_HAS_RUNNING_BONUS;
-            }
-
-            using var conn = _mainDbClient.GetMySqlConnection();
-            conn.Open();
-            using var trans = conn.BeginTransaction();
-            
-            var calculateBonus = CalculateBonus(claimPromotion, amount, lockedAmount, depositBonus.CustId, depositBonus.SiteId, depositBonus.CurrencyId);
-            if (calculateBonus.result <= 0)
-                return calculateBonus.result;
-
-            bonusAmount = calculateBonus.BonusAmount;
-            rollOver = calculateBonus.RollOver;
-            expiryTime = calculateBonus.ExpiryTime;
-
-            var bonusRewardInput = new BonusRewardInput
-            {
-                PromotionType = claimPromotion.PromotionType,
-                BonusCode = depositBonus.BonusCode,
-                CategoryId = claimPromotion.CategoryId,
-                TpId = claimPromotion.TpId,
-                BonusInfo = calculateBonus.BonusInfo,
-                BonusAmount = calculateBonus.BonusAmount,
-                LockedAmount = calculateBonus.LockedAmount,
-                RollOver = calculateBonus.RollOver,
-                FullFillType = claimPromotion.FullFillType,
-                ExpiryTime = expiryTime,
-                ExpiryDays = claimPromotion.ExpiryDays,
-                CustId = depositBonus.CustId,
-                UserName = depositBonus.UserName,
-                CurrencyId = depositBonus.CurrencyId,
-                SiteId = depositBonus.SiteId,
-                Memo = memo,
-                Prefix = $"B{_common.GetEnv()}",
-                RefList =  null,
-                SetBalanceMemo = $"Claim {Enum.GetName(typeof(PromotionType), claimPromotion.PromotionType)} BonusCode: {depositBonus.BonusCode}, Locked Amount: {calculateBonus.LockedAmount:#,##0.##}",
-                RewardBonusMemo = $"Claim {Enum.GetName(typeof(PromotionType), claimPromotion.PromotionType)} BonusCode: {depositBonus.BonusCode}",
-                FinancialType = FinancialType.Bonusreward,
-                AtPage = BonusInfoAtPage.Promotion
-            };
-            var result = Reward(bonusRewardInput, trans);
-
-            if (result > 0)
-            {
-                if (AfterReward(claimPromotion, depositBonus.CustId, depositBonus.SiteId, depositBonus.BonusCode, depositBonus.CurrencyId, null, 0, conn, trans) > 0)
-                    trans.Commit();
-            }
-           
-            return result;
-
-        }
-        
         public IEnumerable<CustPromotion> GetPromotionList(CustPromotionRequest request)
         {
             return _reportDbClient.Query<CustPromotion>("Member_PromotionList_Get_V7",
