@@ -43,7 +43,7 @@ namespace BonusService.Service.Workers
                 var depositBonusQueueCustList = depositBonusBLL.GetDepositBonusQueueCustList();
                 foreach (var depositBonusQueue in depositBonusQueueCustList)
                 {
-                    var depositBonusList = depositBonusBLL.GetDepositBonusQueueByCustId(depositBonusQueue.CustId);
+                    var depositBonusList = depositBonusBLL.GetDepositBonusQueueByCustId(depositBonusQueue.CustId, false);
                     foreach (var depositBonus in depositBonusList)
                     {
                         

@@ -6,14 +6,18 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using BonusService.Service.Library;
 using Newtonsoft.Json;
 
 namespace BonusService.Service.BLL
 {
     public class PromotionBll
     {
+        private readonly MySqlClient _mainDbClient;
+        private readonly Common _common;
         private readonly CustInfoService _custInfoService;
         private readonly PromotionService _promotionService;
         private readonly SelLangBLL _selLangBll;
@@ -24,6 +28,8 @@ namespace BonusService.Service.BLL
 
         public PromotionBll(IServiceProvider provider)
         {
+            _mainDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);
+            _common = provider.GetRequiredService<Common>();
             _custInfoService = provider.GetRequiredService<CustInfoService>();
             _promotionService = provider.GetRequiredService<PromotionService>();
             _selLangBll = provider.GetRequiredService<SelLangBLL>();
@@ -255,171 +261,345 @@ namespace BonusService.Service.BLL
             if(input.atPage != BonusInfoAtPage.Deposit) 
                 CancelAllWaitingBonus(input.CustId);
         }
-        
+
         public async Task<ApiResult> SetClaimPromotionV2Async(int custId, string bonusCode, string custIp,
             decimal lockedAmount, int? deviceType, BonusInfoAtPage atPage, bool isMessageUserLang,
             string depositTransId = null)
         {
-            var apiResult1 = new ApiResult();
-
+            var apiResult = new ApiResult();
             bonusCode = bonusCode.Trim();
             var custInfo = _custInfoService.GetCustInfo(custId);
-            var result = _promotionService.SetClaimPromotionV2(custId, custInfo.UserName, custInfo.SiteId, bonusCode,
-                custInfo.CurrencyId, custIp, deviceType, atPage, out var bonusAmount, ref lockedAmount,
-                out var rollOver, out var expiryTime, out var promotion, depositTransId);
-
-            if (result > 0)
+            var errorInfo = new ErrorMessageMakerInput
             {
-                if (promotion?.TpId > 0)
-                {
-                    var tpBonusTransfer = new TpBonusTransfer
-                    {
-                        TpId = promotion.TpId,
-                        CustId = custId,
-                        Bonus = bonusAmount + lockedAmount,
-                        BonusAmount = bonusAmount,
-                        LockedAmount = lockedAmount,
-                        RolloverAmount = rollOver,
-                        ExpiryTime = expiryTime,
-                        inputs = new Dictionary<string, string>()
-                    };
-                    var apiResult = await _promotionService.TransferTpBonus(tpBonusTransfer);
-                    if (apiResult.ErrorCode != 0)
-                    {
-                        //ErrorCode:1205 TPService Pending
-                        apiResult1 = apiResult;
-                    }
-                    else
-                    {
-                        apiResult1.ErrorCode = 0;
-                    }
-                }
-                else
-                {
-                    apiResult1.ErrorCode = 0;
-                }
-
-                if (apiResult1.ErrorCode == 0 && promotion is { PromotionType: PromotionType.Cashback })
-                {
-                    var content = string.Format(
-                        _selLangBll.GetMsg("msg_ClaimCashBackBonus", custInfo.SiteId, custInfo.SiteName,
-                            custInfo.UserLang),
-                        bonusAmount.ToString("#,##0.##"));
-                    _messageService.SendMessage(custInfo.SiteId, "System", content, content, custInfo.CustId,
-                        custInfo.UserName, custInfo.UserLang);
-                }
-
-                if (apiResult1.ErrorCode == 0)
-                {
-                    var input = new AfterRewardSuccessInput
-                    {
-                        CustId = custId,
-                        atPage = atPage
-                    };
-                    AfterRewardSuccess(input);
-                }
-            }
-            else
-            {
-                var P = new ClaimPromotion { }; //for fix NullReferenceException
-                if (promotion != null)
-                    P = promotion;
-                var errorInfo = new ErrorMessageMakerInput
-                {
-                    Result = result,
-                    InputBonusCode = bonusCode,
-                    LockedAmount = lockedAmount,
-                    CustInfo = custInfo,
-                    ClaimPromotion = P
-                };
-
-                apiResult1 = MakeErrorMessage(errorInfo, isMessageUserLang);
-            }
-
-            return apiResult1;
-        }
-
-        public async Task<ApiResult> SetAdjustmentBonusV2Async(int custId, string bonusCode, string memo, decimal amount, int promotionType)
-        {
-            var apiResult1 = new ApiResult();
-            var lockedAmount = (decimal) 0;
-            bonusCode = bonusCode.Trim();
-            var custInfo = _custInfoService.GetCustInfo(custId);
-
-            var depositBonus = new DepositBonus
-            {
-                CustId = custId,
-                UserName = custInfo.UserName,
-                SiteId = custInfo.SiteId,
-                BonusCode = bonusCode,
-                CurrencyId = custInfo.CurrencyId,
-                DeviceType = 1
+                Result = (int)BonusErrorCode.PROMOTION_NOT_FOUND,
+                InputBonusCode = bonusCode,
+                LockedAmount = lockedAmount,
+                CustInfo = custInfo,
+                ClaimPromotion = new ClaimPromotion { }
             };
 
-            var result = _promotionService.SetAdjustmentBonusV2(depositBonus, amount, promotionType, memo, out var bonusAmount, ref lockedAmount, out var rollOver, out var expiryTime, out var promotion);
+            var claimPromotion = _promotionService.GetPromotion<ClaimPromotion>(custId, custInfo.CurrencyId,
+                custInfo.SiteId, bonusCode, deviceType, false);
+
+            var result = VerifyPromotion(custId, custInfo.SiteId, bonusCode, custIp, claimPromotion);
+            if (result != (int)BonusErrorCode.SUCCESS)
+            {
+                errorInfo.Result = result;
+                return MakeErrorMessage(errorInfo);
+            }
+
+            var custConditionInfo = _promotionService.GetCustConditionInfo(custId, custInfo.CurrencyId, custInfo.SiteId,
+                bonusCode, deviceType);
+
+            if (custConditionInfo.CanJoin != 1)
+            {
+                errorInfo.Result = custConditionInfo.Result;
+                return MakeErrorMessage(errorInfo);
+            }
+
+            await using var conn = _mainDbClient.GetMySqlConnection();
+            conn.Open();
+            await using var trans = await conn.BeginTransactionAsync();
+
+            var calculateBonus = _promotionService.CalculateBonus(claimPromotion, custConditionInfo.Amount,
+                lockedAmount, custId, custInfo.SiteId, custInfo.CurrencyId);
+            if (calculateBonus.result <= 0)
+            {
+                errorInfo.Result = calculateBonus.result;
+                return MakeErrorMessage(errorInfo);
+            }
+
+            if (atPage == BonusInfoAtPage.Deposit) //由Deposit頁面進來的 reference紀錄指定TransId、Amount
+            {
+                if (claimPromotion.PromotionType == PromotionType.FstDeposit &&
+                    depositTransId != custConditionInfo.RefId)
+                {
+                    errorInfo.Result = custConditionInfo.Result;
+                    return MakeErrorMessage(errorInfo);
+                }
+
+                custConditionInfo.reference = new List<Ref>
+                {
+                    new Ref
+                    {
+                        DepositId = depositTransId,
+                        Amount = lockedAmount
+                    }
+                };
+            }
+
+            var bonusRewardInput = new BonusRewardInput
+            {
+                PromotionType = claimPromotion.PromotionType,
+                BonusCode = bonusCode,
+                CategoryId = claimPromotion.CategoryId,
+                TpId = claimPromotion.TpId,
+                BonusInfo = calculateBonus.BonusInfo,
+                BonusAmount = calculateBonus.BonusAmount,
+                LockedAmount = calculateBonus.LockedAmount,
+                RollOver = calculateBonus.RollOver,
+                FullFillType = claimPromotion.FullFillType,
+                ExpiryTime = calculateBonus.ExpiryTime,
+                ExpiryDays = claimPromotion.ExpiryDays,
+                CustId = custId,
+                UserName = custInfo.UserName,
+                CurrencyId = custInfo.CurrencyId,
+                SiteId = custInfo.SiteId,
+                Memo = null,
+                Prefix = $"B{_common.GetEnv()}",
+                RefList = custConditionInfo.reference.Any() ? JsonConvert.SerializeObject(custConditionInfo.reference) : null,
+                SetBalanceMemo = $"Claim {Enum.GetName(typeof(PromotionType), claimPromotion.PromotionType)} BonusCode: {bonusCode}, Locked Amount: {calculateBonus.LockedAmount:#,##0.##}",
+                RewardBonusMemo = $"Claim {Enum.GetName(typeof(PromotionType), claimPromotion.PromotionType)} BonusCode: {bonusCode}",
+                FinancialType = FinancialType.Bonusreward,
+                AtPage = atPage
+            };
+            result = _promotionService.Reward(bonusRewardInput, trans);
+
             if (result > 0)
             {
-                if (promotion?.TpId > 0)
+                result = _promotionService.AfterReward(claimPromotion, custInfo.SiteId, bonusCode, custInfo.CurrencyId,
+                    custIp, trans);
+                if (result > 0)
+                    trans.Commit();
+            }
+
+            if (result > 0)
+            {
+                if (claimPromotion.TpId > 0)
                 {
                     var tpBonusTransfer = new TpBonusTransfer
                     {
-                        TpId = promotion.TpId,
+                        TpId = claimPromotion.TpId,
                         CustId = custId,
-                        Bonus = bonusAmount + lockedAmount,
-                        BonusAmount = bonusAmount,
+                        Bonus = calculateBonus.BonusAmount + lockedAmount,
+                        BonusAmount = calculateBonus.BonusAmount,
                         LockedAmount = lockedAmount,
-                        RolloverAmount = rollOver,
-                        ExpiryTime = expiryTime,
+                        RolloverAmount = calculateBonus.RollOver,
+                        ExpiryTime = calculateBonus.ExpiryTime,
                         inputs = new Dictionary<string, string>()
                     };
-                    var apiResult = await _promotionService.TransferTpBonus(tpBonusTransfer);
-                    if (apiResult.ErrorCode != 0)
+                    var transferResult = await _promotionService.TransferTpBonus(tpBonusTransfer);
+                    if (transferResult.ErrorCode != 0)
                     {
                         //ErrorCode:1205 TPService Pending
-                        apiResult1 = apiResult;
+                        apiResult = transferResult;
                     }
                     else
                     {
-                        apiResult1.ErrorCode = 0;
+                        apiResult.ErrorCode = 0;
                     }
                 }
                 else
                 {
-                    apiResult1.ErrorCode = 0;
+                    apiResult.ErrorCode = 0;
                 }
 
-                if (apiResult1.ErrorCode == 0)
+                if (apiResult.ErrorCode == 0 && claimPromotion is { PromotionType: PromotionType.Cashback })
                 {
-                    var input = new AfterRewardSuccessInput
+                    _ = Task.Run(async () =>
                     {
-                        CustId = custId,
-                        atPage = BonusInfoAtPage.Promotion
-                    };
-                    AfterRewardSuccess(input);
+                        var content = string.Format(_selLangBll.GetMsg("msg_ClaimCashBackBonus", custInfo.SiteId,
+                            custInfo.SiteName, custInfo.UserLang), calculateBonus.BonusAmount.ToString("#,##0.##"));
+                        await _messageService.SendMessageAsync(new Message(custInfo.SiteId, "System", content, content,
+                            custInfo.CustId, custInfo.UserName, custInfo.UserLang));
+                    });
                 }
-            }
-            else
-            {
-                var P = new ClaimPromotion { }; //for fix NullReferenceException
-                if (promotion != null)
-                    P = promotion;
-                var errorInfo = new ErrorMessageMakerInput
+
+                if (apiResult.ErrorCode != 0) return apiResult;
+                var input = new AfterRewardSuccessInput
                 {
-                    Result = result,
-                    InputBonusCode = bonusCode,
-                    LockedAmount = lockedAmount,
-                    InputPromotionType = promotionType,
-                    InputAmount = amount,
-                    CustInfo = custInfo,
-                    ClaimPromotion = P
+                    CustId = custId,
+                    atPage = atPage
                 };
+                AfterRewardSuccess(input);
 
-                apiResult1 = MakeErrorMessage(errorInfo);
+                return apiResult;
             }
 
-            return apiResult1;
+            errorInfo.Result = result;
+            errorInfo.ClaimPromotion = claimPromotion;
+            return MakeErrorMessage(errorInfo, isMessageUserLang);
+        }
+
+        public async Task<ApiResult> SetAdjustmentBonusV2Async(int custId, string bonusCode, string memo,
+            decimal amount, int promotionType)
+        {
+            var apiResult = new ApiResult();
+            var lockedAmount = (decimal)0;
+            bonusCode = bonusCode.Trim();
+            var custInfo = _custInfoService.GetCustInfo(custId);
+
+            var errorInfo = new ErrorMessageMakerInput
+            {
+                Result = (int)BonusErrorCode.PROMOTION_NOT_FOUND,
+                InputBonusCode = bonusCode,
+                LockedAmount = lockedAmount,
+                InputPromotionType = promotionType,
+                InputAmount = amount,
+                CustInfo = custInfo,
+                ClaimPromotion = new ClaimPromotion { }
+            };
+
+            var claimPromotion = _promotionService.GetPromotion<ClaimPromotion>(custId, custInfo.CurrencyId,
+                custInfo.SiteId, bonusCode, 1, false);
+
+            var result = VerifyAdjustmentBonus(custId, custInfo.SiteId, amount, promotionType, claimPromotion);
+            if (result != (int)BonusErrorCode.SUCCESS)
+            {
+                errorInfo.Result = result;
+                apiResult = MakeErrorMessage(errorInfo);
+                return apiResult;
+            }
+
+            await using var conn = _mainDbClient.GetMySqlConnection();
+            conn.Open();
+            await using var trans = await conn.BeginTransactionAsync();
+
+            var calculateBonus = _promotionService.CalculateBonus(claimPromotion, amount, lockedAmount, custId,
+                custInfo.SiteId, custInfo.CurrencyId);
+            if (calculateBonus.result <= 0)
+            {
+                errorInfo.Result = calculateBonus.result;
+                return MakeErrorMessage(errorInfo);
+            }
+
+            var bonusRewardInput = new BonusRewardInput
+            {
+                PromotionType = claimPromotion.PromotionType,
+                BonusCode = bonusCode,
+                CategoryId = claimPromotion.CategoryId,
+                TpId = claimPromotion.TpId,
+                BonusInfo = calculateBonus.BonusInfo,
+                BonusAmount = calculateBonus.BonusAmount,
+                LockedAmount = calculateBonus.LockedAmount,
+                RollOver = calculateBonus.RollOver,
+                FullFillType = claimPromotion.FullFillType,
+                ExpiryTime = calculateBonus.ExpiryTime,
+                ExpiryDays = claimPromotion.ExpiryDays,
+                CustId = custId,
+                UserName = custInfo.UserName,
+                CurrencyId = custInfo.CurrencyId,
+                SiteId = custInfo.SiteId,
+                Memo = memo,
+                Prefix = $"B{_common.GetEnv()}",
+                RefList = null,
+                SetBalanceMemo = $"Claim {Enum.GetName(typeof(PromotionType), claimPromotion.PromotionType)} BonusCode: {bonusCode}, Locked Amount: {calculateBonus.LockedAmount:#,##0.##}",
+                RewardBonusMemo = $"Claim {Enum.GetName(typeof(PromotionType), claimPromotion.PromotionType)} BonusCode: {bonusCode}",
+                FinancialType = FinancialType.Bonusreward,
+                AtPage = BonusInfoAtPage.Promotion
+            };
+
+            result = _promotionService.Reward(bonusRewardInput, trans);
+            if (result > 0)
+            {
+                result = _promotionService.AfterReward(claimPromotion, custInfo.SiteId, bonusCode, custInfo.CurrencyId,
+                    null, trans);
+                if (result > 0)
+                    trans.Commit();
+            }
+
+            if (result > 0)
+            {
+                if (claimPromotion.TpId > 0)
+                {
+                    var tpBonusTransfer = new TpBonusTransfer
+                    {
+                        TpId = claimPromotion.TpId,
+                        CustId = custId,
+                        Bonus = calculateBonus.BonusAmount + lockedAmount,
+                        BonusAmount = calculateBonus.BonusAmount,
+                        LockedAmount = lockedAmount,
+                        RolloverAmount = calculateBonus.RollOver,
+                        ExpiryTime = calculateBonus.ExpiryTime,
+                        inputs = new Dictionary<string, string>()
+                    };
+                    var transferResult = await _promotionService.TransferTpBonus(tpBonusTransfer);
+                    if (transferResult.ErrorCode != 0)
+                    {
+                        //ErrorCode:1205 TPService Pending
+                        apiResult = transferResult;
+                    }
+                    else
+                    {
+                        apiResult.ErrorCode = 0;
+                    }
+                }
+                else
+                {
+                    apiResult.ErrorCode = 0;
+                }
+
+                if (apiResult.ErrorCode != 0) return apiResult;
+                var input = new AfterRewardSuccessInput
+                {
+                    CustId = custId,
+                    atPage = BonusInfoAtPage.Promotion
+                };
+                AfterRewardSuccess(input);
+
+                return apiResult;
+            }
+
+            errorInfo.Result = result;
+            errorInfo.ClaimPromotion = claimPromotion;
+            return MakeErrorMessage(errorInfo);
+        }
+
+        private int VerifyPromotion(int custId, int siteId, string bonusCode, string custIp, ClaimPromotion claimPromotion)
+        {
+            if (claimPromotion == null)
+                return (int)BonusErrorCode.PROMOTION_NOT_FOUND;
+
+            if (_promotionService.IsBlockIP(claimPromotion, bonusCode, siteId, custIp))
+                return (int)BonusErrorCode.IP_IS_BLOCKED;
+            if (!CheckProfileFinish(custId, siteId)) //Profile Finish & Phone Verified
+                return (int)BonusErrorCode.PROFILE_OR_PHONE_NOT_FINISH;
+            
+            return (int)BonusErrorCode.SUCCESS;
         }
         
+        private int VerifyAdjustmentBonus(int custId, int siteId, decimal amount, int promotionType,
+            Promotion claimPromotion)
+        {
+            if (claimPromotion == null)
+            {
+                return (int)BonusErrorCode.PROMOTION_NOT_FOUND;
+            }
+
+            if (claimPromotion.PromotionType != (PromotionType)promotionType)
+            {
+                return (int)BonusErrorCode.ADJUSTMENT_BONUS_PROMOTIONTYPE_NOT_MATCH;
+            }
+
+            if (claimPromotion.PromotionType == PromotionType.ManualBonus)
+            {
+                if (claimPromotion.PromotionAction != 1)
+                    return (int)BonusErrorCode.ADJUSTMENT_BONUS_PROMOTION_NOT_ACTIVE;
+                if (amount > claimPromotion.MaxBonus)
+                    return (int)BonusErrorCode.ADJUSTMENT_BONUS_PROMOTION_AMOUNT_OVER_MAXBONUS;
+            }
+
+            if (!CheckProfileFinish(custId, siteId)) //Profile Finish & Phone Verified
+                return (int)BonusErrorCode.PROFILE_OR_PHONE_NOT_FINISH;
+
+            if (_promotionService.GetCustRunningBonus(custId).Any())
+            {
+                return (int)BonusErrorCode.ADJUSTMENT_BONUS_CUSTOMER_HAS_RUNNING_BONUS;
+            }
+
+            return (int)BonusErrorCode.SUCCESS;
+        }
+
+        private bool CheckProfileFinish(int custId, int siteId) //Profile Finish & Phone Verified
+        {
+            var custInfoProfile = _custInfoService.GetCustInfoProfile( custId, siteId);
+            return custInfoProfile.PhoneVerified 
+                   && !string.IsNullOrEmpty(custInfoProfile.AccountName) 
+                   && !string.IsNullOrEmpty(custInfoProfile.Birth_y) 
+                   && !string.IsNullOrEmpty(custInfoProfile.Birth_m) 
+                   && !string.IsNullOrEmpty(custInfoProfile.Birth_d);
+        }
+
         public List<CustPromotion> GetPromotionList(CustPromotionRequest request)
         {
             var promotionList =  _promotionService.GetPromotionList(request);
