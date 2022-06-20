@@ -45,7 +45,7 @@ namespace BonusService.Service.DAL
             _courierAdapter = serviceProvider.GetRequiredService<CourierAdapter>();
             _allowIp = serviceProvider.GetRequiredService<IEnumerable<AllowIp>>();
         }
-        public T GetPromotion<T>(int custId, int currencyId, int siteId, string bonusCode, int? deviceType, bool getDetail)
+        public T GetPromotion<T>(int custId, int currencyId, int siteId, string bonusCode, int deviceType, bool getDetail)
         {
             return _reportDbClient.QueryFirst<T>("Member_Promotion_Get_V4", new DynamicParameters(new
             {
@@ -75,7 +75,7 @@ namespace BonusService.Service.DAL
             return false;
         }
 
-        public CustCondition GetCustConditionInfo(int custId, int currencyId, int siteId, string bonusCode, int? deviceType)
+        public CustCondition GetCustConditionInfo(int custId, int currencyId, int siteId, string bonusCode, int deviceType)
         {
             var p = new DynamicParameters(new { CustId = custId, CurrencyId = currencyId, SiteId = siteId, BonusCode = bonusCode, DeviceType = deviceType });
             p.Add("CanJoin", dbType: DbType.Boolean, direction: ParameterDirection.Output);
