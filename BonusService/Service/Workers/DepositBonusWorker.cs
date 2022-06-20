@@ -50,7 +50,7 @@ namespace BonusService.Service.Workers
                         if (depositBonus.DepositStatus == (int)DepositStatusEnum.Approved)
                         {
                             var result = await _promotionBll.SetClaimPromotionV2Async(depositBonus.CustId, depositBonus.BonusCode, depositBonus.IP,
-                                depositBonus.LockedAmount, 1, BonusInfoAtPage.Deposit, false, depositBonus.TransId);
+                                depositBonus.LockedAmount, (int)PromotionDeviceType.All, BonusInfoAtPage.Deposit, false, depositBonus.TransId);
                             if (result.ErrorCode == 0)
                             {
                                 logger.LogInformation($"DoDepositBonus success TransId: {depositBonus.TransId}");

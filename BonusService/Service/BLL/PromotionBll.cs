@@ -263,7 +263,7 @@ namespace BonusService.Service.BLL
         }
 
         public async Task<ApiResult> SetClaimPromotionV2Async(int custId, string bonusCode, string custIp,
-            decimal lockedAmount, int? deviceType, BonusInfoAtPage atPage, bool isMessageUserLang,
+            decimal lockedAmount, int deviceType, BonusInfoAtPage atPage, bool isMessageUserLang,
             string depositTransId = null)
         {
             var apiResult = new ApiResult();
@@ -441,7 +441,7 @@ namespace BonusService.Service.BLL
             };
 
             var claimPromotion = _promotionService.GetPromotion<ClaimPromotion>(custId, custInfo.CurrencyId,
-                custInfo.SiteId, bonusCode, 1, false);
+                custInfo.SiteId, bonusCode, (int)PromotionDeviceType.All, false);
 
             var result = VerifyAdjustmentBonus(custId, custInfo.SiteId, amount, promotionType, claimPromotion);
             if (result != (int)BonusErrorCode.SUCCESS)

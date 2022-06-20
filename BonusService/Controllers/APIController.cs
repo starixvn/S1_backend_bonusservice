@@ -75,7 +75,7 @@ namespace BonusService.Controllers
             }
             if (result.ErrorCode != 0)
             {
-                _logger.LogError($"SetAdjustBonusAsync { JsonConvert.SerializeObject(result)}");
+                _logger.LogInformation($"SetAdjustBonusAsync { JsonConvert.SerializeObject(result)}");
             }
             return result;
         }
@@ -114,7 +114,7 @@ namespace BonusService.Controllers
             public int CustId { set; get; }
             public string custIP { set; get; }
             public decimal? LockedAmount { set; get; }
-            public int? DeviceType { set; get; }
+            public int DeviceType { set; get; }
         }
 
         [HttpPost]
@@ -123,14 +123,9 @@ namespace BonusService.Controllers
             var apiResult = new ApiResult();
             try
             {
-                int? deviceType = 1;
-                if (promotionReq.DeviceType != null)
-                {
-                    deviceType = promotionReq.DeviceType;
-                }
                 var lockedAmount = promotionReq.LockedAmount ?? 0;
                 
-                apiResult = await _promotionBll.SetClaimPromotionV2Async(promotionReq.CustId, promotionReq.BonusCode, promotionReq.custIP, lockedAmount, deviceType, BonusInfoAtPage.Promotion,true);
+                apiResult = await _promotionBll.SetClaimPromotionV2Async(promotionReq.CustId, promotionReq.BonusCode, promotionReq.custIP, lockedAmount, promotionReq.DeviceType, BonusInfoAtPage.Promotion,true);
             }
             catch (Exception ex)
             {

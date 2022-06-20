@@ -62,6 +62,14 @@
         Percentage = 1,
         Amount = 2
     }
+
+    public enum PromotionDeviceType
+    {
+        All = 1,
+        Web = 2,
+        App = 3
+    }
+    
     public enum LockedType
     {
         FromBonus = 1,
