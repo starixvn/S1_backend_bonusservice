@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using BonusService.Service.Library;
 using BonusService.Service.Model;
@@ -17,14 +15,12 @@ namespace BonusService.Service.DAL
         
         private readonly IConfiguration configuration;
         private readonly MySqlClient _mainDbClient;
-        private readonly MySqlClient _reportDbClient;
         private readonly int typePosition = 1000;
 
         public BonusWalletService(IServiceProvider provider)
         {
             configuration = provider.GetRequiredService<IConfiguration>();
             _mainDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);
-            _reportDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Report);
         }
 
         public bool RewardBonus(int bonusId, int promoCategoryId, int tpId, int custId, int siteId, string userName, decimal bonusAmount, decimal lockedAmount, decimal rollover ,long expiryTime, int type, string Memo, string RefTransId, MySqlTransaction trans ,int fullFillType = 1)
@@ -50,29 +46,6 @@ namespace BonusService.Service.DAL
                 custCashBackInput.CalculateDate
             });
             return _mainDbClient.Execute("Member_CustCashBack_Set", trans, parameter);
-        }
-
-        public IEnumerable<BonusWallet> GetCustBonusWallet(int CustId)
-        {
-            using var conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
-            return conn.Query<BonusWallet>("Member_CustBonus_Get", new { CustId }, commandType: CommandType.StoredProcedure);
-        }
-
-        public BonusWallet CheckBonusWallet(int CustId, int TpId)
-        {
-            using var conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
-            return conn.QueryFirstOrDefault<BonusWallet>("Member_CustBonus_Check", new { CustId, TpId }, commandType: CommandType.StoredProcedure);
-        }
-        public BonusWallet CheckBonusWallet(int CustId, string bonusCode)
-        {
-            using var conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
-            return conn.QueryFirstOrDefault<BonusWallet>("Member_CustBonusByCode_Get", new { CustId, BonusCode = bonusCode }, commandType: CommandType.StoredProcedure);
-        }
-
-        public BonusWallet CustBonusInfo(int CustId, string BonusCode, int TpId, int PromoCategoryId)
-        {
-            using var conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
-            return conn.QueryFirstOrDefault<BonusWallet>("Member_CustBonus_GetById", new { CustId, BonusCode, TpId, PromoCategoryId }, commandType: CommandType.StoredProcedure);
         }
     }
 }
