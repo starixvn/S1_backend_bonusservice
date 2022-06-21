@@ -55,25 +55,7 @@ namespace BonusService.Service.Workers
                         var rebateInfoList = _rebateBll.GetVipRebateCustList(rebateTask.SiteId, rebateTask.CurrencyId, (int)rebateTask.PeriodType, rebateTask.SpecificDate, rebateTask.TimeZone);
                         foreach (var rebateInfo in rebateInfoList)
                         {
-                            var rebateTpBetRecordList = _rebateBll.GetVipRebateTpBetRecord((int)rebateTask.PeriodType, rebateInfo.CustId, rebateTask.SpecificDate, rebateTask.TimeZone, 0).ToList();//.ToDictionary<string, RebateTpBetRecord>(x => $"{x.SettledDate:yyyyMMdd}_{x.GameType}", x => x);
-
-                            //if (rebateTask.PeriodType == 3) //3: Monthly 暫時沒有用到
-                            //{
-                            //    var dd = rebateTpBetRecordList.ToDictionary(x => $"{x.SettledDate:yyyyMMdd}_{x.GameType}", x => x);
-
-                            //    foreach (var rebateTpBetRecord14 in _rebateBll.GetVipRebateTpBetRecord(rebateTask.SiteId, rebateInfo.CustId, rebateTask.SpecificDate, 1))
-                            //    {
-                            //        if (dd.ContainsKey($"{rebateTpBetRecord14.SettledDate:yyyyMMdd}_{rebateTpBetRecord14.GameType}"))
-                            //        {
-                            //            dd[$"{rebateTpBetRecord14.SettledDate:yyyyMMdd}_{rebateTpBetRecord14.GameType}"].ValidBet += rebateTpBetRecord14.ValidBet;
-                            //            dd[$"{rebateTpBetRecord14.SettledDate:yyyyMMdd}_{rebateTpBetRecord14.GameType}"].WinlostAmount += rebateTpBetRecord14.WinlostAmount;
-                            //        }
-                            //        else
-                            //        {
-                            //            rebateTpBetRecordList.Add(rebateTpBetRecord14);
-                            //        }
-                            //    }
-                            //}
+                            var rebateTpBetRecordList = _rebateBll.GetVipRebateTpBetRecord((int)rebateTask.PeriodType, rebateInfo.CustId, rebateTask.SpecificDate, rebateTask.TimeZone, 0).ToList();
 
                             if (rebateTpBetRecordList.Count > 0)
                             {
