@@ -33,12 +33,12 @@ namespace BonusService.Service.DAL
             this.withdrawalLimitService = withdrawalLimitService;
             this.common = common;
         }
-        public IEnumerable<VipRebateTpBetRecord> GetVipRebateTpBetRecord(int custId,int periodType, DateTime specificDate,string timeZone, int is14)
+        public IEnumerable<VipRebateTpBetRecord> GetVipRebateTpBetRecord(int periodType, int custId, DateTime specificDate, string timeZone, int is14)
         {
             var p = new
             {
-                _CustId = custId,
                 _PeriodType = periodType,
+                _CustId = custId,
                 _SpecificDate = specificDate,
                 _CurrencyTimeZone = timeZone,
                 _Is14 = is14
@@ -46,7 +46,7 @@ namespace BonusService.Service.DAL
 
             return _reportDbClient.Query<VipRebateTpBetRecord>("Service_VipRebateTpBetRecord_Get_V3", p);
         }
-        public IEnumerable<VipRebateInfo> GetVipRebateCustList(int siteId, int currencyId, int periodType, DateTime specificDate, string timeZone)
+        public IEnumerable<VipRebateInfo> GetVipRebateCustList(int siteId, int currencyId, int periodType, DateTime specificDate, string timeZone, int pageNumber, int pageSize)
         {
             var p = new
             {
@@ -54,7 +54,9 @@ namespace BonusService.Service.DAL
                 _CurrencyId = currencyId,
                 _PeriodType = periodType,
                 _SpecificDate = specificDate,
-                _CurrencyTimeZone = timeZone
+                _CurrencyTimeZone = timeZone,
+                _PageNumber = pageNumber,
+                _PageSize = pageSize
             };
             return _reportDbClient.Query<VipRebateInfo>("Service_VipRebateCustList_Get_V3", p);
         }
@@ -62,7 +64,7 @@ namespace BonusService.Service.DAL
         {
             return _reportDbClient.Query<RebateTask>("Service_VipRebateTask_Get_V2");
         }
-        public int PayoutVipRebate(int siteId,VipRebateInfo rebateInfo, IEnumerable<VipRebateTpBetRecord> rebateTpBetRecords, out decimal payAmount, out Dictionary<int, decimal> rebateLogList, out Dictionary<int, decimal> rebateCLogList, IEnumerable<RebatePayoutLimit> rebatePayoutLimits)
+        public int PayoutVipRebate(int siteId, VipRebateInfo rebateInfo, IEnumerable<VipRebateTpBetRecord> rebateTpBetRecords, out decimal payAmount, out Dictionary<int, decimal> rebateLogList, out Dictionary<int, decimal> rebateCLogList, IEnumerable<RebatePayoutLimit> rebatePayoutLimits)
         {
             int result = 0;
             using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
@@ -171,7 +173,7 @@ namespace BonusService.Service.DAL
         public int SetVipRebateTaskDone(int siteId, int currencyId)
         {
             using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
-            return conn.Execute("Service_VipRebateTaskDone_Set_V2", new { _SiteId = siteId, _Currency = currencyId }, commandType: CommandType.StoredProcedure);
+            return conn.Execute("Service_VipRebateTaskDone_Set_V2", new { _SiteId = siteId, _CurrencyId = currencyId }, commandType: CommandType.StoredProcedure);
         }
     }
 }

@@ -37,8 +37,8 @@ namespace BonusService.Service.BLL
         {
             //檢查參數
             //0.檢查參數是否正確
-            //1.有設定指定日期，且日期大於2020/01/01，屬於重跑流程(目前因為系統也只有設定daily，故只有daily有再用，其他類型的要用嗎？)
-            //2.檢查期間型別需檢查項目是否符合(每月rebate檢核尚須確認)
+            //1.有設定指定日期，且日期大於2020/01/01，屬於重跑流程(目前因為系統也只有設定daily，故只有daily有再用)
+            //2.檢查期間型別需檢查項目是否符合
 
             var rebateTaskList = _vipRebateService.GetVipRebateTask();
 
@@ -71,9 +71,9 @@ namespace BonusService.Service.BLL
                         }
                         break;
                     case 3:  //3: Monthly
-                        //每月rebate邏輯需要再確認，目前暫無使用
-                        //var currencyNowDay = task.CurrencyNowTime.Day; //幣別時區當月N日
-                        //var lastDay = DateTime.DaysInMonth(task.CurrencyNowTime.Year, task.CurrencyNowTime.Month); //當月最後一日
+                        //目前暫無使用
+                        //var currencyNowDay = task.CurrencyNowTime.Day;
+                        //var lastDay = DateTime.DaysInMonth(task.CurrencyNowTime.Year, task.CurrencyNowTime.Month);
                         //if (currencyNowDay != task.PeriodDay)
                         //{
                         //    _logger.LogWarning($"task.PeriodDay is Invaild. task value={JsonConvert.SerializeObject(task)}.");
@@ -98,10 +98,10 @@ namespace BonusService.Service.BLL
 
                 //Step4：檢查最近一次執行時間是否符合
                 //LastCurrencySettledTime 是 Null，代表第一次執行排程
-                //LastCurrencySettledTime.Date >= CurrencyNowTime.Date，上次執行時間大於幣別時區時間，不可再執行
+                //LastCurrencySettledTime.Date = CurrencyNowTime.Date，上次執行時間日期等於幣別時區時間日期，不可再執行(原邏輯)
                 if (task.LastCurrencySettledTime != null)
                 {
-                    if (task.LastCurrencySettledTime.Date >= task.CurrencyNowTime.Date)
+                    if (task.LastCurrencySettledTime.Date == task.CurrencyNowTime.Date)
                     {
                         _logger.LogWarning($"task.LastCurrencySettledTime Invaild. task value={JsonConvert.SerializeObject(task)}");
                         continue;
@@ -123,9 +123,9 @@ namespace BonusService.Service.BLL
         {
             return _vipRebateService.GetVipRebateTpBetRecord(periodType, custId, specificDate, timeZone, is14);
         }
-        public IEnumerable<VipRebateInfo> GetVipRebateCustList(int siteId, int currencyId, int periodType, DateTime specificDate, string currencyTimeZone)
+        public IEnumerable<VipRebateInfo> GetVipRebateCustList(int siteId, int currencyId, int periodType, DateTime specificDate, string currencyTimeZone,int pageNumber,int pageSize)
         {
-            return _vipRebateService.GetVipRebateCustList(siteId, currencyId, periodType, specificDate, currencyTimeZone);
+            return _vipRebateService.GetVipRebateCustList(siteId, currencyId, periodType, specificDate, currencyTimeZone,pageNumber,pageSize);
         }
         public int PayoutVipRebate(int siteId, VipRebateInfo vipRebateInfo, IEnumerable<VipRebateTpBetRecord> vipRebateTpBetRecords, IEnumerable<RebatePayoutLimit> rebatePayoutLimits)
         {
