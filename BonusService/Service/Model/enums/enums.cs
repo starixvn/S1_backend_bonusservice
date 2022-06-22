@@ -174,4 +174,13 @@
         SpecialCodeErrorForCheck = 1000,
         PromoCodeHasBeenUsed = 3000
     }
+
+    /// <summary>
+    /// <remarks>
+    /// Use Table：RebateCLog,RebateMLog
+    /// </remarks>
+    public enum RebateType
+    {
+        VipRebate = 1,
+    }
 }
