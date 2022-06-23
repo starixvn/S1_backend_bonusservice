@@ -13,13 +13,10 @@ namespace BonusService.Service.DAL
     public class BonusWalletService
     {
         
-        private readonly IConfiguration configuration;
         private readonly MySqlClient _mainDbClient;
-        private readonly int typePosition = 1000;
 
         public BonusWalletService(IServiceProvider provider)
         {
-            configuration = provider.GetRequiredService<IConfiguration>();
             _mainDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);
         }
 
