@@ -44,28 +44,6 @@ namespace BonusService.Service.DAL
             });
             return _reportDbClient.Query<CashBackPromotionOutput>("Service_VipCashBackPromotion_Get", parameter);
         }
-        
-        public IEnumerable<TpGameTypeOutput> GetTpGameType(string categoryIds)
-        {
-            var parameter = new DynamicParameters();
-            parameter.Add("CategoryIds", categoryIds);
-            return _reportDbClient.Query<TpGameTypeOutput>("Service_TpGameType_Get", parameter);
-        }
-        
-        public bool SetPromotionCashBackSetting(PromotionCashBackSettingInputInsert promotionCashBackSettingInputInsert)
-        {
-            var parameter = new DynamicParameters();
-            parameter.Add("BonusCode", promotionCashBackSettingInputInsert.BonusCode);
-            parameter.Add("CurrencyId", promotionCashBackSettingInputInsert.CurrencyId);
-            parameter.Add("SiteId", promotionCashBackSettingInputInsert.SiteId);
-            parameter.Add("TpId", promotionCashBackSettingInputInsert.TpId);
-            parameter.Add("CategoryId", promotionCashBackSettingInputInsert.CategoryId);
-            parameter.Add("Level", promotionCashBackSettingInputInsert.Level);
-            parameter.Add("Percentage", promotionCashBackSettingInputInsert.Percentage);
-            parameter.Add("Status", promotionCashBackSettingInputInsert.Status);
-            parameter.Add("LastUpdateUser", promotionCashBackSettingInputInsert.LastUpdateUser);
-            return _mainDbClient.Execute("Service_PromotionCashBackSetting_Ins", parameter) >= 0;
-        }
 
         public IEnumerable<PromotionCashBackSettingOutput> GetPromotionCashBackSetting(PromotionCashBackSettingInput promotionCashBackSettingInput)
         {

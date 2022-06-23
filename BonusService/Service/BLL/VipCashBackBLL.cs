@@ -5,6 +5,7 @@ using BonusService.Service.DAL;
 using BonusService.Service.Extensions;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace BonusService.Service.BLL
@@ -13,11 +14,13 @@ namespace BonusService.Service.BLL
     {
         private readonly VipCashBackService _vipCashBackCashBackService;
         private readonly ILogger<VipCashBackBLL> _logger;
+        private readonly PromotionBll _promotionBll;
 
-        public VipCashBackBLL(VipCashBackService vipCashBackService, ILogger<VipCashBackBLL> logger)
+        public VipCashBackBLL(IServiceProvider provider)
         {
-            _logger = logger;
-            _vipCashBackCashBackService = vipCashBackService;
+            _logger = provider.GetRequiredService<ILogger<VipCashBackBLL>>();
+            _vipCashBackCashBackService = provider.GetRequiredService<VipCashBackService>();
+            _promotionBll = provider.GetRequiredService<PromotionBll>();
         }
         
         private IEnumerable<CashBackSettingOutput> GetCashBackSettings()
@@ -28,16 +31,6 @@ namespace BonusService.Service.BLL
         private bool SetCashBackSettings(CashBackSettingInput cashBackSettingInput)
         {
             return _vipCashBackCashBackService.SetCashBackSettings(cashBackSettingInput);
-        }
-
-        private IEnumerable<TpGameTypeOutput> GetTpGameType(string categoryIds)
-        {
-            return _vipCashBackCashBackService.GetTpGameType(categoryIds);
-        }
-
-        private bool SetPromotionCashBackSetting(PromotionCashBackSettingInputInsert promotionCashBackSettingInputInsert)
-        {
-            return _vipCashBackCashBackService.SetPromotionCashBackSetting(promotionCashBackSettingInputInsert);
         }
 
         private IEnumerable<CashBackPromotionOutput> GetVipCashBackPromotion(CashBackPromotionInput cashBackPromotionInput)
@@ -75,11 +68,10 @@ namespace BonusService.Service.BLL
             try
             {
                 var currentTime = DateTime.UtcNow.AddHours(8);
-                var startTime = StartOfWeek(currentTime.AddDays(-7), DayOfWeek.Monday).Date;
+                var startTime = _promotionBll.StartOfWeek(currentTime.AddDays(-7), DayOfWeek.Monday).Date;
                 var startDate = startTime.ToString("yyyy-MM-dd");
                 var endDate = startTime.AddDays(7).AddTicks(-1).ToString("yyyy-MM-dd");
-                var monday = StartOfWeek(currentTime, DayOfWeek.Monday)
-                    .ToString("yyyy-MM-dd");
+                var monday = _promotionBll.StartOfWeek(currentTime, DayOfWeek.Monday).ToString("yyyy-MM-dd");
 
                 var cashBackSettings = GetCashBackSettings();
                 foreach (var cashBackSetting in cashBackSettings)
@@ -185,13 +177,13 @@ namespace BonusService.Service.BLL
             }
         }
 
-        private static bool VerifyTask(CashBackSettingOutput cashBackSettingOutput)
+        private bool VerifyTask(CashBackSettingOutput cashBackSettingOutput)
         {
             var currentTime = DateTime.UtcNow.AddHours(8);
             switch (cashBackSettingOutput.PeriodType)
             {
                 case (int) VipPeriodType.Weekly:
-                    var monday = StartOfWeek(currentTime, DayOfWeek.Monday).Date;
+                    var monday = _promotionBll.StartOfWeek(currentTime, DayOfWeek.Monday).Date;
                     return cashBackSettingOutput.SettleTime < monday;
 
                 case (int) VipPeriodType.Monthly:
@@ -199,12 +191,6 @@ namespace BonusService.Service.BLL
                 default:
                     return false;
             }
-        }
-        
-        private static DateTime StartOfWeek(DateTime dateTime, DayOfWeek startOfWeek)
-        {
-            var diff = (7 + (dateTime.DayOfWeek - startOfWeek)) % 7;
-            return dateTime.AddDays(-1 * diff).Date;
         }
     }
 }

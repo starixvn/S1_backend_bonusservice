@@ -6,10 +6,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using BonusService.Service.Library;
+using Dapper;
+using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
 
 namespace BonusService.Service.BLL
@@ -24,6 +27,8 @@ namespace BonusService.Service.BLL
         private readonly MessageService _messageService;
         private readonly DepositBonusBLL _depositBonusBll;
         private readonly WalletService _walletService;
+        private readonly WithdrawalLimitService _withdrawalLimitService;
+        private readonly BonusWalletService _bonusWalletService;
         private readonly ILogger<PromotionBll> _logger;
 
         public PromotionBll(IServiceProvider provider)
@@ -36,9 +41,12 @@ namespace BonusService.Service.BLL
             _messageService = provider.GetRequiredService<MessageService>();
             _depositBonusBll = provider.GetRequiredService<DepositBonusBLL>();
             _walletService = provider.GetRequiredService<WalletService>();
+            _withdrawalLimitService = provider.GetRequiredService<WithdrawalLimitService>();
+            _bonusWalletService = provider.GetRequiredService<BonusWalletService>();
             _logger = provider.GetRequiredService<ILogger<PromotionBll>>();
         }
-        public ApiResult MakeErrorMessage(ErrorMessageMakerInput input, bool isMessageUserLang = false)
+
+        private ApiResult MakeErrorMessage(ErrorMessageMakerInput input, bool isMessageUserLang = false)
         {
             var apiResult1 = new ApiResult
             {
@@ -245,8 +253,8 @@ namespace BonusService.Service.BLL
             _logger.LogInformation($"CustId={input.CustInfo.CustId} BonusCode={input.InputBonusCode} apiResult={JsonConvert.SerializeObject(apiResult1)}");
             return apiResult1;
         }
-        
-        public void CancelAllWaitingBonus(int custId)
+
+        private void CancelAllWaitingBonus(int custId)
         {//當領取BONUS成功   將客戶DepositBonusQueue中的BONUS CANCEL掉
 
             var BonusList = _promotionService.GetDepositBonusQueueByCustId(custId, true);//改變狀態用mainDb取得資料，避免資料不同步
@@ -256,7 +264,8 @@ namespace BonusService.Service.BLL
                 _depositBonusBll.SetDepositBonusStatus(depositBonus.TransId, (int)DepositBonusQueueStatus.Cancel_other_Bonus);
             }
         }
-        public void AfterRewardSuccess(AfterRewardSuccessInput input)
+
+        private void AfterRewardSuccess(AfterRewardSuccessInput input)
         {
             if(input.atPage != BonusInfoAtPage.Deposit) 
                 CancelAllWaitingBonus(input.CustId);
@@ -301,7 +310,7 @@ namespace BonusService.Service.BLL
             conn.Open();
             await using var trans = await conn.BeginTransactionAsync();
 
-            var calculateBonus = _promotionService.CalculateBonus(claimPromotion, custConditionInfo.Amount,
+            var calculateBonus = CalculateBonus(claimPromotion, custConditionInfo.Amount,
                 lockedAmount, custId, custInfo.SiteId, custInfo.CurrencyId);
             if (calculateBonus.result <= 0)
             {
@@ -353,7 +362,7 @@ namespace BonusService.Service.BLL
                 FinancialType = FinancialType.Bonusreward,
                 AtPage = atPage
             };
-            result = _promotionService.Reward(bonusRewardInput, trans);
+            result = Reward(bonusRewardInput, trans);
 
             if (result > 0)
             {
@@ -455,7 +464,7 @@ namespace BonusService.Service.BLL
             conn.Open();
             await using var trans = await conn.BeginTransactionAsync();
 
-            var calculateBonus = _promotionService.CalculateBonus(claimPromotion, amount, lockedAmount, custId,
+            var calculateBonus = CalculateBonus(claimPromotion, amount, lockedAmount, custId,
                 custInfo.SiteId, custInfo.CurrencyId);
             if (calculateBonus.result <= 0)
             {
@@ -489,7 +498,7 @@ namespace BonusService.Service.BLL
                 AtPage = BonusInfoAtPage.Promotion
             };
 
-            result = _promotionService.Reward(bonusRewardInput, trans);
+            result = Reward(bonusRewardInput, trans);
             if (result > 0)
             {
                 result = _promotionService.AfterReward(claimPromotion, custInfo.SiteId, bonusCode, custInfo.CurrencyId,
@@ -589,7 +598,7 @@ namespace BonusService.Service.BLL
 
             return (int)BonusErrorCode.SUCCESS;
         }
-
+        
         private bool CheckProfileFinish(int custId, int siteId) //Profile Finish & Phone Verified
         {
             var custInfoProfile = _custInfoService.GetCustInfoProfile( custId, siteId);
@@ -598,6 +607,258 @@ namespace BonusService.Service.BLL
                    && !string.IsNullOrEmpty(custInfoProfile.Birth_y) 
                    && !string.IsNullOrEmpty(custInfoProfile.Birth_m) 
                    && !string.IsNullOrEmpty(custInfoProfile.Birth_d);
+        }
+
+        private CalculateBonusOutput CalculateBonus(ClaimPromotion claimPromotion, decimal amount, decimal lockedAmount, int custId, int siteId, int currencyId)
+        {
+            var output = new CalculateBonusOutput
+            {
+                result = (int)BonusErrorCode.SUCCESS
+            };
+
+            decimal bonusAmount;
+            var lockAmount = amount;
+            decimal rollover;
+
+            switch (claimPromotion.PromotionType)
+            {
+                case PromotionType.FstDeposit:
+                case PromotionType.ReDeposit:
+                    {
+                        if (claimPromotion.PromotionType == PromotionType.ReDeposit ||
+                           (claimPromotion.IsSpecial && claimPromotion.PromotionType == PromotionType.FstDeposit))
+                        {
+                            amount = claimPromotion.BonusType == BonusType.Amount ? claimPromotion.RequiredAmount : lockedAmount;
+
+                            if (amount <= 0)
+                            {
+                                output.result = (int)BonusErrorCode.CALCULATE_AMOUNT_IS_NEGATIVE;
+                                return output;
+                            }
+                            lockAmount = amount;
+                        }
+
+                        if (amount < claimPromotion.RequiredAmount)
+                        {
+                            output.result = (int)BonusErrorCode.DEPOSIT_AMOUNT_NOT_ENOUGH;
+                            return output;
+                        }
+
+                        if (claimPromotion.BonusType == BonusType.Amount)
+                        {
+                            if (claimPromotion.RequiredAmount == 0)
+                            {
+                                throw new Exception("Required Amount can't be 0");
+                            }
+
+                            lockAmount = claimPromotion.RequiredAmount;
+                            bonusAmount = claimPromotion.Bonus;
+                        }
+                        else
+                        {
+                            bonusAmount = Math.Ceiling(claimPromotion.Bonus * amount / 100);
+                            if (claimPromotion.MaxBonus != 0 && bonusAmount > claimPromotion.MaxBonus)
+                            {
+                                bonusAmount = claimPromotion.MaxBonus;
+                                lockAmount = claimPromotion.MaxBonus * 100 / claimPromotion.Bonus;
+                            }
+                        }
+
+                        rollover = (lockAmount + bonusAmount) * (claimPromotion.FullFillType == 1 ? claimPromotion.RollOver : claimPromotion.WinOver);
+                        break;
+                    }
+
+                case PromotionType.Cashback:
+                    var custPromotion = new CustPromotion
+                    {
+                        BonusCode = claimPromotion.BonusCode,
+                        CategoryId = claimPromotion.CategoryId
+                    };
+                    GetCashbackInfo(custId, siteId, currencyId, custPromotion, true);
+                    if (!(custPromotion.canJoin && custPromotion.CashBackDetails?.TotalBonus > claimPromotion.MinPayout))
+                    {
+                        output.result = (int)BonusErrorCode.CALCULATE_CASHBACK_TOTALBONUS_LESS_THEN_MINPAY;
+                        return output;
+                    }
+
+                    bonusAmount = custPromotion.CashBackDetails?.TotalBonus ?? 0;
+                    if (claimPromotion.MaxBonus != 0 && bonusAmount > claimPromotion.MaxBonus)
+                    {
+                        bonusAmount = claimPromotion.MaxBonus;
+                    }
+
+                    rollover = ((lockAmount + bonusAmount) * claimPromotion.RollOver);
+                    lockAmount = 0;
+                    break;
+
+                case PromotionType.FreeBet:
+                    bonusAmount = claimPromotion.Bonus;
+                    rollover = bonusAmount * claimPromotion.RollOver;
+
+                    lockAmount = 0;
+                    break;
+
+                case PromotionType.WalletBonus when claimPromotion.RequiredAmount == 0:
+                    throw new Exception("Required Amount can't be 0");
+
+                case PromotionType.WalletBonus:
+                    {
+                        amount = _walletService.GetBalance(custId);
+
+                        if (amount < claimPromotion.RequiredAmount)
+                        {
+                            output.LockedAmount = claimPromotion.RequiredAmount;
+                            output.result = (int)BonusErrorCode.DEPOSIT_AMOUNT_NOT_ENOUGH;
+                            return output;
+                        }
+
+                        if (claimPromotion.BonusType == BonusType.Amount)
+                        {
+                            bonusAmount = claimPromotion.Bonus;
+                            lockAmount = claimPromotion.RequiredAmount;
+                        }
+                        else
+                        {
+                            bonusAmount = Math.Ceiling(claimPromotion.Bonus * amount / 100);
+                            if (claimPromotion.MaxBonus != 0 && bonusAmount > claimPromotion.MaxBonus)
+                            {
+                                bonusAmount = claimPromotion.MaxBonus;
+                                lockAmount = claimPromotion.MaxBonus * 100 / claimPromotion.Bonus;
+                            }
+                        }
+                        rollover = ((lockAmount + bonusAmount) * claimPromotion.RollOver);
+                        break;
+                    }
+
+                case PromotionType.Rebate:
+                    return output;
+                
+                case PromotionType.ManualBonus:
+                    bonusAmount = amount;
+                    lockAmount = 0;
+                    rollover = amount * claimPromotion.RollOver;
+                    break;
+                
+                case PromotionType.RetentionBonus:
+                    bonusAmount = claimPromotion.Bonus;
+                    lockAmount = 0;         
+                    rollover = bonusAmount * claimPromotion.RollOver;
+                    break;
+
+                default:
+                    output.result = (int)BonusErrorCode.CALCULATE_UNKNOW_PROMOTION_TYPE;
+                    return output;
+            }
+            output.BonusInfo = JsonConvert.SerializeObject(claimPromotion,
+                            new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+            output.ExpiryTime = DateTimeOffset.Now.AddDays(claimPromotion.ExpiryDays).ToUnixTimeSeconds();
+            output.BonusAmount = bonusAmount;
+            output.LockedAmount = lockAmount;
+            output.RollOver = rollover;
+            return output;
+        }
+
+        private int Reward(BonusRewardInput bonusRewardInput, MySqlTransaction trans)
+        {
+            int result;
+            switch (bonusRewardInput.PromotionType)
+            {
+                case PromotionType.FstDeposit:
+                case PromotionType.ReDeposit:
+                case PromotionType.FreeBet:
+                case PromotionType.WalletBonus:
+                case PromotionType.Cashback:
+                case PromotionType.ManualBonus:
+                case PromotionType.RetentionBonus:
+                    {
+
+                        result = BonusReward(bonusRewardInput, trans);
+                        break;
+                    }
+
+                case PromotionType.Rebate:
+                    result = _bonusWalletService.RewardRebate(bonusRewardInput.BonusCode, (int)bonusRewardInput.PromotionType - 5,
+                        bonusRewardInput.CustId, bonusRewardInput.UserName, bonusRewardInput.SiteId, bonusRewardInput.CurrencyId, trans)
+                        ? 1
+                        : 0;
+                    break;
+
+                case PromotionType.Special:
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+            return result;
+        }
+        
+        private int BonusReward(BonusRewardInput bonusRewardInput, MySqlTransaction trans)
+        {
+
+            var p = new DynamicParameters(new
+            {
+                PromotionType = (int)bonusRewardInput.PromotionType,
+                bonusRewardInput.BonusCode,
+                bonusRewardInput.CustId,
+                bonusRewardInput.UserName,
+                bonusRewardInput.CurrencyId,
+                bonusRewardInput.SiteId,
+                bonusRewardInput.BonusInfo,
+                bonusRewardInput.LockedAmount,
+                bonusRewardInput.BonusAmount,
+                bonusRewardInput.ExpiryDays,
+                bonusRewardInput.Memo,
+                bonusRewardInput.Prefix,
+                bonusRewardInput.RefList,
+                AtPage = (int)bonusRewardInput.AtPage
+            });
+            p.Add("TransId", dbType: DbType.String, direction: ParameterDirection.Output);
+            var result = _mainDbClient.Execute("Member_BonusInfo_Ins_V3", trans, p);
+            var transId = p.Get<string>("TransId");
+
+            if (result > 0 && bonusRewardInput.LockedAmount > 0)
+            {
+
+                result = _walletService.SetBalance(bonusRewardInput.CustId, bonusRewardInput.SiteId, bonusRewardInput.UserName, bonusRewardInput.LockedAmount * -1, (int)bonusRewardInput.FinancialType,
+                    bonusRewardInput.SetBalanceMemo, transId,
+                    out _, out _, trans);
+
+                if (result > 0)
+                {
+                    _withdrawalLimitService.SetWithdrawalLimit(bonusRewardInput.CustId, bonusRewardInput.UserName, bonusRewardInput.SiteId, bonusRewardInput.LockedAmount * -1,
+                        null, transId, out _, trans);
+                }
+                else
+                {
+                    return (int)BonusErrorCode.MAINWALLET_AMOUNT_NOT_ENOUGH;
+                }
+            }
+
+            if (result > 0)
+            {
+                var m = Regex.Match(transId, @"\d+");
+                int.TryParse(m.Value, out var bonusId);
+
+                result = _bonusWalletService.RewardBonus(bonusId, bonusRewardInput.CategoryId, bonusRewardInput.TpId, bonusRewardInput.CustId,
+                    bonusRewardInput.SiteId, bonusRewardInput.UserName, bonusRewardInput.BonusAmount, bonusRewardInput.LockedAmount, bonusRewardInput.RollOver, bonusRewardInput.ExpiryTime, (int)bonusRewardInput.FinancialType,
+                    bonusRewardInput.RewardBonusMemo, transId, trans, bonusRewardInput.FullFillType)
+                    ? 1
+                    : 0;
+            }
+
+            if (result > 0 && bonusRewardInput.PromotionType == PromotionType.Cashback)
+            {
+                var offset = 8;
+                if (bonusRewardInput.SiteId == (int)SiteId.Goal123 || bonusRewardInput.SiteId == (int)SiteId.Bwing)
+                {
+                    offset = 7;
+                }
+                var currentTime = DateTime.UtcNow.AddHours(offset);
+                var calculateDate = StartOfWeek(currentTime, DayOfWeek.Monday).ToString("yyyy-MM-dd");
+
+                result = _bonusWalletService.RewardCashBack(
+                    new CustCashBackInput(bonusRewardInput.CustId, bonusRewardInput.BonusCode, bonusRewardInput.CategoryId, calculateDate),
+                    trans);
+            }
+            return result;
         }
 
         public List<CustPromotion> GetPromotionList(CustPromotionRequest request)
@@ -746,7 +1007,7 @@ namespace BonusService.Service.BLL
                 
                 if (promo.PromotionType == PromotionType.Cashback)
                 {
-                    _promotionService.GetCashbackInfo(custId, siteId, currencyId, promo, getCashbackDetail);
+                    GetCashbackInfo(custId, siteId, currencyId, promo, getCashbackDetail);
                 }
             }
         }
@@ -831,7 +1092,7 @@ namespace BonusService.Service.BLL
 
             return mPwd.Success;
         }
-        
+
         public PromotionBySpecialCode GetPromotionBySpecialCode(int siteId, string SpecialCode)
         {
             return _promotionService.GetPromotionBySpecialCode(siteId,SpecialCode);
@@ -845,6 +1106,60 @@ namespace BonusService.Service.BLL
         public BonusInfoByBonusCode GetBonusInfoByBonusCode(int CustId, string BonusCode)
         {
             return _promotionService.GetBonusInfoByBonusCode(CustId, BonusCode);
+        }
+
+        private void GetCashbackInfo(int custId, int siteId, int currencyId, CustPromotion promotion, bool getDetail)
+        {
+            var custInfo = _custInfoService.GetCustInfo(custId);
+            var offset = 8;
+            if (siteId == (int)SiteId.Goal123 || siteId == (int)SiteId.Bwing)
+            {
+                offset = 7;
+            }
+            var currentTime = DateTime.UtcNow.AddHours(offset);
+            var calculateDate = StartOfWeek(currentTime, DayOfWeek.Monday).ToString("yyyy-MM-dd");
+
+            var result = _promotionService.GetCustCashBackCheck(custId, promotion, calculateDate).ToList();
+
+            promotion.isJoin = result.FirstOrDefault()?.Claimed ?? false;
+            promotion.canJoin = result.Any();
+
+            var utcMonday = StartOfWeek(currentTime, DayOfWeek.Monday).AddHours(-offset);
+            var utcSunday = utcMonday.AddDays(7).AddTicks(-1);
+            promotion.PeriodFrom = ((DateTimeOffset)utcMonday).ToUnixTimeSeconds();
+            promotion.PeriodTo = ((DateTimeOffset)utcSunday).ToUnixTimeSeconds();
+
+            if (!getDetail) return;
+            var lastMonday = StartOfWeek(currentTime.AddDays(-7), DayOfWeek.Monday).Date;
+            var lastSunday = lastMonday.AddDays(6);
+            var detail = _promotionService.GetCashBackInfo(custId, promotion, lastMonday, lastSunday).ToList();
+
+            if (detail.Any() && detail.First().TpId == (int)Tp.Saba)
+            {
+                foreach (var d in detail)
+                {
+                    d.TpName = d.CategoryId switch
+                    {
+                        (int)TpCategoryId.Sports => _selLangBll.GetResourceValue("lbl_Cashback_Sports", custInfo.UserLang),
+                        (int)TpCategoryId.Casino => _selLangBll.GetResourceValue("lbl_Cashback_RNG", custInfo.UserLang),
+                        (int)TpCategoryId.Lottery => _selLangBll.GetResourceValue("lbl_Cashback_Lottery", custInfo.UserLang),
+                        (int)TpCategoryId.VirtualSports => _selLangBll.GetResourceValue("lbl_Cashback_Virtual_Sports", custInfo.UserLang),
+                        _ => d.TpName
+                    };
+                }
+            }
+
+            var details = _promotionService.GetCustCashBack(custId, siteId, currencyId, promotion, calculateDate).ToList();
+
+            if (!details.Any()) return;
+            details.First().CashBackDetail = detail;
+            promotion.CashBackDetails = details.First();
+        }
+        
+        public DateTime StartOfWeek(DateTime dateTime, DayOfWeek startOfWeek)
+        {
+            var diff = (7 + (dateTime.DayOfWeek - startOfWeek)) % 7;
+            return dateTime.AddDays(-1 * diff).Date;
         }
     }
 }
