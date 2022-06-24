@@ -38,15 +38,15 @@ namespace BonusService.Service.Workers
                 int timeTraceStart = 0;
                 try
                 {
-                    _logger.LogInformation("Verify Rebate Task Start.");
+                    _logger.LogInformation("VipRebate Wroker：Verify Task Start.");
 
                     var doTaskList = _rebateBll.VerifyRebateTask();
 
-                    _logger.LogInformation($"Verify Rebate Task End. Count = {doTaskList.Count()}");
+                    _logger.LogInformation($"VipRebate Wroker：Verify Task End. Count = {doTaskList.Count()}");
 
                     foreach (var rebateTask in doTaskList)
                     {
-                        _logger.LogInformation($"VipRebate Work Start. SiteId:{rebateTask.SiteId} CurrencyId:{rebateTask.CurrencyId} SpecificDate:{rebateTask.SpecificDate}. ");
+                        _logger.LogInformation($"VipRebate Wroker：Do Task Start. SiteId:{rebateTask.SiteId} CurrencyId:{rebateTask.CurrencyId} SpecificDate:{rebateTask.SpecificDate}. ");
 
                         timeTraceStart = Environment.TickCount;
                         int pageSize = 1000, pageNumber = 1;
@@ -71,7 +71,7 @@ namespace BonusService.Service.Workers
                         _rebateBll.SetVipRebateTaskDone(rebateTask.SiteId, rebateTask.CurrencyId);
                         int spendTime = Environment.TickCount - timeTraceStart;
 
-                        _logger.LogInformation($"VipRebate Work End. SiteId:{rebateTask.SiteId} CurrencyId:{rebateTask.CurrencyId} SpecificDate:{rebateTask.SpecificDate}. \n"
+                        _logger.LogInformation($"VipRebate Wroker：Do Task End. SiteId:{rebateTask.SiteId} CurrencyId:{rebateTask.CurrencyId} SpecificDate:{rebateTask.SpecificDate}. \n"
                         + $"Finish Time (m:s:ms): {spendTime / 60000}:{(spendTime % 60000) / 1000}.{(spendTime % 60000) % 1000}.");
                     }
                 }
