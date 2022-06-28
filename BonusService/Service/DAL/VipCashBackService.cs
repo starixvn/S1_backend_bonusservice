@@ -32,7 +32,7 @@ namespace BonusService.Service.DAL
                 cashBackSettingInput.SiteId,
                 cashBackSettingInput.SettleTime
             });
-            return _mainDbClient.Execute("Service_CashBackSetting_Set", parameter);
+            return _mainDbClient.Execute("Service_CashBackSetting_Set", parameter) >= 0;
         }
         
         public IEnumerable<CashBackPromotionOutput> GetVipCashBackPromotion(CashBackPromotionInput cashBackPromotionInput)
@@ -43,28 +43,6 @@ namespace BonusService.Service.DAL
                 cashBackPromotionInput.PromotionType
             });
             return _reportDbClient.Query<CashBackPromotionOutput>("Service_VipCashBackPromotion_Get", parameter);
-        }
-        
-        public IEnumerable<TpGameTypeOutput> GetTpGameType(string categoryIds)
-        {
-            var parameter = new DynamicParameters();
-            parameter.Add("CategoryIds", categoryIds);
-            return _reportDbClient.Query<TpGameTypeOutput>("Service_TpGameType_Get", parameter);
-        }
-        
-        public bool SetPromotionCashBackSetting(PromotionCashBackSettingInputInsert promotionCashBackSettingInputInsert)
-        {
-            var parameter = new DynamicParameters();
-            parameter.Add("BonusCode", promotionCashBackSettingInputInsert.BonusCode);
-            parameter.Add("CurrencyId", promotionCashBackSettingInputInsert.CurrencyId);
-            parameter.Add("SiteId", promotionCashBackSettingInputInsert.SiteId);
-            parameter.Add("TpId", promotionCashBackSettingInputInsert.TpId);
-            parameter.Add("CategoryId", promotionCashBackSettingInputInsert.CategoryId);
-            parameter.Add("Level", promotionCashBackSettingInputInsert.Level);
-            parameter.Add("Percentage", promotionCashBackSettingInputInsert.Percentage);
-            parameter.Add("Status", promotionCashBackSettingInputInsert.Status);
-            parameter.Add("LastUpdateUser", promotionCashBackSettingInputInsert.LastUpdateUser);
-            return _mainDbClient.Execute("Service_PromotionCashBackSetting_Ins", parameter);
         }
 
         public IEnumerable<PromotionCashBackSettingOutput> GetPromotionCashBackSetting(PromotionCashBackSettingInput promotionCashBackSettingInput)
@@ -113,7 +91,7 @@ namespace BonusService.Service.DAL
             parameter.Add("Percentage", cashBackInfoInput.Percentage);
             parameter.Add("WinlostAmount", cashBackInfoInput.WinlostAmount);
             parameter.Add("BonusAmount", cashBackInfoInput.BonusAmount);
-            return _mainDbClient.Execute("Service_CashBackInfo_Ins", parameter);
+            return _mainDbClient.Execute("Service_CashBackInfo_Ins", parameter) >= 0;
         }
 
         public bool SetCustCashBack(CustCashBackInput custCashBackInput)
@@ -127,7 +105,7 @@ namespace BonusService.Service.DAL
                 custCashBackInput.CalculateDate,
                 custCashBackInput.BonusAmount
             });
-            return _mainDbClient.Execute("Service_CustCashBack_Set", parameter);
+            return _mainDbClient.Execute("Service_CustCashBack_Set", parameter) >= 0;
         }
     }
 }

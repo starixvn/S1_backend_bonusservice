@@ -25,25 +25,30 @@ namespace BonusService.Service.DAL
         }
         public IEnumerable<ReferralInfo> GetReferralSettlement()
         {
-            using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
+            using var conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
             return conn.Query<ReferralInfo>("Service_ReferralSettlement_Get", commandType: CommandType.StoredProcedure);
         }
 
         public int PayoutReferral(IEnumerable<ReferralInfo> referralInfos, out decimal payAmount, out List<ReferralInfo> paidReferralList)
         {
-            int result = 0;
+            var result = 0;
             paidReferralList = new List<ReferralInfo>();
-            using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
+            using var conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
             conn.Open();
             using var trans = conn.BeginTransaction();
             payAmount = 0m;
-            long tc = DateTime.Now.Ticks;
+            var tc = DateTime.Now.Ticks;
 
             foreach (var rr in referralInfos)
             {
                 try
                 {
-                    conn.Execute("Common_ReferralLog_Ins", new { CustId = rr.CustId, CurrencyId = rr.CurrencyId, UserName = rr.UserName, SiteId = rr.SiteId, AgentId = rr.AgentId, ReferralAmount = rr.BonusAmount, Memo = "", RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
+                    conn.Execute("Common_ReferralLog_Ins", new {
+                        rr.CustId,
+                        rr.CurrencyId,
+                        rr.UserName,
+                        rr.SiteId,
+                        rr.AgentId, ReferralAmount = rr.BonusAmount, Memo = "", RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
                     payAmount += rr.BonusAmount;
                     paidReferralList.Add(rr);
                 }
@@ -63,15 +68,15 @@ namespace BonusService.Service.DAL
             if (payAmount > 0)
             {
                 var agent = referralInfos.FirstOrDefault();
-                result = walletService.SetBalance(agent.AgentId, agent.SiteId, agent.AgentName, payAmount, 13, $"Referral Bonus: {payAmount:#,##0.##}", "N/A", out _, out _, conn, trans);
+                result = walletService.SetBalance(agent.AgentId, agent.SiteId, agent.AgentName, payAmount, 13, $"Referral Bonus: {payAmount:#,##0.##}", "N/A", out _, out _, trans);
 
                 if (result > 0)
                 {
-                    conn.Execute("Common_ReferralMLog_Ins", new { CustId = agent.AgentId, CurrencyId = agent.CurrencyId, UserName = agent.AgentName, SiteId = agent.SiteId, ReferralAmount = payAmount, Memo = "", RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
+                    conn.Execute("Common_ReferralMLog_Ins", new { CustId = agent.AgentId, agent.CurrencyId, UserName = agent.AgentName, agent.SiteId, ReferralAmount = payAmount, Memo = "", RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
 
                     var rollOver = 1 * payAmount;
                     if (rollOver > 0)
-                        result = withdrawalLimitService.SetWithdrawalLimit(agent.AgentId, agent.AgentName, agent.SiteId, rollOver, $"Referral Bonus: {rollOver:#,##0.##}", "N/A", out _, conn, trans);
+                        result = withdrawalLimitService.SetWithdrawalLimit(agent.AgentId, agent.AgentName, agent.SiteId, rollOver, $"Referral Bonus: {rollOver:#,##0.##}", "N/A", out _, trans);
 
                     if (result > 0)
                     {

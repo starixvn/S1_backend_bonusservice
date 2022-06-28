@@ -36,16 +36,16 @@ namespace MemberSite.Service.Model
 
         public void SetSelLang(ISelLang selLang)
         {
-            this.SelLang = selLang;
+            SelLang = selLang;
         }
         public string RawErrorCode { get; set; }
         public string RawMessage { get; set; }
         public ApiResult() : this(9000, "", "", "") { }
-        public ApiResult(ISelLang selLang) : this(9000, "", "", "") { this.SelLang = selLang; }
+        public ApiResult(ISelLang selLang) : this(9000, "", "", "") { SelLang = selLang; }
         public ApiResult(int ErrorCode, string Message) : this(ErrorCode, Message, "", "") { }
         public ApiResult(int _ErrorCode, string Message, string RawErrorCode, string RawMessage)
         {
-            this.ErrorCode = _ErrorCode;
+            ErrorCode = _ErrorCode;
             this.Message = Message;
             this.RawErrorCode = RawErrorCode;
             this.RawMessage = RawMessage;
@@ -54,8 +54,8 @@ namespace MemberSite.Service.Model
     public class ApiResult<TData> : ApiResult
     {
         public ApiResult() : this(9000, "",  default) { }
-        public ApiResult(ISelLang selLang) : this(9000, "", default) { this.SelLang = selLang; }
-        public ApiResult(int ErrorCode, string Message, TData data) : base(ErrorCode, Message) { this.Data = data; }
+        public ApiResult(ISelLang selLang) : this(9000, "", default) { SelLang = selLang; }
+        public ApiResult(int ErrorCode, string Message, TData data) : base(ErrorCode, Message) { Data = data; }
         public TData Data { get; set; }
     }
 

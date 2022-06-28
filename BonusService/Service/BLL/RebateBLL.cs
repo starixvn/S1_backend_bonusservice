@@ -48,7 +48,7 @@ namespace BonusService.Service.BLL
         }
         public int PayoutVipRebate(int siteId, int custId, string userName, VipRebateInfo vipRebateInfo, IEnumerable<VipRebateTpBetRecord> vipRebateTpBetRecords, IEnumerable<RebatePayoutLimit> rebatePayoutLimits)
         {
-            var result = _vipRebateService.PayoutVipRebate(siteId, custId, userName, vipRebateInfo, vipRebateTpBetRecords, out decimal payAmount, out Dictionary<int, decimal> rebateLogList, out Dictionary<int, decimal> rebateCLogList, rebatePayoutLimits);
+            var result = _vipRebateService.PayoutVipRebate(siteId, custId, userName, vipRebateInfo, vipRebateTpBetRecords, out var payAmount, out var rebateLogList, out var rebateCLogList, rebatePayoutLimits);
 
             if (result > 0)
             {
@@ -93,7 +93,7 @@ namespace BonusService.Service.BLL
 
         public Dictionary<int, string> GetTpCategoryList()
         {
-            string key = $"TpCategory";
+            var key = $"TpCategory";
             return _cacheHelper.TryGetOrCreate(key,
                 new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(10)),
                 i => _rebateService.GetTpCategoryList().ToDictionary(x => x.Id, x => x.Name));
@@ -101,7 +101,7 @@ namespace BonusService.Service.BLL
 
         public IEnumerable<BonusCashBackGames> GetBonusCashBackGamesInfo(int CashbackId, int SiteId)
         {
-            string key = $"GetBonusCashBackGamesInfo_{CashbackId}_{SiteId}";
+            var key = $"GetBonusCashBackGamesInfo_{CashbackId}_{SiteId}";
             return _cacheHelper.TryGetOrCreate(key,
                 new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(1)),
                 i => _rebateService.GetBonusCashBackGamesInfo(CashbackId, SiteId));
