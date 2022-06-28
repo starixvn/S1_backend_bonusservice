@@ -3,11 +3,8 @@ using BonusService.Service.Library;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
 using MemberSite.Service.Model;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace BonusService.Service.BLL
 {
@@ -15,24 +12,14 @@ namespace BonusService.Service.BLL
     {
         private readonly CustInfoService _custInfoService;
         private readonly BonusAPIService _bonusAPIService;
-        private readonly IConfiguration _configuration;
-        private readonly CourierAdapter _courierAdapter;
         private readonly SelLangBLL _selLangBll;
         private readonly MessageService _messageService;
         private readonly Currency _currency;
-        private readonly string _apiUrl;
-        private readonly Dictionary<int, bool> isConvert = new Dictionary<int, bool>()
-        {
-            {51,false },{15,false }
-        };
-        
+
         public  BonusAPIBLL(IServiceProvider provider)
         {
             _custInfoService = provider.GetRequiredService<CustInfoService>();
             _bonusAPIService = provider.GetRequiredService<BonusAPIService>();
-            _configuration = provider.GetRequiredService<IConfiguration>();
-            _apiUrl = _configuration.GetValue<string>("TpService");
-            _courierAdapter = provider.GetRequiredService<CourierAdapter>();
             _selLangBll = provider.GetRequiredService<SelLangBLL>();
             _messageService = provider.GetRequiredService<MessageService>();
             _currency = provider.GetRequiredService<Currency>();

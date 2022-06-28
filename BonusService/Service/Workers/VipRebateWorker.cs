@@ -49,7 +49,7 @@ namespace BonusService.Service.Workers
                         _logger.LogInformation($"VipRebate Wroker：Do Task Start. SiteId:{rebateTask.SiteId} CurrencyId:{rebateTask.CurrencyId} SpecificDate:{rebateTask.SpecificDate}. ");
 
                         timeTraceStart = Environment.TickCount;
-                        int pageSize = 1000, pageNumber = 1; 
+                        int pageSize = 1000, pageNumber = 1;
                         var isRemain = true;
                         var rebatePayoutLimit = _rebateBll.GetRebatePayoutLimit();
 
@@ -67,7 +67,6 @@ namespace BonusService.Service.Workers
                                 }
                             }
                         }
-
                         _rebateBll.SetVipRebateTaskDone(rebateTask.SiteId, rebateTask.CurrencyId);
                         int spendTime = Environment.TickCount - timeTraceStart;
 

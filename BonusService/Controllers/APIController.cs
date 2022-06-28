@@ -1,6 +1,5 @@
 ﻿using BonusService.Service.BLL;
 using BonusService.Service.Extensions;
-using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
 using MemberSite.Service.Model;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +9,8 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using BonusService.Service.Model;
+using MySql.Data.MySqlClient;
 
 namespace BonusService.Controllers
 {
@@ -18,14 +19,19 @@ namespace BonusService.Controllers
     public class APIController : ControllerBase
     {
         private readonly BonusAPIBLL _bonusAPIBLL;
-        private readonly BonusAPIBLLV2 _bonusAPIBLLV2;
+        private readonly PromotionBll _promotionBll;
         private readonly ILogger<APIController> _logger;
 
-        public APIController(IServiceProvider provider, ILogger<APIController> logger)
+        public APIController(IServiceProvider provider)
         {
             _bonusAPIBLL = provider.GetRequiredService<BonusAPIBLL>();
-            _bonusAPIBLLV2 = provider.GetRequiredService<BonusAPIBLLV2>();
-            this._logger = logger;
+            _promotionBll = provider.GetRequiredService<PromotionBll>();
+            _logger = provider.GetRequiredService<ILogger<APIController>>();
+        }
+        
+        public class SpecialCodeResponse
+        {
+            public string BonusCode { get; set; }
         }
 
         public class SetAdjustBonusAsyncReq
@@ -56,9 +62,9 @@ namespace BonusService.Controllers
                     result.Message = "Please complete your profile and verify your phone number to enjoy our promotions.";
                     return result;
                 }
-                string Memo = JsonConvert.SerializeObject(new { Operator = setAdjustBonusReq.Operator }); 
+                var Memo = JsonConvert.SerializeObject(new { setAdjustBonusReq.Operator }); 
 
-                result = await _bonusAPIBLLV2.SetAdjustmentBonusV2Async(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode, setAdjustBonusReq.Operator, Memo, setAdjustBonusReq.Amount, setAdjustBonusReq.PromotionType);
+                result = await _promotionBll.SetAdjustmentBonusV2Async(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode, Memo, setAdjustBonusReq.Amount, setAdjustBonusReq.PromotionType);
 
             }
             catch (Exception ex)
@@ -69,7 +75,7 @@ namespace BonusService.Controllers
             }
             if (result.ErrorCode != 0)
             {
-                _logger.LogError($"SetAdjustBonusAsync { Newtonsoft.Json.JsonConvert.SerializeObject(result)}");
+                _logger.LogInformation($"SetAdjustBonusAsync { JsonConvert.SerializeObject(result)}");
             }
             return result;
         }
@@ -85,7 +91,7 @@ namespace BonusService.Controllers
         [HttpPost]
         public ApiResult SetVerificationReward(SetVerificationRewardReq verificationRewardReq)
         {
-            OTPTypeEnum item = OTPTypeEnum.SMS;
+            var item = OTPTypeEnum.SMS;
             if(verificationRewardReq.OTPType == 1)
                 item = OTPTypeEnum.Email;
 
@@ -95,7 +101,7 @@ namespace BonusService.Controllers
         [HttpPost]
         public ApiResult CheckRewardCondination(SetVerificationRewardReq verificationRewardReq)
         {
-            OTPTypeEnum item = OTPTypeEnum.SMS;
+            var item = OTPTypeEnum.SMS;
             if (verificationRewardReq.OTPType == 1)
                 item = OTPTypeEnum.Email;
 
@@ -108,7 +114,7 @@ namespace BonusService.Controllers
             public int CustId { set; get; }
             public string custIP { set; get; }
             public decimal? LockedAmount { set; get; }
-            public int? DeviceType { set; get; }
+            public int DeviceType { set; get; }
         }
 
         [HttpPost]
@@ -117,25 +123,259 @@ namespace BonusService.Controllers
             var apiResult = new ApiResult();
             try
             {
-                
-                int? deviceType = 1;
-                if (promotionReq.DeviceType != null)
-                {
-                    deviceType = promotionReq.DeviceType;
-                }
                 var lockedAmount = promotionReq.LockedAmount ?? 0;
                 
-                apiResult = await _bonusAPIBLLV2.SetClaimPromotionV2Async(promotionReq.CustId, promotionReq.BonusCode, promotionReq.custIP, lockedAmount, deviceType, BonusInfoAtPage.Promotion,true);
+                apiResult = await _promotionBll.SetClaimPromotionV2Async(promotionReq.CustId, promotionReq.BonusCode, promotionReq.custIP, lockedAmount, promotionReq.DeviceType, BonusInfoAtPage.Promotion,true);
             }
             catch (Exception ex)
             {
                 apiResult.RawMessage = ex.Message;
                 apiResult.Message = ex.Message;
+                _logger.LogError(ex, MethodExtension.GetCurrentAsyncMethod());
+            }
+
+            return apiResult;
+        }
+        
+        [HttpPost]
+        public ApiResult<List<CustPromotion>> GetPromotionListV3(CustPromotionRequest request)
+        {
+            var result = new ApiResult<List<CustPromotion>>
+            {
+                ErrorCode = 0
+            };
+            
+            try
+            {
+                result.Data = _promotionBll.GetPromotionList(request);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, MethodExtension.GetCurrentMethod());
+            }
+
+            return result;
+        }
+        
+        [HttpPost]
+        public ApiResult<CustPromotion> GetPromotionDetail(PromotionDetailRequest request)
+        {
+            var result = new ApiResult<CustPromotion>
+            {
+                ErrorCode = 0
+            };
+
+            try
+            {
+                result.Data = _promotionBll.GetPromotionDetail(request);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, MethodExtension.GetCurrentMethod());
+            }
+
+            return result;
+        }
+
+        [HttpPost]
+        public ApiResult<List<CustPromotion>> GetSpecialPromotionListV2(CustPromotionRequest request)
+        {
+            var result = new ApiResult<List<CustPromotion>>
+            {
+                ErrorCode = 0
+            };
+            
+            try
+            {
+                result.Data = _promotionBll.GetSpecialPromotionList(request);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, MethodExtension.GetCurrentMethod());
+            }
+
+            return result;
+        }
+        
+        public ApiResult<List<CustPromotion>> GetDepositPromotionList(CustPromotionRequest request)
+        {
+            var result = new ApiResult<List<CustPromotion>>
+            {
+                ErrorCode = 0
+            };
+           
+            try
+            {
+                result.Data = _promotionBll.GetDepositPromotionList(request);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, MethodExtension.GetCurrentMethod());
+            }
+
+            return result;
+        }
+        
+        [HttpPost]
+        public ApiResult SetSpecialCode(SpecialCodeRequest request)
+        {
+            var result = new ApiResult
+            {
+                ErrorCode = (int)SpecialCode.SpecialCodeError
+            };
+
+            try
+            {
+                if (!_promotionBll.CheckSpecialCode(request.SpecialCode))
+                {
+                    result.ErrorCode = (int)SpecialCode.SpecialCodeError;
+                }
+                else if (_promotionBll.CheckScratchCardCode(request.SpecialCode.ToUpper()))
+                {
+                    result.ErrorCode = _promotionBll.SetScratchCardCode(request);
+                }
+                else
+                {
+                    if (_promotionBll.SetSpecialCode(request))
+                    {
+                        result.ErrorCode = (int)SpecialCode.Success;
+                    }
+                    else
+                    {
+                        result.ErrorCode = (int)SpecialCode.SpecialCodeError;
+                    }
+                }
+            }
+            catch (MySqlException mySqlEx)
+            {
+                if (mySqlEx.Number == (int)MySqlErrorCode.DuplicateKeyEntry)/*Duplicate for key 'PRIMARY'*/
+                {
+                    result.ErrorCode = (int)SpecialCode.Success;
+                }
+                else
+                {
+                    result.ErrorCode = 9000;
+                    result.Message = mySqlEx.ToString();
+                    _logger.LogError(mySqlEx, MethodExtension.GetCurrentMethod());
+                }
+            }
+            catch (Exception ex)
+            {
+                result.ErrorCode = 9000;
+                result.Message = ex.ToString();
+                _logger.LogError(ex, MethodExtension.GetCurrentMethod());
+            }
+
+            return result;
+        }
+
+        [HttpPost]
+        public ApiResult<SpecialCodeResponse> CheckDepositSpecialCode(SpecialCodeRequest request)
+        {
+            var apiResult = new ApiResult<SpecialCodeResponse>();
+
+            try
+            {
+                //檢核SpecialCode格式是否正確
+                var isSpecialCode = _promotionBll.CheckSpecialCode(request.SpecialCode);
+                var isScratchCardCode = _promotionBll.CheckScratchCardCode(request.SpecialCode.ToUpper());
+                if (!isSpecialCode && !isScratchCardCode)
+                {
+                    apiResult.ErrorCode = (int)SpecialCode.SpecialCodeErrorForCheck;
+                    return apiResult;
+                }
+
+                if (isScratchCardCode)
+                {
+                    //檢核是否真有這筆ScratchCardCode
+                    var promotion =
+                        _promotionBll.GetPromotionBySpecialScratchCard(request.SiteId, request.SpecialCode);
+                    if (promotion != null)
+                    {
+                        if (promotion.PromotionType != (int)PromotionType.FstDeposit &&
+                            promotion.PromotionType != (int)PromotionType.ReDeposit)
+                        {
+                            apiResult.ErrorCode = (int)SpecialCode.SpecialCodeErrorForCheck;
+                            return apiResult;
+                        }
+
+                        if (promotion.CustId != 0 && promotion.CustId != request.CustId)
+                        {
+                            apiResult.ErrorCode = (int)SpecialCode.PromoCodeHasBeenUsed;
+                            return apiResult;
+                        }
+
+                        //寫入CustSpecialCode Table,並檢核是否輸入相同ScratchCard過
+                        //有輸入相同ScratchCard過
+                        if (_promotionBll.SetScratchCardCode(request) != 0)
+                        {
+                            //檢核是否領過這個BonusCode
+                            if (_promotionBll.GetBonusInfoByBonusCode(request.CustId, promotion.BonusCode) != null)
+                            {
+                                apiResult.ErrorCode = (int)SpecialCode.PromoCodeHasBeenUsed;
+                                return apiResult;
+                            }
+
+                            apiResult.ErrorCode = (int)SpecialCode.SpecialCodeErrorForCheck;
+                            return apiResult;
+                        }
+
+                        apiResult.ErrorCode = (int)SpecialCode.Success;
+                        apiResult.Data = new SpecialCodeResponse() { BonusCode = promotion.BonusCode };
+
+                        return apiResult;
+                    }
+                }
+
+                if (!isSpecialCode)
+                {
+                    apiResult.ErrorCode = (int)SpecialCode.SpecialCodeErrorForCheck;
+                    return apiResult;
+                }
+
+                //檢核是否真有這筆specialCode
+                var promotionBySpecialCode =
+                    _promotionBll.GetPromotionBySpecialCode(request.SiteId, request.SpecialCode);
+                if (promotionBySpecialCode != null)
+                {
+                    if (promotionBySpecialCode.PromotionType != (int)PromotionType.FstDeposit &&
+                        promotionBySpecialCode.PromotionType != (int)PromotionType.ReDeposit)
+                    {
+                        apiResult.ErrorCode = (int)SpecialCode.SpecialCodeErrorForCheck;
+                        return apiResult;
+                    }
+
+                    //寫入CustSpecialCode Table,並檢核是否輸入相同specialCode過
+                    //有輸入相同specialCode過
+                    if (!_promotionBll.SetSpecialCode(request))
+                    {
+                        //檢核是否領過這個BonusCode
+                        if (_promotionBll.GetBonusInfoByBonusCode(request.CustId, promotionBySpecialCode.BonusCode) !=
+                            null)
+                        {
+                            apiResult.ErrorCode = (int)SpecialCode.PromoCodeHasBeenUsed;
+                            return apiResult;
+                        }
+
+                        apiResult.ErrorCode = (int)SpecialCode.SpecialCodeErrorForCheck;
+                        return apiResult;
+                    }
+
+                    apiResult.ErrorCode = (int)SpecialCode.Success;
+                    apiResult.Data = new SpecialCodeResponse() { BonusCode = promotionBySpecialCode.BonusCode };
+                    return apiResult;
+                }
+
+                apiResult.ErrorCode = (int)SpecialCode.SpecialCodeErrorForCheck;
+            }
+            catch (Exception e)
+            {
+                apiResult.ErrorCode = 9000;
+                apiResult.Message = e.ToString();
+                _logger.LogError(e, MethodExtension.GetCurrentMethod());
             }
 
             return apiResult;
         }
     }
-
-
 }

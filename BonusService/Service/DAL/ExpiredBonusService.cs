@@ -1,7 +1,6 @@
 ﻿using BonusService.Service.Model;
 using Dapper;
 using Microsoft.Extensions.Configuration;
-using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,7 +44,7 @@ namespace BonusService.Service.DAL
         
         public int RefundExpiredBonus(ExpiredBonus expiredBonus, string memo)
         {
-            using var conn = new MySqlConnection(_connectionString);
+            using var conn = _mainDbClient.GetMySqlConnection();
             conn.Open();
             using var trans = conn.BeginTransaction();
             var result = 0;
@@ -53,13 +52,13 @@ namespace BonusService.Service.DAL
             {
                 result = _walletService.SetBalance(expiredBonus.CustId, expiredBonus.SiteId, expiredBonus.UserName,
                     expiredBonus.Refund, (int)FinancialType.CancelledBonus, memo,
-                    expiredBonus.BonusId.ToString(), out _, out _, conn, trans);
+                    expiredBonus.BonusId.ToString(), out _, out _, trans);
                 
                 if (result >= 0)
                 {
                     result = _withdrawalLimitService.SetWithdrawalLimit(expiredBonus.CustId, expiredBonus.UserName,
                         expiredBonus.SiteId, expiredBonus.Refund, "CancelBonus", expiredBonus.BonusId.ToString(),
-                        out _, conn, trans);
+                        out _, trans);
                 }
             }
 

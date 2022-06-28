@@ -66,8 +66,8 @@ namespace BonusService.Service.DAL
         }
         public int PayoutVipRebate(int siteId, VipRebateInfo rebateInfo, IEnumerable<VipRebateTpBetRecord> rebateTpBetRecords, out decimal payAmount, out Dictionary<int, decimal> rebateLogList, out Dictionary<int, decimal> rebateCLogList, IEnumerable<RebatePayoutLimit> rebatePayoutLimits)
         {
-            int result = 0;
-            using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
+            var result = 0;
+            using var conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
             conn.Open();
             using var trans = conn.BeginTransaction();
             payAmount = 0m;
@@ -75,7 +75,7 @@ namespace BonusService.Service.DAL
             rebateLogList = new Dictionary<int, decimal>();
             rebateCLogList = new Dictionary<int, decimal>();
 
-            long tc = DateTime.Now.Ticks;
+            var tc = DateTime.Now.Ticks;
 
             foreach (var rr in rebateTpBetRecords)
             {
@@ -133,7 +133,7 @@ namespace BonusService.Service.DAL
 
             if (payAmount > 0)
             {
-                result = walletService.SetBalance(rebateInfo.CustId, siteId, rebateInfo.UserName, payAmount, 17 - (int)promotionType, $"Rebate: {payAmount:#,##0.##}", "", out _, out _, conn, trans);
+                result = walletService.SetBalance(rebateInfo.CustId, siteId, rebateInfo.UserName, payAmount, 17 - (int)promotionType, $"Rebate: {payAmount:#,##0.##}", "", out _, out _, trans);
 
                 if (result > 0)
                 {

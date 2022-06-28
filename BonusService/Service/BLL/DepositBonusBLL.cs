@@ -1,8 +1,6 @@
 ﻿using BonusService.Service.DAL;
 using BonusService.Service.Model;
-using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
-using BonusService.Service.Library;
 using BonusService.Service.Model.enums;
 using Microsoft.Extensions.Logging;
 
@@ -11,32 +9,23 @@ namespace BonusService.Service.BLL
     public class DepositBonusBLL
     {
         private readonly DepositBonusService depositBonusService;
-        private readonly string apiUrl;
-        private readonly CourierAdapter courierAdapter;
-        private readonly BonusAPIBLL bonusAPIBLL;
-        private readonly BonusAPIServiceV2 bonusAPIServiceV2;
+        private readonly PromotionService _promotionService;
         private readonly ILogger<DepositBonusBLL> _logger;
 
-        public DepositBonusBLL(DepositBonusService depositBonusService, IConfiguration configuration, CourierAdapter courierAdapter, BonusAPIBLL bonusAPIBLL, BonusAPIServiceV2 bonusAPIServiceV2, ILogger<DepositBonusBLL> logger)
+        public DepositBonusBLL(DepositBonusService depositBonusService, PromotionService promotionService, ILogger<DepositBonusBLL> logger)
         {
             this.depositBonusService = depositBonusService;
-            this.apiUrl = configuration.GetValue<string>("TpService");
-            this.courierAdapter = courierAdapter;
-            this.bonusAPIBLL = bonusAPIBLL;
-            this.bonusAPIServiceV2 = bonusAPIServiceV2;
+            _promotionService = promotionService;
             _logger = logger;
         }
-        public IEnumerable<DepositBonus> GetDepositBonusQueue()
-        {
-            return depositBonusService.GetDepositBonusQueue();
-        }
+
         public IEnumerable<DepositBonusCustList> GetDepositBonusQueueCustList()
         {
             return depositBonusService.GetDepositBonusQueueCustList();
         }
-        public IEnumerable<DepositBonus> GetDepositBonusQueueByCustId(int custId, bool useMainDb = false)
+        public IEnumerable<DepositBonus> GetDepositBonusQueueByCustId(int custId, bool useMainDb)
         {
-                return bonusAPIServiceV2.GetDepositBonusQueueByCustId(custId, useMainDb);
+                return _promotionService.GetDepositBonusQueueByCustId(custId, useMainDb);
         }
 
         public void CheckDepositBonusExpired()
@@ -45,7 +34,7 @@ namespace BonusService.Service.BLL
         }
         public string GetDepositBonusQueueStatusComment(int status)
         {
-            string Comment = "UnKnowStatus";
+            var Comment = "UnKnowStatus";
             switch (status)
             {
                 case (int)DepositBonusQueueStatus.Undo:
@@ -78,7 +67,7 @@ namespace BonusService.Service.BLL
         }
         public int SetDepositBonusFinish(string transId, int custId)
         {
-            var BonusList = GetDepositBonusQueueByCustId(custId,true); //改變狀態用mainDb取得資料，避免資料不同步
+            var BonusList = GetDepositBonusQueueByCustId(custId, true); //改變狀態用mainDb取得資料，避免資料不同步
             foreach (var depositBonus in BonusList)
             {
                 if (depositBonus.TransId == transId)

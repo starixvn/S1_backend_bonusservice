@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using BonusService.Service.Library;
 using BonusService.Service.Model.enums;
-using Dapper;
 using MemberSite.Service.Model;
 using Microsoft.Extensions.DependencyInjection;
 
