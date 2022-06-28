@@ -132,7 +132,7 @@ namespace BonusService.Service.DAL
 
             if (payAmount > 0)
             {
-                result = walletService.SetBalance(rebateInfo.CustId, siteId, rebateInfo.UserName, payAmount, 17 - (int)promotionType, $"Rebate:{payAmount:#,##0.##}", "", out _, out _, trans);
+                result = walletService.SetBalance(rebateInfo.CustId, siteId, rebateInfo.UserName, payAmount, 17 - (int)promotionType, $"Rebate: {payAmount:#,##0.##}", "", out _, out _, trans);
 
                 if (result > 0)
                 {

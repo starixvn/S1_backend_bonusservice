@@ -166,7 +166,7 @@
         DormantAccountLock = 1,
         Bonus = 2
     }
-    
+
     public enum SpecialCode
     {
         Success = 0,

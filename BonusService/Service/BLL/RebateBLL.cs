@@ -99,7 +99,7 @@ namespace BonusService.Service.BLL
                 //Step4：檢查最近一次執行時間是否符合
                 //LastCurrencySettledTime 是 Null，代表第一次執行排程
                 //LastCurrencySettledTime.Date = CurrencyNowTime.Date，上次執行時間日期等於幣別時區時間日期，不可再執行(原邏輯)
-                if (task.LastCurrencySettledTime != null)
+                if (task.LastCurrencySettledTime !=  null)
                 {
                     if (task.LastCurrencySettledTime.Date == task.CurrencyNowTime.Date)
                     {
@@ -129,7 +129,7 @@ namespace BonusService.Service.BLL
         }
         public int PayoutVipRebate(int siteId, VipRebateInfo vipRebateInfo, IEnumerable<VipRebateTpBetRecord> vipRebateTpBetRecords, IEnumerable<RebatePayoutLimit> rebatePayoutLimits)
         {
-            var result = _vipRebateService.PayoutVipRebate(siteId, vipRebateInfo, vipRebateTpBetRecords, out decimal payAmount, out Dictionary<int, decimal> rebateLogList, out Dictionary<int, decimal> rebateCLogList, rebatePayoutLimits);
+            var result = _vipRebateService.PayoutVipRebate(siteId, vipRebateInfo, vipRebateTpBetRecords, out decimal payAmount, out var rebateLogList, out var rebateCLogList, rebatePayoutLimits);
 
             if (result > 0)
             {
