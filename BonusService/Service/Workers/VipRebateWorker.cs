@@ -67,7 +67,6 @@ namespace BonusService.Service.Workers
                                 }
                             }
                         }
-
                         _rebateBll.SetVipRebateTaskDone(rebateTask.SiteId, rebateTask.CurrencyId);
                         int spendTime = Environment.TickCount - timeTraceStart;
 
