@@ -28,13 +28,13 @@ namespace BonusService.Service.DAL
 
         public IEnumerable<TpCategory> GetTpCategoryList()
         {
-            using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
+            using var conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport"));
             return conn.Query<TpCategory>("Common_TpCategory_Get", commandType: CommandType.StoredProcedure);
         }
 
         public IEnumerable<BonusCashBackGames> GetBonusCashBackGamesInfo(int CashbackId, int SiteId)
         {
-            using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport")))
+            using (var conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport")))
             {
                 return conn.Query<BonusCashBackGames>("Service_BonusCashBackGames_Get", new { CashbackId, SiteId }, commandType: CommandType.StoredProcedure);
             }
@@ -42,7 +42,7 @@ namespace BonusService.Service.DAL
 
         public IEnumerable<TpBetRecord> GetTpBetRecordInfo(long StartDate, long EndDate, int SiteId, int GameType)
         {
-            using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport")))
+            using (var conn = new MySqlConnection(configuration.GetConnectionString("ConnectionStringReport")))
             {
                 return conn.Query<TpBetRecord>("Service_BonusCashBackTpBetRecord_Get", new { StartDate, EndDate, SiteId, GameType }, commandType: CommandType.StoredProcedure);
             }
@@ -52,18 +52,18 @@ namespace BonusService.Service.DAL
         {
             var p = new DynamicParameters(new { bonusCashBackInfo.CustId, bonusCashBackInfo.CalculationDay, bonusCashBackInfo.WinlostAmountCountCalculationTotal });
             p.Add("WinlostAmount", dbType: DbType.Decimal, direction: ParameterDirection.Output);
-            int result = conn.Execute("Service_BonusInfoCashBack_Set", p, transaction: trans, commandType: CommandType.StoredProcedure);
+            var result = conn.Execute("Service_BonusInfoCashBack_Set", p, transaction: trans, commandType: CommandType.StoredProcedure);
             WinlostAmount = p.Get<decimal>("WinlostAmount");
             return result;
         }
 
         public int InsBonusCashBack(BonusCashBackInfoList bonusCashBackInfo)
         {
-            int result = 0;
+            var result = 0;
             byte is1stDepoist = 0;
             decimal afterAmount = 0;
 
-            using (MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString")))
+            using (var conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString")))
             {
                 conn.Open();
                 using var trans = conn.BeginTransaction();
@@ -95,16 +95,16 @@ namespace BonusService.Service.DAL
                         memo = "ReCalculationTotal";
                     }
                     WinlostAmountCountCalculationTotal = bonusCashBackInfo.WinlostAmountCountCalculationTotal - WinlostAmountCountCalculationTotal;
-                    decimal WithdrawBonusCashBack = WinlostAmountCountCalculationTotal * bonusCashBackInfo.WithdrawCondition;
+                    var WithdrawBonusCashBack = WinlostAmountCountCalculationTotal * bonusCashBackInfo.WithdrawCondition;
 
-                    result = walletService.SetBalance(bonusCashBackInfo.CustId, bonusCashBackInfo.SiteId, bonusCashBackInfo.UserName, WinlostAmountCountCalculationTotal, 7, memo, null, out afterAmount, out is1stDepoist, conn, trans);
+                    result = walletService.SetBalance(bonusCashBackInfo.CustId, bonusCashBackInfo.SiteId, bonusCashBackInfo.UserName, WinlostAmountCountCalculationTotal, 7, memo, null, out afterAmount, out is1stDepoist, trans);
 
                     if (result > 0)
                     {
                         string BonusInfo = null;
                         string Memo = null;
-                        string Prefix = $"B{common.GetEnv()}";
-                        int ExpiryDays = 3;
+                        var Prefix = $"B{common.GetEnv()}";
+                        var ExpiryDays = 3;
 
                         var p = new DynamicParameters(new { PromotionType = 4, BonusCode = "CashBack", bonusCashBackInfo.CustId, bonusCashBackInfo.UserName, bonusCashBackInfo.CurrencyId, bonusCashBackInfo.SiteId, BonusInfo, LockedAmount = afterAmount, BonusAmount = bonusCashBackInfo.WinlostAmountCountCalculationTotal, ExpiryDays, Memo, bonusCashBackInfo.CalculationDay, Prefix });
                         p.Add("BonusId", dbType: DbType.Int32, direction: ParameterDirection.Output);
@@ -115,7 +115,7 @@ namespace BonusService.Service.DAL
                         {
                             var TransId = p.Get<string>("TransId");
                             decimal withdrawalLimit = 0;
-                            result = withdrawalLimitService.SetWithdrawalLimit(bonusCashBackInfo.CustId, bonusCashBackInfo.UserName, bonusCashBackInfo.SiteId, WithdrawBonusCashBack, $"BonusCashBack: {WithdrawBonusCashBack}", TransId, out withdrawalLimit, conn, trans);
+                            result = withdrawalLimitService.SetWithdrawalLimit(bonusCashBackInfo.CustId, bonusCashBackInfo.UserName, bonusCashBackInfo.SiteId, WithdrawBonusCashBack, $"BonusCashBack: {WithdrawBonusCashBack}", TransId, out withdrawalLimit, trans);
                         }
                         if (result > 0)
                         {
