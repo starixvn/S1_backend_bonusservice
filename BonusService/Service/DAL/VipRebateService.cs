@@ -43,7 +43,7 @@ namespace BonusService.Service.DAL
                 _CurrencyTimeZone = timeZone,
                 _Is14 = is14
             };
-            return _reportDbClient.Query<VipRebateTpBetRecord>("Service_VipRebateTpBetRecord_Get_V3", p);
+            return _reportDbClient.Query<VipRebateTpBetRecord>("Service_VipRebateTpBetRecord_Get_V3", new DynamicParameters(p));
         }
         public IEnumerable<VipRebateInfo> GetVipRebateCustList(int siteId, int currencyId, int periodType, DateTime specificDate, string timeZone, int pageNumber, int pageSize)
         {
@@ -57,7 +57,7 @@ namespace BonusService.Service.DAL
                 _PageNumber = pageNumber,
                 _PageSize = pageSize
             };
-            return _reportDbClient.Query<VipRebateInfo>("Service_VipRebateCustList_Get_V3", p);
+            return _reportDbClient.Query<VipRebateInfo>("Service_VipRebateCustList_Get_V3", new DynamicParameters(p));
         }
         public IEnumerable<RebateTask> GetVipRebateTask()
         {
@@ -66,7 +66,7 @@ namespace BonusService.Service.DAL
         public int PayoutVipRebate(int siteId, VipRebateInfo rebateInfo, IEnumerable<VipRebateTpBetRecord> rebateTpBetRecords, out decimal payAmount, out Dictionary<int, decimal> rebateLogList, out Dictionary<int, decimal> rebateCLogList, IEnumerable<RebatePayoutLimit> rebatePayoutLimits)
         {
             var result = 0;
-            using var conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
+            using var conn = _mainDbClient.GetMySqlConnection();
             conn.Open();
             using var trans = conn.BeginTransaction();
             payAmount = 0m;
@@ -171,8 +171,7 @@ namespace BonusService.Service.DAL
         }
         public int SetVipRebateTaskDone(int siteId, int currencyId)
         {
-            using MySqlConnection conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
-            return conn.Execute("Service_VipRebateTaskDone_Set_V2", new { _SiteId = siteId, _CurrencyId = currencyId }, commandType: CommandType.StoredProcedure);
+            return _mainDbClient.Execute("Service_VipRebateTaskDone_Set_V2", new DynamicParameters(new { _SiteId = siteId, _CurrencyId = currencyId }));
         }
     }
 }
