@@ -48,7 +48,7 @@ namespace BonusService.Service.Workers
                     {
                         _logger.LogInformation($"VipRebate Wroker：Do Task Start. SiteId:{rebateTask.SiteId} CurrencyId:{rebateTask.CurrencyId} SpecificDate:{rebateTask.SpecificDate}. ");
 
-                        var sw = Stopwatch.StartNew(); 
+                        var sw = Stopwatch.StartNew();
                         int pageSize = 1000, pageNumber = 1;
                         var isRemain = true;
                         var rebatePayoutLimit = _rebateBll.GetRebatePayoutLimit();
@@ -70,7 +70,7 @@ namespace BonusService.Service.Workers
                         _rebateBll.SetVipRebateTaskDone(rebateTask.SiteId, rebateTask.CurrencyId);
 
                         _logger.LogInformation($"VipRebate Wroker：Do Task End. SiteId:{rebateTask.SiteId} CurrencyId:{rebateTask.CurrencyId} SpecificDate:{rebateTask.SpecificDate}. \n"
-                        + $"Finish Time (m:s:ms): {sw.Elapsed.TotalMilliseconds / 60000}:{(sw.Elapsed.TotalMilliseconds % 60000) / 1000}.{(sw.Elapsed.TotalMilliseconds % 60000) % 1000}.");
+                        + $"Finish Time (m:s:ms): {Math.Round(sw.Elapsed.TotalMilliseconds / 60000)}:{Math.Round((sw.Elapsed.TotalMilliseconds % 60000) / 1000)}.{Math.Round((sw.Elapsed.TotalMilliseconds % 60000) % 1000)}.");
                     }
                 }
                 catch (Exception ex)
