@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -35,7 +36,6 @@ namespace BonusService.Service.Workers
             if (execCount == 1)
             {
                 bool isError = false;
-                int timeTraceStart = 0;
                 try
                 {
                     _logger.LogInformation("VipRebate Wroker：Verify Task Start.");
@@ -48,7 +48,7 @@ namespace BonusService.Service.Workers
                     {
                         _logger.LogInformation($"VipRebate Wroker：Do Task Start. SiteId:{rebateTask.SiteId} CurrencyId:{rebateTask.CurrencyId} SpecificDate:{rebateTask.SpecificDate}. ");
 
-                        timeTraceStart = Environment.TickCount;
+                        var sw = Stopwatch.StartNew(); 
                         int pageSize = 1000, pageNumber = 1;
                         var isRemain = true;
                         var rebatePayoutLimit = _rebateBll.GetRebatePayoutLimit();
@@ -56,7 +56,7 @@ namespace BonusService.Service.Workers
                         while (isRemain)
                         {
                             var rebateInfoList = _rebateBll.GetVipRebateCustList(rebateTask.SiteId, rebateTask.CurrencyId, (int)rebateTask.PeriodType, rebateTask.SpecificDate, rebateTask.TimeZone, pageNumber, pageSize);
-                            isRemain = rebateInfoList.Count() < pageSize ? false : true;
+                            isRemain = rebateInfoList.Count() > pageSize;
                             foreach (var rebateInfo in rebateInfoList)
                             {
                                 var rebateTpBetRecordList = _rebateBll.GetVipRebateTpBetRecord((int)rebateTask.PeriodType, rebateInfo.CustId, rebateTask.SpecificDate, rebateTask.TimeZone, 0).ToList();
@@ -68,10 +68,9 @@ namespace BonusService.Service.Workers
                             }
                         }
                         _rebateBll.SetVipRebateTaskDone(rebateTask.SiteId, rebateTask.CurrencyId);
-                        int spendTime = Environment.TickCount - timeTraceStart;
 
                         _logger.LogInformation($"VipRebate Wroker：Do Task End. SiteId:{rebateTask.SiteId} CurrencyId:{rebateTask.CurrencyId} SpecificDate:{rebateTask.SpecificDate}. \n"
-                        + $"Finish Time (m:s:ms): {spendTime / 60000}:{(spendTime % 60000) / 1000}.{(spendTime % 60000) % 1000}.");
+                        + $"Finish Time (m:s:ms): {sw.Elapsed.TotalMilliseconds / 60000}:{(sw.Elapsed.TotalMilliseconds % 60000) / 1000}.{(sw.Elapsed.TotalMilliseconds % 60000) % 1000}.");
                     }
                 }
                 catch (Exception ex)
@@ -81,10 +80,7 @@ namespace BonusService.Service.Workers
                 }
                 finally
                 {
-                    var dueTimeSpan = TimeSpan.FromMinutes(30);
-
-                    if (isError)
-                        dueTimeSpan = TimeSpan.FromMinutes(10);
+                    var dueTimeSpan = isError ? TimeSpan.FromMinutes(10) : TimeSpan.FromMinutes(30);
 
                     timer.Change(dueTimeSpan, TimeSpan.Zero);
                 }
