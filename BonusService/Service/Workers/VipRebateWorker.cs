@@ -70,7 +70,7 @@ namespace BonusService.Service.Workers
                         _rebateBll.SetVipRebateTaskDone(rebateTask.SiteId, rebateTask.CurrencyId);
 
                         _logger.LogInformation($"VipRebate Wroker：Do Task End. SiteId:{rebateTask.SiteId} CurrencyId:{rebateTask.CurrencyId} SpecificDate:{rebateTask.SpecificDate}. \n"
-                        + $"Finish Time (m:s:ms): {Math.Round(sw.Elapsed.TotalMilliseconds / 60000)}:{Math.Round((sw.Elapsed.TotalMilliseconds % 60000) / 1000)}.{Math.Round((sw.Elapsed.TotalMilliseconds % 60000) % 1000)}.");
+                        + $"Finish Time (m:s.ms): {Math.Round(sw.Elapsed.TotalMinutes)}:{Math.Round(sw.Elapsed.TotalMinutes)}.{Math.Round(sw.Elapsed.TotalMilliseconds)}.");
                     }
                 }
                 catch (Exception ex)
