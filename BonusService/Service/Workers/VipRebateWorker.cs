@@ -70,7 +70,7 @@ namespace BonusService.Service.Workers
                         _rebateBll.SetVipRebateTaskDone(rebateTask.SiteId, rebateTask.CurrencyId);
 
                         _logger.LogInformation($"VipRebate Wroker：Do Task End. SiteId:{rebateTask.SiteId} CurrencyId:{rebateTask.CurrencyId} SpecificDate:{rebateTask.SpecificDate}. \n"
-                        + $"Finish Time (m:s:ms): {Math.Round(sw.Elapsed.TotalMilliseconds / 60000)}:{Math.Round((sw.Elapsed.TotalMilliseconds % 60000) / 1000)}.{Math.Round((sw.Elapsed.TotalMilliseconds % 60000) % 1000)}.");
+                        + $"Finish Time (m:s.ms): {Math.Round(sw.Elapsed.TotalMinutes)}:{Math.Round(sw.Elapsed.TotalMinutes)}.{Math.Round(sw.Elapsed.TotalMilliseconds)}.");
                     }
                 }
                 catch (Exception ex)
@@ -81,6 +81,9 @@ namespace BonusService.Service.Workers
                 finally
                 {
                     var dueTimeSpan = isError ? TimeSpan.FromMinutes(10) : TimeSpan.FromMinutes(30);
+
+                    _logger.LogInformation($"VipRebate Task End. isError = {isError}.\n" +
+                      $"Next Task Will Start At {DateTime.Now.Add(dueTimeSpan).AddHours(8).ToString("yyyy-MM-ddTHH:mm:ss")}");
 
                     timer.Change(dueTimeSpan, TimeSpan.Zero);
                 }
