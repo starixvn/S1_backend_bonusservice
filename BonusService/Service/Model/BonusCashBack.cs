@@ -5,18 +5,25 @@ namespace BonusService.Service.Model
 {
     public class RebateTask
     {
-        public string BonusCode { set; get; }
         public int SiteId { set; get; }
-        public int PromotionType { set; get; }
-        public int PeriodType { set; get; }
-        public int PeriodDay { set; get; }
         public int CurrencyId { set; get; }
+        public int? PeriodType { set; get; }
+        public int? PeriodDay { set; get; }
+        public int? RedeemHours { set; get; }
+        public DateTime? SettleTime { set; get; }
+        public DateTime SpecificDate { set; get; }
+        public string TimeZone { set; get; }
+        public DateTime CurrencyNowTime { set; get; }
+        public DateTime LastCurrencySettledTime { get;set; }
+
+        //===================已下未使用，可能是舊版rebate=======================
+        public string BonusCode { set; get; }
+        public int PromotionType { set; get; }
         public int GameType { set; get; }
         public decimal Percentage { set; get; }
         public decimal MaxBonus { set; get; }
         public decimal RollOver { set; get; }
         public decimal MinPayout { set; get; }
-        public DateTime SpecificDate { set; get; }
     }
     public class RebatePeriod
     {
@@ -158,7 +165,7 @@ namespace BonusService.Service.Model
         public int CurrencyId { set; get; }
         public int SiteId { set; get; }
         public string TpUserName { set; get; }
-        public int WithdrawCondition {set;get;}
+        public int WithdrawCondition { set; get; }
         public decimal WinlostAmountCountCalculationTotal { set; get; }
         public long CalculationDay { set; get; }
         public List<BonusCashBackInfoListDetail> BonusCashBackInfoListDetails { get; set; }
