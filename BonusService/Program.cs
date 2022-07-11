@@ -16,6 +16,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using BonusService.Service.Model;
+using StackExchange.Redis;
 
 namespace BonusService
 {
@@ -60,6 +61,8 @@ namespace BonusService
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.AddMemoryCache();
+                    services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(hostContext.Configuration.GetValue<string>("RedisConnection")));
+                    services.AddSingleton<ICacheHelper, RedisCacheHelper>();
                     services.AddDatabaseConnection(hostContext.Configuration);
                     services.AddSingleton<Common>();
                     services.AddSingleton<Currency>();

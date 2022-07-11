@@ -30,6 +30,7 @@ namespace BonusService.Service.BLL
         private readonly WithdrawalLimitService _withdrawalLimitService;
         private readonly BonusWalletService _bonusWalletService;
         private readonly ILogger<PromotionBll> _logger;
+        private readonly ICacheHelper _redisHelper;
 
         public PromotionBll(IServiceProvider provider)
         {
@@ -44,6 +45,7 @@ namespace BonusService.Service.BLL
             _withdrawalLimitService = provider.GetRequiredService<WithdrawalLimitService>();
             _bonusWalletService = provider.GetRequiredService<BonusWalletService>();
             _logger = provider.GetRequiredService<ILogger<PromotionBll>>();
+            _redisHelper = provider.GetRequiredService<ICacheHelper>();
         }
 
         private ApiResult MakeErrorMessage(ErrorMessageMakerInput input, bool isMessageUserLang = false)
@@ -132,6 +134,9 @@ namespace BonusService.Service.BLL
                     {
                         apiResult1.RawMessage = "Calculate function unknow promotion type.";
                     }
+                    break;
+                case (int)BonusErrorCode.DuplicateClaimBonus:
+                    apiResult1.RawMessage = "Duplicate claim bonus.";
                     break;
                 //SP Return ERROR -11XX
                 case (int)BonusErrorCode.SP_BONUS_NOT_FOUND:
@@ -792,7 +797,13 @@ namespace BonusService.Service.BLL
         
         private int BonusReward(BonusRewardInput bonusRewardInput, MySqlTransaction trans)
         {
-
+            var key = $"BonusReward:{bonusRewardInput.CustId}";
+            if (_redisHelper.KeyExists(key))
+            {
+                return (int)BonusErrorCode.DuplicateClaimBonus;
+            }
+            _redisHelper.StringSet(key, bonusRewardInput.CustId, TimeSpan.FromMinutes(1));
+            
             var p = new DynamicParameters(new
             {
                 PromotionType = (int)bonusRewardInput.PromotionType,

@@ -56,7 +56,7 @@ namespace BonusService.Service.Workers
                         while (isRemain)
                         {
                             var rebateInfoList = _rebateBll.GetVipRebateCustList(rebateTask.SiteId, rebateTask.CurrencyId, (int)rebateTask.PeriodType, rebateTask.SpecificDate, rebateTask.TimeZone, pageNumber, pageSize);
-                            isRemain = rebateInfoList.Count() > pageSize;
+                            isRemain = rebateInfoList.Count() >= pageSize;
                             foreach (var rebateInfo in rebateInfoList)
                             {
                                 var rebateTpBetRecordList = _rebateBll.GetVipRebateTpBetRecord((int)rebateTask.PeriodType, rebateInfo.CustId, rebateTask.SpecificDate, rebateTask.TimeZone, 0).ToList();

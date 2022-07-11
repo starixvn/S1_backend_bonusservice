@@ -4,7 +4,6 @@ using BonusService.Service.Library;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
 using Dapper;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MySql.Data.MySqlClient;
 
