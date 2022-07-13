@@ -57,7 +57,7 @@ namespace BonusService.Service.DAL
                 _PageNumber = pageNumber,
                 _PageSize = pageSize
             };
-            return _reportDbClient.Query<VipRebateInfo>("Service_VipRebateCustList_Get_V3", new DynamicParameters(p));
+            return _reportDbClient.Query<VipRebateInfo>("Service_VipRebateCustList_Get_V4", new DynamicParameters(p));
         }
         public IEnumerable<RebateTask> GetVipRebateTask()
         {
