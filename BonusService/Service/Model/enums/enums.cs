@@ -166,6 +166,15 @@
         DormantAccountLock = 1,
         Bonus = 2
     }
+
+    /// <summary>
+    /// <remarks>
+    /// Use Table：RebateCLog,RebateMLog
+    /// </remarks>
+    public enum RebateType
+    {
+        VipRebate = 1,
+    }
     
     public enum SpecialCode
     {

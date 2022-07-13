@@ -1,8 +1,10 @@
 ﻿using BonusService.Service.BLL;
 using BonusService.Service.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,14 +13,15 @@ namespace BonusService.Service.Workers
 {
     public class VipRebateWorker : BackgroundService
     {
-        private readonly RebateBLL rebateBLL;
+        private readonly RebateBLL _rebateBll;
         private readonly ILogger<VipRebateWorker> _logger;
         private Timer timer;
+        private int execCount = 0;
 
-        public VipRebateWorker(RebateBLL rebateBLL, ILogger<VipRebateWorker> logger)
+        public VipRebateWorker(IServiceProvider provider)
         {
-            this.rebateBLL = rebateBLL;
-            _logger = logger;
+            _rebateBll = provider.GetRequiredService<RebateBLL>();
+            _logger = provider.GetRequiredService<ILogger<VipRebateWorker>>();
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -28,73 +31,63 @@ namespace BonusService.Service.Workers
         }
         private void DoWork(object state)
         {
-            var isError = false;
-            var startTick = 0;
-            try
+            Interlocked.Increment(ref execCount);
+
+            if (execCount == 1)
             {
-                var rebateTaskList = rebateBLL.GetVipRebateTask();
-                foreach (var rebateTask in rebateTaskList)
+                bool isError = false;
+                try
                 {
-                    startTick = Environment.TickCount;
-                    _logger.LogInformation($"VipRebate SiteId:{rebateTask.SiteId} start ");
-                    int pageSize = 1000, pageNumber = 1;
-                    var rebatePayoutLimit = rebateBLL.GetRebatePayoutLimit();
+                    _logger.LogInformation("VipRebate Wroker：Verify Task Start.");
 
-                  
-                    var rebateInfoList = rebateBLL.GetVipRebateCustList(rebateTask.SiteId, pageSize, pageNumber, rebateTask.SpecificDate);
-                    foreach (var rebateInfo in rebateInfoList)
+                    var doTaskList = _rebateBll.VerifyRebateTask();
+
+                    _logger.LogInformation($"VipRebate Wroker：Verify Task End. Count = {doTaskList.Count()}");
+
+                    foreach (var rebateTask in doTaskList)
                     {
-                            var rebateTpBetRecordList = rebateBLL.GetVipRebateTpBetRecord(rebateTask.SiteId, rebateInfo.CustId, rebateTask.SpecificDate, 0).ToList();//.ToDictionary<string, RebateTpBetRecord>(x => $"{x.SettledDate:yyyyMMdd}_{x.GameType}", x => x);
+                        _logger.LogInformation($"VipRebate Wroker：Do Task Start. SiteId:{rebateTask.SiteId} CurrencyId:{rebateTask.CurrencyId} SpecificDate:{rebateTask.SpecificDate}. ");
 
-                        if (rebateTask.PeriodType == 3)
+                        var sw = Stopwatch.StartNew();
+                        int pageSize = 1000, pageNumber = 1;
+                        var isRemain = true;
+                        var rebatePayoutLimit = _rebateBll.GetRebatePayoutLimit();
+
+                        while (isRemain)
                         {
-                            var dd = rebateTpBetRecordList.ToDictionary(x => $"{x.SettledDate:yyyyMMdd}_{x.GameType}", x => x);
-
-                            foreach (var rebateTpBetRecord14 in rebateBLL.GetVipRebateTpBetRecord(rebateTask.SiteId, rebateInfo.CustId, rebateTask.SpecificDate, 1))
+                            var rebateInfoList = _rebateBll.GetVipRebateCustList(rebateTask.SiteId, rebateTask.CurrencyId, (int)rebateTask.PeriodType, rebateTask.SpecificDate, rebateTask.TimeZone, pageNumber, pageSize);
+                            isRemain = rebateInfoList.Count() >= pageSize;
+                            foreach (var rebateInfo in rebateInfoList)
                             {
-                                if (dd.ContainsKey($"{rebateTpBetRecord14.SettledDate:yyyyMMdd}_{rebateTpBetRecord14.GameType}"))
+                                var rebateTpBetRecordList = _rebateBll.GetVipRebateTpBetRecord((int)rebateTask.PeriodType, rebateInfo.CustId, rebateTask.SpecificDate, rebateTask.TimeZone, 0).ToList();
+
+                                if (rebateTpBetRecordList.Count > 0)
                                 {
-                                    dd[$"{rebateTpBetRecord14.SettledDate:yyyyMMdd}_{rebateTpBetRecord14.GameType}"].ValidBet += rebateTpBetRecord14.ValidBet;
-                                    dd[$"{rebateTpBetRecord14.SettledDate:yyyyMMdd}_{rebateTpBetRecord14.GameType}"].WinlostAmount += rebateTpBetRecord14.WinlostAmount;
-                                }
-                                else
-                                {
-                                    rebateTpBetRecordList.Add(rebateTpBetRecord14);
+                                    _rebateBll.PayoutVipRebate(rebateTask.SiteId, rebateInfo, rebateTpBetRecordList, rebatePayoutLimit);
                                 }
                             }
                         }
+                        _rebateBll.SetVipRebateTaskDone(rebateTask.SiteId, rebateTask.CurrencyId);
 
-                        if (rebateTpBetRecordList.Count > 0)
-                        {
-                            rebateBLL.PayoutVipRebate(rebateTask.SiteId, rebateInfo.CustId, rebateInfo.UserName, rebateInfo, rebateTpBetRecordList, rebatePayoutLimit);
-                        }
+                        _logger.LogInformation($"VipRebate Wroker：Do Task End. SiteId:{rebateTask.SiteId} CurrencyId:{rebateTask.CurrencyId} SpecificDate:{rebateTask.SpecificDate}. \n"
+                        + $"Finish Time (m:s.ms): {Math.Round(sw.Elapsed.TotalMinutes)}:{Math.Round(sw.Elapsed.TotalMinutes)}.{Math.Round(sw.Elapsed.TotalMilliseconds)}.");
                     }
-
-                    rebateBLL.SetVipRebateTaskDone(rebateTask.SiteId);
-                    var spendTime = Environment.TickCount - startTick;
-                        
-                    _logger.LogInformation($"VipRebateTask SiteId:{rebateTask.SiteId} SpecificDate:{rebateTask.SpecificDate} finish time: {spendTime / 60000}:{(spendTime % 60000) / 1000}.{(spendTime % 60000) % 1000}");
                 }
-            }
-            catch (Exception ex)
-            {
-                isError = true;
-                _logger.LogError(ex, MethodExtension.GetCurrentMethod());
-            }
-            finally
-            {
-                var dueTimeSpan = TimeSpan.FromMinutes(60);
-                //  if (environment.IsDevelopment())
-                //  {
-                //      dueTimeSpan = TimeSpan.FromMinutes(1);
-                //  }
-
-                if (isError)
+                catch (Exception ex)
                 {
-                    dueTimeSpan = TimeSpan.FromMinutes(10);
+                    isError = true;
+                    _logger.LogError(ex, MethodExtension.GetCurrentMethod());
                 }
-                timer.Change(dueTimeSpan, TimeSpan.Zero);
+                finally
+                {
+                    var dueTimeSpan = isError ? TimeSpan.FromMinutes(10) : TimeSpan.FromMinutes(30);
+
+                    _logger.LogInformation($"VipRebate Task End. isError = {isError}.\n" +
+                      $"Next Task Will Start At {DateTime.Now.Add(dueTimeSpan).AddHours(8).ToString("yyyy-MM-ddTHH:mm:ss")}");
+                    timer.Change(dueTimeSpan, TimeSpan.Zero);
+                }
             }
+            Interlocked.Decrement(ref execCount);
         }
 
         public override Task StopAsync(CancellationToken cancellationToken)
