@@ -142,7 +142,7 @@ namespace BonusService.Service.Workers
             }
             finally
             {
-                _timerExpiredBonus.Change(TimeSpan.FromMinutes(10), TimeSpan.Zero);
+                _timerExpiredBonus?.Change(TimeSpan.FromMinutes(10), TimeSpan.Zero);
             }
 
         }
