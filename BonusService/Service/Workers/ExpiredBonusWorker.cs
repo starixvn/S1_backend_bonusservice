@@ -40,74 +40,70 @@ namespace BonusService.Service.Workers
             try
             {
                 _logger.LogInformation("Expired Transfer Bonus Task Start");
-                int count;
-                do
+                var data = _expiredBonusBll.GetTransferBonusExpired(Limit);
+                foreach (var item in data)
                 {
-                    var data = _expiredBonusBll.GetTransferBonusExpired(Limit);
-                    foreach (var item in data)
+                    try
                     {
-                        try
+                        var winLossAmount = _expiredBonusBll.GetBonusWinLoss(item.BonusId)?.FirstOrDefault() ?? 0m;
+                        //計算當初領取 Bonus Amount 總額 
+                        var transferBonusAmount = item.BonusAmount + item.LockedAmount;
+                        var remainingBonus = transferBonusAmount + winLossAmount;
+
+                        switch (item.PromotionType)
                         {
-                            var winLossAmount = _expiredBonusBll.GetBonusWinLoss(item.BonusId)?.FirstOrDefault() ?? 0m;
-                            //計算當初領取 Bonus Amount 總額 
-                            var transferBonusAmount = item.BonusAmount + item.LockedAmount;
-                            var remainingBonus = transferBonusAmount + winLossAmount;
+                            case PromotionType.FstDeposit:
+                            case PromotionType.ReDeposit:
+                            case PromotionType.FreeBet:
+                            case PromotionType.WalletBonus:
+                            case PromotionType.Rebate:
+                            case PromotionType.Cashback:
+                            case PromotionType.ManualBonus:
+                            case PromotionType.RetentionBonus:
 
-                            switch (item.PromotionType)
-                            {
-                                case PromotionType.FstDeposit:
-                                case PromotionType.ReDeposit:
-                                case PromotionType.FreeBet:
-                                case PromotionType.WalletBonus:
-                                case PromotionType.Rebate:
-                                case PromotionType.Cashback:
-                                case PromotionType.ManualBonus:
-                                case PromotionType.RetentionBonus:
+                                //確認剩餘本金
+                                var refundAmount = remainingBonus - item.BonusAmount;
+                                if (refundAmount < 0)
+                                {
+                                    refundAmount = 0;
+                                }
+                                else if (refundAmount > item.LockedAmount)
+                                {
+                                    refundAmount = item.LockedAmount;
+                                }
 
-                                    //確認剩餘本金
-                                    var refundAmount = remainingBonus - item.BonusAmount;
-                                    if (refundAmount < 0)
+                                //呼叫轉帳 API 扣款
+                                if (remainingBonus > 0)
+                                {
+                                    var tpBonusCancelTransfer = new TpBonusCancelTransfer
                                     {
-                                        refundAmount = 0;
-                                    }
-                                    else if (refundAmount > item.LockedAmount)
-                                    {
-                                        refundAmount = item.LockedAmount;
-                                    }
+                                        TpId = item.TpId,
+                                        CustId = item.CustId,
+                                        UserName = item.UserName,
+                                        SiteId = item.SiteId,
+                                        PromoCategoryId = item.PromoCategoryId,
+                                        BonusId = item.BonusId,
+                                        RemainingBonus = remainingBonus,
+                                        RefundAmount = refundAmount
+                                    };
+                                    _expiredBonusBll.BonusCancelTransfer(tpBonusCancelTransfer);
+                                }
+                                else
+                                {
+                                    _expiredBonusBll.RefundExpiredBonus(item,
+                                        $"CancelBonus: BonusId={item.BonusId}, Remaining Bonus={remainingBonus:#,##0.##}, Refund Amount={0:#,##0.##}");
+                                }
 
-                                    //呼叫轉帳 API 扣款
-                                    if (remainingBonus > 0)
-                                    {
-                                        var tpBonusCancelTransfer = new TpBonusCancelTransfer
-                                        {
-                                            TpId = item.TpId,
-                                            CustId = item.CustId,
-                                            UserName = item.UserName,
-                                            SiteId = item.SiteId,
-                                            PromoCategoryId = item.PromoCategoryId,
-                                            BonusId = item.BonusId,
-                                            RemainingBonus = remainingBonus,
-                                            RefundAmount = refundAmount
-                                        };
-                                        _expiredBonusBll.BonusCancelTransfer(tpBonusCancelTransfer);
-                                    }
-                                    else
-                                    {
-                                        _expiredBonusBll.RefundExpiredBonus(item,
-                                            $"CancelBonus: BonusId={item.BonusId}, Remaining Bonus={remainingBonus:#,##0.##}, Refund Amount={0:#,##0.##}");
-                                    }
-
-                                    break;
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, MethodExtension.GetCurrentMethod());
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException();
                         }
                     }
-
-                    count = data.Count();
-                } while (count >= Limit);
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, MethodExtension.GetCurrentMethod());
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -115,35 +111,30 @@ namespace BonusService.Service.Workers
             }
             finally
             {
-                _timerExpiredTransferBonus.Change(TimeSpan.FromMinutes(10), TimeSpan.Zero);
+                _timerExpiredTransferBonus?.Change(TimeSpan.FromMinutes(10), TimeSpan.Zero);
             }
         }
+        
 
         private void DoExpiredBonusTaskAsync(object state)
         {
             try
             {
                 _logger.LogInformation("Expired Bonus Task Async Start");
-                int nCount;
-                do
+                var data = _expiredBonusBll.GetBonusExpired(Limit);
+                foreach (var item in data)
                 {
-                    var data = _expiredBonusBll.GetBonusExpired(Limit).ToList();
-                    foreach (var item in data)
+                    try
                     {
-                        try
-                        {
-                            _expiredBonusBll.RefundExpiredBonus(item,
-                                $"CancelBonus: BonusId={item.BonusId}, Remaining Bonus={item.Bonus:#,##0.##}, Refund Amount={item.Refund:#,##0.##}");
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, MethodExtension.GetCurrentMethod());
-                        }
-
+                        _expiredBonusBll.RefundExpiredBonus(item,
+                            $"CancelBonus: BonusId={item.BonusId}, Remaining Bonus={item.Bonus:#,##0.##}, Refund Amount={item.Refund:#,##0.##}");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, MethodExtension.GetCurrentMethod());
                     }
 
-                    nCount = data.Count;
-                } while (nCount >= Limit);
+                }
             }
             catch (Exception ex)
             {
@@ -151,17 +142,15 @@ namespace BonusService.Service.Workers
             }
             finally
             {
-                _timerExpiredBonus.Change(TimeSpan.FromMinutes(10), TimeSpan.Zero);
+                _timerExpiredBonus?.Change(TimeSpan.FromMinutes(10), TimeSpan.Zero);
             }
 
         }
-        private DateTime GetUTC8Time()
-        {
-            return new DateTimeOffset(DateTime.Now).ToOffset(new TimeSpan(8, 0, 0)).DateTime;
-        }
+
         public override Task StopAsync(CancellationToken cancellationToken)
         {
             _timerExpiredBonus?.Change(Timeout.Infinite, 0);
+            _timerExpiredTransferBonus?.Change(Timeout.Infinite, 0);
             return Task.CompletedTask;
         }
     }
