@@ -41,6 +41,7 @@ namespace BonusService.Service.Workers
             {
                 _logger.LogInformation("Expired Transfer Bonus Task Start");
                 var data = _expiredBonusBll.GetTransferBonusExpired(Limit);
+                _logger.LogInformation($"GetTransferBonusExpired Data Count：{data.Count()}");
                 foreach (var item in data)
                 {
                     try
@@ -122,6 +123,7 @@ namespace BonusService.Service.Workers
             {
                 _logger.LogInformation("Expired Bonus Task Async Start");
                 var data = _expiredBonusBll.GetBonusExpired(Limit);
+                _logger.LogInformation($"GetBonusExpired Data Count：{data.Count()}");
                 foreach (var item in data)
                 {
                     try
