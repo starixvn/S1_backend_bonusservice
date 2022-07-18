@@ -86,8 +86,8 @@ namespace BonusService.Service.DAL
                             new
                             {
                                 CustId = rr.CustId, CurrencyId = rr.CurrencyId, UserName = rr.UserName,
-                                SiteId = rr.SiteId, ReferralFreeCredit = rr.ReferralFreeCredit, AgentId = rr.AgentId,
-                                ReferralAmount = rr.BonusAmount, Memo = "", RelId = tc, RewardStatus = 0
+                                SiteId = rr.SiteId, ReferralFreeCredit = 0m, AgentId = rr.AgentId,
+                                ReferralAmount = 0m, Memo = "", RelId = tc, RewardStatus = 0
                             }, transaction: trans, commandType: CommandType.StoredProcedure);
                     }
                 }
