@@ -30,7 +30,7 @@ namespace BonusService.Service.Workers
         }
         private void DoWork(object state)
         {
-            var isError = false;
+            bool isError = false;
 
             try
             {
@@ -50,7 +50,7 @@ namespace BonusService.Service.Workers
             }
             finally
             {
-                var dueTimeSpan = TimeSpan.FromMinutes(30);
+                TimeSpan dueTimeSpan = TimeSpan.FromMinutes(30);
                 if (environment.IsDevelopment())
                 {
                     dueTimeSpan = TimeSpan.FromMinutes(1);

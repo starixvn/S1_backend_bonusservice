@@ -44,7 +44,7 @@ namespace BonusService.Service.DAL
 
         public int PayoutReferral(IEnumerable<ReferralInfo> referralInfos, out decimal payAmount, out List<ReferralInfo> paidReferralList)
         {
-            var result = 0;
+            int result = 0;
             paidReferralList = new List<ReferralInfo>();
             var agent = referralInfos.FirstOrDefault();
             payAmount = 0m;
@@ -86,8 +86,8 @@ namespace BonusService.Service.DAL
                             new
                             {
                                 CustId = rr.CustId, CurrencyId = rr.CurrencyId, UserName = rr.UserName,
-                                SiteId = rr.SiteId, ReferralFreeCredit = rr.ReferralFreeCredit, AgentId = rr.AgentId,
-                                ReferralAmount = rr.BonusAmount, Memo = "", RelId = tc, RewardStatus = 0
+                                SiteId = rr.SiteId, ReferralFreeCredit = 0m, AgentId = rr.AgentId,
+                                ReferralAmount = 0m, Memo = "", RelId = tc, RewardStatus = 0
                             }, transaction: trans, commandType: CommandType.StoredProcedure);
                     }
                 }
@@ -113,7 +113,7 @@ namespace BonusService.Service.DAL
 
                 if (result > 0)
                 {
-                    conn.Execute("Common_ReferralMLog_Ins", new { CustId = agent.AgentId, agent.CurrencyId, UserName = agent.AgentName, agent.SiteId, ReferralAmount = payAmount, Memo = "", RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
+                    conn.Execute("Common_ReferralMLog_Ins", new { CustId = agent.AgentId, CurrencyId = agent.CurrencyId, UserName = agent.AgentName, SiteId = agent.SiteId, ReferralAmount = payAmount, Memo = "", RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
 
                     var rollOver = 1 * payAmount;
                     if (rollOver > 0)
