@@ -19,12 +19,14 @@ namespace BonusService.Service.DAL
         private readonly ILogger<RebateService> _logger;
         private readonly WalletService walletService;
         private readonly WithdrawalLimitService withdrawalLimitService;
+        private readonly MySqlClient _mainDbClient;
         private readonly MySqlClient _reportDbClient;
         public ReferralService(IConfiguration configuration, ILogger<RebateService> logger, WalletService walletService, WithdrawalLimitService withdrawalLimitService, IEnumerable<MySqlClient> dbClients)
         {
             this.configuration = configuration;
             this.walletService = walletService;
             this.withdrawalLimitService = withdrawalLimitService;
+            _mainDbClient = dbClients.FirstOrDefault(a => a.DataBase == DataBase.Main);
             _reportDbClient = dbClients.FirstOrDefault(a => a.DataBase == DataBase.Report);
             _logger = logger;
         }
@@ -54,7 +56,7 @@ namespace BonusService.Service.DAL
             }
 
             var remaining = GetRemainingCount(agent.AgentId, agent.SiteId, agent.CurrencyId);
-            using var conn = new MySqlConnection(configuration.GetConnectionString("ConnectionString"));
+            using var conn = _mainDbClient.GetMySqlConnection();
             conn.Open();
             using var trans = conn.BeginTransaction();
             
