@@ -31,7 +31,7 @@ namespace BonusService.Service.BLL
 
         public int Payout(IEnumerable<ReferralInfo> referralInfos, out decimal payAmount, out List<ReferralInfo> paidReferralList)
         {
-            int result = 0;
+            var result = 0;
             paidReferralList = new List<ReferralInfo>();
             var agent = referralInfos.FirstOrDefault();
             payAmount = 0m;
@@ -54,18 +54,21 @@ namespace BonusService.Service.BLL
                     if (remaining > 0)
                     {
                         result = _walletAdapter.SetBalance(rr.CustId, rr.SiteId, rr.UserName, rr.ReferralFreeCredit, (int)FinancialType.ReferFriendsRewards, $"Referral Free Credit: {rr.ReferralFreeCredit:#,##0.##}", "N/A", out _, out _, trans);
-                        result = _withdrawalLimitAdapter.SetWithdrawalLimit(rr.CustId, rr.UserName, rr.SiteId, rr.ReferralFreeCredit, $"Referral Free Credit: {rr.ReferralFreeCredit:#,##0.##}", "N/A", out _, trans);
-                        conn.Execute("Common_ReferralLog_Ins_V2",
-                            new
-                            {
-                                CustId = rr.CustId, CurrencyId = rr.CurrencyId, UserName = rr.UserName,
-                                SiteId = rr.SiteId, ReferralFreeCredit = rr.ReferralFreeCredit, 
-                                AgentId = rr.AgentId, ReferralAmount = rr.BonusAmount, Memo = "",
-                                RelId = tc, RewardStatus = 1
-                            }, transaction: trans, commandType: CommandType.StoredProcedure);
-                        payAmount += rr.BonusAmount;
-                        paidReferralList.Add(rr);
-                        remaining -= 1;
+                        if (result > 0)
+                        {
+                            conn.Execute("Common_ReferralLog_Ins_V2",
+                                new
+                                {
+                                    CustId = rr.CustId, CurrencyId = rr.CurrencyId, UserName = rr.UserName,
+                                    SiteId = rr.SiteId, ReferralFreeCredit = rr.ReferralFreeCredit, AgentId = rr.AgentId,
+                                    ReferralAmount = rr.BonusAmount, Memo = "", RelId = tc, RewardStatus = 1
+                                }, transaction: trans, commandType: CommandType.StoredProcedure);
+                            
+                            result = _withdrawalLimitAdapter.SetWithdrawalLimit(rr.CustId, rr.UserName, rr.SiteId, rr.ReferralFreeCredit, $"Referral Free Credit: {rr.ReferralFreeCredit:#,##0.##}", "N/A", out _, trans);
+                            payAmount += rr.BonusAmount;
+                            paidReferralList.Add(rr);
+                            remaining -= 1;
+                        }
                     }
                     else
                     {
