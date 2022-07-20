@@ -69,7 +69,7 @@ namespace BonusService.Service.BLL
                     }
                     else
                     {
-                        conn.Execute("Common_ReferralLog_Ins_V2",
+                        result = conn.Execute("Common_ReferralLog_Ins_V2",
                             new
                             {
                                 CustId = rr.CustId, CurrencyId = rr.CurrencyId, UserName = rr.UserName,
@@ -105,12 +105,12 @@ namespace BonusService.Service.BLL
                     var rollOver = 1 * payAmount;
                     if (rollOver > 0)
                         result = _withdrawalLimitAdapter.SetWithdrawalLimit(agent.AgentId, agent.AgentName, agent.SiteId, rollOver, $"Referral Bonus: {rollOver:#,##0.##}", "N/A", out _, trans);
-
-                    if (result > 0)
-                    {
-                        trans.Commit();
-                    }
                 }
+            }
+            
+            if (result > 0)
+            {
+                trans.Commit();
             }
 
             return result;
