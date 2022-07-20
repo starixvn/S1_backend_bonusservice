@@ -30,7 +30,7 @@ namespace BonusService.Service.BLL
         public int PayoutReferral(int agentId, IEnumerable<ReferralInfo> referralInfos, out decimal payAmount, out List<ReferralInfo> paidReferralList)
         {
             var result = _referralReward.Payout(referralInfos, out payAmount, out paidReferralList);
-            if (result > 0)
+            if (result > 0 && payAmount > 0)
             {
                 var custInfo = custInfoService.GetCustInfo(agentId);
 
