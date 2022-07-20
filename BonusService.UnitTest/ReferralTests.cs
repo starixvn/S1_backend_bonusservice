@@ -3,11 +3,12 @@ using System.IO;
 using System.Linq;
 using BonusService.Service.BLL;
 using BonusService.Service.DAL;
+using BonusService.Service.DAL.Interface;
 using BonusService.Service.Library;
 using BonusService.Service.Model;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using MySql.Data.MySqlClient;
 using NSubstitute;
 using NUnit.Framework;
 
@@ -59,24 +60,50 @@ public class ReferralTests
     [Test]
     public void PayoutReferralTest()
     {
-        var services = new ServiceCollection();
-        var configBuilder = new ConfigurationBuilder();
-        configBuilder.SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", false, false)
-            .AddJsonFile("appsettings.Local.json", false, false);
-        var configuration = configBuilder.Build();
-        var logger = Substitute.For<ILogger<RebateService>>();
+        var referralService = Substitute.For<IReferralService>();
+        var fakeWallet = new FakeWalletService();
+        var fakeWithdrawalLimitService = new FakeWithdrawalLimitService();
         var mySqlClient = Substitute.For<IEnumerable<MySqlClient>>();
-        var walletService = Substitute.For<WalletService>();
-        var withdrawalLimitService = Substitute.For<WithdrawalLimitService>();
-        var referralSvc = new ReferralService(configuration, logger, walletService, withdrawalLimitService, mySqlClient);
-        var referrals = referralInfos.ToLookup(a => a.AgentId);
+        var logger = Substitute.For<ILogger<ReferralReward>>();
+        var referralReward = new ReferralReward(referralService, fakeWallet, fakeWithdrawalLimitService, mySqlClient, logger);
+        var referrals = new List<ReferralInfo>();
+        var result = referralReward.Payout(referrals, out var payAmount, out var paidReferralList);
 
-        var isSuccess = true;
-        foreach(var referral in referrals)
+        result.Should().Be(0);
+        payAmount.Should().Be(0);
+        paidReferralList.Count.Should().Be(0);
+    }
+    
+    public class FakeWalletService : IWalletAdapter
+    {
+        public readonly List<TestCustomer> _Customers;
+        public decimal Amount { get; set; }
+
+        public int SetBalance(int custId, int siteId, string userName, decimal amount, int type, string memo, string refTransId, out decimal afterAmount, out byte is1StDeposit, MySqlTransaction trans)
         {
-            isSuccess &= referralSvc.PayoutReferral(referral, out var payAmount, out var referralInfos) > 0;
+            afterAmount = amount;
+            is1StDeposit = 0;
+            Amount = amount;
+            return 1;
         }
-        Assert.IsTrue(isSuccess);
+    }
+    
+    public class FakeWithdrawalLimitService : IWithdrawalLimitAdapter
+    {
+        public readonly List<TestCustomer> _Customers;
+        public decimal WithdrawalLimit { get; set; }
+        public int SetWithdrawalLimit(int custId, string userName, int siteId, decimal withdrawalLimit, string memo, string refTransId, out decimal afterWithdrawalLimit, MySqlTransaction trans)
+        {
+            afterWithdrawalLimit = withdrawalLimit;
+            WithdrawalLimit = withdrawalLimit;
+            return 1;
+        }
+    }
+    
+    public class TestCustomer
+    {
+        public int CustId { get; set; }
+        public decimal Amount { get; set; }
+        public decimal WithdrawalLimit { get; set; }
     }
 }
