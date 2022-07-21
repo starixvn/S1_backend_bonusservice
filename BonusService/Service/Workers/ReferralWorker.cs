@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Linq;
 using BonusService.Service.Model;
 using Newtonsoft.Json;
 
@@ -24,33 +25,19 @@ namespace BonusService.Service.Workers
         }
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            //  Console.WriteLine(selLangBLL.GetResourceValue("lbl_HelloWorld", "en"));
             timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.Zero);
             return Task.CompletedTask;
         }
         private void DoWork(object state)
         {
-            var isError = false;
-
-            //_logger.LogCritical($"Worker running at: {environment.EnvironmentName}");
+            bool isError = false;
 
             try
             {
-                var settlementList = new Dictionary<int, List<ReferralInfo>>();
-
-                foreach(var referralInfo in referralBLL.GetReferralSettlement())
+                var settlementList = referralBLL.GetReferralSettlement().ToLookup(a => a.AgentId);
+                foreach(var referralInfos in settlementList)
                 {
-                    if (!settlementList.ContainsKey(referralInfo.AgentId))
-                    {
-                        settlementList.Add(referralInfo.AgentId, new List<ReferralInfo>());
-                    }
-
-                    settlementList[referralInfo.AgentId].Add(referralInfo);
-                }
-
-                foreach(var rr in settlementList)
-                {
-                    if(referralBLL.PayoutReferral(rr.Value, out var payAmount, out var paidReferralList) > 0)
+                    if(referralBLL.PayoutReferral(referralInfos.Key, referralInfos, out decimal payAmount, out List<ReferralInfo> paidReferralList) > 0)
                     {
                         _logger.LogInformation($"Referral:{JsonConvert.SerializeObject(paidReferralList)}");
                     }
@@ -63,7 +50,7 @@ namespace BonusService.Service.Workers
             }
             finally
             {
-                var dueTimeSpan = TimeSpan.FromMinutes(30);
+                TimeSpan dueTimeSpan = TimeSpan.FromMinutes(30);
                 if (environment.IsDevelopment())
                 {
                     dueTimeSpan = TimeSpan.FromMinutes(1);

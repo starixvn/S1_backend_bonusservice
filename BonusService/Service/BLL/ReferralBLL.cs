@@ -9,29 +9,28 @@ namespace BonusService.Service.BLL
     public class ReferralBLL
     {
         private readonly SelLangBLL selLangBLL;
-        private readonly ReferralService referralService;
         private readonly MessageService messageService;
         private readonly CustInfoService custInfoService;
+        private readonly ReferralReward _referralReward;
 
-        public ReferralBLL(SelLangBLL selLangBLL, ReferralService referralService, MessageService messageService, CustInfoService custInfoService)
+        public ReferralBLL(SelLangBLL selLangBLL, MessageService messageService, CustInfoService custInfoService, ReferralReward referralReward)
         {
             this.selLangBLL = selLangBLL;
-            this.referralService = referralService;
             this.messageService = messageService;
             this.custInfoService = custInfoService;
+            _referralReward = referralReward;
         }
         public IEnumerable<ReferralInfo> GetReferralSettlement()
         {
-            return referralService.GetReferralSettlement();
+            return _referralReward.GetReferralSettlement();
         }
 
-        public int PayoutReferral(IEnumerable<ReferralInfo> referralInfos, out decimal payAmount, out List<ReferralInfo> paidReferralList)
+        public int PayoutReferral(int agentId, IEnumerable<ReferralInfo> referralInfos, out decimal payAmount, out List<ReferralInfo> paidReferralList)
         {
-            var result = referralService.PayoutReferral(referralInfos, out payAmount, out paidReferralList);
-            if (result > 0)
+            var result = _referralReward.Payout(referralInfos, out payAmount, out paidReferralList);
+            if (result > 0 && payAmount > 0)
             {
-                var agent = referralInfos.FirstOrDefault();
-                var custInfo = custInfoService.GetCustInfo(agent.AgentId);
+                var custInfo = custInfoService.GetCustInfo(agentId);
 
                 var msg = new StringBuilder();
 

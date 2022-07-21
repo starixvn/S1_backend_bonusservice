@@ -15,6 +15,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using BonusService.Service.DAL.Interface;
 using BonusService.Service.Model;
 using StackExchange.Redis;
 
@@ -83,10 +84,14 @@ namespace BonusService
                     services.AddSingleton<PromotionAutoExtendService>();
                     services.AddSingleton<DepositBonusService>();
                     services.AddSingleton<ConfigService>();
+                    services.AddSingleton<IWalletAdapter, WalletAdapter>();
+                    services.AddSingleton<IWithdrawalLimitAdapter, WithdrawalLimitAdapter>();
+                    services.AddSingleton<IReferralService, ReferralService>();
 
                     services.AddSingleton<RebateBLL>();
                     services.AddSingleton<ReferralBLL>();
                     services.AddSingleton<RewardBLL>();
+                    services.AddSingleton<ReferralReward>();
                     services.AddSingleton<SelLangBLL>();
                     services.AddSingleton<ExpiredBonusBLL>();
                     services.AddSingleton<VipBLL>();
