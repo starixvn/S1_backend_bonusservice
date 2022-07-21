@@ -28,7 +28,12 @@ namespace BonusService.Service.BLL
             _mainDbClient = dbClients.FirstOrDefault(a => a.DataBase == DataBase.Main);
             _logger = logger;
         }
-
+        
+        public IEnumerable<ReferralInfo> GetReferralSettlement()
+        {
+            return _referralService.GetReferralSettlement();
+        }
+        
         public int Payout(IEnumerable<ReferralInfo> referralInfos, out decimal payAmount, out List<ReferralInfo> paidReferralList)
         {
             var result = 0;
