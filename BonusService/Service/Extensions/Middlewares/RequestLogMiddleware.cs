@@ -22,6 +22,7 @@ namespace BonusService.Extensions.Middlewares
 
         public async Task Invoke(HttpContext context)
         {
+            context.Request.EnableBuffering();
             var url = context.Request.GetDisplayUrl();
             var requestBodyStream = new MemoryStream();
             var originalRequestBody = context.Request.Body;
