@@ -18,17 +18,16 @@ namespace BonusService.Service.Workers
         private readonly ExpiredBonusBLL _expiredBonusBll;
         private Timer _timerExpiredBonus;
         private Timer _timerExpiredTransferBonus;
-        private const int Limit = 1000;
+        private readonly Random _random;
 
         public ExpiredBonusWorker(IServiceProvider provider)
         {
             _logger = provider.GetRequiredService<ILogger<ExpiredBonusWorker>>();
             _expiredBonusBll = provider.GetRequiredService<ExpiredBonusBLL>();
-            
+            _random = new Random();
         }
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-
             _timerExpiredBonus = new Timer(DoExpiredBonusTaskAsync, null, TimeSpan.Zero, TimeSpan.Zero);
             _timerExpiredTransferBonus = new Timer(DoExpiredTransferBonusTaskAsync, null, TimeSpan.Zero, TimeSpan.Zero);
 
@@ -40,7 +39,7 @@ namespace BonusService.Service.Workers
             try
             {
                 _logger.LogInformation("Expired Transfer Bonus Task Start");
-                var data = _expiredBonusBll.GetTransferBonusExpired(Limit);
+                var data = _expiredBonusBll.GetTransferBonusExpired(_random.Next(950, 1000));// 避免 ORM 或 db execution plan cache
                 _logger.LogInformation($"GetTransferBonusExpired Data Count：{data.Count()}");
                 foreach (var item in data)
                 {
@@ -115,14 +114,14 @@ namespace BonusService.Service.Workers
                 _timerExpiredTransferBonus?.Change(TimeSpan.FromMinutes(10), TimeSpan.Zero);
             }
         }
-        
+
 
         private void DoExpiredBonusTaskAsync(object state)
         {
             try
             {
                 _logger.LogInformation("Expired Bonus Task Async Start");
-                var data = _expiredBonusBll.GetBonusExpired(Limit);
+                var data = _expiredBonusBll.GetBonusExpired(_random.Next(950, 1000)); // 避免 ORM 或 db execution plan cache
                 _logger.LogInformation($"GetBonusExpired Data Count：{data.Count()}");
                 foreach (var item in data)
                 {

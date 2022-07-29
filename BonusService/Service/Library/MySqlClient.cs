@@ -216,7 +216,10 @@ namespace BonusService.Service.Library
             try
             {
                 using var connection = new MySqlConnection(_connectionString);
+                if (connection.State != ConnectionState.Open) connection.Open();// 自己 Control connection open close，不要讓 ORM 自己做
                 result = connection.Query<T>(name, parameters, commandTimeout: commandTimeout, commandType: CommandType.StoredProcedure);
+                connection.Close();
+                connection.Dispose();
             }
             catch (Exception e)
             {
