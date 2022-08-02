@@ -105,7 +105,7 @@ namespace BonusService.Controllers
             if (verificationRewardReq.OTPType == 1)
                 item = OTPTypeEnum.Email;
 
-            return _bonusAPIBLL.CheckRewardCondination(verificationRewardReq.CustId, item ,out _ );
+            return _bonusAPIBLL.CheckRewardCondination(verificationRewardReq.CustId, item);
         }
 
         public class PromotionReq
