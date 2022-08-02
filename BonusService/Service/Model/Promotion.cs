@@ -53,6 +53,23 @@ namespace BonusService.Service.Model
                 return JsonConvert.DeserializeObject<IEnumerable<TierAmount>>(TierAmount);
             }
         }
+        public TierAmount CalculateTierAmount(decimal actualDeposit)
+        {
+            if (!TierAmountList.Any())
+            {
+                return null;
+            }
+
+            var tierAmountList = TierAmountList.OrderByDescending(i => i.RequiredAmount);
+            foreach (var item in tierAmountList)
+            {
+                if (actualDeposit >= item.RequiredAmount)
+                {
+                    return item;
+                }
+            }
+            return null;
+        }
     }
 
     public class TierAmount
