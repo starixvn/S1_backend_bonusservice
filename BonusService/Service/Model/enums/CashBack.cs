@@ -10,7 +10,8 @@
         Rebate = 6,
         Cashback = 7,
         ManualBonus = 8,
-        RetentionBonus = 9
+        RetentionBonus = 9,
+        TierRedepositBonus = 10
     }
 
     public enum PromotionCategoryId
