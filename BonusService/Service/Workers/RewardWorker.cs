@@ -42,8 +42,7 @@ namespace BonusService.Service.Workers
                 {
                     if (data.Reward == null)
                     {
-                        var type = data.Type == 0 ? OTPTypeEnum.SMS : OTPTypeEnum.Email;
-                        _bonusApiBll.SetVerificationReward(data.CustId, type , true);
+                        _bonusApiBll.SetVerificationReward(data.CustId, data.Type , true);
                     }
                 }
             }
