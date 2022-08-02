@@ -470,7 +470,7 @@ namespace BonusService.Service.BLL
             await using var trans = await conn.BeginTransactionAsync();
 
             var calculateBonus = CalculateBonus(claimPromotion, amount, lockedAmount, custId,
-                custInfo.SiteId, custInfo.CurrencyId);
+                custInfo.SiteId, custInfo.CurrencyId, depositId);
             if (calculateBonus.result <= 0)
             {
                 errorInfo.Result = calculateBonus.result;
@@ -619,7 +619,7 @@ namespace BonusService.Service.BLL
                    && !string.IsNullOrEmpty(custInfoProfile.Birth_d);
         }
 
-        private CalculateBonusOutput CalculateBonus(ClaimPromotion claimPromotion, decimal amount, decimal lockedAmount, int custId, int siteId, int currencyId)
+        private CalculateBonusOutput CalculateBonus(ClaimPromotion claimPromotion, decimal amount, decimal lockedAmount, int custId, int siteId, int currencyId, string depositId = null)
         {
             var output = new CalculateBonusOutput
             {
@@ -756,23 +756,43 @@ namespace BonusService.Service.BLL
                     break;
                 case PromotionType.TierRedepositBonus:
                     {
-                        var tireAmount = claimPromotion.TierAmountList.First(i => i.Bonus == amount);
-                        claimPromotion.MaxBonus = tireAmount.MaxBonus;
-                        claimPromotion.RequiredAmount = tireAmount.RequiredAmount;
-                        claimPromotion.Bonus = tireAmount.Bonus;
+                        var checkResult = CheckTierRedepositBonus(new CheckTierRedepositBonusReq 
+                        {
+                            CustId = custId,
+                            BonusCode = claimPromotion.BonusCode,
+                            PromotionType = (int)claimPromotion.PromotionType,
+                            SiteId = siteId,
+                            CurrencyId = currencyId,
+                            DepositId = depositId
+                        });
+                        if (!checkResult.IsSuccess)
+                        {
+                            throw new Exception("TierAmount check fail.");
+                        }
+
+                        var tierAmount = claimPromotion.CalculateTierAmount(checkResult.ActualDeposit);
+                        if (tierAmount == null)
+                        {
+                            throw new Exception("TierAmount no found.");
+                        }
+
+                        claimPromotion.MaxBonus = tierAmount.MaxBonus;
+                        claimPromotion.RequiredAmount = tierAmount.RequiredAmount;
+                        claimPromotion.Bonus = tierAmount.Bonus;
 
                         if (claimPromotion.BonusType == BonusType.Amount)
                         {
-                            bonusAmount = tireAmount.Bonus;
-                            lockAmount = tireAmount.RequiredAmount;
+                            bonusAmount = tierAmount.Bonus;
+                            lockAmount = tierAmount.RequiredAmount;
                         }
                         else 
                         {
-                            bonusAmount = Math.Ceiling(tireAmount.Bonus * amount / 100);
-                            if (tireAmount.MaxBonus != 0 && bonusAmount > tireAmount.MaxBonus)
+                            bonusAmount = Math.Ceiling(tierAmount.Bonus * checkResult.ActualDeposit / 100);
+                            lockAmount = bonusAmount * 100 / tierAmount.Bonus;
+                            if (tierAmount.MaxBonus != 0 && bonusAmount > tierAmount.MaxBonus)
                             {
-                                bonusAmount = tireAmount.MaxBonus;
-                                lockAmount = tireAmount.MaxBonus * 100 / tireAmount.Bonus;
+                                bonusAmount = tierAmount.MaxBonus;
+                                lockAmount = tierAmount.MaxBonus * 100 / tierAmount.Bonus;
                             }
                         }
                         rollover = (lockAmount + bonusAmount) * claimPromotion.RollOver;
@@ -1201,5 +1221,12 @@ namespace BonusService.Service.BLL
             var diff = (7 + (dateTime.DayOfWeek - startOfWeek)) % 7;
             return dateTime.AddDays(-1 * diff).Date;
         }
+
+        private CheckTierRedepositBonusRep CheckTierRedepositBonus(CheckTierRedepositBonusReq request)
+        {
+            return _mainDbClient.QueryFirst<CheckTierRedepositBonusRep>("Admin_CheckTierRedepositBonus_Get", new DynamicParameters(request));
+        }
+
+       
     }
 }
