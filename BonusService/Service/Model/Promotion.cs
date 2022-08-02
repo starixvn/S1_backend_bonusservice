@@ -1,4 +1,5 @@
 ﻿using BonusService.Service.Model.enums;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
@@ -39,8 +40,28 @@ namespace BonusService.Service.Model
         public bool IsSpecial { get; set; }
         public string SpecialCode { get; set; }
         public decimal MinPayout { get; set; }
+        public string TierAmount { get; set; }
+        public IEnumerable<TierAmount> TierAmountList
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(TierAmount))
+                {
+                    return default;
+                }
+
+                return JsonConvert.DeserializeObject<IEnumerable<TierAmount>>(TierAmount);
+            }
+        }
     }
-    
+
+    public class TierAmount
+    {
+        public decimal Bonus { get; set; }
+        public decimal MaxBonus { get; set; }
+        public decimal RequiredAmount { get; set; }
+    }
+
     public class CustPromotionRequest
     {
         public int SiteId { set; get; }

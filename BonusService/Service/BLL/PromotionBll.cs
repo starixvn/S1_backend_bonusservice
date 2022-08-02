@@ -436,7 +436,7 @@ namespace BonusService.Service.BLL
         }
 
         public async Task<ApiResult> SetAdjustmentBonusV2Async(int custId, string bonusCode, string memo,
-            decimal amount, int promotionType)
+            decimal amount, int promotionType, string depositId)
         {
             var apiResult = new ApiResult();
             var lockedAmount = (decimal)0;
@@ -496,7 +496,7 @@ namespace BonusService.Service.BLL
                 SiteId = custInfo.SiteId,
                 Memo = memo,
                 Prefix = $"B{_common.GetEnv()}",
-                RefList = null,
+                RefList = claimPromotion.PromotionType == PromotionType.TierRedepositBonus ? JsonConvert.SerializeObject(new { DepositId = depositId } ) : null,
                 SetBalanceMemo = $"Claim {Enum.GetName(typeof(PromotionType), claimPromotion.PromotionType)} BonusCode: {bonusCode}, Locked Amount: {calculateBonus.LockedAmount:#,##0.##}",
                 RewardBonusMemo = $"Claim {Enum.GetName(typeof(PromotionType), claimPromotion.PromotionType)} BonusCode: {bonusCode}",
                 FinancialType = FinancialType.Bonusreward,
@@ -573,7 +573,7 @@ namespace BonusService.Service.BLL
         }
         
         private int VerifyAdjustmentBonus(int custId, int siteId, decimal amount, int promotionType,
-            Promotion claimPromotion)
+            ClaimPromotion claimPromotion)
         {
             if (claimPromotion == null)
             {
@@ -599,6 +599,11 @@ namespace BonusService.Service.BLL
             if (_promotionService.GetCustRunningBonus(custId).Any())
             {
                 return (int)BonusErrorCode.ADJUSTMENT_BONUS_CUSTOMER_HAS_RUNNING_BONUS;
+            }
+
+            if (claimPromotion.PromotionType == PromotionType.TierRedepositBonus && !claimPromotion.TierAmountList.Any())
+            {
+                return (int)BonusErrorCode.ADJUSTMENT_BONUS_PROMOTION_NOT_ACTIVE;
             }
 
             return (int)BonusErrorCode.SUCCESS;
@@ -749,6 +754,30 @@ namespace BonusService.Service.BLL
                     lockAmount = 0;         
                     rollover = bonusAmount * claimPromotion.RollOver;
                     break;
+                case PromotionType.TierRedepositBonus:
+                    {
+                        var tireAmount = claimPromotion.TierAmountList.First(i => i.Bonus == amount);
+                        claimPromotion.MaxBonus = tireAmount.MaxBonus;
+                        claimPromotion.RequiredAmount = tireAmount.RequiredAmount;
+                        claimPromotion.Bonus = tireAmount.Bonus;
+
+                        if (claimPromotion.BonusType == BonusType.Amount)
+                        {
+                            bonusAmount = tireAmount.Bonus;
+                            lockAmount = tireAmount.RequiredAmount;
+                        }
+                        else 
+                        {
+                            bonusAmount = Math.Ceiling(tireAmount.Bonus * amount / 100);
+                            if (tireAmount.MaxBonus != 0 && bonusAmount > tireAmount.MaxBonus)
+                            {
+                                bonusAmount = tireAmount.MaxBonus;
+                                lockAmount = tireAmount.MaxBonus * 100 / tireAmount.Bonus;
+                            }
+                        }
+                        rollover = (lockAmount + bonusAmount) * claimPromotion.RollOver;
+                        break;
+                    }
 
                 default:
                     output.result = (int)BonusErrorCode.CALCULATE_UNKNOW_PROMOTION_TYPE;
@@ -775,8 +804,8 @@ namespace BonusService.Service.BLL
                 case PromotionType.Cashback:
                 case PromotionType.ManualBonus:
                 case PromotionType.RetentionBonus:
+                case PromotionType.TierRedepositBonus:
                     {
-
                         result = BonusReward(bonusRewardInput, trans);
                         break;
                     }
