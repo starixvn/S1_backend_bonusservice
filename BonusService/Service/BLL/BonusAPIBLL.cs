@@ -136,21 +136,23 @@ namespace BonusService.Service.BLL
                 }
                 return result;
             } 
-            
+            var reward = 0m;
             if (verInfo.VerificationType == 1) //email & phone both
             {
-                var reward = verInfo.PhoneReward + verInfo.EmailReward;
+                reward = verInfo.PhoneReward + verInfo.EmailReward;
                 result = _bonusAPIService.PayoutVerificationReward(custInfo.CustId, custInfo.SiteId, custInfo.CurrencyId, custInfo.UserName, OTPVerificationType.All, reward);
             }
             else if (verInfo.VerificationType == 0)//email & phone each
             {
                 if (inputType == OTPTypeEnum.SMS)
                 {
-                    result = _bonusAPIService.PayoutVerificationReward(custInfo.CustId, custInfo.SiteId, custInfo.CurrencyId, custInfo.UserName, OTPVerificationType.SMS, verInfo.PhoneReward);
+                    reward = verInfo.PhoneReward;
+                    result = _bonusAPIService.PayoutVerificationReward(custInfo.CustId, custInfo.SiteId, custInfo.CurrencyId, custInfo.UserName, OTPVerificationType.SMS, reward);
                 }
                 else
                 {
-                    result = _bonusAPIService.PayoutVerificationReward(custInfo.CustId, custInfo.SiteId, custInfo.CurrencyId, custInfo.UserName, OTPVerificationType.Email, verInfo.EmailReward);
+                    reward = verInfo.EmailReward;
+                    result = _bonusAPIService.PayoutVerificationReward(custInfo.CustId, custInfo.SiteId, custInfo.CurrencyId, custInfo.UserName, OTPVerificationType.Email, reward);
                 }
             }
 
@@ -161,8 +163,7 @@ namespace BonusService.Service.BLL
                 var title = string.Format(_selLangBll.GetResourceValue("lbl_VerificationRewardLimitTitle", custInfo.UserLang));
                 var content = string.Format(_selLangBll.GetResourceValue("lbl_VerificationRewardContent", custInfo.UserLang),
                     currencyName,
-                    (inputType == OTPTypeEnum.Email) ? 
-                        verInfo.EmailReward.ToString("#,##0.##") : verInfo.PhoneReward.ToString("#,##0.##"));
+                    reward.ToString("#,##0.##"));
                 _messageService.SendMessage(custInfo.SiteId, "System", title, content, custInfo.CustId, custInfo.UserName, custInfo.UserLang);
             }
             
