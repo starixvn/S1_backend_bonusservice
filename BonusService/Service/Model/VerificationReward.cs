@@ -1,4 +1,5 @@
 ﻿using System;
+using BonusService.Service.Model.enums;
 
 namespace MemberSite.Service.Model
 {
@@ -10,6 +11,7 @@ namespace MemberSite.Service.Model
         public int VerificationType { get; set; }
         public decimal PhoneReward { get; set; }
         public decimal EmailReward { get; set; }
+        public decimal MinDeposit { get; set; }
     }
     
     public class CustVerificationRewardData
@@ -37,7 +39,7 @@ namespace MemberSite.Service.Model
         public int CustId { get; set; }
         public int SiteId { get; set; }
         public int CurrencyId { get; set; }
-        public int Type { get; set; }
+        public OTPTypeEnum Type { get; set; }
         public bool Verified { get; set; }
         public decimal? Reward { get; set; }
         public decimal MinDeposit { get; set; }
