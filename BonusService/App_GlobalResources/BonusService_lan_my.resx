@@ -159,4 +159,7 @@
   <data name="lbl_VerificationRewardLimitTitle" xml:space="preserve">
     <value>Ganjaran Pengesahan</value>
   </data>
+  <data name="lbl_ReferredBonusCreditedMsg" xml:space="preserve">
+    <value>Tahniah! Anda telah menerima KREDIT PERCUMA yang telah dirujuk {0}!</value>
+  </data>
 </root>

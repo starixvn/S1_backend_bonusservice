@@ -153,4 +153,13 @@
   <data name="lbl_VerificationRewardLimitTitle" xml:space="preserve">
     <value>Phần thưởng xác thực.</value>
   </data>
+  <data name="lbl_ReferredBonusCreditedMsg" xml:space="preserve">
+    <value>Xin chúc mừng! Bạn đã nhận được tín dụng miễn phí mà bạn đã giới thiệu {0}!</value>
+  </data>
+  <data name="lbl_ReferralBonusCreditedMsg" xml:space="preserve">
+    <value>Xin chúc mừng! Phần thưởng giới thiệu của bạn {0} đã được ghi có vào tài khoản của bạn!</value>
+  </data>
+  <data name="lbl_ReferralBonusCreditedTitle" xml:space="preserve">
+    <value>Giới thiệu bạn bè Phần thưởng [Giới thiệu và kiếm tiền]</value>
+  </data>
 </root>

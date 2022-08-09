@@ -150,4 +150,7 @@
   <data name="lbl_VipUpgradeTitle" xml:space="preserve">
     <value>貴賓等級升級</value>
   </data>
+  <data name="lbl_ReferredBonusCreditedMsg" xml:space="preserve">
+    <value>恭喜！您的被推薦免費彩金{0} 已匯到您的賬戶！</value>
+  </data>
 </root>
