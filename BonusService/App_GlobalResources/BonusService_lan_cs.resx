@@ -159,4 +159,7 @@
   <data name="lbl_VerificationRewardLimitTitle" xml:space="preserve">
     <value>验证奖励</value>
   </data>
+  <data name="lbl_ReferredBonusCreditedMsg" xml:space="preserve">
+    <value>恭喜！您的被推荐免费彩金{0} 已汇到您的账户！</value>
+  </data>
 </root>

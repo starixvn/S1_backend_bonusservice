@@ -159,4 +159,7 @@
   <data name="lbl_VerificationRewardLimitTitle" xml:space="preserve">
     <value>Hadiah Verifikasi</value>
   </data>
+  <data name="lbl_ReferredBonusCreditedMsg" xml:space="preserve">
+    <value>Selamat! Anda telah menerima kredit gratis yang Anda rujuk {0}!</value>
+  </data>
 </root>
