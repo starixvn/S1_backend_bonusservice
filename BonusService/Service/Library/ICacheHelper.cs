@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using BonusService.Service.Model.enums;
+﻿using BonusService.Service.Model.enums;
 using StackExchange.Redis;
 
 namespace BonusService.Service.Library

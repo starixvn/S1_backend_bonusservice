@@ -2,13 +2,8 @@
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
 using Dapper;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using MySql.Data.MySqlClient;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 
 namespace BonusService.Service.DAL
 {

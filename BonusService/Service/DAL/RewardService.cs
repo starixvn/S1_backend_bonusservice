@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using BonusService.Service.Library;
+﻿using BonusService.Service.Library;
 using BonusService.Service.Model.enums;
 using MemberSite.Service.Model;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace BonusService.Service.DAL
 {

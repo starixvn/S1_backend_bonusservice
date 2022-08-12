@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Builder;
-using BonusService.Extensions.Middlewares;
+﻿using BonusService.Extensions.Middlewares;
 
 namespace BonusService.Extensions
 {

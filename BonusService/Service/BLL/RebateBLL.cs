@@ -1,13 +1,8 @@
 ﻿using BonusService.Service.DAL;
 using BonusService.Service.Model;
 using Microsoft.Extensions.Caching.Memory;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using BonusService.Service.Library;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace BonusService.Service.BLL

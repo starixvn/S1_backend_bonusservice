@@ -2,10 +2,7 @@
 using BonusService.Service.Model.enums;
 using Dapper;
 using MemberSite.Service.Model;
-using Microsoft.Extensions.DependencyInjection;
 using MySql.Data.MySqlClient;
-using System;
-using System.Linq;
 
 namespace BonusService.Service.DAL
 {

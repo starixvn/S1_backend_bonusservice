@@ -1,11 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using BonusService.Service.DAL;
+﻿using BonusService.Service.DAL;
 using BonusService.Service.Library;
 using BonusService.Service.Model.enums;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace BonusService.Service.Extensions
 {

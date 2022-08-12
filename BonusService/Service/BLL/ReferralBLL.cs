@@ -1,7 +1,5 @@
 ﻿using BonusService.Service.DAL;
 using BonusService.Service.Model;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace BonusService.Service.BLL

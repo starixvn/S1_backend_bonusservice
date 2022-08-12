@@ -1,6 +1,5 @@
 ﻿using BonusService.Service.DAL;
 using BonusService.Service.Model;
-using System.Collections.Generic;
 
 namespace BonusService.Service.BLL
 {

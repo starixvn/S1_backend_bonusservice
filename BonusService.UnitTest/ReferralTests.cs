@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using BonusService.Service.BLL;
-using BonusService.Service.DAL;
+﻿using BonusService.Service.BLL;
 using BonusService.Service.DAL.Interface;
 using BonusService.Service.Library;
 using BonusService.Service.Model;

@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.Hosting;
-using System;
-
-namespace BonusService.Service.Library
+﻿namespace BonusService.Service.Library
 {
     public class Common
     {

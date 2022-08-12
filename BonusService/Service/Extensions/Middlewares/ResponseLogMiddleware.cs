@@ -1,9 +1,5 @@
 ﻿using System.Diagnostics;
-using System.IO;
 using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
 
 namespace BonusService.Extensions.Middlewares
 {

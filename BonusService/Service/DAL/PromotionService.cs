@@ -3,15 +3,9 @@ using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
 using Dapper;
 using MemberSite.Service.Model;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace BonusService.Service.DAL
 {
