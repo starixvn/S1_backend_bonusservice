@@ -36,7 +36,7 @@ namespace BonusService.Service.Library
                 }
 
                 var json = db.StringGet(key);
-                return JsonConvert.DeserializeObject<TItem>(json);
+                return json.HasValue ? JsonConvert.DeserializeObject<TItem>(json) : factory();
             }
             catch (Exception ex)
             {
@@ -65,7 +65,7 @@ namespace BonusService.Service.Library
                 }
 
                 var json = db.StringGet(key);
-                return JsonConvert.DeserializeObject<TItem>(json);
+                return json.HasValue ? JsonConvert.DeserializeObject<TItem>(json) : await factory();
             }
             catch (Exception ex)
             {
