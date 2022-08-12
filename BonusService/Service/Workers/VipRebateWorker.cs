@@ -1,13 +1,6 @@
 ﻿using BonusService.Service.BLL;
 using BonusService.Service.Extensions;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace BonusService.Service.Workers
 {

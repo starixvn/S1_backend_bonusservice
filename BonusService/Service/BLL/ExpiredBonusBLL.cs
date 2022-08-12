@@ -1,12 +1,8 @@
 ﻿using BonusService.Service.DAL;
 using BonusService.Service.Model;
-using System;
-using System.Collections.Generic;
 using System.Text;
 using BonusService.Service.Library;
 using MemberSite.Service.Model;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace BonusService.Service.BLL
 {

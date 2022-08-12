@@ -2,14 +2,8 @@
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
 using MemberSite.Service.Model;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using BonusService.Service.Library;
 using Dapper;
 using MySql.Data.MySqlClient;

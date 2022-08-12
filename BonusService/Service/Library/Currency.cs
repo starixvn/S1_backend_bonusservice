@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace BonusService.Service.Library
+﻿namespace BonusService.Service.Library
 {
     public class Currency
     {

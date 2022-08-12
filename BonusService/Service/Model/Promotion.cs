@@ -1,7 +1,5 @@
 ﻿using BonusService.Service.Model.enums;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 
 namespace BonusService.Service.Model
 {

@@ -1,5 +1,4 @@
-﻿using System;
-using BonusService.Service.Model.enums;
+﻿using BonusService.Service.Model.enums;
 
 namespace MemberSite.Service.Model
 {

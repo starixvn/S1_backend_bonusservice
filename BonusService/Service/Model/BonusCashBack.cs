@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace BonusService.Service.Model
+﻿namespace BonusService.Service.Model
 {
     public class RebateTask
     {

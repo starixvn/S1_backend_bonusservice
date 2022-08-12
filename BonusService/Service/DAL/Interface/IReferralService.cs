@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using BonusService.Service.Model;
+﻿using BonusService.Service.Model;
 
 namespace BonusService.Service.DAL.Interface
 {

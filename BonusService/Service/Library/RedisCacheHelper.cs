@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using BonusService.Service.Model.enums;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+﻿using BonusService.Service.Model.enums;
 using Newtonsoft.Json;
 using StackExchange.Redis;
 
@@ -41,7 +36,7 @@ namespace BonusService.Service.Library
                 }
 
                 var json = db.StringGet(key);
-                return JsonConvert.DeserializeObject<TItem>(json);
+                return json.HasValue ? JsonConvert.DeserializeObject<TItem>(json) : factory();
             }
             catch (Exception ex)
             {
@@ -70,7 +65,7 @@ namespace BonusService.Service.Library
                 }
 
                 var json = db.StringGet(key);
-                return JsonConvert.DeserializeObject<TItem>(json);
+                return json.HasValue ? JsonConvert.DeserializeObject<TItem>(json) : await factory();
             }
             catch (Exception ex)
             {

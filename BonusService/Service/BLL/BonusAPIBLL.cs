@@ -3,8 +3,6 @@ using BonusService.Service.Library;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
 using MemberSite.Service.Model;
-using Microsoft.Extensions.DependencyInjection;
-using System;
 
 namespace BonusService.Service.BLL
 {

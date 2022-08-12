@@ -1,11 +1,4 @@
 ﻿using BonusService.Service.BLL;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Linq;
 using BonusService.Service.Model;
 using Newtonsoft.Json;
 
