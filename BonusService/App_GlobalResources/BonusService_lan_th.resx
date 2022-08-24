@@ -159,4 +159,7 @@
   <data name="lbl_VerificationRewardLimitTitle" xml:space="preserve">
     <value>รางวัลการยืนยัน</value>
   </data>
+  <data name="lbl_ReferredBonusCreditedMsg" xml:space="preserve">
+    <value>ยินดีด้วยค่ะ คุณได้รับเครดิตฟรีจากการแนะนำ {0} !</value>
+  </data>
 </root>

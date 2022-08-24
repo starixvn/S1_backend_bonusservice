@@ -39,21 +39,23 @@ namespace BonusService.Service.BLL
                 }
 
                 var title = selLangBLL.GetResourceValue("lbl_ReferralBonusCreditedTitle", custInfo.UserLang);
-                var message =
-                    string.Format($" {selLangBLL.GetResourceValue("lbl_ReferralBonusCreditedMsg", custInfo.UserLang)}",
-                        dpayAmount);
+                var message = string.Format($" {selLangBLL.GetResourceValue("lbl_ReferralBonusCreditedMsg", custInfo.UserLang)}", dpayAmount);
                 msg.AppendLine(message);
 
 
                 foreach (var paidReferral in paidReferralList)
                 {
-                    var dAmount = paidReferral.BonusAmount.ToString("#,##0.##");
-                    if (custInfoService.IsConvertRequired(custInfo.CurrencyId))
+                    var referralFreeCredit = paidReferral.ReferralFreeCredit;
+                    var dAmount = paidReferral.BonusAmount;
+                    if (custInfoService.IsConvertRequired(paidReferral.CurrencyId))
                     {
-                        dAmount = $"{paidReferral.BonusAmount / 1000:#,##0.##}";
+                        referralFreeCredit /= 1000;
+                        dAmount /= 1000;
                     }
-
-                    msg.AppendLine($"{paidReferral.UserName}: {dAmount}");
+                    var referredMessage = string.Format($"{selLangBLL.GetResourceValue("lbl_ReferredBonusCreditedMsg", paidReferral.UserLang)}", $"{referralFreeCredit:#,##0.##}");
+                    messageService.SendMessage(paidReferral.SiteId, "Bonus Service", title, referredMessage, paidReferral.CustId, paidReferral.UserName, paidReferral.UserLang);
+                    
+                    msg.AppendLine($"{paidReferral.UserName}: {dAmount:#,##0.##}");
                 }
 
                 messageService.SendMessage(custInfo.SiteId, "Bonus Service", title, msg.ToString(), custInfo.CustId, custInfo.UserName, custInfo.UserLang);

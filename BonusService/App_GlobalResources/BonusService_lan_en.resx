@@ -159,4 +159,7 @@
   <data name="lbl_VerificationRewardLimitTitle" xml:space="preserve">
     <value>Verification Rewards</value>
   </data>
+  <data name="lbl_ReferredBonusCreditedMsg" xml:space="preserve">
+    <value>Congratulation! You have received your REFERRED FREE CREDIT {0} !</value>
+  </data>
 </root>
