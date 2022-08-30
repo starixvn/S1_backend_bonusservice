@@ -490,7 +490,7 @@ namespace BonusService.Service.BLL
                 SiteId = custInfo.SiteId,
                 Memo = memo,
                 Prefix = $"B{_common.GetEnv()}",
-                RefList = claimPromotion.PromotionType == PromotionType.TierRedepositBonus ? JsonConvert.SerializeObject(new { DepositId = depositId } ) : null,
+                RefList = !string.IsNullOrEmpty(depositId) ? JsonConvert.SerializeObject(new { DepositId = depositId } ) : null,
                 SetBalanceMemo = $"Claim {Enum.GetName(typeof(PromotionType), claimPromotion.PromotionType)} BonusCode: {bonusCode}, Locked Amount: {calculateBonus.LockedAmount:#,##0.##}",
                 RewardBonusMemo = $"Claim {Enum.GetName(typeof(PromotionType), claimPromotion.PromotionType)} BonusCode: {bonusCode}",
                 FinancialType = FinancialType.Bonusreward,
@@ -595,11 +595,6 @@ namespace BonusService.Service.BLL
                 return (int)BonusErrorCode.ADJUSTMENT_BONUS_CUSTOMER_HAS_RUNNING_BONUS;
             }
 
-            if (claimPromotion.PromotionType == PromotionType.TierRedepositBonus && !claimPromotion.TierAmountList.Any())
-            {
-                return (int)BonusErrorCode.ADJUSTMENT_BONUS_PROMOTION_NOT_ACTIVE;
-            }
-
             return (int)BonusErrorCode.SUCCESS;
         }
         
@@ -629,6 +624,12 @@ namespace BonusService.Service.BLL
                 case PromotionType.FstDeposit:
                 case PromotionType.ReDeposit:
                     {
+                        //帶DepositId使用存款金額計算TierAmount
+                        if (claimPromotion.PromotionType == PromotionType.ReDeposit && depositId != null)
+                        {
+                            return CalculateTierRedepositBonus(claimPromotion, custId, siteId, currencyId, depositId);     
+                        }
+
                         if (claimPromotion.PromotionType == PromotionType.ReDeposit ||
                            (claimPromotion.IsSpecial && claimPromotion.PromotionType == PromotionType.FstDeposit))
                         {
@@ -747,51 +748,7 @@ namespace BonusService.Service.BLL
                     bonusAmount = claimPromotion.Bonus;
                     lockAmount = 0;         
                     rollover = bonusAmount * claimPromotion.RollOver;
-                    break;
-                case PromotionType.TierRedepositBonus:
-                    {
-                        var checkResult = CheckTierRedepositBonus(new CheckTierRedepositBonusReq 
-                        {
-                            CustId = custId,
-                            BonusCode = claimPromotion.BonusCode,
-                            PromotionType = (int)claimPromotion.PromotionType,
-                            SiteId = siteId,
-                            CurrencyId = currencyId,
-                            DepositId = depositId
-                        });
-                        if (!checkResult.IsSuccess)
-                        {
-                            throw new Exception("TierAmount check fail.");
-                        }
-
-                        var tierAmount = claimPromotion.CalculateTierAmount(checkResult.ActualDeposit);
-                        if (tierAmount == null)
-                        {
-                            throw new Exception("TierAmount no found.");
-                        }
-
-                        claimPromotion.MaxBonus = tierAmount.MaxBonus;
-                        claimPromotion.RequiredAmount = tierAmount.RequiredAmount;
-                        claimPromotion.Bonus = tierAmount.Bonus;
-
-                        if (claimPromotion.BonusType == BonusType.Amount)
-                        {
-                            bonusAmount = tierAmount.Bonus;
-                            lockAmount = tierAmount.RequiredAmount;
-                        }
-                        else 
-                        {
-                            bonusAmount = Math.Ceiling(tierAmount.Bonus * checkResult.ActualDeposit / 100);
-                            lockAmount = bonusAmount * 100 / tierAmount.Bonus;
-                            if (tierAmount.MaxBonus != 0 && bonusAmount > tierAmount.MaxBonus)
-                            {
-                                bonusAmount = tierAmount.MaxBonus;
-                                lockAmount = tierAmount.MaxBonus * 100 / tierAmount.Bonus;
-                            }
-                        }
-                        rollover = (lockAmount + bonusAmount) * claimPromotion.RollOver;
-                        break;
-                    }
+                    break;                  
 
                 default:
                     output.result = (int)BonusErrorCode.CALCULATE_UNKNOW_PROMOTION_TYPE;
@@ -818,7 +775,6 @@ namespace BonusService.Service.BLL
                 case PromotionType.Cashback:
                 case PromotionType.ManualBonus:
                 case PromotionType.RetentionBonus:
-                case PromotionType.TierRedepositBonus:
                     {
                         result = BonusReward(bonusRewardInput, trans);
                         break;
@@ -1221,6 +1177,61 @@ namespace BonusService.Service.BLL
             return _mainDbClient.QueryFirst<CheckTierRedepositBonusRep>("Admin_CheckTierRedepositBonus_Get", new DynamicParameters(request));
         }
 
-       
+        private CalculateBonusOutput CalculateTierRedepositBonus(ClaimPromotion claimPromotion, int custId, int siteId, int currencyId, string depositId)
+        {
+            var checkResult = CheckTierRedepositBonus(new CheckTierRedepositBonusReq
+            {
+                CustId = custId,
+                BonusCode = claimPromotion.BonusCode,
+                PromotionType = (int)claimPromotion.PromotionType,
+                SiteId = siteId,
+                CurrencyId = currencyId,
+                DepositId = depositId
+            });
+            if (!checkResult.IsSuccess)
+            {
+                throw new Exception("TierAmount check fail.");
+            }
+
+            var tierAmount = claimPromotion.CalculateTierAmount(checkResult.ActualDeposit);
+            if (tierAmount == null)
+            {
+                throw new Exception("TierAmount no found.");
+            }
+
+            claimPromotion.MaxBonus = tierAmount.MaxBonus;
+            claimPromotion.RequiredAmount = tierAmount.RequiredAmount;
+            claimPromotion.Bonus = tierAmount.Bonus;
+
+            decimal bonusAmount;
+            decimal lockAmount;
+            if (claimPromotion.BonusType == BonusType.Amount)
+            {
+                bonusAmount = tierAmount.Bonus;
+                lockAmount = tierAmount.RequiredAmount;
+            }
+            else
+            {
+                bonusAmount = Math.Ceiling(tierAmount.Bonus * checkResult.ActualDeposit / 100);
+                lockAmount = bonusAmount * 100 / tierAmount.Bonus;
+                if (tierAmount.MaxBonus != 0 && bonusAmount > tierAmount.MaxBonus)
+                {
+                    bonusAmount = tierAmount.MaxBonus;
+                    lockAmount = tierAmount.MaxBonus * 100 / tierAmount.Bonus;
+                }
+            }
+
+            return new CalculateBonusOutput
+            {
+                result = (int)BonusErrorCode.SUCCESS,
+                BonusInfo = JsonConvert.SerializeObject(claimPromotion,new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }),
+                ExpiryTime = DateTimeOffset.Now.AddDays(claimPromotion.ExpiryDays).ToUnixTimeSeconds(),
+                BonusAmount = bonusAmount,
+                LockedAmount = lockAmount,  
+                RollOver = (lockAmount + bonusAmount) * claimPromotion.RollOver
+            };
+        }
+
+
     }
 }
