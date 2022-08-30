@@ -121,7 +121,7 @@ namespace BonusService.Service.BLL
                                     item.TpId == customerGroupByCustId.First().TpId &&
                                     item.CategoryId == customerGroupByCustId.First().CategoryId &&
                                     Math.Abs(customerGroupByCustId.Sum(i => i.WinlostAmount)) >= item.LossAmount)
-                                .OrderByDescending(i => i.LossAmount).FirstOrDefault()?.Percentage ?? 0;
+                                .MaxBy(i => i.LossAmount)?.Percentage ?? 0;
 
                             if (percentage == 0)
                             {
