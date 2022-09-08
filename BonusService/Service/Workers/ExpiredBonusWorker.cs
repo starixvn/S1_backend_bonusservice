@@ -48,11 +48,10 @@ namespace BonusService.Service.Workers
                             case PromotionType.FstDeposit:
                             case PromotionType.ReDeposit:
                             case PromotionType.FreeBet:
-                            case PromotionType.WalletBonus:
                             case PromotionType.Rebate:
                             case PromotionType.Cashback:
-                            case PromotionType.ManualBonus:
-                            case PromotionType.RetentionBonus:
+                            case PromotionType.SpecialBonus:
+                            case PromotionType.RetentionFreeBet:
 
                                 //確認剩餘本金
                                 var refundAmount = remainingBonus - item.BonusAmount;
