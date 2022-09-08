@@ -579,7 +579,7 @@ namespace BonusService.Service.BLL
                 return (int)BonusErrorCode.ADJUSTMENT_BONUS_PROMOTIONTYPE_NOT_MATCH;
             }
 
-            if (claimPromotion.PromotionType == PromotionType.ManualBonus)
+            if (claimPromotion.PromotionType == PromotionType.SpecialBonus)
             {
                 if (claimPromotion.PromotionAction != 1)
                     return (int)BonusErrorCode.ADJUSTMENT_BONUS_PROMOTION_NOT_ACTIVE;
@@ -669,7 +669,7 @@ namespace BonusService.Service.BLL
                             }
                         }
 
-                        rollover = (lockAmount + bonusAmount) * (claimPromotion.FullFillType == 1 ? claimPromotion.RollOver : claimPromotion.WinOver);
+                        rollover = (lockAmount + bonusAmount) * (claimPromotion.FullFillType == (int)FullFillType.RollOver ? claimPromotion.RollOver : claimPromotion.WinOver);
                         break;
                     }
 
@@ -703,48 +703,16 @@ namespace BonusService.Service.BLL
                     lockAmount = 0;
                     break;
 
-                case PromotionType.WalletBonus when claimPromotion.RequiredAmount == 0:
-                    throw new Exception("Required Amount can't be 0");
-
-                case PromotionType.WalletBonus:
-                    {
-                        amount = _walletService.GetBalance(custId);
-
-                        if (amount < claimPromotion.RequiredAmount)
-                        {
-                            output.LockedAmount = claimPromotion.RequiredAmount;
-                            output.result = (int)BonusErrorCode.DEPOSIT_AMOUNT_NOT_ENOUGH;
-                            return output;
-                        }
-
-                        if (claimPromotion.BonusType == BonusType.Amount)
-                        {
-                            bonusAmount = claimPromotion.Bonus;
-                            lockAmount = claimPromotion.RequiredAmount;
-                        }
-                        else
-                        {
-                            bonusAmount = Math.Ceiling(claimPromotion.Bonus * amount / 100);
-                            if (claimPromotion.MaxBonus != 0 && bonusAmount > claimPromotion.MaxBonus)
-                            {
-                                bonusAmount = claimPromotion.MaxBonus;
-                                lockAmount = claimPromotion.MaxBonus * 100 / claimPromotion.Bonus;
-                            }
-                        }
-                        rollover = ((lockAmount + bonusAmount) * claimPromotion.RollOver);
-                        break;
-                    }
-
                 case PromotionType.Rebate:
                     return output;
                 
-                case PromotionType.ManualBonus:
+                case PromotionType.SpecialBonus:
                     bonusAmount = amount;
                     lockAmount = 0;
                     rollover = amount * claimPromotion.RollOver;
                     break;
                 
-                case PromotionType.RetentionBonus:
+                case PromotionType.RetentionFreeBet:
                     bonusAmount = claimPromotion.Bonus;
                     lockAmount = 0;         
                     rollover = bonusAmount * claimPromotion.RollOver;
@@ -771,10 +739,9 @@ namespace BonusService.Service.BLL
                 case PromotionType.FstDeposit:
                 case PromotionType.ReDeposit:
                 case PromotionType.FreeBet:
-                case PromotionType.WalletBonus:
                 case PromotionType.Cashback:
-                case PromotionType.ManualBonus:
-                case PromotionType.RetentionBonus:
+                case PromotionType.SpecialBonus:
+                case PromotionType.RetentionFreeBet:
                     {
                         result = BonusReward(bonusRewardInput, trans);
                         break;
@@ -787,7 +754,6 @@ namespace BonusService.Service.BLL
                         : 0;
                     break;
 
-                case PromotionType.Special:
                 default:
                     throw new ArgumentOutOfRangeException();
             }

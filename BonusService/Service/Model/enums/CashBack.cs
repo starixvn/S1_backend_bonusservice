@@ -5,12 +5,10 @@
         FstDeposit = 1,
         ReDeposit = 2,
         FreeBet = 3,
-        Special = 4,
-        WalletBonus = 5,
         Rebate = 6,
         Cashback = 7,
-        ManualBonus = 8,
-        RetentionBonus = 9
+        SpecialBonus = 8,
+        RetentionFreeBet = 9
     }
 
     public enum PromotionCategoryId
@@ -31,5 +29,11 @@
         Lottery = 6,
         VirtualSports = 7,
         Poker = 8
+    }
+
+    public enum FullFillType
+    {
+        RollOver = 1,
+        WinOver = 2
     }
 }
