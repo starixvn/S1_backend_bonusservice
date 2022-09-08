@@ -1,10 +1,5 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using BonusService.Service.BLL;
+﻿using BonusService.Service.BLL;
 using BonusService.Service.Extensions;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace BonusService.Service.Workers
 {

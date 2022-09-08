@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
+﻿using System.Data;
 using BonusService.Service.DAL.Interface;
 using BonusService.Service.Library;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
 using Dapper;
-using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
 
 namespace BonusService.Service.BLL

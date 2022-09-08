@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace BonusService.Service.Model
+﻿namespace BonusService.Service.Model
 {
     public class PromotionAutoExtend
     {

@@ -1,12 +1,8 @@
 ﻿using Dapper;
 using MySql.Data.MySqlClient;
-using System;
 using System.Data;
-using System.Linq;
 using BonusService.Service.Library;
 using BonusService.Service.Model.enums;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
 
 namespace BonusService.Service.DAL
 {
@@ -38,7 +34,7 @@ namespace BonusService.Service.DAL
             });
             p.Add("Is1stDepoist", dbType: DbType.Boolean, direction: ParameterDirection.Output);
             p.Add("AfterAmount", dbType: DbType.Decimal, direction: ParameterDirection.Output);
-            _mainDbClient.Execute("Wallet_Set", trans, p);
+            _mainDbClient.Execute("Wallet_Set_V2", trans, p);
             is1StDeposit = p.Get<byte?>("Is1stDepoist") ?? 0;
             afterAmount = p.Get<decimal?>("AfterAmount") ?? 0;
             return afterAmount >= 0 ? 1 : 0;

@@ -1,8 +1,6 @@
 ﻿using BonusService.Service.DAL;
 using BonusService.Service.Model;
-using System.Collections.Generic;
 using BonusService.Service.Model.enums;
-using Microsoft.Extensions.Logging;
 
 namespace BonusService.Service.BLL
 {

@@ -1,6 +1,4 @@
 ﻿using BonusService.Service.Model.enums;
-using System;
-using System.Collections.Generic;
 
 namespace BonusService.Service.Model
 {

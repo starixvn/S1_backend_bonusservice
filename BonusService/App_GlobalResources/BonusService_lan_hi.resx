@@ -159,4 +159,7 @@
   <data name="lbl_VerificationRewardLimitTitle" xml:space="preserve">
     <value>सत्यापन इनाम</value>
   </data>
+  <data name="lbl_ReferredBonusCreditedMsg" xml:space="preserve">
+    <value>बधाई हो! आपको अपना रेफ़रर्ड मुफ़्त क्रेडिट {0} मिल गया है!</value>
+  </data>
 </root>
