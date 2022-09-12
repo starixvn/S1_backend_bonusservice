@@ -48,7 +48,6 @@ namespace BonusService.Service.Workers
                             case PromotionType.FstDeposit:
                             case PromotionType.ReDeposit:
                             case PromotionType.FreeBet:
-                            case PromotionType.Rebate:
                             case PromotionType.Cashback:
                             case PromotionType.SpecialBonus:
                             case PromotionType.RetentionFreeBet:
@@ -87,6 +86,7 @@ namespace BonusService.Service.Workers
                                 }
 
                                 break;
+                            case PromotionType.Rebate:
                             default:
                                 throw new ArgumentOutOfRangeException();
                         }
