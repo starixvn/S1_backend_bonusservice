@@ -57,7 +57,7 @@ namespace BonusService.Service.BLL
 
             apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible", input.CustInfo.SiteId, input.CustInfo.SiteName, showLangId);
 
-            if (input.CustInfo.SiteId == (int)SiteId.Goal123 || input.CustInfo.SiteId == (int)SiteId.Bwing)
+            if (input.CustInfo.SiteId is (int)SiteId.Goal123 or (int)SiteId.Bwing)
             {
                 if (input.ClaimPromotion.PromotionType == PromotionType.FreeBet)
                 {
@@ -238,7 +238,7 @@ namespace BonusService.Service.BLL
                     {
                         apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible", input.CustInfo.SiteId, input.CustInfo.SiteName, showLangId);
 
-                        if (input.CustInfo.SiteId == (int)SiteId.Goal123 || input.CustInfo.SiteId == (int)SiteId.Bwing)
+                        if (input.CustInfo.SiteId is (int)SiteId.Goal123 or (int)SiteId.Bwing)
                         {
                             if (input.ClaimPromotion.PromotionType == PromotionType.FreeBet)
                             {
@@ -812,7 +812,7 @@ namespace BonusService.Service.BLL
             if (result > 0 && bonusRewardInput.PromotionType == PromotionType.Cashback)
             {
                 var offset = 8;
-                if (bonusRewardInput.SiteId == (int)SiteId.Goal123 || bonusRewardInput.SiteId == (int)SiteId.Bwing)
+                if (bonusRewardInput.SiteId is (int)SiteId.Goal123 or (int)SiteId.Bwing)
                 {
                     offset = 7;
                 }
@@ -908,7 +908,7 @@ namespace BonusService.Service.BLL
         
         private void SetPromotion(int siteId, int custId, int currencyId, bool getCashbackDetail, CustPromotion promo, CustCondition custCondition)
         {
-            if ((promo.PromotionType == PromotionType.FstDeposit || promo.PromotionType == PromotionType.ReDeposit)
+            if (promo.PromotionType is PromotionType.FstDeposit or PromotionType.ReDeposit
                 && promo.canJoin)
             {
                 promo.DepositId = custCondition.RefId;
@@ -1069,7 +1069,7 @@ namespace BonusService.Service.BLL
         {
             var custInfo = _custInfoService.GetCustInfo(custId);
             var offset = 8;
-            if (siteId == (int)SiteId.Goal123 || siteId == (int)SiteId.Bwing)
+            if (siteId is (int)SiteId.Goal123 or (int)SiteId.Bwing)
             {
                 offset = 7;
             }
