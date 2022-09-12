@@ -1,5 +1,7 @@
 ﻿using BonusService.Service.Model.enums;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 
 namespace BonusService.Service.Model
 {
@@ -10,7 +12,10 @@ namespace BonusService.Service.Model
         public string Description { get; set; }
         public PromotionType PromotionType { get; set; }
         public int CategoryId { get; set; }
+        public long PeriodFrom { get; set; }
         public long PeriodTo { get; set; }
+        public long DisplayFrom { get; set; }
+        public long DisplaytTo { get; set; }
         public int RollOver { get; set; }
         public int WinOver { get; set; }
         public int FullFillType { get; set; }
@@ -96,7 +101,6 @@ namespace BonusService.Service.Model
     public class CustPromotion : Promotion
     {
         public string Banner { get; set; }
-        public long PeriodFrom { get; set; }
         public int WalletType { get; set; }        
         public decimal CustRollOver { get; set; }
         public decimal CustTurnOver { get; set; }
