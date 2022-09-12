@@ -743,12 +743,6 @@ namespace BonusService.Service.BLL
                     }
 
                 case PromotionType.Rebate:
-                    result = _bonusWalletService.RewardRebate(bonusRewardInput.BonusCode, (int)bonusRewardInput.PromotionType - 5,
-                        bonusRewardInput.CustId, bonusRewardInput.UserName, bonusRewardInput.SiteId, bonusRewardInput.CurrencyId, trans)
-                        ? 1
-                        : 0;
-                    break;
-
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -957,29 +951,21 @@ namespace BonusService.Service.BLL
                     promo.canJoin = false;
                 }
             }
-        
-            if (promo.PromotionType == PromotionType.Rebate)
+            
+            var custBonusInfo = _promotionService.GetBonusInfoByCust(custId, promo);
+            if (custBonusInfo != null)
             {
-                promo.isJoin = _promotionService.GetRebateInfo(custId, promo);
-        
+                promo.CustExpiryTime = custBonusInfo.ExpiryTime;
+                promo.CustRollOver = custBonusInfo.Rollover;
+                promo.CustTurnOver = custBonusInfo.Turnover < 0 ? 0 : custBonusInfo.Turnover;
+                promo.FullFillType = custBonusInfo.FullFillType;
+                promo.Status = custBonusInfo.Status;
+                promo.isJoin = true;
             }
-            else
+            
+            if (promo.PromotionType == PromotionType.Cashback)
             {
-                var custBonusInfo = _promotionService.GetBonusInfoByCust(custId, promo);
-                if (custBonusInfo != null)
-                {
-                    promo.CustExpiryTime = custBonusInfo.ExpiryTime;
-                    promo.CustRollOver = custBonusInfo.Rollover;
-                    promo.CustTurnOver = custBonusInfo.Turnover < 0 ? 0 : custBonusInfo.Turnover;
-                    promo.FullFillType = custBonusInfo.FullFillType;
-                    promo.Status = custBonusInfo.Status;
-                    promo.isJoin = true;
-                }
-                
-                if (promo.PromotionType == PromotionType.Cashback)
-                {
-                    GetCashbackInfo(custId, siteId, currencyId, promo, getCashbackDetail);
-                }
+                GetCashbackInfo(custId, siteId, currencyId, promo, getCashbackDetail);
             }
         }
         

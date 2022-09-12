@@ -23,11 +23,6 @@ namespace BonusService.Service.DAL
                 RefTransId });
             return _mainDbClient.Execute("Common_Bonus_Ins_V2", trans, p) > 0;
         }
-        public bool RewardRebate(string bonusCode, int rebateType, int custId, string userName, int siteId, int currencyId, MySqlTransaction trans)
-        {
-            var p = new DynamicParameters(new { BonusCode = bonusCode, RebateType = rebateType, CustId = custId, UserName = userName, SiteId = siteId, CurrencyId = currencyId });
-            return _mainDbClient.Execute("Common_Rebate_Ins", trans, p) > 0;
-        }
 
         public int RewardCashBack(CustCashBackInput custCashBackInput, MySqlTransaction trans)
         {
