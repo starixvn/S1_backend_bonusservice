@@ -9,24 +9,16 @@ namespace BonusService.Service.DAL
 {
     public class VipRebateService
     {
-        private readonly IConfiguration configuration;
         private readonly WalletService walletService;
-        private readonly WithdrawalLimitService withdrawalLimitService;
         private readonly Common common;
         private readonly MySqlClient _mainDbClient;
         private readonly MySqlClient _reportDbClient;
-        public VipRebateService(IConfiguration configuration,
-                             WalletService walletService,
-            Common common,
-            WithdrawalLimitService withdrawalLimitService,
-            IServiceProvider provider)
+        public VipRebateService(IServiceProvider provider)
         {
             _mainDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);
             _reportDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Report);
-            this.configuration = configuration;
-            this.walletService = walletService;
-            this.withdrawalLimitService = withdrawalLimitService;
-            this.common = common;
+            walletService = provider.GetRequiredService<WalletService>();
+            common = provider.GetRequiredService<Common>();
         }
         public IEnumerable<VipRebateTpBetRecord> GetVipRebateTpBetRecord(int periodType, int custId, DateTime specificDate, string timeZone, int is14)
         {

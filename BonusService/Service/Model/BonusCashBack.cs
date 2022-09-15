@@ -22,20 +22,6 @@
         public decimal RollOver { set; get; }
         public decimal MinPayout { set; get; }
     }
-    public class RebatePeriod
-    {
-        public string BonusCode { set; get; }
-        public int SiteId { set; get; }
-        public int PromotionType { set; get; }
-        public int PeriodType { set; get; }
-        public int PeriodDay { set; get; }
-        public int CurrencyId { set; get; }
-        public int GameType { set; get; }
-        public decimal Percentage { set; get; }
-        public decimal MaxBonus { set; get; }
-        public decimal RollOver { set; get; }
-        public decimal MinPayout { set; get; }
-    }
 
     public class RebateInfo
     {
@@ -64,43 +50,18 @@
         public decimal MaxPayout { set; get; }
         public decimal MinPayout { set; get; }
     }
-    public class RebateTpBetRecord
-    {
-        public DateTime SettledDate { set; get; }
-        public int GameType { set; get; }
-        public string UserName { set; get; }
-        public int CurrencyId { set; get; }
-        public string TpUserName { set; get; }
-        public decimal ValidBet { set; get; }
-        public decimal WinlostAmount { set; get; }
-    }
+
     public class RebateRecord
     {
         public int SettledDate { set; get; }
         public int GameType { set; get; }
         public decimal Sum { set; get; }
     }
-    public class TpGameType
-    {
-        public int Type { get; set; }
-        public string TypeName { get; set; }
-    }
+
     public class TpCategory
     {
         public int Id { get; set; }
         public string Name { get; set; }
-    }
-    public class BonusCashBack
-    {
-        public int Id { set; get; }
-        public int SiteId { set; get; }
-        public int Period { set; get; }
-        public int DayOfWeek { set; get; }
-        public int PayHour { set; get; }
-        public int PayMinute { set; get; }
-        public int WithdrawCondition { set; get; }
-        public decimal DefaultPercentage { set; get; }
-        public decimal TimeZone { set; get; }
     }
 
     public class BonusCashBackGames
@@ -112,16 +73,6 @@
         public int Status { set; get; }
     }
 
-    public class BonusCashBackMinMax
-    {
-        public int SiteId { set; get; }
-        public int CashbackId { set; get; }
-        public int CurrencyId { set; get; }
-        public decimal MinPay { set; get; }
-        public decimal MaxPay { set; get; }
-        public decimal MinBet { set; get; }
-        public decimal MaxBet { set; get; }
-    }
     public class TpBetRecord
     {
         public int TpId { set; get; }

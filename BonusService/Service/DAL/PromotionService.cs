@@ -172,13 +172,7 @@ namespace BonusService.Service.DAL
             return _reportDbClient.Query<CustPromotion>("Member_SPCodePromotionList_Get_V4",
                 new { request.CustId, request.DeviceType });
         }
-        
-        public bool GetRebateInfo(int custId, CustPromotion promo)
-        {
-            return _reportDbClient.Execute("Member_RebateInfo_GetByCust",
-                new { promo.BonusCode, RebateType = promo.PromotionType - 5, CustId = custId }) > 0;
-        }
-        
+
         public BonusWallet GetBonusInfoByCust(int custId, CustPromotion promo)
         {
            return _reportDbClient.QueryFirst<BonusWallet>("Member_BonusInfo_GetByCust",

@@ -57,7 +57,7 @@ namespace BonusService.Service.BLL
 
             apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible", input.CustInfo.SiteId, input.CustInfo.SiteName, showLangId);
 
-            if (input.CustInfo.SiteId == (int)SiteId.Goal123 || input.CustInfo.SiteId == (int)SiteId.Bwing)
+            if (input.CustInfo.SiteId is (int)SiteId.Goal123 or (int)SiteId.Bwing)
             {
                 if (input.ClaimPromotion.PromotionType == PromotionType.FreeBet)
                 {
@@ -238,7 +238,7 @@ namespace BonusService.Service.BLL
                     {
                         apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible", input.CustInfo.SiteId, input.CustInfo.SiteName, showLangId);
 
-                        if (input.CustInfo.SiteId == (int)SiteId.Goal123 || input.CustInfo.SiteId == (int)SiteId.Bwing)
+                        if (input.CustInfo.SiteId is (int)SiteId.Goal123 or (int)SiteId.Bwing)
                         {
                             if (input.ClaimPromotion.PromotionType == PromotionType.FreeBet)
                             {
@@ -579,7 +579,7 @@ namespace BonusService.Service.BLL
                 return (int)BonusErrorCode.ADJUSTMENT_BONUS_PROMOTIONTYPE_NOT_MATCH;
             }
 
-            if (claimPromotion.PromotionType == PromotionType.ManualBonus)
+            if (claimPromotion.PromotionType == PromotionType.SpecialBonus)
             {
                 if (claimPromotion.PromotionAction != 1)
                     return (int)BonusErrorCode.ADJUSTMENT_BONUS_PROMOTION_NOT_ACTIVE;
@@ -669,7 +669,7 @@ namespace BonusService.Service.BLL
                             }
                         }
 
-                        rollover = (lockAmount + bonusAmount) * (claimPromotion.FullFillType == 1 ? claimPromotion.RollOver : claimPromotion.WinOver);
+                        rollover = (lockAmount + bonusAmount) * (claimPromotion.FullFillType == (int)FullFillType.RollOver ? claimPromotion.RollOver : claimPromotion.WinOver);
                         break;
                     }
 
@@ -703,48 +703,16 @@ namespace BonusService.Service.BLL
                     lockAmount = 0;
                     break;
 
-                case PromotionType.WalletBonus when claimPromotion.RequiredAmount == 0:
-                    throw new Exception("Required Amount can't be 0");
-
-                case PromotionType.WalletBonus:
-                    {
-                        amount = _walletService.GetBalance(custId);
-
-                        if (amount < claimPromotion.RequiredAmount)
-                        {
-                            output.LockedAmount = claimPromotion.RequiredAmount;
-                            output.result = (int)BonusErrorCode.DEPOSIT_AMOUNT_NOT_ENOUGH;
-                            return output;
-                        }
-
-                        if (claimPromotion.BonusType == BonusType.Amount)
-                        {
-                            bonusAmount = claimPromotion.Bonus;
-                            lockAmount = claimPromotion.RequiredAmount;
-                        }
-                        else
-                        {
-                            bonusAmount = Math.Ceiling(claimPromotion.Bonus * amount / 100);
-                            if (claimPromotion.MaxBonus != 0 && bonusAmount > claimPromotion.MaxBonus)
-                            {
-                                bonusAmount = claimPromotion.MaxBonus;
-                                lockAmount = claimPromotion.MaxBonus * 100 / claimPromotion.Bonus;
-                            }
-                        }
-                        rollover = ((lockAmount + bonusAmount) * claimPromotion.RollOver);
-                        break;
-                    }
-
                 case PromotionType.Rebate:
                     return output;
                 
-                case PromotionType.ManualBonus:
+                case PromotionType.SpecialBonus:
                     bonusAmount = amount;
                     lockAmount = 0;
                     rollover = amount * claimPromotion.RollOver;
                     break;
                 
-                case PromotionType.RetentionBonus:
+                case PromotionType.RetentionFreeBet:
                     bonusAmount = claimPromotion.Bonus;
                     lockAmount = 0;         
                     rollover = bonusAmount * claimPromotion.RollOver;
@@ -771,23 +739,15 @@ namespace BonusService.Service.BLL
                 case PromotionType.FstDeposit:
                 case PromotionType.ReDeposit:
                 case PromotionType.FreeBet:
-                case PromotionType.WalletBonus:
                 case PromotionType.Cashback:
-                case PromotionType.ManualBonus:
-                case PromotionType.RetentionBonus:
+                case PromotionType.SpecialBonus:
+                case PromotionType.RetentionFreeBet:
                     {
                         result = BonusReward(bonusRewardInput, trans);
                         break;
                     }
 
                 case PromotionType.Rebate:
-                    result = _bonusWalletService.RewardRebate(bonusRewardInput.BonusCode, (int)bonusRewardInput.PromotionType - 5,
-                        bonusRewardInput.CustId, bonusRewardInput.UserName, bonusRewardInput.SiteId, bonusRewardInput.CurrencyId, trans)
-                        ? 1
-                        : 0;
-                    break;
-
-                case PromotionType.Special:
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -857,7 +817,7 @@ namespace BonusService.Service.BLL
             if (result > 0 && bonusRewardInput.PromotionType == PromotionType.Cashback)
             {
                 var offset = 8;
-                if (bonusRewardInput.SiteId == (int)SiteId.Goal123 || bonusRewardInput.SiteId == (int)SiteId.Bwing)
+                if (bonusRewardInput.SiteId is (int)SiteId.Goal123 or (int)SiteId.Bwing)
                 {
                     offset = 7;
                 }
@@ -953,7 +913,7 @@ namespace BonusService.Service.BLL
         
         private void SetPromotion(int siteId, int custId, int currencyId, bool getCashbackDetail, CustPromotion promo, CustCondition custCondition)
         {
-            if ((promo.PromotionType == PromotionType.FstDeposit || promo.PromotionType == PromotionType.ReDeposit)
+            if (promo.PromotionType is PromotionType.FstDeposit or PromotionType.ReDeposit
                 && promo.canJoin)
             {
                 promo.DepositId = custCondition.RefId;
@@ -996,29 +956,21 @@ namespace BonusService.Service.BLL
                     promo.canJoin = false;
                 }
             }
-        
-            if (promo.PromotionType == PromotionType.Rebate)
+            
+            var custBonusInfo = _promotionService.GetBonusInfoByCust(custId, promo);
+            if (custBonusInfo != null)
             {
-                promo.isJoin = _promotionService.GetRebateInfo(custId, promo);
-        
+                promo.CustExpiryTime = custBonusInfo.ExpiryTime;
+                promo.CustRollOver = custBonusInfo.Rollover;
+                promo.CustTurnOver = custBonusInfo.Turnover < 0 ? 0 : custBonusInfo.Turnover;
+                promo.FullFillType = custBonusInfo.FullFillType;
+                promo.Status = custBonusInfo.Status;
+                promo.isJoin = true;
             }
-            else
+            
+            if (promo.PromotionType == PromotionType.Cashback)
             {
-                var custBonusInfo = _promotionService.GetBonusInfoByCust(custId, promo);
-                if (custBonusInfo != null)
-                {
-                    promo.CustExpiryTime = custBonusInfo.ExpiryTime;
-                    promo.CustRollOver = custBonusInfo.Rollover;
-                    promo.CustTurnOver = custBonusInfo.Turnover < 0 ? 0 : custBonusInfo.Turnover;
-                    promo.FullFillType = custBonusInfo.FullFillType;
-                    promo.Status = custBonusInfo.Status;
-                    promo.isJoin = true;
-                }
-                
-                if (promo.PromotionType == PromotionType.Cashback)
-                {
-                    GetCashbackInfo(custId, siteId, currencyId, promo, getCashbackDetail);
-                }
+                GetCashbackInfo(custId, siteId, currencyId, promo, getCashbackDetail);
             }
         }
         
@@ -1122,7 +1074,7 @@ namespace BonusService.Service.BLL
         {
             var custInfo = _custInfoService.GetCustInfo(custId);
             var offset = 8;
-            if (siteId == (int)SiteId.Goal123 || siteId == (int)SiteId.Bwing)
+            if (siteId is (int)SiteId.Goal123 or (int)SiteId.Bwing)
             {
                 offset = 7;
             }

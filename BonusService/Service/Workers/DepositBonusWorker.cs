@@ -56,7 +56,7 @@ namespace BonusService.Service.Workers
                             depositBonusBLL.SetDepositBonusStatus(depositBonus.TransId, (int)DepositBonusQueueStatus.Cancel_not_eligible);
                         }
                        
-                        else if (depositBonus.DepositStatus == (int)DepositStatusEnum.Rejected || depositBonus.DepositStatus == (int)DepositStatusEnum.Canceled || depositBonus.DepositStatus == (int)DepositStatusEnum.Expired || depositBonus.DepositStatus == (int)DepositStatusEnum.Error )
+                        else if (depositBonus.DepositStatus is (int)DepositStatusEnum.Rejected or (int)DepositStatusEnum.Canceled or (int)DepositStatusEnum.Expired or (int)DepositStatusEnum.Error )
                         {
                             depositBonusBLL.SetDepositBonusStatus(depositBonus.TransId, (int)DepositBonusQueueStatus.Cancel_Rejected);
                         }
