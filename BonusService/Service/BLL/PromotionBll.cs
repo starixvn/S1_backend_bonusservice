@@ -293,7 +293,7 @@ namespace BonusService.Service.BLL
             if (result != (int)BonusErrorCode.SUCCESS)
             {
                 errorInfo.Result = result;
-                return MakeErrorMessage(errorInfo);
+                return MakeErrorMessage(errorInfo,isMessageUserLang);
             }
 
             var custConditionInfo = _promotionService.GetCustConditionInfo(custId, custInfo.CurrencyId, custInfo.SiteId,
@@ -302,7 +302,7 @@ namespace BonusService.Service.BLL
             if (custConditionInfo.CanJoin != 1)
             {
                 errorInfo.Result = custConditionInfo.Result;
-                return MakeErrorMessage(errorInfo);
+                return MakeErrorMessage(errorInfo,isMessageUserLang);
             }
 
             await using var conn = _mainDbClient.GetMySqlConnection();
@@ -314,7 +314,7 @@ namespace BonusService.Service.BLL
             if (calculateBonus.result <= 0)
             {
                 errorInfo.Result = calculateBonus.result;
-                return MakeErrorMessage(errorInfo);
+                return MakeErrorMessage(errorInfo,isMessageUserLang);
             }
 
             if (atPage == BonusInfoAtPage.Deposit) //由Deposit頁面進來的 reference紀錄指定TransId、Amount
@@ -323,7 +323,7 @@ namespace BonusService.Service.BLL
                     depositTransId != custConditionInfo.RefId)
                 {
                     errorInfo.Result = custConditionInfo.Result;
-                    return MakeErrorMessage(errorInfo);
+                    return MakeErrorMessage(errorInfo,isMessageUserLang);
                 }
 
                 custConditionInfo.reference = new List<Ref>
