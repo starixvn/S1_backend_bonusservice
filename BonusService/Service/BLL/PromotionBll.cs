@@ -1154,6 +1154,8 @@ namespace BonusService.Service.BLL
             claimPromotion.MaxBonus = tierAmount.MaxBonus;
             claimPromotion.RequiredAmount = tierAmount.RequiredAmount;
             claimPromotion.Bonus = tierAmount.Bonus;
+            claimPromotion.RollOver = tierAmount.RollOver;
+            claimPromotion.WinOver = tierAmount.WinOver;
 
             decimal bonusAmount;
             decimal lockAmount;

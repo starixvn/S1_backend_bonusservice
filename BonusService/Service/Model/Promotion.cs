@@ -80,6 +80,8 @@ namespace BonusService.Service.Model
         public decimal Bonus { get; set; }
         public decimal MaxBonus { get; set; }
         public decimal RequiredAmount { get; set; }
+        public int RollOver { get; set; }
+        public int WinOver { get; set; }
     }
 
     public class CustPromotionRequest
