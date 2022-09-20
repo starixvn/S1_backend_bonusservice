@@ -1182,7 +1182,7 @@ namespace BonusService.Service.BLL
                 ExpiryTime = DateTimeOffset.Now.AddDays(claimPromotion.ExpiryDays).ToUnixTimeSeconds(),
                 BonusAmount = bonusAmount,
                 LockedAmount = lockAmount,  
-                RollOver = (lockAmount + bonusAmount) * claimPromotion.RollOver
+                RollOver = (lockAmount + bonusAmount) * (claimPromotion.FullFillType == (int)FullFillType.RollOver ? claimPromotion.RollOver : claimPromotion.WinOver)
             };
         }
 
