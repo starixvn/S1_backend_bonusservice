@@ -28,21 +28,6 @@ namespace BonusService.Service.Model
         public int TpId { get; set; }
         public string Details { get; set; }
         public int PromotionAction { get; set; }
-    }
-    
-    public class ClaimPromotion : Promotion
-    {
-        public string CategoryName { get; set; }
-        public int ExpiryDays { get; set; }
-        public int CurrencyId { get; set; }
-        public decimal LockedAmount { get; set; }
-        public decimal BonusAmount { get; set; }
-        public DateTime ExpiryTime { get; set; }
-        public int BonusInfoStatus { get; set; }
-        public CustRollOver custRollOver { get; set; } 
-        public bool IsSpecial { get; set; }
-        public string SpecialCode { get; set; }
-        public decimal MinPayout { get; set; }
         public string TierAmount { get; set; }
         public IEnumerable<TierAmount> TierAmountList
         {
@@ -74,12 +59,29 @@ namespace BonusService.Service.Model
             return null;
         }
     }
+    
+    public class ClaimPromotion : Promotion
+    {
+        public string CategoryName { get; set; }
+        public int ExpiryDays { get; set; }
+        public int CurrencyId { get; set; }
+        public decimal LockedAmount { get; set; }
+        public decimal BonusAmount { get; set; }
+        public DateTime ExpiryTime { get; set; }
+        public int BonusInfoStatus { get; set; }
+        public CustRollOver custRollOver { get; set; } 
+        public bool IsSpecial { get; set; }
+        public string SpecialCode { get; set; }
+        public decimal MinPayout { get; set; }
+    }
 
     public class TierAmount
     {
         public decimal Bonus { get; set; }
         public decimal MaxBonus { get; set; }
         public decimal RequiredAmount { get; set; }
+        public int RollOver { get; set; }
+        public int WinOver { get; set; }
     }
 
     public class CustPromotionRequest
