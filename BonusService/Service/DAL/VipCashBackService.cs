@@ -86,8 +86,9 @@ namespace BonusService.Service.DAL
             parameter.Add("SiteId", cashBackInfoInput.SiteId);
             parameter.Add("Percentage", cashBackInfoInput.Percentage);
             parameter.Add("WinlostAmount", cashBackInfoInput.WinlostAmount);
+            parameter.Add("WinlostAmountWithBonus", cashBackInfoInput.WinlostAmountWithBonus);
             parameter.Add("BonusAmount", cashBackInfoInput.BonusAmount);
-            return _mainDbClient.Execute("Service_CashBackInfo_Ins", parameter) >= 0;
+            return _mainDbClient.Execute("Service_CashBackInfo_Ins_V2", parameter) >= 0;
         }
 
         public bool SetCustCashBack(CustCashBackInput custCashBackInput)

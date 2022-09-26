@@ -108,6 +108,7 @@
         public int TpId { get; set; }
         public int CategoryId { get; set; }
         public decimal WinlostAmount { get; set; }
+        public decimal WinlostAmountWithBonus { get; set; }
     }
 
     public class CustomerVIPInfoOutput
@@ -130,6 +131,7 @@
         public int SiteId { get; set; }
         public decimal Percentage { get; set; }
         public decimal WinlostAmount { get; set; }
+        public decimal WinlostAmountWithBonus { get; set; }
         public decimal BonusAmount { get; set; }
     }
 
