@@ -114,9 +114,9 @@ namespace BonusService.Service.BLL
             return _vipRebateService.SetVipRebateTaskDone(siteId, currencyId);
         }
 
-        public IEnumerable<VipRebateTpBetRecord> GetVipRebateTpBetRecord(int periodType, int custId, DateTime specificDate, string timeZone, int is14)
+        public IEnumerable<VipRebateTpBetRecord> GetVipRebateTpBetRecord(int periodType, int custId, DateTime specificDate, string timeZone)
         {
-            return _vipRebateService.GetVipRebateTpBetRecord(periodType, custId, specificDate, timeZone, is14);
+            return _vipRebateService.GetVipRebateTpBetRecord(periodType, custId, specificDate, timeZone);
         }
         public IEnumerable<VipRebateInfo> GetVipRebateCustList(int siteId, int currencyId, int periodType, DateTime specificDate, string currencyTimeZone,int pageNumber,int pageSize)
         {

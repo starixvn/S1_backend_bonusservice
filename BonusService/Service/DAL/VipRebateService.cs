@@ -28,18 +28,17 @@ namespace BonusService.Service.DAL
             this.withdrawalLimitService = withdrawalLimitService;
             this.common = common;
         }
-        public IEnumerable<VipRebateTpBetRecord> GetVipRebateTpBetRecord(int periodType, int custId, DateTime specificDate, string timeZone, int is14)
+        public IEnumerable<VipRebateTpBetRecord> GetVipRebateTpBetRecord(int periodType, int custId, DateTime specificDate, string timeZone)
         {
             var p = new
             {
                 _PeriodType = periodType,
                 _CustId = custId,
                 _SpecificDate = specificDate,
-                _CurrencyTimeZone = timeZone,
-                _Is14 = is14
+                _CurrencyTimeZone = timeZone
             };
 
-            return _reportDbClient.Query<VipRebateTpBetRecord>("Service_VipRebateTpBetRecord_Get_V3", new DynamicParameters(p));
+            return _reportDbClient.Query<VipRebateTpBetRecord>("Service_VipRebateTpBetRecord_Get_V4", new DynamicParameters(p));
         }
         public IEnumerable<VipRebateInfo> GetVipRebateCustList(int siteId, int currencyId, int periodType, DateTime specificDate, string timeZone, int pageNumber, int pageSize)
         {

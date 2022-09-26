@@ -52,7 +52,7 @@ namespace BonusService.Service.Workers
                             isRemain = rebateInfoList.Count() >= pageSize;
                             foreach (var rebateInfo in rebateInfoList)
                             {
-                                var rebateTpBetRecordList = _rebateBll.GetVipRebateTpBetRecord((int)rebateTask.PeriodType, rebateInfo.CustId, rebateTask.SpecificDate, rebateTask.TimeZone, 0).ToList();
+                                var rebateTpBetRecordList = _rebateBll.GetVipRebateTpBetRecord((int)rebateTask.PeriodType, rebateInfo.CustId, rebateTask.SpecificDate, rebateTask.TimeZone).ToList();
 
                                 if (rebateTpBetRecordList.Count > 0)
                                 {
