@@ -149,6 +149,10 @@ namespace BonusService.Service.Model
     {
         public decimal TotalBonus { get; set; }
         public decimal MaxBonus { get; set; }
+        public decimal TotalLossAmount => CashBackDetail.Sum(i => i.LossAmount);
+        public decimal MinLossAmount => CashBackDetail.Max(i => i.MinLossAmount);
+        public decimal OriginalTotalBonus => CashBackDetail.Max(i => i.Percentage) / 100 * TotalLossAmount;
+        public string Percentage => CashBackDetail.Select(i => i.PercentageName).FirstOrDefault();
         public IEnumerable<CashBackDetail> CashBackDetail { get; set; }
     }
 
@@ -157,12 +161,22 @@ namespace BonusService.Service.Model
         public int CategoryId { get; set; }
         public int TpId { get; set; }
         public string TpName { get; set; }
-        public string PeriodFrom { get; set; }
-        public string PeriodTo { get; set; }
-        public decimal LossAmount { get; set; }
-        public decimal Percentage { private get; set; }
+        public decimal LossAmount
+        {
+            get => Math.Abs(_LossAmount);
+            set => _LossAmount = value;
+        }
+        private decimal _LossAmount { get; set; }
+        public decimal LossAmountWithBonus
+        {
+            get => Math.Abs(_LossAmountWithBonus);
+            set => _LossAmountWithBonus = value;
+        }
+        private decimal _LossAmountWithBonus { get; set; }
+        public decimal Percentage { get; set; }
         public string PercentageName => $"{Percentage:G29}%";
         public decimal BonusAmount { get; set; }
+        public decimal MinLossAmount { get; set; }
     }
 
     public class Ref

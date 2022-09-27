@@ -980,20 +980,23 @@ namespace BonusService.Service.BLL
             {
                 var details = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(promo.Details);
                 Dictionary<string, string> settings = null;
-                if (details.ContainsKey(langId))
+                if (details != null)
                 {
-                    settings = details[langId];
-                }
-                else if (details.ContainsKey(defLang))
-                {
-                    settings = details[defLang];
-                }
-                else
-                {
-                    foreach (var item in details)
+                    if (details.ContainsKey(langId))
                     {
-                        settings = item.Value;
-                        break;
+                        settings = details[langId];
+                    }
+                    else if (details.ContainsKey(defLang))
+                    {
+                        settings = details[defLang];
+                    }
+                    else
+                    {
+                        foreach (var item in details)
+                        {
+                            settings = item.Value;
+                            break;
+                        }
                     }
                 }
 
