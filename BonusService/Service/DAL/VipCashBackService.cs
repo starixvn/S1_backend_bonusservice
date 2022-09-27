@@ -74,20 +74,20 @@ namespace BonusService.Service.DAL
         public bool SetCashBackInfo(CashBackInfoInput cashBackInfoInput)
         {
             var parameter = new DynamicParameters();
-            parameter.Add("BonusCode", cashBackInfoInput.BonusCode);
-            parameter.Add("PromoCategoryId", cashBackInfoInput.PromoCategoryId);
-            parameter.Add("CategoryId", cashBackInfoInput.CategoryId);
-            parameter.Add("TpId", cashBackInfoInput.TpId);
-            parameter.Add("CustId", cashBackInfoInput.CustId);
-            parameter.Add("PeriodFrom", cashBackInfoInput.PeriodFrom);
-            parameter.Add("PeriodTo", cashBackInfoInput.PeriodTo);
-            parameter.Add("VipLevel", cashBackInfoInput.VipLevel);
-            parameter.Add("CurrencyId", cashBackInfoInput.CurrencyId);
-            parameter.Add("SiteId", cashBackInfoInput.SiteId);
-            parameter.Add("Percentage", cashBackInfoInput.Percentage);
-            parameter.Add("WinlostAmount", cashBackInfoInput.WinlostAmount);
-            parameter.Add("WinlostAmountWithBonus", cashBackInfoInput.WinlostAmountWithBonus);
-            parameter.Add("BonusAmount", cashBackInfoInput.BonusAmount);
+            parameter.Add("_BonusCode", cashBackInfoInput.BonusCode);
+            parameter.Add("_PromoCategoryId", cashBackInfoInput.PromoCategoryId);
+            parameter.Add("_CategoryId", cashBackInfoInput.CategoryId);
+            parameter.Add("_TpId", cashBackInfoInput.TpId);
+            parameter.Add("_CustId", cashBackInfoInput.CustId);
+            parameter.Add("_PeriodFrom", cashBackInfoInput.PeriodFrom);
+            parameter.Add("_PeriodTo", cashBackInfoInput.PeriodTo);
+            parameter.Add("_VipLevel", cashBackInfoInput.VipLevel);
+            parameter.Add("_CurrencyId", cashBackInfoInput.CurrencyId);
+            parameter.Add("_SiteId", cashBackInfoInput.SiteId);
+            parameter.Add("_Percentage", cashBackInfoInput.Percentage);
+            parameter.Add("_WinlostAmount", cashBackInfoInput.WinlostAmount);
+            parameter.Add("_WinlostAmountWithBonus", cashBackInfoInput.WinlostAmountWithBonus);
+            parameter.Add("_BonusAmount", cashBackInfoInput.BonusAmount);
             return _mainDbClient.Execute("Service_CashBackInfo_Ins_V2", parameter) >= 0;
         }
 
