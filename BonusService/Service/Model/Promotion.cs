@@ -15,7 +15,7 @@ namespace BonusService.Service.Model
         public long PeriodFrom { get; set; }
         public long PeriodTo { get; set; }
         public long DisplayFrom { get; set; }
-        public long DisplaytTo { get; set; }
+        public long DisplayTo { get; set; }
         public int RollOver { get; set; }
         public int WinOver { get; set; }
         public int FullFillType { get; set; }
