@@ -38,7 +38,7 @@ namespace BonusService.Service.DAL
                 _CurrencyTimeZone = timeZone
             };
 
-            return _reportDbClient.Query<VipRebateTpBetRecord>("Service_VipRebateTpBetRecord_Get_V4", new DynamicParameters(p));
+            return _reportDbClient.Query<VipRebateTpBetRecord>("Service_VipRebateTpBetRecord_Get_V5", new DynamicParameters(p));
         }
         public IEnumerable<VipRebateInfo> GetVipRebateCustList(int siteId, int currencyId, int periodType, DateTime specificDate, string timeZone, int pageNumber, int pageSize)
         {
@@ -73,56 +73,69 @@ namespace BonusService.Service.DAL
 
             foreach (var rr in rebateTpBetRecords)
             {
-                var sum = rr.ValidBet;
+                var sum = rr.RedeemAmount;
                 if (sum != 0)
                 {
-                    var rebateRecord = GetRebateRecord(rebateInfo.CustId, int.Parse(rr.SettledDate.ToString("yyyyMMdd")), rr.GameType, (int)promotionType, conn, trans);
-                    if (rebateRecord == null)
+                    //var rebateRecord = GetRebateRecord(rebateInfo.CustId, int.Parse(rr.SettledDate.ToString("yyyyMMdd")), rr.GameType, (int)promotionType, conn, trans);
+                    //if (rebateRecord == null)
+                    //{
+                    SetRebateRecord(rebateInfo.CustId, int.Parse(rr.SettledDate.ToString("yyyyMMdd")), rr.GameType, rr.ValidBet, rr.Percentage, sum, (int)promotionType, tc, conn, trans);
+                    var amount = sum;
+                    amount = common.Floor(amount, 2);
+
+                    if (rebateLogList.ContainsKey(rr.GameType))
                     {
-                        SetRebateRecord(rebateInfo.CustId, int.Parse(rr.SettledDate.ToString("yyyyMMdd")), rr.GameType, rr.Percentage, sum, (int)promotionType, tc, conn, trans);
-                        var amount = sum;
-                        amount = common.Floor(amount, 2);
-
-                        if (rebateLogList.ContainsKey(rr.GameType))
-                        {
-                            rebateLogList[rr.GameType] += amount;
-                        }
-                        else
-                        {
-                            rebateLogList.Add(rr.GameType, amount);
-                        }
-
-                        if (rebateCLogList.ContainsKey(rr.CategoryId))
-                        {
-                            rebateCLogList[rr.CategoryId] += amount;
-                        }
-                        else
-                        {
-                            rebateCLogList.Add(rr.CategoryId, amount);
-                        }
+                        rebateLogList[rr.GameType] += amount;
                     }
+                    else
+                    {
+                        rebateLogList.Add(rr.GameType, amount);
+                    }
+
+                    if (rebateCLogList.ContainsKey(rr.CategoryId))
+                    {
+                        rebateCLogList[rr.CategoryId] += amount;
+                    }
+                    else
+                    {
+                        rebateCLogList.Add(rr.CategoryId, amount);
+                    }
+                    //}
                 }
             }
             var newRebateCLogList = new Dictionary<int, decimal>(rebateCLogList);
             foreach (var rebateKey in newRebateCLogList.Keys)
             {
+                var redeemAmount = rebateCLogList[rebateKey];
                 var rebatePayoutLimit = rebatePayoutLimits.FirstOrDefault(x => x.CurrencyId == rebateInfo.CurrencyId && x.SiteId == siteId && x.CategoryId == rebateKey);
                 if (rebatePayoutLimit != null)
                 {
-                    if (rebateCLogList[rebateKey] >= rebatePayoutLimit.MinPayout)
-                    {
-                        if (rebatePayoutLimit.MaxPayout != 0 && rebatePayoutLimit.MaxPayout < rebateCLogList[rebateKey])
-                        {
-                            rebateCLogList[rebateKey] = rebatePayoutLimit.MaxPayout;
-                        }
-                    }
-                    else
-                    {
-                        rebateCLogList[rebateKey] = 0;
-                    }
+                    if (rebateCLogList[rebateKey] < rebatePayoutLimit.MinPayout)
+                        redeemAmount = 0;
+
+                    if (rebatePayoutLimit.MaxPayout != 0 && rebatePayoutLimit.MaxPayout < rebateCLogList[rebateKey])
+                        redeemAmount = rebatePayoutLimit.MaxPayout;
                 }
 
-                payAmount += rebateCLogList[rebateKey];
+                //不論有沒有到達可發放值，只要有該類型則紀錄
+                conn.Execute("Common_RebateCLog_Set", new
+                {
+                    CustId = rebateInfo.CustId,
+                    CurrencyId = rebateInfo.CurrencyId,
+                    CategoryId = rebateKey,
+                    RebateType = RebateType.VipRebate,
+                    UserName = rebateInfo.UserName,
+                    SiteId = siteId,
+                    CalculatedAmount = rebateCLogList[rebateKey],
+                    RedeemAmount = redeemAmount,
+                    MinPayout = rebatePayoutLimit.MinPayout,
+                    MaxPayout = rebatePayoutLimit.MaxPayout,
+                    CanReward = redeemAmount > 0,
+                    Memo = "",
+                    RelId = tc
+                }, transaction: trans, commandType: CommandType.StoredProcedure);
+
+                payAmount += redeemAmount;
             }
 
             if (payAmount > 0)
@@ -139,26 +152,19 @@ namespace BonusService.Service.DAL
                         {
                             conn.Execute("Common_RebateLog_Ins", new { CustId = rebateInfo.CustId, CurrencyId = rebateInfo.CurrencyId, GameType = rebateLog.Key, RebateType = RebateType.VipRebate, UserName = rebateInfo.UserName, SiteId = siteId, RedeemAmount = rebateLog.Value, Memo = "", BonusCode = "VipRebate", RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
                         }
-
-                        foreach (var rebateLog in rebateCLogList)
-                        {
-                            conn.Execute("Common_RebateCLog_Ins", new { CustId = rebateInfo.CustId, CurrencyId = rebateInfo.CurrencyId, CategoryId = rebateLog.Key, RebateType = RebateType.VipRebate, UserName = rebateInfo.UserName, SiteId = siteId, RedeemAmount = rebateLog.Value, Memo = "", RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
-                        }
-
-                        trans.Commit();
                     }
                 }
             }
-
+            trans.Commit();
             return result;
         }
         public RebateRecord GetRebateRecord(int CustId, int SettledDate, int GameType, int PromotionType, MySqlConnection conn, MySqlTransaction trans)
         {
             return conn.Query<RebateRecord>("Service_RebateRecord_Get", new { CustId, SettledDate, GameType, BonusCode = "VipRebate", PromotionType }, transaction: trans, commandType: CommandType.StoredProcedure).FirstOrDefault();
         }
-        public int SetRebateRecord(int CustId, int SettledDate, int GameType, decimal Percentage, decimal Sum, int PromotionType, long RelId, MySqlConnection conn, MySqlTransaction trans)
+        public int SetRebateRecord(int CustId, int SettledDate, int GameType, decimal ValidBet, decimal Percentage, decimal Sum, int PromotionType, long RelId, MySqlConnection conn, MySqlTransaction trans)
         {
-            return conn.Execute("Service_RebateRecord_Set_V2", new { CustId, SettledDate, GameType, BonusCode = "VipRebate", Percentage, Sum, PromotionType, RelId }, transaction: trans, commandType: CommandType.StoredProcedure);
+            return conn.Execute("Service_RebateRecord_Set_V3", new { CustId, SettledDate, GameType, ValidBet, Percentage, Sum, PromotionType, BonusCode = "VipRebate", RelId }, transaction: trans, commandType: CommandType.StoredProcedure);
         }
         public IEnumerable<RebatePayoutLimit> GetRebatePayoutLimit()
         {
