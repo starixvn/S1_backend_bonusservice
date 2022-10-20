@@ -125,7 +125,7 @@ namespace BonusService.Service.BLL
         public int PayoutVipRebate(int siteId, VipRebateInfo vipRebateInfo, IEnumerable<VipRebateTpBetRecord> vipRebateTpBetRecords, IEnumerable<RebatePayoutLimit> rebatePayoutLimits)
         {
 
-            var result = _vipRebateService.PayoutVipRebate(siteId, vipRebateInfo, vipRebateTpBetRecords, out decimal payAmount, out var rebateLogList, out var rebateCLogList, rebatePayoutLimits);
+            var result = _vipRebateService.PayoutVipRebate(siteId, vipRebateInfo, vipRebateTpBetRecords, rebatePayoutLimits, out decimal payAmount, out var rebateCLogList);
 
             if (result > 0)
             {
