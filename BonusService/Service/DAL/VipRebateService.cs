@@ -112,7 +112,6 @@ namespace BonusService.Service.DAL
                     RedeemAmount = redeemAmount,
                     MinPayout = rebatePayoutLimit.MinPayout,
                     MaxPayout = rebatePayoutLimit.MaxPayout,
-                    CanReward = redeemAmount > 0,
                     Memo = "",
                     RelId = tc
                 }, transaction: trans, commandType: CommandType.StoredProcedure);
