@@ -816,11 +816,7 @@ namespace BonusService.Service.BLL
 
             if (result > 0 && bonusRewardInput.PromotionType == PromotionType.Cashback)
             {
-                var offset = 8;
-                if (bonusRewardInput.SiteId is (int)SiteId.Goal123 or (int)SiteId.Bwing)
-                {
-                    offset = 7;
-                }
+                var offset = GetOffset(bonusRewardInput.SiteId);
                 var currentTime = DateTime.UtcNow.AddHours(offset);
                 var calculateDate = StartOfWeek(currentTime, DayOfWeek.Monday).ToString("yyyy-MM-dd");
 
@@ -866,6 +862,11 @@ namespace BonusService.Service.BLL
                         request.SiteId, promo.BonusCode, request.DeviceType);
                     SetResult(promo, custCondition);
                     SetPromotion(request.SiteId, request.CustId, request.CurrencyId, true, promo, custCondition);
+                }
+                else
+                {
+                    var offset = GetOffset(request.SiteId);
+                    ProcessPeriodTime(promo, DateTime.UtcNow.AddHours(offset), offset);
                 }
             }
 
@@ -1076,11 +1077,7 @@ namespace BonusService.Service.BLL
         private void GetCashbackInfo(int custId, int siteId, int currencyId, CustPromotion promotion, bool getDetail)
         {
             var custInfo = _custInfoService.GetCustInfo(custId);
-            var offset = 8;
-            if (siteId is (int)SiteId.Goal123 or (int)SiteId.Bwing)
-            {
-                offset = 7;
-            }
+            var offset = GetOffset(siteId);
             var currentTime = DateTime.UtcNow.AddHours(offset);
             var calculateDate = StartOfWeek(currentTime, DayOfWeek.Monday).ToString("yyyy-MM-dd");
 
@@ -1088,11 +1085,8 @@ namespace BonusService.Service.BLL
 
             promotion.isJoin = result.FirstOrDefault()?.Claimed ?? false;
             promotion.canJoin = result.Any();
-
-            var utcMonday = StartOfWeek(currentTime, DayOfWeek.Monday).AddHours(-offset);
-            var utcSunday = utcMonday.AddDays(7).AddTicks(-1);
-            promotion.PeriodFrom = ((DateTimeOffset)utcMonday).ToUnixTimeSeconds();
-            promotion.PeriodTo = ((DateTimeOffset)utcSunday).ToUnixTimeSeconds();
+            
+            ProcessPeriodTime(promotion, currentTime, offset);
 
             if (!getDetail) return;
             var lastMonday = StartOfWeek(currentTime.AddDays(-7), DayOfWeek.Monday).Date;
@@ -1120,7 +1114,26 @@ namespace BonusService.Service.BLL
             details.First().CashBackDetail = detail;
             promotion.CashBackDetails = details.First();
         }
-        
+
+        private void ProcessPeriodTime(CustPromotion promotion, DateTime currentTime, int offset)
+        {
+            var utcMonday = StartOfWeek(currentTime, DayOfWeek.Monday).AddHours(-offset);
+            var utcSunday = utcMonday.AddDays(7).AddTicks(-1);
+            promotion.PeriodFrom = ((DateTimeOffset)utcMonday).ToUnixTimeSeconds();
+            promotion.PeriodTo = ((DateTimeOffset)utcSunday).ToUnixTimeSeconds();
+        }
+
+        private int GetOffset(int siteId)
+        {
+            var offset = 8;
+            if (siteId is (int)SiteId.Goal123 or (int)SiteId.Bwing)
+            {
+                offset = 7;
+            }
+
+            return offset;
+        }
+
         public DateTime StartOfWeek(DateTime dateTime, DayOfWeek startOfWeek)
         {
             var diff = (7 + (dateTime.DayOfWeek - startOfWeek)) % 7;
