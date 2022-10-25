@@ -863,7 +863,7 @@ namespace BonusService.Service.BLL
                     SetResult(promo, custCondition);
                     SetPromotion(request.SiteId, request.CustId, request.CurrencyId, true, promo, custCondition);
                 }
-                else if(promo.PromotionType == PromotionType.Cashback)
+                else if (promo.PromotionType == PromotionType.Cashback)
                 {
                     var offset = GetOffset(request.SiteId);
                     ProcessPeriodTime(promo, DateTime.UtcNow.AddHours(offset), offset);
