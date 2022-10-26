@@ -1117,10 +1117,14 @@ namespace BonusService.Service.BLL
 
         private void ProcessPeriodTime(CustPromotion promotion, DateTime currentTime, int offset)
         {
-            var utcMonday = StartOfWeek(currentTime, DayOfWeek.Monday).AddHours(-offset);
-            var utcSunday = utcMonday.AddDays(7).AddTicks(-1);
-            promotion.PeriodFrom = ((DateTimeOffset)utcMonday).ToUnixTimeSeconds();
-            promotion.PeriodTo = ((DateTimeOffset)utcSunday).ToUnixTimeSeconds();
+            var checkTime = ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeSeconds();
+            if (promotion.PeriodFrom <= checkTime && checkTime <= promotion.PeriodTo)
+            {
+                var utcMonday = StartOfWeek(currentTime, DayOfWeek.Monday).AddHours(-offset);
+                var utcSunday = utcMonday.AddDays(7).AddTicks(-1);
+                promotion.PeriodFrom = ((DateTimeOffset)utcMonday).ToUnixTimeSeconds();
+                promotion.PeriodTo = ((DateTimeOffset)utcSunday).ToUnixTimeSeconds();
+            }
         }
 
         private int GetOffset(int siteId)
