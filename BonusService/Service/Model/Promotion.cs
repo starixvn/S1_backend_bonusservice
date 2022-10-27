@@ -35,13 +35,19 @@ namespace BonusService.Service.Model
             {
                 if (string.IsNullOrEmpty(TierAmount))
                 {
-                    return default;
+                    return new List<TierAmount>();
                 }
 
                 return JsonConvert.DeserializeObject<IEnumerable<TierAmount>>(TierAmount);
             }
         }
-        public TierAmount CalculateTierAmount(decimal actualDeposit)
+
+        /// <summary>
+        /// 使用金額找到符合的級距紅利
+        /// </summary>
+        /// <param name="depositAmount"></param>
+        /// <returns></returns>
+        public TierAmount FindTierAmountLevel(decimal depositAmount)
         {
             if (!TierAmountList.Any())
             {
@@ -51,12 +57,32 @@ namespace BonusService.Service.Model
             var tierAmountList = TierAmountList.OrderByDescending(i => i.RequiredAmount);
             foreach (var item in tierAmountList)
             {
-                if (actualDeposit >= item.RequiredAmount)
+                if (depositAmount >= item.RequiredAmount)
                 {
                     return item;
                 }
             }
             return null;
+        }
+
+        /// <summary>
+        /// 計算符合資格的級距紅利
+        /// </summary>
+        /// <param name="depositAmount"></param>
+        public void CalculateCanJoinTierAmount(decimal depositAmount)
+        {
+            var canJoinTierAmount = TierAmountList.Where(i => depositAmount >= i.RequiredAmount);
+            _canJoinTierAmountList = canJoinTierAmount.Select(i => i.CalculateTierAmount(BonusType, depositAmount));
+        }
+
+        private IEnumerable<CanJoinTierAmount> _canJoinTierAmountList { get; set; }
+
+        public IEnumerable<CanJoinTierAmount> CanJoinTierAmountList
+        {
+            get
+            {
+                return _canJoinTierAmountList != null ? _canJoinTierAmountList : new List<CanJoinTierAmount>();
+            }
         }
     }
     
@@ -82,6 +108,42 @@ namespace BonusService.Service.Model
         public decimal RequiredAmount { get; set; }
         public int RollOver { get; set; }
         public int WinOver { get; set; }
+        public CanJoinTierAmount CalculateTierAmount(BonusType bonusType, decimal depositAmount)
+        {       
+            decimal bonusAmount;
+            decimal lockAmount;
+            if (bonusType == BonusType.Amount)
+            {
+                bonusAmount = Bonus;
+                lockAmount = RequiredAmount;
+            }
+            else
+            {
+                bonusAmount = Math.Ceiling(Bonus * depositAmount / 100);
+                lockAmount = bonusAmount * 100 / Bonus;
+                if (MaxBonus != 0 && bonusAmount > MaxBonus)
+                {
+                    bonusAmount = MaxBonus;
+                    lockAmount = MaxBonus * 100 / Bonus;
+                }
+            }
+
+            return new CanJoinTierAmount()
+            {
+                RequiredAmount = RequiredAmount,
+                Bonus = Bonus,
+                BonusAmount = bonusAmount,
+                LockedAmount = lockAmount,
+            }; 
+        }
+    }
+
+    public class CanJoinTierAmount
+    {
+        public decimal RequiredAmount { get; set; }
+        public decimal Bonus { get; set; }       
+        public decimal BonusAmount { get; set; }
+        public decimal LockedAmount { get; set; }
     }
 
     public class CustPromotionRequest
