@@ -37,7 +37,7 @@ namespace BonusService.Service.DAL
                 GetDetail = getDetail
             }));
         }
-
+            
         public bool IsBlockIP(ClaimPromotion claimPromotion, string bonusCode, int siteId, string custIP)
         {
             if ((claimPromotion.PromotionType == PromotionType.FreeBet || (claimPromotion.IsSpecial && claimPromotion.PromotionType == PromotionType.FstDeposit))
