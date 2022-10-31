@@ -149,9 +149,7 @@ namespace BonusService.Service.BLL
                         dAmount = $"{rebateLog.Value / 1000:#,##0.##}";
                     }
 
-                    var rebateTpBetRecord = vipRebateTpBetRecords.FirstOrDefault(x => x.CategoryId == rebateLog.Key);
-
-                    msg.AppendLine($"{GetTpCategoryList()[rebateLog.Key]} ({rebateTpBetRecord.Percentage}): {dAmount}");
+                    msg.AppendLine($"{GetTpCategoryList()[rebateLog.Key]} : {dAmount}");
                 }
 
 
