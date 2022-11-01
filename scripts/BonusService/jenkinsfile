@@ -2,8 +2,7 @@ pipeline {
     agent none
     environment {
         env = 'Development'
-        registry = '13.213.82.69:8082'
-        proj = 'bonusservice'
+        registry = '13.213.82.69/bonusservice/bonusservice'
         ansible_path = '/var/jenkins_home/ansible/backend'
     }
     stages {
@@ -13,16 +12,15 @@ pipeline {
                 script {
                     env.version = sh (script: 'git rev-parse --short=7 HEAD', returnStdout: true).trim()
                 }
-                sh 'sudo docker build -f ./BonusService/Dockerfile -t ${registry}/${proj}:${version} .'
-                sh 'sudo docker login ${registry} -u admin -p 123456'
-                sh 'sudo docker push ${registry}/${proj}:${version}'
-                sh 'sudo docker rmi ${registry}/${proj}:${version}'
+                sh 'sudo docker build -f ./BonusService/Dockerfile -t ${registry}:${version} .'
+                sh 'sudo docker push ${registry}:${version}'
+                sh 'sudo docker rmi ${registry}:${version}'
             }
         }
         stage('Deploy') {
             agent { node { label 'master' } }
             steps {
-                sh 'ansible-playbook -i ${ansible_path}/DEV.AWS.yml ${ansible_path}/deploy.docker.yml --extra-vars "host=linux-dev-worker docker_name=dev_bonusservice ver=${proj}:${version} env=${env} docker_ports=50997:50997 volume=/logs/bonus:/bonus"'
+                sh 'ansible-playbook -i ${ansible_path}/DEV.AWS.yml ${ansible_path}/deploy.yml --extra-vars "host=linux-dev-worker docker_name=dev_bonusservice image=bonusservice/bonusservice:${version} env=${env} docker_ports=50997:50997 volume=/logs/bonus:/bonus"'
             }
         }
     }
