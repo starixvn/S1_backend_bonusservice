@@ -2,42 +2,42 @@
 {
     public enum BonusErrorCode
     {
-        ERROR = 0,
-        SUCCESS = 1,
+        Error = 0,
+        Success = 1,
         //API error -10xx
-        PROMOTION_NOT_FOUND = -1001,
-        IP_IS_BLOCKED = -1002,
-        PROFILE_OR_PHONE_NOT_FINISH = -1003,
-        DEPOSIT_AMOUNT_NOT_ENOUGH = -1004,
-        MAINWALLET_AMOUNT_NOT_ENOUGH = -1005,
-        CALCULATE_AMOUNT_IS_NEGATIVE = -1006,
-        CALCULATE_CASHBACK_TOTALBONUS_LESS_THEN_MINPAY = -1007,
-        CALCULATE_UNKNOW_PROMOTION_TYPE = -1008,
+        PromotionNotFound = -1001,
+        IpIsBlocked = -1002,
+        ProfileOrPhoneNotFinish = -1003,
+        DepositAmountNotEnough = -1004,
+        MainWalletAmountNotEnough = -1005,
+        CalculateAmountIsNegative = -1006,
+        CalculateCashbackTotalBonusLessThenMinPay = -1007,
+        CalculateUnknownPromotionType = -1008,
         DuplicateClaimBonus = -1009,
 
         //SP Return ERROR -11XX
-        SP_BONUS_NOT_FOUND = -1101,
-        SP_CUSTUMER_NOT_JOIN_SPECIALCODE = -1102,
-        SP_CUSTUMER_JOIN_THIS_PROMOTION_BEFORE = -1103,
-        SP_CUSTUMER_BONUS_STILL_RUNNING = -1104,
-        SP_CUSTUMER_DEPOSITE_NOT_EXCEED_REQUIRED_AMOUNT = -1105,
-        SP_CUSTUMER_DONT_HAVE_FIRSTDEPOSIT = -1106,
-        SP_CUSTUMER_FIRSTDEPOSIT_RULT_DONT_MATCH = -1107,
-        SP_CUSTUMER_WITHDRAWAL_BEFORE = -1108,
-        SP_CUSTOMER_BONUS_STILL_RUNNING_OR_ADD_OTHER_BONUS_IN_PERIOD_TIME = -1109,
-        SP_CUSTOMER_BONUS_STILL_RUNNING_OR_ADD_OTHER_BONUS_WHICH_PROMOTIONTYPE_IN_135 = -1110,
-        SP_CUSTOMER_DEPOSIT_APPROVE_BEFORE = -1111,
-        SP_CUSTOMER_BONUS_STILL_RUNNING_OR_ADD_THIS_BONUS_BEFORE = -1112,
-        SP_CUSTOMER_JOIN_THIS_REBATE_BEFORE = -1113,
-        SP_CUSTOMER_HAVE_RUNNING_BONUS_OR_JOIN_THIS_BONUS_IN_PROID_TIME = -1114,
-        SP_UNDEFINE_PROMOTIONTYPE = -1115,
+        SpBonusNotFound = -1101,
+        SpCustomerNotJoinSpecialCode = -1102,
+        SpCustomerJoinThisPromotionBefore = -1103,
+        SpCustomerBonusStillRunning = -1104,
+        SpCustomerDepositNotExceedRequiredAmount = -1105,
+        SpCustomerDontHaveFirstDeposit = -1106,
+        SpCustomerFirstDepositRuleDontMatch = -1107,
+        SpCustomerWithdrawalBefore = -1108,
+        SpCustomerBonusStillRunningOrAddOtherBonusInPeriodTime = -1109,
+        SpCustomerBonusStillRunningOrAddOtherBonusWhichPromotionTypeIn135 = -1110,
+        SpCustomerDepositApproveBefore = -1111,
+        SpCustomerBonusStillRunningOrAddThisBonusBefore = -1112,
+        SpCustomerJoinThisRebateBefore = -1113,
+        SpCustomerHaveRunningBonusOrJoinThisBonusInPeriodTime = -1114,
+        SpUndefinedPromotionType = -1115,
 
         //AdjustmentBonus Error -12XX
-        ADJUSTMENT_BONUS_PROMOTIONTYPE_NOT_MATCH = -1202,
-        ADJUSTMENT_BONUS_PROMOTION_NOT_ACTIVE = -1203,
-        ADJUSTMENT_BONUS_PROMOTION_AMOUNT_OVER_MAXBONUS = -1204,
-        ADJUSTMENT_BONUS_CUSTOMER_HAS_RUNNING_BONUS = -1205,
-        UNKNOWERROR = -9999
+        AdjustmentBonusPromotionTypeNotMatch = -1202,
+        AdjustmentBonusPromotionNotActive = -1203,
+        AdjustmentBonusPromotionAmountOverMaxBonus = -1204,
+        AdjustmentBonusCustomerHasRunningBonus = -1205,
+        UnknownError = -9999
 
     }
 }
