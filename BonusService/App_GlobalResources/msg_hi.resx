@@ -1,64 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
-    Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
-    associated with the data types.
-    
-    Example:
-    
-    ... ado.net/XML headers & schema ...
-    <resheader name="resmimetype">text/microsoft-resx</resheader>
-    <resheader name="version">2.0</resheader>
-    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
-    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
-    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
-    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
-    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
-        <value>[base64 mime encoded serialized .NET Framework object]</value>
-    </data>
-    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
-        <comment>This is a comment</comment>
-    </data>
-                
-    There are any number of "resheader" rows that contain simple 
-    name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
-    mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
-    extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
-    read any of the formats listed below.
-    
-    mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
-            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
-            : and then encoded with base64 encoding.
-    
-    mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
-            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
-            : and then encoded with base64 encoding.
-
-    mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
-            : using a System.ComponentModel.TypeConverter
-            : and then encoded with base64 encoding.
-    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -123,19 +64,85 @@
   <data name="msg_OTPHint2" xml:space="preserve">
     <value>अभी अपना फ़ोन सत्यापित करें?</value>
   </data>
-  <data name="msg_LockedAmountInsufficient" xml:space="preserve">
-    <value>मुख्य वॉलेट बैलेंस {0} से कम नहीं होना चाहिए</value>
-  </data>
   <data name="msg_Ineligible" xml:space="preserve">
     <value>आप इस पदोन्नति के योग्य नहीं हैं। अधिक जानकारी के लिए कृपया हमारे समर्थन से संपर्क करें।</value>
-  </data>
-  <data name="msg_RequiredAmountInsufficient" xml:space="preserve">
-    <value>बोनस का उपयोग करने के लिए कम से कम {0} जमा करें</value>
   </data>
   <data name="msg_ClaimCashBackBonus" xml:space="preserve">
     <value>बधाई हो, आपका कैशबैक {0} आपके खाते में क्रेडिट कर दिया गया है!.</value>
   </data>
   <data name="msg_PhoneProfile_ERROR" xml:space="preserve">
     <value>कृपया अपना प्रोफ़ाइल पूरा करें और हमारे प्रचार का आनंद लेने के लिए अपना फ़ोन नंबर सत्यापित करें।</value>
+  </data>
+  <data name="msg_PromotionNotFound" xml:space="preserve">
+    <value>पदोन्नति पाया नहीं जा सकता</value>
+  </data>
+  <data name="msg_IpIsBlocked" xml:space="preserve">
+    <value>डुप्लिकेट खाता जानकारी इस प्रचार पर दावा किया गया है</value>
+  </data>
+  <data name="msg_ProfileOrPhoneNotFinish" xml:space="preserve">
+    <value>खाते की जानकारी पूरी नहीं हुई है, कृपया खाते की जानकारी की पुष्टि करें</value>
+  </data>
+  <data name="msg_DepositAmountNotEnough" xml:space="preserve">
+    <value>बोनस का उपयोग करने के लिए कम से कम {0} जमा करें</value>
+  </data>
+  <data name="msg_MainWalletAmountNotEnough" xml:space="preserve">
+    <value>मुख्य वॉलेट बैलेंस {0} से कम नहीं होना चाहिए</value>
+  </data>
+  <data name="msg_CalculateAmountIsNegative" xml:space="preserve">
+    <value>इस प्रमोशन में शामिल होने का हकदार नहीं ह</value>
+  </data>
+  <data name="msg_CalculateCashbackTotalBonusLessThenMinPay" xml:space="preserve">
+    <value>न्यूनतम कैशबैक राशि नहीं पहुंची</value>
+  </data>
+  <data name="msg_CalculateUnknownPromotionType" xml:space="preserve">
+    <value>प्रचार नहीं मिल सका</value>
+  </data>
+  <data name="msg_DuplicateClaimBonus" xml:space="preserve">
+    <value>रिडीम प्रमोशन की नकल न करें</value>
+  </data>
+  <data name="msg_SpBonusNotFound" xml:space="preserve">
+    <value>प्रचार नहीं मिल सका</value>
+  </data>
+  <data name="msg_SpCustomerNotJoinSpecialCode" xml:space="preserve">
+    <value>कृपया प्रोमो कोड दर्ज करें</value>
+  </data>
+  <data name="msg_SpCustomerJoinThisPromotionBefore" xml:space="preserve">
+    <value>भागीदारी की सीमा पूरी हो गई</value>
+  </data>
+  <data name="msg_SpCustomerBonusStillRunning" xml:space="preserve">
+    <value>अभी भी बोनस चल रहा है, कृपया बाद में पुनः प्रयास करें</value>
+  </data>
+  <data name="msg_SpCustomerDepositNotExceedRequiredAmount" xml:space="preserve">
+    <value>जमा राशि इस पदोन्नति में भाग लेने के लिए पात्र नहीं है</value>
+  </data>
+  <data name="msg_SpCustomerDontHaveFirstDeposit" xml:space="preserve">
+    <value>कृपया अपना पहला जमा पूरा करें</value>
+  </data>
+  <data name="msg_SpCustomerFirstDepositRuleDontMatch" xml:space="preserve">
+    <value>इस पदोन्नति में भाग लेने के लिए पात्र नहीं</value>
+  </data>
+  <data name="msg_SpCustomerWithdrawalBefore" xml:space="preserve">
+    <value>एक निकासी रिकॉर्ड पाया गया है, इस प्रचार में शामिल होने में असमर्थ</value>
+  </data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusInPeriodTime" xml:space="preserve">
+    <value>अभी भी रनिंग बोनस में है, कृपया बाद में पुनः प्रयास करें</value>
+  </data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusWhichPromotionTypeIn135" xml:space="preserve">
+    <value>अभी भी रनिंग बोनस में है, या इस ऑफ़र में भागीदारी की सीमा पूरी हो चुकी है</value>
+  </data>
+  <data name="msg_SpCustomerDepositApproveBefore" xml:space="preserve">
+    <value>एक सफल जमा रिकॉर्ड इस प्रचार में शामिल होने में असमर्थ पाया गया है</value>
+  </data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddThisBonusBefore" xml:space="preserve">
+    <value>अभी भी रनिंग बोनस में है, या इस ऑफ़र में भागीदारी की सीमा पूरी हो चुकी है</value>
+  </data>
+  <data name="msg_SpCustomerJoinThisRebateBefore" xml:space="preserve">
+    <value>इस पदोन्नति का दावा किया गया है</value>
+  </data>
+  <data name="msg_SpCustomerHaveRunningBonusOrJoinThisBonusInPeriodTime" xml:space="preserve">
+    <value>अभी भी चल रहे बोनस में हैं, या इस ऑफ़र में भागीदारी की सीमा पूरी हो चुकी है</value>
+  </data>
+  <data name="msg_SpUndefinedPromotionType" xml:space="preserve">
+    <value>प्रचार नहीं मिल सका</value>
   </data>
 </root>
