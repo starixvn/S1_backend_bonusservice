@@ -198,6 +198,7 @@ namespace BonusService.Service.BLL
 
             var claimPromotion = _promotionService.GetPromotion<ClaimPromotion>(custId, custInfo.CurrencyId,
                 custInfo.SiteId, bonusCode, deviceType, false);
+            errorInfo.ClaimPromotion = claimPromotion;
 
             var result = VerifyPromotion(custId, custInfo.SiteId, bonusCode, custIp, claimPromotion);
             if (result != (int)BonusErrorCode.Success)
@@ -360,6 +361,7 @@ namespace BonusService.Service.BLL
 
             var claimPromotion = _promotionService.GetPromotion<ClaimPromotion>(custId, custInfo.CurrencyId,
                 custInfo.SiteId, bonusCode, (int)PromotionDeviceType.All, false);
+            errorInfo.ClaimPromotion = claimPromotion;
 
             var result = VerifyAdjustmentBonus(custId, custInfo.SiteId, amount, promotionType, claimPromotion);
             if (result != (int)BonusErrorCode.Success)
