@@ -67,9 +67,6 @@
   <data name="lbl_CancelBonusTitle" xml:space="preserve">
     <value>प्रमोशन समाप्ति सूचना</value>
   </data>
-  <data name="lbl_CashbackMsg" xml:space="preserve">
-    <value>बधाई हो, आपका कैशबैक {0} आपके खाते में क्रेडिट कर दिया गया है!</value>
-  </data>
   <data name="lbl_RebateMsg" xml:space="preserve">
     <value>बधाई हो, आपकी छूट {0} आपके खाते में क्रेडिट कर दी गई है!</value>
   </data>

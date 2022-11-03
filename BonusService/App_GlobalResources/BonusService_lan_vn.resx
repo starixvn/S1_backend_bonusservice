@@ -67,9 +67,6 @@
   <data name="lbl_CancelBonusTitle" xml:space="preserve">
     <value>Thông báo khuyến mãi hết hạn</value>
   </data>
-  <data name="lbl_CashbackMsg" xml:space="preserve">
-    <value>Xin chúc mừng, khoản tiền hoàn lại {0} của bạn đã được ghi có vào tài khoản của bạn!</value>
-  </data>
   <data name="lbl_RebateMsg" xml:space="preserve">
     <value>Xin chúc mừng, khoản chiết khấu {0} đã được ghi có vào tài khoản của bạn!</value>
   </data>

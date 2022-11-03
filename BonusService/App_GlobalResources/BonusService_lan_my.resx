@@ -67,9 +67,6 @@
   <data name="lbl_CancelBonusTitle" xml:space="preserve">
     <value>Notis pengakhiran promosi.</value>
   </data>
-  <data name="lbl_CashbackMsg" xml:space="preserve">
-    <value>Tahniah, pulangan tunai anda bernilai {0} telah dikreditkan ke akaun anda!</value>
-  </data>
   <data name="lbl_RebateMsg" xml:space="preserve">
     <value>Tahniah, rebat anda bernilai {0} telah dikreditkan ke akaun anda!</value>
   </data>

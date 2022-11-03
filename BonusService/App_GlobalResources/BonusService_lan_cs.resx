@@ -67,9 +67,6 @@
   <data name="lbl_CancelBonusTitle" xml:space="preserve">
     <value>优惠活动过期通知</value>
   </data>
-  <data name="lbl_CashbackMsg" xml:space="preserve">
-    <value>恭喜，您的现金返还 {0} 已汇入您的户口！</value>
-  </data>
   <data name="lbl_RebateMsg" xml:space="preserve">
     <value>恭喜，您的返水 {0} 已汇入您的户口！</value>
   </data>

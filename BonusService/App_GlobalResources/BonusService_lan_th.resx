@@ -67,9 +67,6 @@
   <data name="lbl_CancelBonusTitle" xml:space="preserve">
     <value>ประกาศการหมดอายุของโปรโมชั่น</value>
   </data>
-  <data name="lbl_CashbackMsg" xml:space="preserve">
-    <value>ขอแสดงความยินดีเครดิตเงินคืน {0} ของคุณเข้าบัญชีของคุณแล้ว!</value>
-  </data>
   <data name="lbl_RebateMsg" xml:space="preserve">
     <value>ขอแสดงความยินดีเงินคืนของคุณ {0} ได้รับการบันทึกเครดิตเข้าบัญชีของคุณแล้ว!</value>
   </data>
