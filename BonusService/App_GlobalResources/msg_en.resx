@@ -117,20 +117,11 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="msg_OTPHint1" xml:space="preserve">
-    <value>Do you want to enjoy our complete products &amp; services?</value>
-  </data>
-  <data name="msg_OTPHint2" xml:space="preserve">
-    <value>Verify your Phone now?</value>
-  </data>
   <data name="msg_Ineligible" xml:space="preserve">
     <value>You are not eligible for this promotion. Please contact our support for more details.</value>
   </data>
   <data name="msg_ClaimCashBackBonus" xml:space="preserve">
     <value>Congratulations, your CASHBACK {0} has been credited to your account!</value>
-  </data>
-  <data name="msg_PhoneProfile_ERROR" xml:space="preserve">
-    <value>Please complete your profile and verify your phone number to enjoy our promotions.</value>
   </data>
   <data name="msg_PromotionNotFound" xml:space="preserve">
     <value>The Promotion can't be found</value>

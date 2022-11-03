@@ -61,17 +61,8 @@
   <data name="msg_Ineligible" xml:space="preserve">
     <value>Anda tidak memenuhi syarat untuk promosi ini. Silakan hubungi Layanan Bantuan kami untuk lebih jelasnya.</value>
   </data>
-  <data name="msg_OTPHint1" xml:space="preserve">
-    <value>Ingin rasakan produk dan layanan lebih komplit?</value>
-  </data>
-  <data name="msg_OTPHint2" xml:space="preserve">
-    <value>Verifikasi no telpon Anda sekarang!</value>
-  </data>
   <data name="msg_ClaimCashBackBonus" xml:space="preserve">
     <value>Selamat, Bonus CASHBACK Anda {0} telah dikreditkan ke akun Anda!</value>
-  </data>
-  <data name="msg_PhoneProfile_ERROR" xml:space="preserve">
-    <value>Harap lengkapi profil Anda dan verifikasi ponsel Anda untuk menikmati promosi kami.</value>
   </data>
   <data name="msg_PromotionNotFound" xml:space="preserve">
     <value>Promosi ini tidak dapat ditemukan</value>
