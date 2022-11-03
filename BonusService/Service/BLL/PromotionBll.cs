@@ -336,7 +336,6 @@ namespace BonusService.Service.BLL
             }
 
             errorInfo.Result = result;
-            errorInfo.ClaimPromotion = claimPromotion;
             return MakeErrorMessage(errorInfo);
         }
 
@@ -468,7 +467,6 @@ namespace BonusService.Service.BLL
             }
 
             errorInfo.Result = result;
-            errorInfo.ClaimPromotion = claimPromotion;
             return MakeErrorMessage(errorInfo);
         }
 
