@@ -6,7 +6,6 @@ using System.Data;
 using System.Text.RegularExpressions;
 using BonusService.Service.Library;
 using Dapper;
-using Google.Protobuf.WellKnownTypes;
 using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
 using Enum = System.Enum;
