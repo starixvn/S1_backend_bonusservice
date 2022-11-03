@@ -58,6 +58,7 @@ namespace BonusService.Service.Model
         public string BonusInfo { set; get; }
         public long ExpiryTime { set; get; }
         public int result { set; get; }
+        public decimal DepositAmount { set; get; }
     }
 
     public class AfterRewardSuccessInput

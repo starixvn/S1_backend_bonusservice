@@ -401,7 +401,14 @@ namespace BonusService.Service.BLL
                 SiteId = custInfo.SiteId,
                 Memo = memo,
                 Prefix = $"B{_common.GetEnv()}",
-                RefList = !string.IsNullOrEmpty(depositId) ? JsonConvert.SerializeObject(new { DepositId = depositId } ) : null,
+                RefList = !string.IsNullOrEmpty(depositId) ? JsonConvert.SerializeObject(new List<Ref>() 
+                {  
+                    new Ref ()
+                    { 
+                        DepositId = depositId,
+                        Amount = calculateBonus.DepositAmount
+                    } 
+                }) : null,
                 SetBalanceMemo = $"Claim {Enum.GetName(typeof(PromotionType), claimPromotion.PromotionType)} BonusCode: {bonusCode}, Locked Amount: {calculateBonus.LockedAmount:#,##0.##}",
                 RewardBonusMemo = $"Claim {Enum.GetName(typeof(PromotionType), claimPromotion.PromotionType)} BonusCode: {bonusCode}",
                 FinancialType = FinancialType.Bonusreward,
@@ -1110,7 +1117,8 @@ namespace BonusService.Service.BLL
                 ExpiryTime = DateTimeOffset.Now.AddDays(claimPromotion.ExpiryDays).ToUnixTimeSeconds(),
                 BonusAmount = bonusAmount,
                 LockedAmount = lockAmount,  
-                RollOver = (lockAmount + bonusAmount) * (claimPromotion.FullFillType == (int)FullFillType.RollOver ? claimPromotion.RollOver : claimPromotion.WinOver)
+                RollOver = (lockAmount + bonusAmount) * (claimPromotion.FullFillType == (int)FullFillType.RollOver ? claimPromotion.RollOver : claimPromotion.WinOver),
+                DepositAmount = depositAmount
             };
         }
 
