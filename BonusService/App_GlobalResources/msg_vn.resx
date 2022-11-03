@@ -61,17 +61,8 @@
   <data name="msg_Ineligible" xml:space="preserve">
     <value>Tài khoản của bạn chưa may mắn trong ngày hôm nay, xin vui lòng thử lại vào ngày hôm sau.</value>
   </data>
-  <data name="msg_OTPHint1" xml:space="preserve">
-    <value>Bạn muốn trải nghiệm toàn diện các sản phẩm &amp; dịch vụ của chúng tôi?</value>
-  </data>
-  <data name="msg_OTPHint2" xml:space="preserve">
-    <value>Xác minh điện thoại của bạn ngay?</value>
-  </data>
   <data name="msg_ClaimCashBackBonus" xml:space="preserve">
     <value>Xin chúc mừng, khoản tiền hoàn lại {0} của bạn đã được ghi có vào tài khoản của bạn!</value>
-  </data>
-  <data name="msg_PhoneProfile_ERROR" xml:space="preserve">
-    <value>Vui lòng hoàn tất thông tin của bạn và xác minh số điện thoại của bạn để được hưởng các chương trình khuyến mãi của chúng tôi.</value>
   </data>
   <data name="msg_PromotionNotFound" xml:space="preserve">
     <value>Không thể tìm thấy Khuyến mãi</value>

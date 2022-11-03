@@ -67,9 +67,6 @@
   <data name="lbl_CancelBonusTitle" xml:space="preserve">
     <value>Promotion expiration notice.</value>
   </data>
-  <data name="lbl_CashbackMsg" xml:space="preserve">
-    <value>Congratulations, your cashback {0} has been credited to your account!</value>
-  </data>
   <data name="lbl_RebateMsg" xml:space="preserve">
     <value>Congratulations, your rebate {0} has been credited to your account!</value>
   </data>

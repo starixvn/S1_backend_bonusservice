@@ -58,20 +58,11 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="msg_OTPHint1" xml:space="preserve">
-    <value>Anda mahu menikmati produk &amp; perkhidmatan kami yang lengkap tak?</value>
-  </data>
-  <data name="msg_OTPHint2" xml:space="preserve">
-    <value>Mengesahkan nombor telefon anda sekarang?</value>
-  </data>
   <data name="msg_Ineligible" xml:space="preserve">
     <value>Anda tidak layak untuk guna promosi ini. Sila hubungi sokongan pelanggan kami untuk maklumat yang lebih lanjut.</value>
   </data>
   <data name="msg_ClaimCashBackBonus" xml:space="preserve">
     <value>Tahniah, PULANGAN TUNAI {0} anda telah dikreditkan ke akaun anda!</value>
-  </data>
-  <data name="msg_PhoneProfile_ERROR" xml:space="preserve">
-    <value>Sila lengkapkan profil dan mengesahkan nombor telefon anda untuk menikmati promosi kami.</value>
   </data>
   <data name="msg_PromotionNotFound" xml:space="preserve">
     <value>Promosi tidak ditemui</value>
