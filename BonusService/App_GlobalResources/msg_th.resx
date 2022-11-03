@@ -61,17 +61,8 @@
   <data name="msg_Ineligible" xml:space="preserve">
     <value>สมาชิกไม่มีสิทธิ์รับโปรโมชั่นนี้ สามารถติดต่อแชทสดสำหรับรายละเอียดเพิ่มเติมค่ะ</value>
   </data>
-  <data name="msg_OTPHint1" xml:space="preserve">
-    <value>คุณต้องการเล่นเกมแบบเต็มรูปแบบที่เราให้บริการหรือไม่?</value>
-  </data>
-  <data name="msg_OTPHint2" xml:space="preserve">
-    <value>ต้องการยืนยันเบอร์โทรศัพท์ของคุณตอนนี้?</value>
-  </data>
   <data name="msg_ClaimCashBackBonus" xml:space="preserve">
     <value>ขอแสดงความยินดีเครดิตเงินคืน {0} ของคุณเข้าบัญชีของคุณแล้ว!</value>
-  </data>
-  <data name="msg_PhoneProfile_ERROR" xml:space="preserve">
-    <value>กรุณากรอกข้อมูลส่วนตัวและยืนยันหมายเลขโทรศัพท์ก่อนเข้าร่วมกิจกรรม</value>
   </data>
   <data name="msg_PromotionNotFound" xml:space="preserve">
     <value>ไม่พบโปรโมชั่นดังกล่าว</value>

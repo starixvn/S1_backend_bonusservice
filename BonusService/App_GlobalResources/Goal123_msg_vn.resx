@@ -58,9 +58,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="msg_DrawPrizeTital1" xml:space="preserve">
-    <value>Rương Thần Huyền Bí Goal123</value>
-  </data>
   <data name="msg_Ineligible" xml:space="preserve">
     <value>Bạn không đủ điều kiện tham gia khuyến mãi này. Vui lòng liên hệ bộ phận hỗ trợ để biết thêm chi tiết.</value>
   </data>

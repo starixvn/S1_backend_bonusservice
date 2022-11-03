@@ -67,9 +67,6 @@
   <data name="lbl_CancelBonusTitle" xml:space="preserve">
     <value>Pemberitahuan kedaluwarsa promosi.</value>
   </data>
-  <data name="lbl_CashbackMsg" xml:space="preserve">
-    <value>Selamat, Bonus cashback Anda {0} telah dikreditkan ke akun Anda!</value>
-  </data>
   <data name="lbl_RebateMsg" xml:space="preserve">
     <value>Selamat, Bonus rebate Anda {0} telah dikreditkan ke akun Anda!</value>
   </data>

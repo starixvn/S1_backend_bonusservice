@@ -58,20 +58,11 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="msg_OTPHint1" xml:space="preserve">
-    <value>क्या आप हमारे संपूर्ण उत्पादों और सेवाओं का आनंद लेना चाहते हैं?</value>
-  </data>
-  <data name="msg_OTPHint2" xml:space="preserve">
-    <value>अभी अपना फ़ोन सत्यापित करें?</value>
-  </data>
   <data name="msg_Ineligible" xml:space="preserve">
     <value>आप इस पदोन्नति के योग्य नहीं हैं। अधिक जानकारी के लिए कृपया हमारे समर्थन से संपर्क करें।</value>
   </data>
   <data name="msg_ClaimCashBackBonus" xml:space="preserve">
     <value>बधाई हो, आपका कैशबैक {0} आपके खाते में क्रेडिट कर दिया गया है!.</value>
-  </data>
-  <data name="msg_PhoneProfile_ERROR" xml:space="preserve">
-    <value>कृपया अपना प्रोफ़ाइल पूरा करें और हमारे प्रचार का आनंद लेने के लिए अपना फ़ोन नंबर सत्यापित करें।</value>
   </data>
   <data name="msg_PromotionNotFound" xml:space="preserve">
     <value>पदोन्नति पाया नहीं जा सकता</value>
