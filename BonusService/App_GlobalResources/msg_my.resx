@@ -74,7 +74,7 @@
     <value>Maklumat akaun belum lengkap, sila sahkan maklumat akaun</value>
   </data>
   <data name="msg_DepositAmountNotEnough" xml:space="preserve">
-    <value>Deposit minima {0} untuk layak dapat bonus.</value>
+    <value>deposit untuk menyertai promosi ini mestilah {0} atau ke atas</value>
   </data>
   <data name="msg_MainWalletAmountNotEnough" xml:space="preserve">
     <value>Baki dompet utama tidak boleh rendah dari {0}</value>

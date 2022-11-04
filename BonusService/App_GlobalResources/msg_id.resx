@@ -74,7 +74,7 @@
     <value>Informasi akun belum diisi, harap verikasi informasi akun anda</value>
   </data>
   <data name="msg_DepositAmountNotEnough" xml:space="preserve">
-    <value>Setoran minimal {0} agar berhak mendapatkan bonus</value>
+    <value>Jumlah deposit untuk berpartisipasi dalam promosi ini harus {0} atau lebih</value>
   </data>
   <data name="msg_MainWalletAmountNotEnough" xml:space="preserve">
     <value>Saldo dompet utama tidak boleh lebih rendah dari {0}</value>
