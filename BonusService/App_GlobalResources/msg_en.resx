@@ -133,7 +133,7 @@
     <value>Account information has not been completed, please verify the account information</value>
   </data>
   <data name="msg_DepositAmountNotEnough" xml:space="preserve">
-    <value>Deposit at least {0} to be eligible for bonus</value>
+    <value>The deposit amount to participate in this promotion must be {0} or above</value>
   </data>
   <data name="msg_MainWalletAmountNotEnough" xml:space="preserve">
     <value>Main wallet balance should not be lower than {0}</value>

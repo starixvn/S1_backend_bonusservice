@@ -74,7 +74,7 @@
     <value>未完善账户信息，请先完善账户信息</value>
   </data>
   <data name="msg_DepositAmountNotEnough" xml:space="preserve">
-    <value>存款最低 {0} 以符合资格领取优惠</value>
+    <value>参与此优惠存款金额需为{0}或以上</value>
   </data>
   <data name="msg_MainWalletAmountNotEnough" xml:space="preserve">
     <value>中心钱包余额不可少于 {0}</value>

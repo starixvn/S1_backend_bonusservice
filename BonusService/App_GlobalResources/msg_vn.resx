@@ -74,7 +74,7 @@
     <value>Thông tin tài khoản chưa được điền đầy đủ, vui lòng xác minh thông tin tài khoản</value>
   </data>
   <data name="msg_DepositAmountNotEnough" xml:space="preserve">
-    <value>Gửi tối thiểu {0} để đủ điều kiện nhận thưởng</value>
+    <value>Bạn cần nạp tối thiểu {0} để tham gia khuyến mãi này</value>
   </data>
   <data name="msg_MainWalletAmountNotEnough" xml:space="preserve">
     <value>Số dư trong ví chính không được nhỏ hơn {0}</value>
