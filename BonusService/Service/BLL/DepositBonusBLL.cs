@@ -19,10 +19,11 @@ namespace BonusService.Service.BLL
             _logger = logger;
         }
 
-        public IEnumerable<DepositBonusCustList> GetDepositBonusQueueCustList()
+        public IEnumerable<DepositBonusCustList> GetDepositBonusQueueCustList(int limit)
         {
-            return depositBonusService.GetDepositBonusQueueCustList();
+            return depositBonusService.GetDepositBonusQueueCustList(limit);
         }
+
         public IEnumerable<DepositBonus> GetDepositBonusQueueByCustId(int custId)
         {
                 return _promotionService.GetDepositBonusQueueByCustId(custId);
