@@ -120,7 +120,7 @@ namespace BonusService.Service.Model
             else
             {
                 bonusAmount = Math.Ceiling(Bonus * depositAmount / 100);
-                lockAmount = bonusAmount * 100 / Bonus;
+                lockAmount = depositAmount;
                 if (MaxBonus != 0 && bonusAmount > MaxBonus)
                 {
                     bonusAmount = MaxBonus;
