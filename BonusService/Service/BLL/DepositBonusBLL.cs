@@ -2,6 +2,8 @@
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
 
+using Newtonsoft.Json;
+
 namespace BonusService.Service.BLL
 {
     public class DepositBonusBLL
@@ -21,9 +23,9 @@ namespace BonusService.Service.BLL
         {
             return depositBonusService.GetDepositBonusQueueCustList();
         }
-        public IEnumerable<DepositBonus> GetDepositBonusQueueByCustId(int custId, bool useMainDb)
+        public IEnumerable<DepositBonus> GetDepositBonusQueueByCustId(int custId)
         {
-                return _promotionService.GetDepositBonusQueueByCustId(custId, useMainDb);
+                return _promotionService.GetDepositBonusQueueByCustId(custId);
         }
 
         public void CheckDepositBonusExpired()
@@ -65,17 +67,18 @@ namespace BonusService.Service.BLL
         }
         public int SetDepositBonusFinish(string transId, int custId)
         {
-            var BonusList = GetDepositBonusQueueByCustId(custId, true); //改變狀態用mainDb取得資料，避免資料不同步
+            var BonusList = GetDepositBonusQueueByCustId(custId);
             foreach (var depositBonus in BonusList)
-            {
+            {              
                 if (depositBonus.TransId == transId)
                 {
                     SetDepositBonusStatus(depositBonus.TransId, (int)DepositBonusQueueStatus.Finish);
-                }else
+                }
+                else
                 {
+                    _logger.LogError($"DoDepositBonus cancel TransId: {transId} || {JsonConvert.SerializeObject(depositBonus)}");
                     SetDepositBonusStatus(depositBonus.TransId, (int)DepositBonusQueueStatus.Cancel_other_Bonus);
                 }
-
             }
             return 1;
         }

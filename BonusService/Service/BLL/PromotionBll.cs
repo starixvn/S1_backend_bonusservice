@@ -165,10 +165,9 @@ namespace BonusService.Service.BLL
         }
 
         private void CancelAllWaitingBonus(int custId)
-        {//當領取BONUS成功   將客戶DepositBonusQueue中的BONUS CANCEL掉
-
-            var BonusList = _promotionService.GetDepositBonusQueueByCustId(custId, true);//改變狀態用mainDb取得資料，避免資料不同步
-
+        {
+            //當領取BONUS成功   將客戶DepositBonusQueue中的BONUS CANCEL掉
+            var BonusList = _promotionService.GetDepositBonusQueueByCustId(custId);
             foreach (var depositBonus in BonusList)
             {
                 _depositBonusBll.SetDepositBonusStatus(depositBonus.TransId, (int)DepositBonusQueueStatus.Cancel_other_Bonus);

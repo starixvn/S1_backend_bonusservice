@@ -95,12 +95,10 @@ namespace BonusService.Service.DAL
             }
             return result;
         }
-        public IEnumerable<DepositBonus> GetDepositBonusQueueByCustId(int custId, bool useMainDb)
+
+        public IEnumerable<DepositBonus> GetDepositBonusQueueByCustId(int custId)
         {
-            var p = new { CustId = custId };
-            return useMainDb
-                ? _mainDbClient.Query<DepositBonus>("Service_DepositBonusQueueByCustId_Get", p)
-                : _reportDbClient.Query<DepositBonus>("Service_DepositBonusQueueByCustId_Get", p);
+            return _mainDbClient.Query<DepositBonus>("Service_DepositBonusQueueByCustId_Get", new { CustId = custId });
         }
 
         public IEnumerable<CashBackDetails> GetCustCashBack(int custId, int siteId, int currencyId, CustPromotion promotion, string calculateDate)
