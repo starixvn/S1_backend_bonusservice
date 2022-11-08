@@ -8,6 +8,7 @@ using BonusService.Service.Library;
 using Dapper;
 using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
+using Enum = System.Enum;
 
 namespace BonusService.Service.BLL
 {
@@ -42,56 +43,49 @@ namespace BonusService.Service.BLL
             _redisHelper = provider.GetRequiredService<ICacheHelper>();
         }
 
-        private ApiResult MakeErrorMessage(ErrorMessageMakerInput input, bool isMessageUserLang = false)
+        private ApiResult MakeErrorMessage(ErrorMessageMakerInput input)
         {
             var apiResult1 = new ApiResult
             {
                 //defult Message display
                 ErrorCode = input.Result
             };
-            var showLangId = "en";//default
-            if(isMessageUserLang)
+            var showLangId = input.CustInfo.UserLang;
+            if (string.IsNullOrWhiteSpace(showLangId))
             {
-                showLangId = input.CustInfo.UserLang;
+                showLangId = "en";
             }
-
-            apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible", input.CustInfo.SiteId, input.CustInfo.SiteName, showLangId);
-
-            if (input.CustInfo.SiteId == (int)SiteId.Goal123 || input.CustInfo.SiteId == (int)SiteId.Bwing)
-            {
-                if (input.ClaimPromotion.PromotionType == PromotionType.FreeBet)
-                {
-                    apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible_FreeBet", input.CustInfo.SiteId, input.CustInfo.SiteName, showLangId);
-                }
-            }
+            
             switch (input.Result)
             {
-                case (int)BonusErrorCode.ERROR:
-                    {
-                        apiResult1.ErrorCode = 9000;//未知錯誤
-                        apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible", input.CustInfo.SiteId, input.CustInfo.SiteName, showLangId);
-                        apiResult1.RawMessage = "Unknow Error";
-                    }
+                //API error -10xx
+                case (int)BonusErrorCode.PromotionNotFound:
+                case (int)BonusErrorCode.IpIsBlocked:
+                case (int)BonusErrorCode.ProfileOrPhoneNotFinish:
+                case (int)BonusErrorCode.CalculateAmountIsNegative:
+                case (int)BonusErrorCode.CalculateCashbackTotalBonusLessThenMinPay:
+                case (int)BonusErrorCode.CalculateUnknownPromotionType:
+                case (int)BonusErrorCode.DuplicateClaimBonus:
+                //SP Return ERROR -11XX
+                case (int)BonusErrorCode.SpBonusNotFound:
+                case (int)BonusErrorCode.SpCustomerNotJoinSpecialCode:
+                case (int)BonusErrorCode.SpCustomerJoinThisPromotionBefore:
+                case (int)BonusErrorCode.SpCustomerBonusStillRunning:
+                case (int)BonusErrorCode.SpCustomerDepositNotExceedRequiredAmount:
+                case (int)BonusErrorCode.SpCustomerDontHaveFirstDeposit:
+                case (int)BonusErrorCode.SpCustomerFirstDepositRuleDontMatch:
+                case (int)BonusErrorCode.SpCustomerWithdrawalBefore:
+                case (int)BonusErrorCode.SpCustomerBonusStillRunningOrAddOtherBonusInPeriodTime:
+                case (int)BonusErrorCode.SpCustomerBonusStillRunningOrAddOtherBonusWhichPromotionTypeIn135:
+                case (int)BonusErrorCode.SpCustomerDepositApproveBefore:
+                case (int)BonusErrorCode.SpCustomerBonusStillRunningOrAddThisBonusBefore:
+                case (int)BonusErrorCode.SpCustomerJoinThisRebateBefore:
+                case (int)BonusErrorCode.SpCustomerHaveRunningBonusOrJoinThisBonusInPeriodTime:
+                case (int)BonusErrorCode.SpUndefinedPromotionType:
+                    apiResult1.Message = _selLangBll.GetMsg($"msg_{((BonusErrorCode)input.Result).ToString()}", input.CustInfo.SiteId, input.CustInfo.SiteName, showLangId);
                     break;
                 //API error -10xx
-                case (int)BonusErrorCode.PROMOTION_NOT_FOUND:
-                    {
-                        apiResult1.Message = $"BonusCode:{input.InputBonusCode} not found";
-                        apiResult1.RawMessage = $"BonusCode:{input.InputBonusCode} not found";
-                    }
-                    break;
-                case (int)BonusErrorCode.IP_IS_BLOCKED:
-                    {
-                        apiResult1.RawMessage = "Customer's IP is blocked";
-                    }
-                    break;
-                case (int)BonusErrorCode.PROFILE_OR_PHONE_NOT_FINISH:
-                    {
-                        apiResult1.Message = $"{_selLangBll.GetMsg("msg_PhoneProfile_ERROR", input.CustInfo.SiteId, input.CustInfo.SiteName, showLangId)}";
-                        apiResult1.RawMessage = "Customer profile incomplete or phone not verified. ";
-                    }
-                    break;
-                case (int)BonusErrorCode.DEPOSIT_AMOUNT_NOT_ENOUGH:
+                case (int)BonusErrorCode.DepositAmountNotEnough:
                     {
                         var dRequiredAmount = input.ClaimPromotion.RequiredAmount.ToString("#,##0");
                         if (_custInfoService.IsConvertRequired(input.CustInfo.CurrencyId))
@@ -99,11 +93,13 @@ namespace BonusService.Service.BLL
                             dRequiredAmount = $"{input.ClaimPromotion.RequiredAmount / 1000:#,##0} ('000)";
                         }
 
-                        apiResult1.Message = string.Format(_selLangBll.GetMsg("msg_RequiredAmountInsufficient", input.CustInfo.SiteId, input.CustInfo.SiteName, showLangId), dRequiredAmount);
-                        apiResult1.RawMessage = $"Customer's deposit amount less then requiredamount {dRequiredAmount}.";
+                        apiResult1.Message = string.Format(
+                            _selLangBll.GetMsg($"msg_{((BonusErrorCode)input.Result).ToString()}",
+                                input.CustInfo.SiteId, input.CustInfo.SiteName, showLangId), dRequiredAmount);
                     }
                     break;
-                case (int)BonusErrorCode.MAINWALLET_AMOUNT_NOT_ENOUGH://中心錢包餘額不可少於 {0}
+                //API error -10xx
+                case (int)BonusErrorCode.MainWalletAmountNotEnough://中心錢包餘額不可少於 {0}
                     {
                         var dRequiredAmount = input.LockedAmount.ToString("#,##0");
                         if (_custInfoService.IsConvertRequired(input.CustInfo.CurrencyId))
@@ -111,141 +107,56 @@ namespace BonusService.Service.BLL
                             dRequiredAmount = $"{input.LockedAmount / 1000:#,##0} ('000)";
                         }
 
-                        apiResult1.Message = string.Format(_selLangBll.GetMsg("msg_LockedAmountInsufficient", input.CustInfo.SiteId, input.CustInfo.SiteName, showLangId), dRequiredAmount);
-                        apiResult1.RawMessage = $"Customer's mainwallet amount less then {dRequiredAmount}.";
-                    }
-                    break;
-                case (int)BonusErrorCode.CALCULATE_AMOUNT_IS_NEGATIVE:
-                    {
-                        apiResult1.RawMessage = "Calculate amount is negiative.";
-                    }
-                    break;
-                case (int)BonusErrorCode.CALCULATE_CASHBACK_TOTALBONUS_LESS_THEN_MINPAY:
-                    {
-                        apiResult1.RawMessage = "Calculate cashback bonus less then minpay.";
-                    }break;
-                case (int)BonusErrorCode.CALCULATE_UNKNOW_PROMOTION_TYPE:
-                    {
-                        apiResult1.RawMessage = "Calculate function unknow promotion type.";
-                    }
-                    break;
-                case (int)BonusErrorCode.DuplicateClaimBonus:
-                    apiResult1.RawMessage = "Duplicate claim bonus.";
-                    break;
-                //SP Return ERROR -11XX
-                case (int)BonusErrorCode.SP_BONUS_NOT_FOUND:
-                    {
-                        apiResult1.RawMessage = $"SP can not found this bonus {input.InputBonusCode}";
-                    }
-                    break;
-                case (int)BonusErrorCode.SP_CUSTUMER_NOT_JOIN_SPECIALCODE:
-                    {
-                        apiResult1.RawMessage = "Customer did not join special code";
-                    }
-                    break;
-                case (int)BonusErrorCode.SP_CUSTUMER_JOIN_THIS_PROMOTION_BEFORE:
-                    {
-                        apiResult1.RawMessage = "Customer join this promotion before";
-                    }
-                    break;
-                case (int)BonusErrorCode.SP_CUSTUMER_BONUS_STILL_RUNNING:
-                    {
-                        apiResult1.RawMessage = "Customer has other running bonus.";
-                    }
-                    break;
-                case (int)BonusErrorCode.SP_CUSTUMER_DEPOSITE_NOT_EXCEED_REQUIRED_AMOUNT:
-                    {
-                        apiResult1.RawMessage = "Customer deposit amount less then requiredamount.";
-                    }
-                    break;
-                case (int)BonusErrorCode.SP_CUSTUMER_DONT_HAVE_FIRSTDEPOSIT:
-                    {
-                        apiResult1.RawMessage = "Can't not find Customer's firstdeposit";
-                    }
-                    break;
-                case (int)BonusErrorCode.SP_CUSTUMER_FIRSTDEPOSIT_RULT_DONT_MATCH:
-                    {
-                        apiResult1.RawMessage = "Customer does not match firstdeposit bonus rult";
-                    }
-                    break;
-                case (int)BonusErrorCode.SP_CUSTUMER_WITHDRAWAL_BEFORE:
-                    {
-                        apiResult1.RawMessage = "Customer withdrawal before";
-                    }
-                    break;
-                case (int)BonusErrorCode.SP_CUSTOMER_BONUS_STILL_RUNNING_OR_ADD_OTHER_BONUS_IN_PERIOD_TIME:
-                    {
-                        apiResult1.RawMessage = "Customer has other running bonus or join other bonus in period time.";
-                    }
-                    break;
-                case (int)BonusErrorCode.SP_CUSTOMER_BONUS_STILL_RUNNING_OR_ADD_OTHER_BONUS_WHICH_PROMOTIONTYPE_IN_135:
-                    {
-                        apiResult1.RawMessage = "Customer has other running bonus or ever join other bonus which promotion type in 1,3,5.";
-                    }
-                    break;
-                case (int)BonusErrorCode.SP_CUSTOMER_DEPOSIT_APPROVE_BEFORE:
-                    {
-                        apiResult1.RawMessage = "Customer has approved deposit before.";
-                    }
-                    break;
-                case (int)BonusErrorCode.SP_CUSTOMER_BONUS_STILL_RUNNING_OR_ADD_THIS_BONUS_BEFORE:
-                    {
-                        apiResult1.RawMessage = "Customer has other running bonus or join this bonus before.";
-                    }
-                    break;
-                case (int)BonusErrorCode.SP_CUSTOMER_JOIN_THIS_REBATE_BEFORE:
-                    {
-                        apiResult1.RawMessage = "Customer has other running bonus or join this bonus before.";
-                    }
-                    break;
-                case (int)BonusErrorCode.SP_CUSTOMER_HAVE_RUNNING_BONUS_OR_JOIN_THIS_BONUS_IN_PROID_TIME:
-                    {
-                        apiResult1.RawMessage = "Customer has other running bonus or join other bonus in period time.";
-                    }
-                    break;
-                case (int)BonusErrorCode.SP_UNDEFINE_PROMOTIONTYPE:
-                    {
-                        apiResult1.RawMessage = "Promotion Type not define.";
+                        apiResult1.Message = string.Format(
+                            _selLangBll.GetMsg($"msg_{((BonusErrorCode)input.Result).ToString()}",
+                                input.CustInfo.SiteId, input.CustInfo.SiteName, showLangId), dRequiredAmount);
                     }
                     break;
                 //AdjustmentBonus Error -12XX
-                case (int)BonusErrorCode.ADJUSTMENT_BONUS_PROMOTIONTYPE_NOT_MATCH:
-                    {
-                        apiResult1.Message = $"BonusCode:{input.InputBonusCode} is not {Enum.GetName(typeof(PromotionType), (PromotionType)input.InputPromotionType)}";
-                        apiResult1.RawMessage = $"BonusCode:{input.InputBonusCode} is not {Enum.GetName(typeof(PromotionType), (PromotionType)input.InputPromotionType)}"; ;
-                    }
+                case (int)BonusErrorCode.AdjustmentBonusPromotionTypeNotMatch:
+                {
+                    apiResult1.Message = string.Format(
+                        _selLangBll.GetMsg($"msg_{((BonusErrorCode)input.Result).ToString()}", input.CustInfo.SiteId,
+                            input.CustInfo.SiteName, showLangId), input.InputBonusCode,
+                        Enum.GetName(typeof(PromotionType), (PromotionType)input.InputPromotionType));
+                }
                     break;
-                case (int)BonusErrorCode.ADJUSTMENT_BONUS_PROMOTION_NOT_ACTIVE:
-                    {
-                        apiResult1.Message = $"BonusCode:{input.InputBonusCode} not Action";
-                        apiResult1.RawMessage = $"BonusCode:{input.InputBonusCode} not Action";
-                    }
+                case (int)BonusErrorCode.AdjustmentBonusPromotionNotActive:
+                {
+                    apiResult1.Message = string.Format(
+                        _selLangBll.GetMsg($"msg_{((BonusErrorCode)input.Result).ToString()}", input.CustInfo.SiteId,
+                            input.CustInfo.SiteName, showLangId), input.InputBonusCode);
+                }
                     break;
-                case (int)BonusErrorCode.ADJUSTMENT_BONUS_PROMOTION_AMOUNT_OVER_MAXBONUS:
-                    {
-                        apiResult1.Message = $"Amount:{input.InputAmount} is over MaxBonus{input.ClaimPromotion.MaxBonus} BonusCode:{input.InputBonusCode} ";
-                        apiResult1.RawMessage = $"Amount:{input.InputAmount} is over MaxBonus{input.ClaimPromotion.MaxBonus} BonusCode:{input.InputBonusCode} ";
-                    }
+                case (int)BonusErrorCode.AdjustmentBonusPromotionAmountOverMaxBonus:
+                {
+                    apiResult1.Message = string.Format(
+                        _selLangBll.GetMsg($"msg_{((BonusErrorCode)input.Result).ToString()}", input.CustInfo.SiteId,
+                            input.CustInfo.SiteName, showLangId), input.InputAmount, input.ClaimPromotion.MaxBonus,
+                        input.InputBonusCode);
+                }
                     break;
-                case (int)BonusErrorCode.ADJUSTMENT_BONUS_CUSTOMER_HAS_RUNNING_BONUS:
-                    {
-                        apiResult1.Message = $"CustId {input.CustInfo.CustId} has other running bonus";
-                        apiResult1.RawMessage = $"CustId {input.CustInfo.CustId} has other running bonus";
-                    }
+                case (int)BonusErrorCode.AdjustmentBonusCustomerHasRunningBonus:
+                {
+                    apiResult1.Message = string.Format(
+                        _selLangBll.GetMsg($"msg_{((BonusErrorCode)input.Result).ToString()}", input.CustInfo.SiteId,
+                            input.CustInfo.SiteName, showLangId), input.CustInfo.CustId);
+                }
                     break;
-                case (int)BonusErrorCode.UNKNOWERROR:
+                case (int)BonusErrorCode.Error:
+                case (int)BonusErrorCode.UnknownError:
                 default://您不符合領取此優惠，請聯繫客服以了解詳情。
                     {
+                        apiResult1.ErrorCode = (int)BonusErrorCode.UnknownError;
                         apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible", input.CustInfo.SiteId, input.CustInfo.SiteName, showLangId);
 
-                        if (input.CustInfo.SiteId == (int)SiteId.Goal123 || input.CustInfo.SiteId == (int)SiteId.Bwing)
+                        if (input.CustInfo.SiteId is (int)SiteId.Goal123 or (int)SiteId.Bwing)
                         {
                             if (input.ClaimPromotion.PromotionType == PromotionType.FreeBet)
                             {
                                 apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible_FreeBet", input.CustInfo.SiteId, input.CustInfo.SiteName, showLangId);
                             }
                         }
-                        apiResult1.RawMessage = "Unknow Error";
                     }
                     break;
             }
@@ -254,10 +165,9 @@ namespace BonusService.Service.BLL
         }
 
         private void CancelAllWaitingBonus(int custId)
-        {//當領取BONUS成功   將客戶DepositBonusQueue中的BONUS CANCEL掉
-
-            var BonusList = _promotionService.GetDepositBonusQueueByCustId(custId, true);//改變狀態用mainDb取得資料，避免資料不同步
-
+        {
+            //當領取BONUS成功   將客戶DepositBonusQueue中的BONUS CANCEL掉
+            var BonusList = _promotionService.GetDepositBonusQueueByCustId(custId);
             foreach (var depositBonus in BonusList)
             {
                 _depositBonusBll.SetDepositBonusStatus(depositBonus.TransId, (int)DepositBonusQueueStatus.Cancel_other_Bonus);
@@ -271,15 +181,14 @@ namespace BonusService.Service.BLL
         }
 
         public async Task<ApiResult> SetClaimPromotionV2Async(int custId, string bonusCode, string custIp,
-            decimal lockedAmount, int deviceType, BonusInfoAtPage atPage, bool isMessageUserLang,
-            string depositTransId = null)
+            decimal lockedAmount, int deviceType, BonusInfoAtPage atPage, string depositTransId = null)
         {
             var apiResult = new ApiResult();
             bonusCode = bonusCode.Trim();
             var custInfo = _custInfoService.GetCustInfo(custId);
             var errorInfo = new ErrorMessageMakerInput
             {
-                Result = (int)BonusErrorCode.PROMOTION_NOT_FOUND,
+                Result = (int)BonusErrorCode.PromotionNotFound,
                 InputBonusCode = bonusCode,
                 LockedAmount = lockedAmount,
                 CustInfo = custInfo,
@@ -288,12 +197,13 @@ namespace BonusService.Service.BLL
 
             var claimPromotion = _promotionService.GetPromotion<ClaimPromotion>(custId, custInfo.CurrencyId,
                 custInfo.SiteId, bonusCode, deviceType, false);
+            errorInfo.ClaimPromotion = claimPromotion;
 
             var result = VerifyPromotion(custId, custInfo.SiteId, bonusCode, custIp, claimPromotion);
-            if (result != (int)BonusErrorCode.SUCCESS)
+            if (result != (int)BonusErrorCode.Success)
             {
                 errorInfo.Result = result;
-                return MakeErrorMessage(errorInfo,isMessageUserLang);
+                return MakeErrorMessage(errorInfo);
             }
 
             var custConditionInfo = _promotionService.GetCustConditionInfo(custId, custInfo.CurrencyId, custInfo.SiteId,
@@ -302,7 +212,7 @@ namespace BonusService.Service.BLL
             if (custConditionInfo.CanJoin != 1)
             {
                 errorInfo.Result = custConditionInfo.Result;
-                return MakeErrorMessage(errorInfo,isMessageUserLang);
+                return MakeErrorMessage(errorInfo);
             }
 
             await using var conn = _mainDbClient.GetMySqlConnection();
@@ -314,7 +224,7 @@ namespace BonusService.Service.BLL
             if (calculateBonus.result <= 0)
             {
                 errorInfo.Result = calculateBonus.result;
-                return MakeErrorMessage(errorInfo,isMessageUserLang);
+                return MakeErrorMessage(errorInfo);
             }
 
             if (atPage == BonusInfoAtPage.Deposit) //由Deposit頁面進來的 reference紀錄指定TransId、Amount
@@ -323,7 +233,7 @@ namespace BonusService.Service.BLL
                     depositTransId != custConditionInfo.RefId)
                 {
                     errorInfo.Result = custConditionInfo.Result;
-                    return MakeErrorMessage(errorInfo,isMessageUserLang);
+                    return MakeErrorMessage(errorInfo);
                 }
 
                 custConditionInfo.reference = new List<Ref>
@@ -425,12 +335,11 @@ namespace BonusService.Service.BLL
             }
 
             errorInfo.Result = result;
-            errorInfo.ClaimPromotion = claimPromotion;
-            return MakeErrorMessage(errorInfo, isMessageUserLang);
+            return MakeErrorMessage(errorInfo);
         }
 
         public async Task<ApiResult> SetAdjustmentBonusV2Async(int custId, string bonusCode, string memo,
-            decimal amount, int promotionType)
+            decimal amount, int promotionType, string depositId)
         {
             var apiResult = new ApiResult();
             var lockedAmount = (decimal)0;
@@ -439,7 +348,7 @@ namespace BonusService.Service.BLL
 
             var errorInfo = new ErrorMessageMakerInput
             {
-                Result = (int)BonusErrorCode.PROMOTION_NOT_FOUND,
+                Result = (int)BonusErrorCode.PromotionNotFound,
                 InputBonusCode = bonusCode,
                 LockedAmount = lockedAmount,
                 InputPromotionType = promotionType,
@@ -450,9 +359,10 @@ namespace BonusService.Service.BLL
 
             var claimPromotion = _promotionService.GetPromotion<ClaimPromotion>(custId, custInfo.CurrencyId,
                 custInfo.SiteId, bonusCode, (int)PromotionDeviceType.All, false);
+            errorInfo.ClaimPromotion = claimPromotion;
 
             var result = VerifyAdjustmentBonus(custId, custInfo.SiteId, amount, promotionType, claimPromotion);
-            if (result != (int)BonusErrorCode.SUCCESS)
+            if (result != (int)BonusErrorCode.Success)
             {
                 errorInfo.Result = result;
                 apiResult = MakeErrorMessage(errorInfo);
@@ -464,7 +374,7 @@ namespace BonusService.Service.BLL
             await using var trans = await conn.BeginTransactionAsync();
 
             var calculateBonus = CalculateBonus(claimPromotion, amount, lockedAmount, custId,
-                custInfo.SiteId, custInfo.CurrencyId);
+                custInfo.SiteId, custInfo.CurrencyId, depositId);
             if (calculateBonus.result <= 0)
             {
                 errorInfo.Result = calculateBonus.result;
@@ -490,7 +400,14 @@ namespace BonusService.Service.BLL
                 SiteId = custInfo.SiteId,
                 Memo = memo,
                 Prefix = $"B{_common.GetEnv()}",
-                RefList = null,
+                RefList = !string.IsNullOrEmpty(depositId) ? JsonConvert.SerializeObject(new List<Ref>() 
+                {  
+                    new Ref ()
+                    { 
+                        DepositId = depositId,
+                        Amount = calculateBonus.DepositAmount
+                    } 
+                }) : null,
                 SetBalanceMemo = $"Claim {Enum.GetName(typeof(PromotionType), claimPromotion.PromotionType)} BonusCode: {bonusCode}, Locked Amount: {calculateBonus.LockedAmount:#,##0.##}",
                 RewardBonusMemo = $"Claim {Enum.GetName(typeof(PromotionType), claimPromotion.PromotionType)} BonusCode: {bonusCode}",
                 FinancialType = FinancialType.Bonusreward,
@@ -549,53 +466,52 @@ namespace BonusService.Service.BLL
             }
 
             errorInfo.Result = result;
-            errorInfo.ClaimPromotion = claimPromotion;
             return MakeErrorMessage(errorInfo);
         }
 
         private int VerifyPromotion(int custId, int siteId, string bonusCode, string custIp, ClaimPromotion claimPromotion)
         {
             if (claimPromotion == null)
-                return (int)BonusErrorCode.PROMOTION_NOT_FOUND;
+                return (int)BonusErrorCode.PromotionNotFound;
 
             if (_promotionService.IsBlockIP(claimPromotion, bonusCode, siteId, custIp))
-                return (int)BonusErrorCode.IP_IS_BLOCKED;
+                return (int)BonusErrorCode.IpIsBlocked;
             if (!CheckProfileFinish(custId, siteId)) //Profile Finish & Phone Verified
-                return (int)BonusErrorCode.PROFILE_OR_PHONE_NOT_FINISH;
+                return (int)BonusErrorCode.ProfileOrPhoneNotFinish;
             
-            return (int)BonusErrorCode.SUCCESS;
+            return (int)BonusErrorCode.Success;
         }
         
         private int VerifyAdjustmentBonus(int custId, int siteId, decimal amount, int promotionType,
-            Promotion claimPromotion)
+            ClaimPromotion claimPromotion)
         {
             if (claimPromotion == null)
             {
-                return (int)BonusErrorCode.PROMOTION_NOT_FOUND;
+                return (int)BonusErrorCode.PromotionNotFound;
             }
 
             if (claimPromotion.PromotionType != (PromotionType)promotionType)
             {
-                return (int)BonusErrorCode.ADJUSTMENT_BONUS_PROMOTIONTYPE_NOT_MATCH;
+                return (int)BonusErrorCode.AdjustmentBonusPromotionTypeNotMatch;
             }
 
-            if (claimPromotion.PromotionType == PromotionType.ManualBonus)
+            if (claimPromotion.PromotionType == PromotionType.SpecialBonus)
             {
                 if (claimPromotion.PromotionAction != 1)
-                    return (int)BonusErrorCode.ADJUSTMENT_BONUS_PROMOTION_NOT_ACTIVE;
+                    return (int)BonusErrorCode.AdjustmentBonusPromotionNotActive;
                 if (amount > claimPromotion.MaxBonus)
-                    return (int)BonusErrorCode.ADJUSTMENT_BONUS_PROMOTION_AMOUNT_OVER_MAXBONUS;
+                    return (int)BonusErrorCode.AdjustmentBonusPromotionAmountOverMaxBonus;
             }
 
             if (!CheckProfileFinish(custId, siteId)) //Profile Finish & Phone Verified
-                return (int)BonusErrorCode.PROFILE_OR_PHONE_NOT_FINISH;
+                return (int)BonusErrorCode.ProfileOrPhoneNotFinish;
 
             if (_promotionService.GetCustRunningBonus(custId).Any())
             {
-                return (int)BonusErrorCode.ADJUSTMENT_BONUS_CUSTOMER_HAS_RUNNING_BONUS;
+                return (int)BonusErrorCode.AdjustmentBonusCustomerHasRunningBonus;
             }
 
-            return (int)BonusErrorCode.SUCCESS;
+            return (int)BonusErrorCode.Success;
         }
         
         private bool CheckProfileFinish(int custId, int siteId) //Profile Finish & Phone Verified
@@ -608,11 +524,11 @@ namespace BonusService.Service.BLL
                    && !string.IsNullOrEmpty(custInfoProfile.Birth_d);
         }
 
-        private CalculateBonusOutput CalculateBonus(ClaimPromotion claimPromotion, decimal amount, decimal lockedAmount, int custId, int siteId, int currencyId)
+        private CalculateBonusOutput CalculateBonus(ClaimPromotion claimPromotion, decimal amount, decimal lockedAmount, int custId, int siteId, int currencyId, string depositId = null)
         {
             var output = new CalculateBonusOutput
             {
-                result = (int)BonusErrorCode.SUCCESS
+                result = (int)BonusErrorCode.Success
             };
 
             decimal bonusAmount;
@@ -624,6 +540,11 @@ namespace BonusService.Service.BLL
                 case PromotionType.FstDeposit:
                 case PromotionType.ReDeposit:
                     {
+                        if (claimPromotion.PromotionType == PromotionType.ReDeposit && claimPromotion.TierAmountList.Any())
+                        {
+                            return CalculateTierRedepositBonus(claimPromotion, custId, siteId, currencyId, lockedAmount, depositId);     
+                        }
+
                         if (claimPromotion.PromotionType == PromotionType.ReDeposit ||
                            (claimPromotion.IsSpecial && claimPromotion.PromotionType == PromotionType.FstDeposit))
                         {
@@ -631,7 +552,7 @@ namespace BonusService.Service.BLL
 
                             if (amount <= 0)
                             {
-                                output.result = (int)BonusErrorCode.CALCULATE_AMOUNT_IS_NEGATIVE;
+                                output.result = (int)BonusErrorCode.CalculateAmountIsNegative;
                                 return output;
                             }
                             lockAmount = amount;
@@ -639,7 +560,7 @@ namespace BonusService.Service.BLL
 
                         if (amount < claimPromotion.RequiredAmount)
                         {
-                            output.result = (int)BonusErrorCode.DEPOSIT_AMOUNT_NOT_ENOUGH;
+                            output.result = (int)BonusErrorCode.DepositAmountNotEnough;
                             return output;
                         }
 
@@ -663,7 +584,7 @@ namespace BonusService.Service.BLL
                             }
                         }
 
-                        rollover = (lockAmount + bonusAmount) * (claimPromotion.FullFillType == 1 ? claimPromotion.RollOver : claimPromotion.WinOver);
+                        rollover = (lockAmount + bonusAmount) * (claimPromotion.FullFillType == (int)FullFillType.RollOver ? claimPromotion.RollOver : claimPromotion.WinOver);
                         break;
                     }
 
@@ -676,7 +597,7 @@ namespace BonusService.Service.BLL
                     GetCashbackInfo(custId, siteId, currencyId, custPromotion, true);
                     if (!(custPromotion.canJoin && custPromotion.CashBackDetails?.TotalBonus > claimPromotion.MinPayout))
                     {
-                        output.result = (int)BonusErrorCode.CALCULATE_CASHBACK_TOTALBONUS_LESS_THEN_MINPAY;
+                        output.result = (int)BonusErrorCode.CalculateCashbackTotalBonusLessThenMinPay;
                         return output;
                     }
 
@@ -697,55 +618,23 @@ namespace BonusService.Service.BLL
                     lockAmount = 0;
                     break;
 
-                case PromotionType.WalletBonus when claimPromotion.RequiredAmount == 0:
-                    throw new Exception("Required Amount can't be 0");
-
-                case PromotionType.WalletBonus:
-                    {
-                        amount = _walletService.GetBalance(custId);
-
-                        if (amount < claimPromotion.RequiredAmount)
-                        {
-                            output.LockedAmount = claimPromotion.RequiredAmount;
-                            output.result = (int)BonusErrorCode.DEPOSIT_AMOUNT_NOT_ENOUGH;
-                            return output;
-                        }
-
-                        if (claimPromotion.BonusType == BonusType.Amount)
-                        {
-                            bonusAmount = claimPromotion.Bonus;
-                            lockAmount = claimPromotion.RequiredAmount;
-                        }
-                        else
-                        {
-                            bonusAmount = Math.Ceiling(claimPromotion.Bonus * amount / 100);
-                            if (claimPromotion.MaxBonus != 0 && bonusAmount > claimPromotion.MaxBonus)
-                            {
-                                bonusAmount = claimPromotion.MaxBonus;
-                                lockAmount = claimPromotion.MaxBonus * 100 / claimPromotion.Bonus;
-                            }
-                        }
-                        rollover = ((lockAmount + bonusAmount) * claimPromotion.RollOver);
-                        break;
-                    }
-
                 case PromotionType.Rebate:
                     return output;
                 
-                case PromotionType.ManualBonus:
+                case PromotionType.SpecialBonus:
                     bonusAmount = amount;
                     lockAmount = 0;
                     rollover = amount * claimPromotion.RollOver;
                     break;
                 
-                case PromotionType.RetentionBonus:
+                case PromotionType.RetentionFreeBet:
                     bonusAmount = claimPromotion.Bonus;
                     lockAmount = 0;         
                     rollover = bonusAmount * claimPromotion.RollOver;
-                    break;
+                    break;                  
 
                 default:
-                    output.result = (int)BonusErrorCode.CALCULATE_UNKNOW_PROMOTION_TYPE;
+                    output.result = (int)BonusErrorCode.CalculateUnknownPromotionType;
                     return output;
             }
             output.BonusInfo = JsonConvert.SerializeObject(claimPromotion,
@@ -765,24 +654,15 @@ namespace BonusService.Service.BLL
                 case PromotionType.FstDeposit:
                 case PromotionType.ReDeposit:
                 case PromotionType.FreeBet:
-                case PromotionType.WalletBonus:
                 case PromotionType.Cashback:
-                case PromotionType.ManualBonus:
-                case PromotionType.RetentionBonus:
+                case PromotionType.SpecialBonus:
+                case PromotionType.RetentionFreeBet:
                     {
-
                         result = BonusReward(bonusRewardInput, trans);
                         break;
                     }
 
                 case PromotionType.Rebate:
-                    result = _bonusWalletService.RewardRebate(bonusRewardInput.BonusCode, (int)bonusRewardInput.PromotionType - 5,
-                        bonusRewardInput.CustId, bonusRewardInput.UserName, bonusRewardInput.SiteId, bonusRewardInput.CurrencyId, trans)
-                        ? 1
-                        : 0;
-                    break;
-
-                case PromotionType.Special:
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -833,7 +713,7 @@ namespace BonusService.Service.BLL
                 }
                 else
                 {
-                    return (int)BonusErrorCode.MAINWALLET_AMOUNT_NOT_ENOUGH;
+                    return (int)BonusErrorCode.MainWalletAmountNotEnough;
                 }
             }
 
@@ -851,11 +731,7 @@ namespace BonusService.Service.BLL
 
             if (result > 0 && bonusRewardInput.PromotionType == PromotionType.Cashback)
             {
-                var offset = 8;
-                if (bonusRewardInput.SiteId == (int)SiteId.Goal123 || bonusRewardInput.SiteId == (int)SiteId.Bwing)
-                {
-                    offset = 7;
-                }
+                var offset = GetOffset(bonusRewardInput.SiteId);
                 var currentTime = DateTime.UtcNow.AddHours(offset);
                 var calculateDate = StartOfWeek(currentTime, DayOfWeek.Monday).ToString("yyyy-MM-dd");
 
@@ -901,6 +777,11 @@ namespace BonusService.Service.BLL
                         request.SiteId, promo.BonusCode, request.DeviceType);
                     SetResult(promo, custCondition);
                     SetPromotion(request.SiteId, request.CustId, request.CurrencyId, true, promo, custCondition);
+                }
+                else if (promo.PromotionType == PromotionType.Cashback)
+                {
+                    var offset = GetOffset(request.SiteId);
+                    ProcessPeriodTime(promo, DateTime.UtcNow.AddHours(offset), offset);
                 }
             }
 
@@ -948,7 +829,7 @@ namespace BonusService.Service.BLL
         
         private void SetPromotion(int siteId, int custId, int currencyId, bool getCashbackDetail, CustPromotion promo, CustCondition custCondition)
         {
-            if ((promo.PromotionType == PromotionType.FstDeposit || promo.PromotionType == PromotionType.ReDeposit)
+            if (promo.PromotionType is PromotionType.FstDeposit or PromotionType.ReDeposit
                 && promo.canJoin)
             {
                 promo.DepositId = custCondition.RefId;
@@ -959,8 +840,7 @@ namespace BonusService.Service.BLL
                     ? _walletService.GetBalance(custId)
                     : promo.DepositAmount;
                 
-                if (promo.PromotionType == PromotionType.FstDeposit
-                    && promo.MaxAmount > promo.DepositAmount)
+                if (promo.PromotionType == PromotionType.FstDeposit && promo.MaxAmount > promo.DepositAmount)
                 {
                     promo.MaxAmount = promo.DepositAmount;
                 }
@@ -985,36 +865,34 @@ namespace BonusService.Service.BLL
                         }
                     }
                 }
-        
+       
                 if (promo.RequiredAmount > promo.DepositAmount)
                 {
                     promo.canJoin = false;
                 }
-            }
-        
-            if (promo.PromotionType == PromotionType.Rebate)
-            {
-                promo.isJoin = _promotionService.GetRebateInfo(custId, promo);
-        
-            }
-            else
-            {
-                var custBonusInfo = _promotionService.GetBonusInfoByCust(custId, promo);
-                if (custBonusInfo != null)
+
+                if (promo.PromotionType == PromotionType.ReDeposit && promo.TierAmountList.Any())
                 {
-                    promo.CustExpiryTime = custBonusInfo.ExpiryTime;
-                    promo.CustRollOver = custBonusInfo.Rollover;
-                    promo.CustTurnOver = custBonusInfo.Turnover < 0 ? 0 : custBonusInfo.Turnover;
-                    promo.FullFillType = custBonusInfo.FullFillType;
-                    promo.Status = custBonusInfo.Status;
-                    promo.isJoin = true;
-                }
-                
-                if (promo.PromotionType == PromotionType.Cashback)
-                {
-                    GetCashbackInfo(custId, siteId, currencyId, promo, getCashbackDetail);
+                    promo.CalculateCanJoinTierAmount(promo.DepositAmount);
+                    promo.canJoin = promo.CanJoinTierAmountList.Any();
                 }
             }
+            
+            var custBonusInfo = _promotionService.GetBonusInfoByCust(custId, promo);
+            if (custBonusInfo != null)
+            {
+                promo.CustExpiryTime = custBonusInfo.ExpiryTime;
+                promo.CustRollOver = custBonusInfo.Rollover;
+                promo.CustTurnOver = custBonusInfo.Turnover < 0 ? 0 : custBonusInfo.Turnover;
+                promo.FullFillType = custBonusInfo.FullFillType;
+                promo.Status = custBonusInfo.Status;
+                promo.isJoin = true;
+            }
+            
+            if (promo.PromotionType == PromotionType.Cashback)
+            {
+                GetCashbackInfo(custId, siteId, currencyId, promo, getCashbackDetail);
+            }         
         }
         
         private void SetPromotionDetail(string langId, string defLang, bool clearDetails, CustPromotion promo)
@@ -1023,20 +901,23 @@ namespace BonusService.Service.BLL
             {
                 var details = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(promo.Details);
                 Dictionary<string, string> settings = null;
-                if (details.ContainsKey(langId))
+                if (details != null)
                 {
-                    settings = details[langId];
-                }
-                else if (details.ContainsKey(defLang))
-                {
-                    settings = details[defLang];
-                }
-                else
-                {
-                    foreach (var item in details)
+                    if (details.ContainsKey(langId))
                     {
-                        settings = item.Value;
-                        break;
+                        settings = details[langId];
+                    }
+                    else if (details.ContainsKey(defLang))
+                    {
+                        settings = details[defLang];
+                    }
+                    else
+                    {
+                        foreach (var item in details)
+                        {
+                            settings = item.Value;
+                            break;
+                        }
                     }
                 }
 
@@ -1116,11 +997,7 @@ namespace BonusService.Service.BLL
         private void GetCashbackInfo(int custId, int siteId, int currencyId, CustPromotion promotion, bool getDetail)
         {
             var custInfo = _custInfoService.GetCustInfo(custId);
-            var offset = 8;
-            if (siteId == (int)SiteId.Goal123 || siteId == (int)SiteId.Bwing)
-            {
-                offset = 7;
-            }
+            var offset = GetOffset(siteId);
             var currentTime = DateTime.UtcNow.AddHours(offset);
             var calculateDate = StartOfWeek(currentTime, DayOfWeek.Monday).ToString("yyyy-MM-dd");
 
@@ -1128,11 +1005,8 @@ namespace BonusService.Service.BLL
 
             promotion.isJoin = result.FirstOrDefault()?.Claimed ?? false;
             promotion.canJoin = result.Any();
-
-            var utcMonday = StartOfWeek(currentTime, DayOfWeek.Monday).AddHours(-offset);
-            var utcSunday = utcMonday.AddDays(7).AddTicks(-1);
-            promotion.PeriodFrom = ((DateTimeOffset)utcMonday).ToUnixTimeSeconds();
-            promotion.PeriodTo = ((DateTimeOffset)utcSunday).ToUnixTimeSeconds();
+            
+            ProcessPeriodTime(promotion, currentTime, offset);
 
             if (!getDetail) return;
             var lastMonday = StartOfWeek(currentTime.AddDays(-7), DayOfWeek.Monday).Date;
@@ -1160,11 +1034,92 @@ namespace BonusService.Service.BLL
             details.First().CashBackDetail = detail;
             promotion.CashBackDetails = details.First();
         }
-        
+
+        private void ProcessPeriodTime(CustPromotion promotion, DateTime currentTime, int offset)
+        {
+            var checkTime = ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeSeconds();
+            if (promotion.PeriodFrom <= checkTime && checkTime <= promotion.PeriodTo)
+            {
+                var utcMonday = StartOfWeek(currentTime, DayOfWeek.Monday).AddHours(-offset);
+                var utcSunday = utcMonday.AddDays(7).AddTicks(-1);
+                promotion.PeriodFrom = ((DateTimeOffset)utcMonday).ToUnixTimeSeconds();
+                promotion.PeriodTo = ((DateTimeOffset)utcSunday).ToUnixTimeSeconds();
+            }
+        }
+
+        private int GetOffset(int siteId)
+        {
+            var offset = 8;
+            if (siteId is (int)SiteId.Goal123 or (int)SiteId.Bwing)
+            {
+                offset = 7;
+            }
+
+            return offset;
+        }
+
         public DateTime StartOfWeek(DateTime dateTime, DayOfWeek startOfWeek)
         {
             var diff = (7 + (dateTime.DayOfWeek - startOfWeek)) % 7;
             return dateTime.AddDays(-1 * diff).Date;
         }
+
+        private CheckTierRedepositBonusRep CheckTierRedepositBonus(CheckTierRedepositBonusReq request)
+        {
+            return _mainDbClient.QueryFirst<CheckTierRedepositBonusRep>("Admin_CheckTierRedepositBonus_Get", new DynamicParameters(request));
+        }
+
+        private CalculateBonusOutput CalculateTierRedepositBonus(ClaimPromotion claimPromotion, int custId, int siteId, int currencyId, decimal amount, string depositId = null)
+        {
+            var depositAmount = amount;
+
+            //帶DepositId使用存款金額計算TierAmount
+            if (depositId != null)
+            {
+                var checkResult = CheckTierRedepositBonus(new CheckTierRedepositBonusReq
+                {
+                    CustId = custId,
+                    BonusCode = claimPromotion.BonusCode,
+                    PromotionType = (int)claimPromotion.PromotionType,
+                    SiteId = siteId,
+                    CurrencyId = currencyId,
+                    DepositId = depositId
+                });
+                if (!checkResult.IsSuccess)
+                {
+                    throw new Exception("TierAmount check fail.");
+                }
+                depositAmount = checkResult.ActualDeposit;
+            }
+            
+            var tierAmount = claimPromotion.FindTierAmountLevel(depositAmount);
+            if (tierAmount == null)
+            {
+                throw new Exception("TierAmount no found.");
+            }
+
+            claimPromotion.MaxBonus = tierAmount.MaxBonus;
+            claimPromotion.RequiredAmount = tierAmount.RequiredAmount;
+            claimPromotion.Bonus = tierAmount.Bonus;
+            claimPromotion.RollOver = tierAmount.RollOver;
+            claimPromotion.WinOver = tierAmount.WinOver;
+
+            var canJoinTierAmount = tierAmount.CalculateTierAmount(claimPromotion.BonusType, depositAmount);
+            var bonusAmount = canJoinTierAmount.BonusAmount;
+            var lockAmount = canJoinTierAmount.LockedAmount;
+
+            return new CalculateBonusOutput
+            {
+                result = (int)BonusErrorCode.Success,
+                BonusInfo = JsonConvert.SerializeObject(claimPromotion,new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }),
+                ExpiryTime = DateTimeOffset.Now.AddDays(claimPromotion.ExpiryDays).ToUnixTimeSeconds(),
+                BonusAmount = bonusAmount,
+                LockedAmount = lockAmount,  
+                RollOver = (lockAmount + bonusAmount) * (claimPromotion.FullFillType == (int)FullFillType.RollOver ? claimPromotion.RollOver : claimPromotion.WinOver),
+                DepositAmount = depositAmount
+            };
+        }
+
+
     }
 }

@@ -170,22 +170,5 @@ namespace BonusService.Service.BLL
                 new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(10)),
                 i => _rebateService.GetTpCategoryList().ToDictionary(x => x.Id, x => x.Name));
         }
-
-        public IEnumerable<BonusCashBackGames> GetBonusCashBackGamesInfo(int CashbackId, int SiteId)
-        {
-            var key = $"GetBonusCashBackGamesInfo_{CashbackId}_{SiteId}";
-            return _cacheHelper.TryGetOrCreate(key,
-                new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(1)),
-                i => _rebateService.GetBonusCashBackGamesInfo(CashbackId, SiteId));
-        }
-        public IEnumerable<TpBetRecord> GetTpBetRecordInfo(long StartDate, long EndDate, int SiteId, int GameType)
-        {
-            return _rebateService.GetTpBetRecordInfo(StartDate, EndDate, SiteId, GameType);
-        }
-
-        public int InsBonusCashBack(KeyValuePair<int, BonusCashBackInfoList> keyValuePair)
-        {
-            return _rebateService.InsBonusCashBack(keyValuePair.Value);
-        }
     }
 }

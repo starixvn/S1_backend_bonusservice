@@ -1,64 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
-    Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
-    associated with the data types.
-    
-    Example:
-    
-    ... ado.net/XML headers & schema ...
-    <resheader name="resmimetype">text/microsoft-resx</resheader>
-    <resheader name="version">2.0</resheader>
-    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
-    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
-    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
-    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
-    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
-        <value>[base64 mime encoded serialized .NET Framework object]</value>
-    </data>
-    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
-        <comment>This is a comment</comment>
-    </data>
-                
-    There are any number of "resheader" rows that contain simple 
-    name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
-    mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
-    extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
-    read any of the formats listed below.
-    
-    mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
-            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
-            : and then encoded with base64 encoding.
-    
-    mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
-            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
-            : and then encoded with base64 encoding.
-
-    mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
-            : using a System.ComponentModel.TypeConverter
-            : and then encoded with base64 encoding.
-    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -117,25 +58,82 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="msg_LockedAmountInsufficient" xml:space="preserve">
-    <value>Saldo dompet utama tidak boleh lebih rendah dari {0}</value>
-  </data>
   <data name="msg_Ineligible" xml:space="preserve">
     <value>Anda tidak memenuhi syarat untuk promosi ini. Silakan hubungi Layanan Bantuan kami untuk lebih jelasnya.</value>
-  </data>
-  <data name="msg_RequiredAmountInsufficient" xml:space="preserve">
-    <value>Setoran minimal {0} agar berhak mendapatkan bonus</value>
-  </data>
-  <data name="msg_OTPHint1" xml:space="preserve">
-    <value>Ingin rasakan produk dan layanan lebih komplit?</value>
-  </data>
-  <data name="msg_OTPHint2" xml:space="preserve">
-    <value>Verifikasi no telpon Anda sekarang!</value>
   </data>
   <data name="msg_ClaimCashBackBonus" xml:space="preserve">
     <value>Selamat, Bonus CASHBACK Anda {0} telah dikreditkan ke akun Anda!</value>
   </data>
-  <data name="msg_PhoneProfile_ERROR" xml:space="preserve">
-    <value>Harap lengkapi profil Anda dan verifikasi ponsel Anda untuk menikmati promosi kami.</value>
+  <data name="msg_PromotionNotFound" xml:space="preserve">
+    <value>Promosi ini tidak dapat ditemukan</value>
+  </data>
+  <data name="msg_IpIsBlocked" xml:space="preserve">
+    <value>Akun Duplikat telah klaim promosi ini</value>
+  </data>
+  <data name="msg_ProfileOrPhoneNotFinish" xml:space="preserve">
+    <value>Informasi akun belum diisi, harap verikasi informasi akun anda</value>
+  </data>
+  <data name="msg_DepositAmountNotEnough" xml:space="preserve">
+    <value>Jumlah deposit untuk berpartisipasi dalam promosi ini harus {0} atau lebih</value>
+  </data>
+  <data name="msg_MainWalletAmountNotEnough" xml:space="preserve">
+    <value>Saldo dompet utama tidak boleh lebih rendah dari {0}</value>
+  </data>
+  <data name="msg_CalculateAmountIsNegative" xml:space="preserve">
+    <value>Tidak berhak mengikuti promosi ini</value>
+  </data>
+  <data name="msg_CalculateCashbackTotalBonusLessThenMinPay" xml:space="preserve">
+    <value>Jumlah minimum cashback tidak tercapai</value>
+  </data>
+  <data name="msg_CalculateUnknownPromotionType" xml:space="preserve">
+    <value>Promosi tidak dapat ditemukan</value>
+  </data>
+  <data name="msg_DuplicateClaimBonus" xml:space="preserve">
+    <value>Jangan menduplikat penukaran promosi</value>
+  </data>
+  <data name="msg_SpBonusNotFound" xml:space="preserve">
+    <value>Promosi tidak dapat ditemukan</value>
+  </data>
+  <data name="msg_SpCustomerNotJoinSpecialCode" xml:space="preserve">
+    <value>Silakan masukkan Kode Promo</value>
+  </data>
+  <data name="msg_SpCustomerJoinThisPromotionBefore" xml:space="preserve">
+    <value>Batas partisipasi tercapai</value>
+  </data>
+  <data name="msg_SpCustomerBonusStillRunning" xml:space="preserve">
+    <value>Masih ada promosi yang berjalan, silakan coba lagi nanti</value>
+  </data>
+  <data name="msg_SpCustomerDepositNotExceedRequiredAmount" xml:space="preserve">
+    <value>Jumlah deposit tidak memenuhi syarat untuk berpartisipasi dalam promosi ini</value>
+  </data>
+  <data name="msg_SpCustomerDontHaveFirstDeposit" xml:space="preserve">
+    <value>Silakan Lengkapi Setoran Pertama Anda</value>
+  </data>
+  <data name="msg_SpCustomerFirstDepositRuleDontMatch" xml:space="preserve">
+    <value>Tidak memenuhi syarat untuk berpartisipasi dalam promosi ini</value>
+  </data>
+  <data name="msg_SpCustomerWithdrawalBefore" xml:space="preserve">
+    <value>Catatan penarikan telah ditemukan, tidak dapat bergabung dengan promosi ini</value>
+  </data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusInPeriodTime" xml:space="preserve">
+    <value>Masih ada promosi yang berjalan, silakan coba lagi nanti</value>
+  </data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusWhichPromotionTypeIn135" xml:space="preserve">
+    <value>Masih ada promosi yang berjalan atau batas partisipasi dalam penawaran ini telah tercapai</value>
+  </data>
+  <data name="msg_SpCustomerDepositApproveBefore" xml:space="preserve">
+    <value>Catatan deposit yang berhasil ditemukan tidak dapat bergabung dengan promosi ini</value>
+  </data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddThisBonusBefore" xml:space="preserve">
+    <value>Masih ada promosi yang berjalan atau batas partisipasi dalam penawaran ini telah tercapai</value>
+  </data>
+  <data name="msg_SpCustomerJoinThisRebateBefore" xml:space="preserve">
+    <value>Promosi ini telah diklaim</value>
+  </data>
+  <data name="msg_SpCustomerHaveRunningBonusOrJoinThisBonusInPeriodTime" xml:space="preserve">
+    <value>Masih ada promosi yang berjalan atau batas partisipasi dalam penawaran ini telah tercapai</value>
+  </data>
+  <data name="msg_SpUndefinedPromotionType" xml:space="preserve">
+    <value>Promosi tidak dapat ditemukan</value>
   </data>
 </root>

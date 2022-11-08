@@ -1,64 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
-    Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
-    associated with the data types.
-    
-    Example:
-    
-    ... ado.net/XML headers & schema ...
-    <resheader name="resmimetype">text/microsoft-resx</resheader>
-    <resheader name="version">2.0</resheader>
-    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
-    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
-    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
-    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
-    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
-        <value>[base64 mime encoded serialized .NET Framework object]</value>
-    </data>
-    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
-        <comment>This is a comment</comment>
-    </data>
-                
-    There are any number of "resheader" rows that contain simple 
-    name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
-    mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
-    extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
-    read any of the formats listed below.
-    
-    mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
-            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
-            : and then encoded with base64 encoding.
-    
-    mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
-            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
-            : and then encoded with base64 encoding.
-
-    mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
-            : using a System.ComponentModel.TypeConverter
-            : and then encoded with base64 encoding.
-    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -117,25 +58,82 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="msg_LockedAmountInsufficient" xml:space="preserve">
-    <value>Số dư trong ví chính không được nhỏ hơn {0}</value>
-  </data>
   <data name="msg_Ineligible" xml:space="preserve">
     <value>Tài khoản của bạn chưa may mắn trong ngày hôm nay, xin vui lòng thử lại vào ngày hôm sau.</value>
-  </data>
-  <data name="msg_RequiredAmountInsufficient" xml:space="preserve">
-    <value>Gửi tối thiểu {0} để đủ điều kiện nhận thưởng</value>
-  </data>
-  <data name="msg_OTPHint1" xml:space="preserve">
-    <value>Bạn muốn trải nghiệm toàn diện các sản phẩm &amp; dịch vụ của chúng tôi?</value>
-  </data>
-  <data name="msg_OTPHint2" xml:space="preserve">
-    <value>Xác minh điện thoại của bạn ngay?</value>
   </data>
   <data name="msg_ClaimCashBackBonus" xml:space="preserve">
     <value>Xin chúc mừng, khoản tiền hoàn lại {0} của bạn đã được ghi có vào tài khoản của bạn!</value>
   </data>
-  <data name="msg_PhoneProfile_ERROR" xml:space="preserve">
-    <value>Vui lòng hoàn tất thông tin của bạn và xác minh số điện thoại của bạn để được hưởng các chương trình khuyến mãi của chúng tôi.</value>
+  <data name="msg_PromotionNotFound" xml:space="preserve">
+    <value>Không thể tìm thấy Khuyến mãi</value>
+  </data>
+  <data name="msg_IpIsBlocked" xml:space="preserve">
+    <value>Khuyến mãi đã được nhận bởi tài khoản trùng lặp thông tin</value>
+  </data>
+  <data name="msg_ProfileOrPhoneNotFinish" xml:space="preserve">
+    <value>Thông tin tài khoản chưa được điền đầy đủ, vui lòng xác minh thông tin tài khoản</value>
+  </data>
+  <data name="msg_DepositAmountNotEnough" xml:space="preserve">
+    <value>Bạn cần nạp tối thiểu {0} để tham gia khuyến mãi này</value>
+  </data>
+  <data name="msg_MainWalletAmountNotEnough" xml:space="preserve">
+    <value>Số dư trong ví chính không được nhỏ hơn {0}</value>
+  </data>
+  <data name="msg_CalculateAmountIsNegative" xml:space="preserve">
+    <value>Không đủ điều kiện tham gia khuyến mãi này</value>
+  </data>
+  <data name="msg_CalculateCashbackTotalBonusLessThenMinPay" xml:space="preserve">
+    <value>Không đạt đủ số tiền hoàn lại tối thiểu</value>
+  </data>
+  <data name="msg_CalculateUnknownPromotionType" xml:space="preserve">
+    <value>Khuyến mãi không hợp lệ</value>
+  </data>
+  <data name="msg_DuplicateClaimBonus" xml:space="preserve">
+    <value>Không trùng lặp khuyến mãi</value>
+  </data>
+  <data name="msg_SpBonusNotFound" xml:space="preserve">
+    <value>Không tìm thấy Khuyến mãi</value>
+  </data>
+  <data name="msg_SpCustomerNotJoinSpecialCode" xml:space="preserve">
+    <value>Vui lòng nhập mã khuyến mãi</value>
+  </data>
+  <data name="msg_SpCustomerJoinThisPromotionBefore" xml:space="preserve">
+    <value>Đã nhận đủ giới hạn khuyến mãi này </value>
+  </data>
+  <data name="msg_SpCustomerBonusStillRunning" xml:space="preserve">
+    <value>Khuyến mãi vẫn chưa hoàn thành, vui lòng thử lại sau</value>
+  </data>
+  <data name="msg_SpCustomerDepositNotExceedRequiredAmount" xml:space="preserve">
+    <value>Số tiền gửi không đủ điều kiện để tham gia chương trình khuyến mãi này</value>
+  </data>
+  <data name="msg_SpCustomerDontHaveFirstDeposit" xml:space="preserve">
+    <value>Vui lòng hoàn thành khoản nạp đầu tiên của bạn</value>
+  </data>
+  <data name="msg_SpCustomerFirstDepositRuleDontMatch" xml:space="preserve">
+    <value>Không đủ điều kiện để tham gia chương trình khuyến mãi này</value>
+  </data>
+  <data name="msg_SpCustomerWithdrawalBefore" xml:space="preserve">
+    <value>Đã rút tiền , không thể tham gia khuyến mãi này</value>
+  </data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusInPeriodTime" xml:space="preserve">
+    <value>Khuyến mãi vẫn chưa hoàn thành, vui lòng thử lại sau</value>
+  </data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusWhichPromotionTypeIn135" xml:space="preserve">
+    <value>Khuyến mãi chưa hoàn thành ,hoặc đã nhận khuyến mãi nạp lần đầu, khuyến mãi trải nghiệm</value>
+  </data>
+  <data name="msg_SpCustomerDepositApproveBefore" xml:space="preserve">
+    <value>Đã nạp tiền nhưng không thể tham gia khuyến mãi này</value>
+  </data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddThisBonusBefore" xml:space="preserve">
+    <value>Khuyến mãi chưa hoàn thành ,hoặc đã nhận khuyến mãi trước đó</value>
+  </data>
+  <data name="msg_SpCustomerJoinThisRebateBefore" xml:space="preserve">
+    <value>Khuyến mãi đã được cập nhật thành công</value>
+  </data>
+  <data name="msg_SpCustomerHaveRunningBonusOrJoinThisBonusInPeriodTime" xml:space="preserve">
+    <value>Khuyến mãi chưa hoàn thành ,hoặc đã nhận khuyến mãi trong thời gian quy định</value>
+  </data>
+  <data name="msg_SpUndefinedPromotionType" xml:space="preserve">
+    <value>Không thể tìm thấy Khuyến mãi</value>
   </data>
 </root>

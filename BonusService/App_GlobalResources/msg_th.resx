@@ -1,64 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
-    Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
-    associated with the data types.
-    
-    Example:
-    
-    ... ado.net/XML headers & schema ...
-    <resheader name="resmimetype">text/microsoft-resx</resheader>
-    <resheader name="version">2.0</resheader>
-    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
-    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
-    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
-    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
-    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
-        <value>[base64 mime encoded serialized .NET Framework object]</value>
-    </data>
-    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
-        <comment>This is a comment</comment>
-    </data>
-                
-    There are any number of "resheader" rows that contain simple 
-    name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
-    mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
-    extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
-    read any of the formats listed below.
-    
-    mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
-            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
-            : and then encoded with base64 encoding.
-    
-    mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
-            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
-            : and then encoded with base64 encoding.
-
-    mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
-            : using a System.ComponentModel.TypeConverter
-            : and then encoded with base64 encoding.
-    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -117,25 +58,82 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="msg_LockedAmountInsufficient" xml:space="preserve">
-    <value>ยอดเงินกระเป๋าเงินหลักไม่ควรต่ำกว่า {0}</value>
-  </data>
   <data name="msg_Ineligible" xml:space="preserve">
     <value>สมาชิกไม่มีสิทธิ์รับโปรโมชั่นนี้ สามารถติดต่อแชทสดสำหรับรายละเอียดเพิ่มเติมค่ะ</value>
-  </data>
-  <data name="msg_RequiredAmountInsufficient" xml:space="preserve">
-    <value>ฝากขั้นต่ำ {0} เพื่อรับโบนัส</value>
-  </data>
-  <data name="msg_OTPHint1" xml:space="preserve">
-    <value>คุณต้องการเล่นเกมแบบเต็มรูปแบบที่เราให้บริการหรือไม่?</value>
-  </data>
-  <data name="msg_OTPHint2" xml:space="preserve">
-    <value>ต้องการยืนยันเบอร์โทรศัพท์ของคุณตอนนี้?</value>
   </data>
   <data name="msg_ClaimCashBackBonus" xml:space="preserve">
     <value>ขอแสดงความยินดีเครดิตเงินคืน {0} ของคุณเข้าบัญชีของคุณแล้ว!</value>
   </data>
-  <data name="msg_PhoneProfile_ERROR" xml:space="preserve">
-    <value>กรุณากรอกข้อมูลส่วนตัวและยืนยันหมายเลขโทรศัพท์ก่อนเข้าร่วมกิจกรรม</value>
+  <data name="msg_PromotionNotFound" xml:space="preserve">
+    <value>ไม่พบโปรโมชั่นดังกล่าว</value>
+  </data>
+  <data name="msg_IpIsBlocked" xml:space="preserve">
+    <value>ข้อมูลบัญชีที่ซ้ำกันได้ใช้สิทธิ์ในโปรโมชั่นนี้แล้ว</value>
+  </data>
+  <data name="msg_ProfileOrPhoneNotFinish" xml:space="preserve">
+    <value>ข้อมูลบัญชีไม่ครบถ้วน กรุณาทำการยืนยันบัญชีของท่าน</value>
+  </data>
+  <data name="msg_DepositAmountNotEnough" xml:space="preserve">
+    <value>จำนวนเงินฝากต้องเป็น {0} ขึ้นไปหรือมากกว่าเพื่อเข้าร่วมในโปรโมชั่นนี้</value>
+  </data>
+  <data name="msg_MainWalletAmountNotEnough" xml:space="preserve">
+    <value>ยอดเงินกระเป๋าเงินหลักไม่ควรต่ำกว่า {0}</value>
+  </data>
+  <data name="msg_CalculateAmountIsNegative" xml:space="preserve">
+    <value>ไม่สามารถเข้าร่วมโปรโมชั่นนี้ได้</value>
+  </data>
+  <data name="msg_CalculateCashbackTotalBonusLessThenMinPay" xml:space="preserve">
+    <value>ยอดเงินคืนขั้นต่ำไม่ถึงตามที่กำหนด</value>
+  </data>
+  <data name="msg_CalculateUnknownPromotionType" xml:space="preserve">
+    <value>ไม่พบโปรโมชั่นดังกล่าว</value>
+  </data>
+  <data name="msg_DuplicateClaimBonus" xml:space="preserve">
+    <value>ห้ามใช้โปรโมชั่นซ้ำ</value>
+  </data>
+  <data name="msg_SpBonusNotFound" xml:space="preserve">
+    <value>ไม่พบโปรโมชั่นดังกล่าว</value>
+  </data>
+  <data name="msg_SpCustomerNotJoinSpecialCode" xml:space="preserve">
+    <value>กรุณากรอกโค้ดโปรโมชั่น</value>
+  </data>
+  <data name="msg_SpCustomerJoinThisPromotionBefore" xml:space="preserve">
+    <value>ถึงขีดจำกัดการเข้าร่วมแล้ว</value>
+  </data>
+  <data name="msg_SpCustomerBonusStillRunning" xml:space="preserve">
+    <value>ยังมีโปรโมชั่นที่ยังต้องทำยอดเทิร์นให้ครบอยู่ กรุณาลองใหม่ภายหลัง</value>
+  </data>
+  <data name="msg_SpCustomerDepositNotExceedRequiredAmount" xml:space="preserve">
+    <value>จำนวนเงินฝากดังกล่าวไม่สามารถเข้าร่วมโปรโมชั่นนี้ได้</value>
+  </data>
+  <data name="msg_SpCustomerDontHaveFirstDeposit" xml:space="preserve">
+    <value>กรุณาทำรายการฝาก</value>
+  </data>
+  <data name="msg_SpCustomerFirstDepositRuleDontMatch" xml:space="preserve">
+    <value>ไม่มีสามารถเข้าร่วมโปรโมชั่นนี้ได้</value>
+  </data>
+  <data name="msg_SpCustomerWithdrawalBefore" xml:space="preserve">
+    <value>พบรายการถอนของท่าน ไม่สามารถเข้าร่วมโปรโมชั่นนี้ได้</value>
+  </data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusInPeriodTime" xml:space="preserve">
+    <value>ยังมีโปรโมชั่นที่ยังต้องทำยอดเทิร์นให้ครบอยู่ กรุณาลองใหม่ภายหลัง</value>
+  </data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusWhichPromotionTypeIn135" xml:space="preserve">
+    <value>ยังมีโปรโมชั่นที่ยังต้องทำยอดเทิร์นให้ครบอยู่ หรือถึงขีดจำกัดของการเข้าร่วมในโปรโมชั่นนี้แล้ว</value>
+  </data>
+  <data name="msg_SpCustomerDepositApproveBefore" xml:space="preserve">
+    <value>พบรายการฝากของท่าน ไม่สามารถเข้าร่วมโปรโมชั่นนี้ได้</value>
+  </data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddThisBonusBefore" xml:space="preserve">
+    <value>ยังมีโปรโมชั่นที่ยังต้องทำยอดเทิร์นให้ครบอยู่ หรือถึงขีดจำกัดของการเข้าร่วมในโปรโมชั่นนี้แล้ว</value>
+  </data>
+  <data name="msg_SpCustomerJoinThisRebateBefore" xml:space="preserve">
+    <value>ได้เข้าร่วมโปรโมชั่นนี้เรียบร้อยแล้ว</value>
+  </data>
+  <data name="msg_SpCustomerHaveRunningBonusOrJoinThisBonusInPeriodTime" xml:space="preserve">
+    <value>ยังมีโปรโมชั่นที่ยังต้องทำยอดเทิร์นให้ครบอยู่ หรือถึงขีดจำกัดของการเข้าร่วมในโปรโมชั่นนี้แล้ว</value>
+  </data>
+  <data name="msg_SpUndefinedPromotionType" xml:space="preserve">
+    <value>ไม่พบโปรโมชั่นดังกล่าว</value>
   </data>
 </root>

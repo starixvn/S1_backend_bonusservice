@@ -11,12 +11,14 @@ namespace BonusService.Service.Workers
         private readonly PromotionBll _promotionBll;
         private Timer timerDepositBonus;
         private DateTime LastChickDate;
+        private readonly Random _random;
 
         public DepositBonusWorker(ILogger<DepositBonusWorker> logger, DepositBonusBLL depositBonusBLL, PromotionBll promotionBll)
         {
             this.logger = logger;
             this.depositBonusBLL = depositBonusBLL;
             _promotionBll = promotionBll;
+            _random = new Random();
         }
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -35,17 +37,17 @@ namespace BonusService.Service.Workers
                     depositBonusBLL.CheckDepositBonusExpired();
                 }
 
-                var depositBonusQueueCustList = depositBonusBLL.GetDepositBonusQueueCustList();
+                var depositBonusQueueCustList = depositBonusBLL.GetDepositBonusQueueCustList(_random.Next(950, 1000));
                 foreach (var depositBonusQueue in depositBonusQueueCustList)
                 {
-                    var depositBonusList = depositBonusBLL.GetDepositBonusQueueByCustId(depositBonusQueue.CustId, false);
+                    var depositBonusList = depositBonusBLL.GetDepositBonusQueueByCustId(depositBonusQueue.CustId);
                     foreach (var depositBonus in depositBonusList)
                     {
                         
                         if (depositBonus.DepositStatus == (int)DepositStatusEnum.Approved)
                         {
                             var result = await _promotionBll.SetClaimPromotionV2Async(depositBonus.CustId, depositBonus.BonusCode, depositBonus.IP,
-                                depositBonus.LockedAmount, (int)PromotionDeviceType.All, BonusInfoAtPage.Deposit, false, depositBonus.TransId);
+                                depositBonus.LockedAmount, (int)PromotionDeviceType.All, BonusInfoAtPage.Deposit, depositBonus.TransId);
                             if (result.ErrorCode == 0)
                             {
                                 logger.LogInformation($"DoDepositBonus success TransId: {depositBonus.TransId}");
@@ -56,7 +58,7 @@ namespace BonusService.Service.Workers
                             depositBonusBLL.SetDepositBonusStatus(depositBonus.TransId, (int)DepositBonusQueueStatus.Cancel_not_eligible);
                         }
                        
-                        else if (depositBonus.DepositStatus == (int)DepositStatusEnum.Rejected || depositBonus.DepositStatus == (int)DepositStatusEnum.Canceled || depositBonus.DepositStatus == (int)DepositStatusEnum.Expired || depositBonus.DepositStatus == (int)DepositStatusEnum.Error )
+                        else if (depositBonus.DepositStatus is (int)DepositStatusEnum.Rejected or (int)DepositStatusEnum.Canceled or (int)DepositStatusEnum.Expired or (int)DepositStatusEnum.Error )
                         {
                             depositBonusBLL.SetDepositBonusStatus(depositBonus.TransId, (int)DepositBonusQueueStatus.Cancel_Rejected);
                         }

@@ -37,7 +37,7 @@ namespace BonusService.Controllers
             public string Memo { get; set; }
             public decimal Amount { get; set; }
             public int PromotionType { get; set; }
-
+            public string DepositId { get; set; }
         }
         [HttpPost]
         public async Task<ApiResult> SetAdjustBonusAsync(SetAdjustBonusAsyncReq setAdjustBonusReq)
@@ -59,7 +59,7 @@ namespace BonusService.Controllers
                 }
                 var Memo = JsonConvert.SerializeObject(new { setAdjustBonusReq.Operator }); 
 
-                result = await _promotionBll.SetAdjustmentBonusV2Async(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode, Memo, setAdjustBonusReq.Amount, setAdjustBonusReq.PromotionType);
+                result = await _promotionBll.SetAdjustmentBonusV2Async(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode, Memo, setAdjustBonusReq.Amount, setAdjustBonusReq.PromotionType, setAdjustBonusReq.DepositId);
 
             }
             catch (Exception ex)
@@ -120,7 +120,7 @@ namespace BonusService.Controllers
             {
                 var lockedAmount = promotionReq.LockedAmount ?? 0;
                 
-                apiResult = await _promotionBll.SetClaimPromotionV2Async(promotionReq.CustId, promotionReq.BonusCode, promotionReq.custIP, lockedAmount, promotionReq.DeviceType, BonusInfoAtPage.Promotion,true);
+                apiResult = await _promotionBll.SetClaimPromotionV2Async(promotionReq.CustId, promotionReq.BonusCode, promotionReq.custIP, lockedAmount, promotionReq.DeviceType, BonusInfoAtPage.Promotion);
             }
             catch (Exception ex)
             {

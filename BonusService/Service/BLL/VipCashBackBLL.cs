@@ -116,12 +116,13 @@ namespace BonusService.Service.BLL
                                 .FirstOrDefault(item => item.CustId == customerGroupByCustId.First().CustId)
                                 ?.VipLevel ?? 1;
 
-                            var percentage = settings.Where(item =>
+                            var setting = settings.Where(item =>
                                     (item.Level == 0 || item.Level == vipLevel) &&
                                     item.TpId == customerGroupByCustId.First().TpId &&
-                                    item.CategoryId == customerGroupByCustId.First().CategoryId &&
-                                    Math.Abs(customerGroupByCustId.Sum(i => i.WinlostAmount)) >= item.LossAmount)
-                                .OrderByDescending(i => i.LossAmount).FirstOrDefault()?.Percentage ?? 0;
+                                    item.CategoryId == customerGroupByCustId.First().CategoryId)
+                                .MaxBy(i => i.LossAmount);
+
+                            var percentage = setting?.Percentage ?? 0;
 
                             if (percentage == 0)
                             {
@@ -144,15 +145,27 @@ namespace BonusService.Service.BLL
                                     SiteId = promotion.SiteId,
                                     Percentage = percentage,
                                     WinlostAmount = customer.WinlostAmount,
+                                    WinlostAmountWithBonus = customer.WinlostAmountWithBonus,
                                     BonusAmount = percentage / 100 * Math.Abs(customer.WinlostAmount)
                                 });
                             }
 
+                            if ((Math.Abs(customerGroupByCustId.Sum(i => i.WinlostAmount)) < setting?.LossAmount))
+                            {
+                                continue;
+                            }
+
+                            var bonus = percentage / 100 *
+                                        Math.Abs(customerGroupByCustId.Sum(output => output.WinlostAmount));
+
+                            if (promotion.MaxBonus > 0 && bonus > promotion.MaxBonus)
+                            {
+                                bonus = promotion.MaxBonus;
+                            }
+
                             SetCustCashBack(new CustCashBackInput(customerGroupByCustId.First().CustId,
-                                promotion.BonusCode,
-                                customerGroupByCustId.First().CategoryId, promotion.CategoryId, monday,
-                                (percentage / 100 *
-                                 Math.Abs(customerGroupByCustId.Sum(output => output.WinlostAmount)))));
+                                promotion.BonusCode, customerGroupByCustId.First().CategoryId, promotion.CategoryId,
+                                monday, bonus));
                         }
                     }
 

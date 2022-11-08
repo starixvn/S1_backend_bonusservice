@@ -95,12 +95,10 @@ namespace BonusService.Service.DAL
             }
             return result;
         }
-        public IEnumerable<DepositBonus> GetDepositBonusQueueByCustId(int custId, bool useMainDb)
+
+        public IEnumerable<DepositBonus> GetDepositBonusQueueByCustId(int custId)
         {
-            var p = new { CustId = custId };
-            return useMainDb
-                ? _mainDbClient.Query<DepositBonus>("Service_DepositBonusQueueByCustId_Get", p)
-                : _reportDbClient.Query<DepositBonus>("Service_DepositBonusQueueByCustId_Get", p);
+            return _mainDbClient.Query<DepositBonus>("Service_DepositBonusQueueByCustId_Get", new { CustId = custId });
         }
 
         public IEnumerable<CashBackDetails> GetCustCashBack(int custId, int siteId, int currencyId, CustPromotion promotion, string calculateDate)
@@ -157,8 +155,8 @@ namespace BonusService.Service.DAL
 
         public IEnumerable<CustPromotion> GetPromotionList(CustPromotionRequest request)
         {
-            return _reportDbClient.Query<CustPromotion>("Member_PromotionList_Get_V7",
-                new { request.CustId, request.SiteId, request.CurrencyId, request.DeviceType, request.LangId });
+            return _reportDbClient.Query<CustPromotion>("Member_PromotionList_Get_V8",
+                new { request.CustId, request.SiteId, request.CurrencyId, request.DeviceType, request.LangId, request.PromotionType });
         }
         
         public IEnumerable<CustPromotion> GetDepositPromotionList(CustPromotionRequest request)
@@ -172,13 +170,7 @@ namespace BonusService.Service.DAL
             return _reportDbClient.Query<CustPromotion>("Member_SPCodePromotionList_Get_V4",
                 new { request.CustId, request.DeviceType });
         }
-        
-        public bool GetRebateInfo(int custId, CustPromotion promo)
-        {
-            return _reportDbClient.Execute("Member_RebateInfo_GetByCust",
-                new { promo.BonusCode, RebateType = promo.PromotionType - 5, CustId = custId }) > 0;
-        }
-        
+
         public BonusWallet GetBonusInfoByCust(int custId, CustPromotion promo)
         {
            return _reportDbClient.QueryFirst<BonusWallet>("Member_BonusInfo_GetByCust",

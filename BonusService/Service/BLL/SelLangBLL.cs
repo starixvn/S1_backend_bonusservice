@@ -1,12 +1,13 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
 using System.Resources;
+using BonusService.Service.Model.enums;
 
 namespace BonusService.Service.BLL
 {
     public class SelLangBLL
     {
-        private readonly ConcurrentDictionary<string, ResourceManager> rm = new ConcurrentDictionary<string, ResourceManager>();
+        private readonly ConcurrentDictionary<string, ResourceManager> _rm = new();
         public SelLangBLL()
         { }
         public string GetResourceValue(string key, string langId)
@@ -15,19 +16,18 @@ namespace BonusService.Service.BLL
         }
         private string GetResourceValue(string key, string categoryId, string langId)
         {
-            //
             var labelString = string.Empty;
             var sKey = $"{Assembly.GetExecutingAssembly().GetName().Name}.App_GlobalResources.{categoryId}_{langId}";
-            if (!rm.ContainsKey(sKey))
+            if (!_rm.ContainsKey(sKey))
             {
-                rm.TryAdd(sKey, new ResourceManager(sKey, Assembly.GetExecutingAssembly()));
+                _rm.TryAdd(sKey, new ResourceManager(sKey, Assembly.GetExecutingAssembly()));
             }
 
             try
             {
-                labelString = rm[sKey].GetString(key);
+                labelString = _rm[sKey].GetString(key);
             }
-            catch (MissingManifestResourceException mme)
+            catch (MissingManifestResourceException)
             {
 
             }
@@ -39,10 +39,10 @@ namespace BonusService.Service.BLL
 
             return labelString;
         }
-        public string GetMsg(string key,int siteId, string siteName, string langId)
+        public string GetMsg(string key, int siteId, string siteName, string langId)
         {
             var msgString = "";
-            if (siteId == 1)
+            if (siteId == (int)SiteId.Nova88)
             {
                 msgString = GetResourceValue(key, "msg", langId);
             }
@@ -52,9 +52,9 @@ namespace BonusService.Service.BLL
                 {
                     msgString = GetResourceValue(key, $"{siteName}_msg", langId);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-
+                    // ignored
                 }
 
                 if (string.IsNullOrEmpty(msgString))

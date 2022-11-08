@@ -1,4 +1,7 @@
 ﻿using BonusService.Service.Model.enums;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 
 namespace BonusService.Service.Model
 {
@@ -9,7 +12,10 @@ namespace BonusService.Service.Model
         public string Description { get; set; }
         public PromotionType PromotionType { get; set; }
         public int CategoryId { get; set; }
+        public long PeriodFrom { get; set; }
         public long PeriodTo { get; set; }
+        public long DisplayFrom { get; set; }
+        public long DisplayTo { get; set; }
         public int RollOver { get; set; }
         public int WinOver { get; set; }
         public int FullFillType { get; set; }
@@ -22,6 +28,62 @@ namespace BonusService.Service.Model
         public int TpId { get; set; }
         public string Details { get; set; }
         public int PromotionAction { get; set; }
+        public string TierAmount { get; set; }
+        public IEnumerable<TierAmount> TierAmountList
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(TierAmount))
+                {
+                    return new List<TierAmount>();
+                }
+
+                return JsonConvert.DeserializeObject<IEnumerable<TierAmount>>(TierAmount);
+            }
+        }
+
+        /// <summary>
+        /// 使用金額找到符合的級距紅利
+        /// </summary>
+        /// <param name="depositAmount"></param>
+        /// <returns></returns>
+        public TierAmount FindTierAmountLevel(decimal depositAmount)
+        {
+            if (!TierAmountList.Any())
+            {
+                return null;
+            }
+
+            var tierAmountList = TierAmountList.OrderByDescending(i => i.RequiredAmount);
+            foreach (var item in tierAmountList)
+            {
+                if (depositAmount >= item.RequiredAmount)
+                {
+                    return item;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// 計算符合資格的級距紅利
+        /// </summary>
+        /// <param name="depositAmount"></param>
+        public void CalculateCanJoinTierAmount(decimal depositAmount)
+        {
+            var canJoinTierAmount = TierAmountList.Where(i => depositAmount >= i.RequiredAmount);
+            _canJoinTierAmountList = canJoinTierAmount.Select(i => i.CalculateTierAmount(BonusType, depositAmount));
+        }
+
+        private IEnumerable<CanJoinTierAmount> _canJoinTierAmountList { get; set; }
+
+        public IEnumerable<CanJoinTierAmount> CanJoinTierAmountList
+        {
+            get
+            {
+                return _canJoinTierAmountList != null ? _canJoinTierAmountList : new List<CanJoinTierAmount>();
+            }
+        }
     }
     
     public class ClaimPromotion : Promotion
@@ -38,7 +100,52 @@ namespace BonusService.Service.Model
         public string SpecialCode { get; set; }
         public decimal MinPayout { get; set; }
     }
-    
+
+    public class TierAmount
+    {
+        public decimal Bonus { get; set; }
+        public decimal MaxBonus { get; set; }
+        public decimal RequiredAmount { get; set; }
+        public int RollOver { get; set; }
+        public int WinOver { get; set; }
+        public CanJoinTierAmount CalculateTierAmount(BonusType bonusType, decimal depositAmount)
+        {       
+            decimal bonusAmount;
+            decimal lockAmount;
+            if (bonusType == BonusType.Amount)
+            {
+                bonusAmount = Bonus;
+                lockAmount = RequiredAmount;
+            }
+            else
+            {
+                bonusAmount = Math.Ceiling(Bonus * depositAmount / 100);
+                lockAmount = depositAmount;
+                if (MaxBonus != 0 && bonusAmount > MaxBonus)
+                {
+                    bonusAmount = MaxBonus;
+                    lockAmount = MaxBonus * 100 / Bonus;
+                }
+            }
+
+            return new CanJoinTierAmount()
+            {
+                RequiredAmount = RequiredAmount,
+                Bonus = Bonus,
+                BonusAmount = bonusAmount,
+                LockedAmount = lockAmount,
+            }; 
+        }
+    }
+
+    public class CanJoinTierAmount
+    {
+        public decimal RequiredAmount { get; set; }
+        public decimal Bonus { get; set; }       
+        public decimal BonusAmount { get; set; }
+        public decimal LockedAmount { get; set; }
+    }
+
     public class CustPromotionRequest
     {
         public int SiteId { set; get; }
@@ -48,6 +155,7 @@ namespace BonusService.Service.Model
         public bool IsLogin { set; get; }
         public string LangId { set; get; }
         public string DefLang { set; get; }
+        public int PromotionType { set; get; }
     }
     
     public class PromotionDetailRequest : CustPromotionRequest
@@ -58,7 +166,6 @@ namespace BonusService.Service.Model
     public class CustPromotion : Promotion
     {
         public string Banner { get; set; }
-        public long PeriodFrom { get; set; }
         public int WalletType { get; set; }        
         public decimal CustRollOver { get; set; }
         public decimal CustTurnOver { get; set; }
@@ -105,6 +212,10 @@ namespace BonusService.Service.Model
     {
         public decimal TotalBonus { get; set; }
         public decimal MaxBonus { get; set; }
+        public decimal TotalLossAmount => CashBackDetail.Any() ? CashBackDetail.Sum(i => i.LossAmount) : 0;
+        public decimal MinLossAmount => CashBackDetail.Any() ? CashBackDetail.Max(i => i.MinLossAmount) : 0;
+        public decimal OriginalTotalBonus => CashBackDetail.Any() ? CashBackDetail.Max(i => i.Percentage) / 100 * TotalLossAmount : 0;
+        public string Percentage => CashBackDetail.Select(i => i.PercentageName).FirstOrDefault();
         public IEnumerable<CashBackDetail> CashBackDetail { get; set; }
     }
 
@@ -113,12 +224,22 @@ namespace BonusService.Service.Model
         public int CategoryId { get; set; }
         public int TpId { get; set; }
         public string TpName { get; set; }
-        public string PeriodFrom { get; set; }
-        public string PeriodTo { get; set; }
-        public decimal LossAmount { get; set; }
-        public decimal Percentage { private get; set; }
+        public decimal LossAmount
+        {
+            get => Math.Abs(_LossAmount);
+            set => _LossAmount = value;
+        }
+        private decimal _LossAmount { get; set; }
+        public decimal LossAmountWithBonus
+        {
+            get => Math.Abs(_LossAmountWithBonus);
+            set => _LossAmountWithBonus = value;
+        }
+        private decimal _LossAmountWithBonus { get; set; }
+        public decimal Percentage { get; set; }
         public string PercentageName => $"{Percentage:G29}%";
         public decimal BonusAmount { get; set; }
+        public decimal MinLossAmount { get; set; }
     }
 
     public class Ref

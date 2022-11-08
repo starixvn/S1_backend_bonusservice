@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="msg_PromotionNotFound" xml:space="preserve">
+    <value>প্রচার খুঁজে পাওয়া যাবে না</value>
+  </data>
+  <data name="msg_IpIsBlocked" xml:space="preserve">
+    <value>ডুপ্লিকেট অ্যাকাউন্ট তথ্য এই প্রচার দাবি করা হয়েছে</value>
+  </data>
+  <data name="msg_ProfileOrPhoneNotFinish" xml:space="preserve">
+    <value>অ্যাকাউন্টের তথ্য সম্পূর্ণ হয়নি, অনুগ্রহ করে অ্যাকাউন্টের তথ্য যাচাই করুন</value>
+  </data>
+  <data name="msg_DepositAmountNotEnough" xml:space="preserve">
+    <value>এই প্রচারে অংশগ্রহণের জন্য জমার পরিমাণ অবশ্যই {0} বা তার বেশি হতে হবে</value>
+  </data>
+  <data name="msg_MainWalletAmountNotEnough" xml:space="preserve">
+    <value>মূল ওয়ালেট ব্যালেন্স {0} এর কম হওয়া উচিত নয়</value>
+  </data>
+  <data name="msg_CalculateAmountIsNegative" xml:space="preserve">
+    <value>প্রচারে অংশগ্রহণের যোগ্য নয়</value>
+  </data>
+  <data name="msg_CalculateCashbackTotalBonusLessThenMinPay" xml:space="preserve">
+    <value>ন্যূনতম ক্যাশব্যাকের পরিমাণ পৌঁছেনি</value>
+  </data>
+  <data name="msg_CalculateUnknownPromotionType" xml:space="preserve">
+    <value>প্রচার খুঁজে পাওয়া যাবে না</value>
+  </data>
+  <data name="msg_DuplicateClaimBonus" xml:space="preserve">
+    <value>ডুপ্লিকেট অফার অনুমোদিত নয়</value>
+  </data>
+  <data name="msg_SpBonusNotFound" xml:space="preserve">
+    <value>প্রচার খুঁজে পাওয়া যাবে না</value>
+  </data>
+  <data name="msg_SpCustomerNotJoinSpecialCode" xml:space="preserve">
+    <value>অনুগ্রহ করে প্রচার কোড লিখুন</value>
+  </data>
+  <data name="msg_SpCustomerJoinThisPromotionBefore" xml:space="preserve">
+    <value>অংশগ্রহণের সীমা পৌঁছেছে</value>
+  </data>
+  <data name="msg_SpCustomerBonusStillRunning" xml:space="preserve">
+    <value>এখনও রানিং বোনাস আছে, অনুগ্রহ করে পরে আবার চেষ্টা করুন</value>
+  </data>
+  <data name="msg_SpCustomerDepositNotExceedRequiredAmount" xml:space="preserve">
+    <value>জমার পরিমাণ এই প্রচারে অংশগ্রহণের জন্য যোগ্য নয</value>
+  </data>
+  <data name="msg_SpCustomerDontHaveFirstDeposit" xml:space="preserve">
+    <value>আপনার প্রথম আমানত সম্পূর্ণ করুন</value>
+  </data>
+  <data name="msg_SpCustomerFirstDepositRuleDontMatch" xml:space="preserve">
+    <value>এই প্রচারে অংশগ্রহণের যোগ্য নয়</value>
+  </data>
+  <data name="msg_SpCustomerWithdrawalBefore" xml:space="preserve">
+    <value>একটি প্রত্যাহার রেকর্ড পাওয়া গেছে, এই প্রচারে যোগ দিতে অক্ষম৷</value>
+  </data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusInPeriodTime" xml:space="preserve">
+    <value>এখনও রানিং বোনাস আছে, অনুগ্রহ করে পরে আবার চেষ্টা করুন</value>
+  </data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusWhichPromotionTypeIn135" xml:space="preserve">
+    <value>এখনও রানিং বোনাস আছে, অথবা এই অফারে অংশগ্রহণের সীমা পৌঁছে গেছে</value>
+  </data>
+  <data name="msg_SpCustomerDepositApproveBefore" xml:space="preserve">
+    <value>একটি সফল আমানত রেকর্ড এই প্রচারে যোগ দিতে অক্ষম পাওয়া গেছে৷</value>
+  </data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddThisBonusBefore" xml:space="preserve">
+    <value>এখনও রানিং বোনাস আছে, অথবা এই অফারে অংশগ্রহণের সীমা পৌঁছে গেছে</value>
+  </data>
+  <data name="msg_SpCustomerJoinThisRebateBefore" xml:space="preserve">
+    <value>এই প্রচার দাবি করা হয়েছে</value>
+  </data>
+  <data name="msg_SpCustomerHaveRunningBonusOrJoinThisBonusInPeriodTime" xml:space="preserve">
+    <value>এখনও রানিং বোনাস আছে, অথবা এই অফারে অংশগ্রহণের সীমা পৌঁছে গেছে</value>
+  </data>
+  <data name="msg_SpUndefinedPromotionType" xml:space="preserve">
+    <value>প্রচার খুঁজে পাওয়া যাবে না</value>
+  </data>
+</root>
