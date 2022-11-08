@@ -125,7 +125,7 @@ namespace BonusService.Service.BLL
         public int PayoutVipRebate(int siteId, VipRebateInfo vipRebateInfo, IEnumerable<VipRebateTpBetRecord> vipRebateTpBetRecords, IEnumerable<RebatePayoutLimit> rebatePayoutLimits)
         {
 
-            var result = _vipRebateService.PayoutVipRebate(siteId, vipRebateInfo, vipRebateTpBetRecords, out decimal payAmount, out var rebateLogList, out var rebateCLogList, rebatePayoutLimits);
+            var result = _vipRebateService.PayoutVipRebate(siteId, vipRebateInfo, vipRebateTpBetRecords, rebatePayoutLimits, out decimal payAmount, out var rebateCLogList);
 
             if (result > 0)
             {
@@ -149,9 +149,7 @@ namespace BonusService.Service.BLL
                         dAmount = $"{rebateLog.Value / 1000:#,##0.##}";
                     }
 
-                    var rebateTpBetRecord = vipRebateTpBetRecords.FirstOrDefault(x => x.CategoryId == rebateLog.Key);
-
-                    msg.AppendLine($"{GetTpCategoryList()[rebateLog.Key]} ({rebateTpBetRecord.Percentage}): {dAmount}");
+                    msg.AppendLine($"{GetTpCategoryList()[rebateLog.Key]} : {dAmount}");
                 }
 
 
