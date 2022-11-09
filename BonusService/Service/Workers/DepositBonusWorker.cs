@@ -11,12 +11,14 @@ namespace BonusService.Service.Workers
         private readonly PromotionBll _promotionBll;
         private Timer timerDepositBonus;
         private DateTime LastChickDate;
+        private readonly Random _random;
 
         public DepositBonusWorker(ILogger<DepositBonusWorker> logger, DepositBonusBLL depositBonusBLL, PromotionBll promotionBll)
         {
             this.logger = logger;
             this.depositBonusBLL = depositBonusBLL;
             _promotionBll = promotionBll;
+            _random = new Random();
         }
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -35,7 +37,7 @@ namespace BonusService.Service.Workers
                     depositBonusBLL.CheckDepositBonusExpired();
                 }
 
-                var depositBonusQueueCustList = depositBonusBLL.GetDepositBonusQueueCustList();
+                var depositBonusQueueCustList = depositBonusBLL.GetDepositBonusQueueCustList(_random.Next(950, 1000));
                 foreach (var depositBonusQueue in depositBonusQueueCustList)
                 {
                     var depositBonusList = depositBonusBLL.GetDepositBonusQueueByCustId(depositBonusQueue.CustId);

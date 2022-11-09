@@ -15,9 +15,9 @@ namespace BonusService.Service.DAL
             _reportDbClient = serviceProvider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Report);
         }
 
-        public IEnumerable<DepositBonusCustList> GetDepositBonusQueueCustList()
+        public IEnumerable<DepositBonusCustList> GetDepositBonusQueueCustList(int limit)
         {
-            return _reportDbClient.Query<DepositBonusCustList>("Service_DepositBonusQueueCustList_Get");
+            return _reportDbClient.Query<DepositBonusCustList>("Service_DepositBonusQueueCustList_Get_V2", new { Limit = limit });
         }
 
         public void CheckDepositBonusExpired()
