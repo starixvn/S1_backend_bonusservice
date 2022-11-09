@@ -1095,7 +1095,10 @@ namespace BonusService.Service.BLL
             var tierAmount = claimPromotion.FindTierAmountLevel(depositAmount);
             if (tierAmount == null)
             {
-                throw new Exception("TierAmount no found.");
+                return new CalculateBonusOutput
+                {
+                    result = (int)BonusErrorCode.TierAmountNoFound
+                };
             }
 
             claimPromotion.MaxBonus = tierAmount.MaxBonus;
