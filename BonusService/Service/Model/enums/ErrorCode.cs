@@ -14,6 +14,7 @@
         CalculateCashbackTotalBonusLessThenMinPay = -1007,
         CalculateUnknownPromotionType = -1008,
         DuplicateClaimBonus = -1009,
+        TierAmountNoFound = -1010,//未找到對應的級距設定
 
         //SP Return ERROR -11XX
         SpBonusNotFound = -1101,
