@@ -40,6 +40,8 @@ namespace BonusService.Service.Workers
                 }
 
                 var depositBonusQueueCustList = depositBonusBLL.GetDepositBonusQueueCustList(_random.Next(950, 1000));
+                logger.LogInformation($"GetDepositBonusQueueCustList Data Count：{depositBonusQueueCustList?.Count()}");
+                
                 foreach (var depositBonusQueue in depositBonusQueueCustList)
                 {
                     var depositBonusList = depositBonusBLL.GetDepositBonusQueueByCustId(depositBonusQueue.CustId);
