@@ -1,6 +1,7 @@
 ﻿using BonusService.Service.BLL;
 using BonusService.Service.Extensions;
 using BonusService.Service.Model.enums;
+using Serilog.Context;
 
 namespace BonusService.Service.Workers
 {
@@ -38,6 +39,7 @@ namespace BonusService.Service.Workers
 
         private void DoVipDownGradeWorker(object state)
         {
+            LogContext.PushProperty("RequestId", Guid.NewGuid().ToString());
             Interlocked.Increment(ref execCount);
 
             if (execCount == 1)

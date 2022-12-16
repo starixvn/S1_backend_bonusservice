@@ -228,7 +228,7 @@ namespace BonusService.Service.Library
             return result;
         }
 
-        public IEnumerable<T> QueryUseCommandDefinition<T>(string name, SqlMapper.IDynamicParameters parameters, int? commandTimeout = null)
+        public IEnumerable<T> QueryUseCommandDefinition<T>(string name, object parameters, int? commandTimeout = null)
         {
             IEnumerable<T> result;
             var sw = Stopwatch.StartNew();

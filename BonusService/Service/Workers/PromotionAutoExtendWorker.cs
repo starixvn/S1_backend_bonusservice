@@ -1,5 +1,6 @@
 ﻿using BonusService.Service.BLL;
 using BonusService.Service.Extensions;
+using Serilog.Context;
 
 namespace BonusService.Service.Workers
 {
@@ -25,6 +26,7 @@ namespace BonusService.Service.Workers
         }
         private async void PromotionAutoExtendTaskAsync(object state)
         {
+            LogContext.PushProperty("RequestId", Guid.NewGuid().ToString());
             var nCount = 0;
             try
             {
