@@ -234,7 +234,8 @@ namespace BonusService.Service.Library
             var sw = Stopwatch.StartNew();
             try
             {
-                using var connection = new MySqlConnection(_connectionString);
+                var connectionString = $"{_connectionString}ProcedureCacheSize=0;";
+                using var connection = new MySqlConnection(connectionString);
                 if (connection.State != ConnectionState.Open) connection.Open();// 自己 Control connection open close，不要讓 ORM 自己做
 
                 var command = new CommandDefinition(name, parameters, // 使用 CommandDefinition 不讓
