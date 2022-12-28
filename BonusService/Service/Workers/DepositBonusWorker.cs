@@ -1,6 +1,7 @@
 ﻿using BonusService.Service.BLL;
 using BonusService.Service.Extensions;
 using BonusService.Service.Model.enums;
+using Serilog.Context;
 
 namespace BonusService.Service.Workers
 {
@@ -29,6 +30,7 @@ namespace BonusService.Service.Workers
         }
         private async void DoDepositBonusTaskAsync(object state)
         {
+            LogContext.PushProperty("RequestId", Guid.NewGuid().ToString());
             try
             {
                 if (LastChickDate != GetUTC8Time().Date)
@@ -38,6 +40,8 @@ namespace BonusService.Service.Workers
                 }
 
                 var depositBonusQueueCustList = depositBonusBLL.GetDepositBonusQueueCustList(_random.Next(950, 1000));
+                logger.LogInformation($"GetDepositBonusQueueCustList Data Count：{depositBonusQueueCustList?.Count()}");
+                
                 foreach (var depositBonusQueue in depositBonusQueueCustList)
                 {
                     var depositBonusList = depositBonusBLL.GetDepositBonusQueueByCustId(depositBonusQueue.CustId);

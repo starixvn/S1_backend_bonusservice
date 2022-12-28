@@ -1,5 +1,6 @@
 ﻿using BonusService.Service.BLL;
 using BonusService.Service.Extensions;
+using Serilog.Context;
 
 namespace BonusService.Service.Workers
 {
@@ -25,6 +26,7 @@ namespace BonusService.Service.Workers
 
         private void DoClaimVerificationRewardTaskAsync(object state)
         {
+            LogContext.PushProperty("RequestId", Guid.NewGuid().ToString());
             try
             {
                 _logger.LogInformation("Claim Verification Reward Task Start");

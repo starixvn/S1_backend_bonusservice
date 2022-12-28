@@ -227,7 +227,39 @@ namespace BonusService.Service.Library
             _logger.LogDebug($"{name} {sw.Elapsed:c}");
             return result;
         }
-        
+
+        public IEnumerable<T> QueryUseCommandDefinition<T>(string name, object parameters, int? commandTimeout = null)
+        {
+            IEnumerable<T> result;
+            var sw = Stopwatch.StartNew();
+            try
+            {
+                var connectionString = $"{_connectionString}ProcedureCacheSize=0;";
+                using var connection = new MySqlConnection(connectionString);
+                if (connection.State != ConnectionState.Open) connection.Open();// 自己 Control connection open close，不要讓 ORM 自己做
+
+                var command = new CommandDefinition(name, parameters, // 使用 CommandDefinition 不讓
+                    commandTimeout: commandTimeout,
+                    commandType: CommandType.StoredProcedure,
+                    flags: CommandFlags.NoCache);
+
+                result = connection.Query<T>(command);
+                connection.Close();
+                connection.Dispose();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, name);
+                throw;
+            }
+
+            LogContext.PushProperty("elapsed", sw.Elapsed.TotalMilliseconds);
+            _logger.LogDebug($"{name} {sw.Elapsed:c}");
+            return result;
+        }
+
+
+
         public IEnumerable<T> Query<T>(string sql, object parameters, CommandType commandType = CommandType.StoredProcedure)
         {
             IEnumerable<T> result;

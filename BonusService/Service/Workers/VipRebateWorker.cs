@@ -1,6 +1,7 @@
 ﻿using BonusService.Service.BLL;
 using BonusService.Service.Extensions;
 using System.Diagnostics;
+using Serilog.Context;
 
 namespace BonusService.Service.Workers
 {
@@ -24,6 +25,7 @@ namespace BonusService.Service.Workers
         }
         private void DoWork(object state)
         {
+            LogContext.PushProperty("RequestId", Guid.NewGuid().ToString());
             Interlocked.Increment(ref execCount);
 
             if (execCount == 1)

@@ -149,14 +149,14 @@ namespace BonusService.Service.BLL
                                     BonusAmount = percentage / 100 * Math.Abs(customer.WinlostAmount)
                                 });
                             }
-
-                            if ((Math.Abs(customerGroupByCustId.Sum(i => i.WinlostAmount)) < setting?.LossAmount))
+                            
+                            var winlostAmount = customerGroupByCustId.Sum(i => i.WinlostAmount);
+                            if (winlostAmount >= 0 || Math.Abs(winlostAmount) < setting?.LossAmount)
                             {
                                 continue;
                             }
 
-                            var bonus = percentage / 100 *
-                                        Math.Abs(customerGroupByCustId.Sum(output => output.WinlostAmount));
+                            var bonus = percentage / 100 * Math.Abs(winlostAmount);
 
                             if (promotion.MaxBonus > 0 && bonus > promotion.MaxBonus)
                             {

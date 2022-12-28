@@ -2,6 +2,7 @@
 using BonusService.Service.Extensions;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
+using Serilog.Context;
 
 namespace BonusService.Service.Workers
 {
@@ -29,6 +30,7 @@ namespace BonusService.Service.Workers
 
         private void DoExpiredTransferBonusTaskAsync(object state)
         {
+            LogContext.PushProperty("RequestId", Guid.NewGuid().ToString());
             try
             {
                 _logger.LogInformation("Expired Transfer Bonus Task Start");
@@ -110,6 +112,7 @@ namespace BonusService.Service.Workers
 
         private void DoExpiredBonusTaskAsync(object state)
         {
+            LogContext.PushProperty("RequestId", Guid.NewGuid().ToString());
             try
             {
                 _logger.LogInformation("Expired Bonus Task Async Start");

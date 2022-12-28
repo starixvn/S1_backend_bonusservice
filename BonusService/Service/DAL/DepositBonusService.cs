@@ -17,7 +17,7 @@ namespace BonusService.Service.DAL
 
         public IEnumerable<DepositBonusCustList> GetDepositBonusQueueCustList(int limit)
         {
-            return _reportDbClient.Query<DepositBonusCustList>("Service_DepositBonusQueueCustList_Get_V2", new { Limit = limit });
+            return _reportDbClient.QueryUseCommandDefinition<DepositBonusCustList>("Service_DepositBonusQueueCustList_Get_V2", new { Limit = limit });
         }
 
         public void CheckDepositBonusExpired()
