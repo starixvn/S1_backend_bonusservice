@@ -30,7 +30,7 @@ namespace BonusService.Service.DAL
                 _CurrencyTimeZone = timeZone
             };
 
-            return _reportDbClient.Query<VipRebateTpBetRecord>("Service_VipRebateTpBetRecord_Get_V5", new DynamicParameters(p));
+            return _reportDbClient.Query<VipRebateTpBetRecord>("Service_VipRebateTpBetRecord_Get_V5", new DynamicParameters(p),300);
         }
         public IEnumerable<VipRebateInfo> GetVipRebateCustList(int siteId, int currencyId, int periodType, DateTime specificDate, string timeZone, int pageNumber, int pageSize)
         {
@@ -44,7 +44,7 @@ namespace BonusService.Service.DAL
                 _PageNumber = pageNumber,
                 _PageSize = pageSize
             };
-            return _reportDbClient.Query<VipRebateInfo>("Service_VipRebateCustList_Get_V4", new DynamicParameters(p));
+            return _reportDbClient.Query<VipRebateInfo>("Service_VipRebateCustList_Get_V4", new DynamicParameters(p),300);
         }
         public IEnumerable<RebateTask> GetVipRebateTask()
         {
