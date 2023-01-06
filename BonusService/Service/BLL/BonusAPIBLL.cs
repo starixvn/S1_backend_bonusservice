@@ -77,12 +77,12 @@ namespace BonusService.Service.BLL
             {
                 if (inputType == OTPTypeEnum.SMS)
                 {
-                    if (custRewardInfo.PhoneVerified)
+                    if (!custRewardInfo.PhoneVerified)
                     {
                         result.ErrorCode = 102;
                         result.Message = "Condition not fulfilled";
                     }
-                    if (custRewardInfo.PhoneReward != null)
+                    else if (custRewardInfo.PhoneReward != null)
                     {
                         //payout before
                         result.ErrorCode = 101;
@@ -96,12 +96,12 @@ namespace BonusService.Service.BLL
                 }
                 else
                 {
-                    if (custRewardInfo.EmailVerified)
+                    if (!custRewardInfo.EmailVerified)
                     {
                         result.ErrorCode = 102;
                         result.Message = "Condition not fulfilled";
                     }
-                    if (custRewardInfo.EmailReward != null)
+                    else if (custRewardInfo.EmailReward != null)
                     {
                         result.ErrorCode = 101;
                         result.Message = "Reward already payout before";
