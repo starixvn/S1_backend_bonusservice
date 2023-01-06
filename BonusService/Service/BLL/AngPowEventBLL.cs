@@ -42,8 +42,8 @@ public class AngPowEventBLL
         foreach (var task in TaskList)
         {
             //Step1：檢查小時是否符合
-            //幣別時區小時 <= 指定小時，不執行排程
-            if (task.CurrencyNowTime.Hour <= task.RedeemHours)
+            //幣別時區小時 < 指定小時，不執行排程
+            if (task.CurrencyNowTime.Hour < task.RedeemHours)
             {
                 _logger.LogWarning($"task.RedeemsHours Invaild. task value={JsonConvert.SerializeObject(task)}");
                 continue;
