@@ -36,7 +36,7 @@ if (!string.IsNullOrEmpty(serviceType) && serviceType.Equals("worker", StringCom
         .AddHostedService<PromotionAutoExtendWorker>()
         .AddHostedService<DepositBonusWorker>()
         .AddHostedService<RewardWorker>()
-        .AddHostedService<AngPowEventWorker>();
+        .AddHostedService<AngPaoEventWorker>();
 
 
     if (builder.Configuration.GetSection("RunVipDowngradeWorker").Get<bool>())
