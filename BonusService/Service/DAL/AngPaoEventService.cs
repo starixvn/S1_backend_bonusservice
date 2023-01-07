@@ -7,12 +7,12 @@ using System.Data;
 
 namespace BonusService.Service.DAL;
 
-public class AngPowEventService
+public class AngPaoEventService
 {
     private readonly Common common;
     private readonly MySqlClient _mainDbClient;
     private readonly MySqlClient _reportDbClient;
-    public AngPowEventService(IServiceProvider provider)
+    public AngPaoEventService(IServiceProvider provider)
     {
         _mainDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);
         _reportDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Report);
