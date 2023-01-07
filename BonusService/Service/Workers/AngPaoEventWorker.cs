@@ -5,16 +5,17 @@ using System.Diagnostics;
 
 namespace BonusService.Service.Workers;
 
-public class AngPowEventWorker : BackgroundService
+public class AngPaoEventWorker : BackgroundService
 {
-    private readonly AngPowEventBLL _angPowEventBLL;
+    private readonly AngPaoEventBLL _angPaoEventBLL;
     private readonly ILogger<VipRebateWorker> _logger;
     private Timer timer;
     private int execCount = 0;
+    private readonly string WorkerName = "AngPaoEvent";
 
-    public AngPowEventWorker(IServiceProvider provider)
+    public AngPaoEventWorker(IServiceProvider provider)
     {
-        _angPowEventBLL = provider.GetRequiredService<AngPowEventBLL>();
+        _angPaoEventBLL = provider.GetRequiredService<AngPaoEventBLL>();
         _logger = provider.GetRequiredService<ILogger<VipRebateWorker>>();
     }
 
@@ -35,15 +36,15 @@ public class AngPowEventWorker : BackgroundService
             {
                 if (VerifyExecute(DateTime.Now.Minute))
                 {
-                    _logger.LogInformation("AngPowEvent Wroker：Verify Task Start.");
+                    _logger.LogInformation($"{WorkerName} Wroker：Verify Task Start.");
 
-                    var doTaskList = _angPowEventBLL.VerifyTask("AngPowEvent");
+                    var doTaskList = _angPaoEventBLL.VerifyTask(WorkerName);
 
-                    _logger.LogInformation($"AngPowEvent Wroker：Verify Task End. Count = {doTaskList.Count()}");
+                    _logger.LogInformation($"{WorkerName} Wroker：Verify Task End. Count = {doTaskList.Count()}");
 
                     foreach (var task in doTaskList)
                     {
-                        _logger.LogInformation($"AngPowEvent Wroker：Do Task Start. SiteId:{task.SiteId} CurrencyId:{task.CurrencyId}. ");
+                        _logger.LogInformation($"{WorkerName} Wroker：Do Task Start. SiteId:{task.SiteId} CurrencyId:{task.CurrencyId}. ");
 
                         var sw = Stopwatch.StartNew();
                         int pageSize = 1000, pageNumber = 1;
@@ -51,21 +52,21 @@ public class AngPowEventWorker : BackgroundService
 
                         while (isRemain)
                         {
-                            var custInfoList = _angPowEventBLL.GetCustList(task.SiteId, task.CurrencyId, task.TimeZone, pageNumber, pageSize);
+                            var custInfoList = _angPaoEventBLL.GetCustList(task.SiteId, task.CurrencyId, task.TimeZone, pageNumber, pageSize);
                             isRemain = custInfoList.Count() >= pageSize;
                             foreach (var custInfo in custInfoList)
                             {
-                                var drawEventTpBetRecord = _angPowEventBLL.GetTpBetRecord(custInfo.CustId, task.TimeZone);
+                                var drawEventTpBetRecord = _angPaoEventBLL.GetTpBetRecord(custInfo.CustId, task.TimeZone);
 
                                 if (drawEventTpBetRecord != null)
                                 {
-                                    _angPowEventBLL.GenTicket(task.SiteId, task.CurrencyId, custInfo, drawEventTpBetRecord);
+                                    _angPaoEventBLL.GenTicket(task.SiteId, task.CurrencyId, custInfo, drawEventTpBetRecord);
                                 }
                             }
                         }
-                        _angPowEventBLL.SetTaskDone(task.SiteId, task.CurrencyId, "AngPowEvent");
+                        _angPaoEventBLL.SetTaskDone(task.SiteId, task.CurrencyId, WorkerName);
 
-                        _logger.LogInformation($"AngPowEvent Wroker：Do Task End. SiteId:{task.SiteId} CurrencyId:{task.CurrencyId} . \n"
+                        _logger.LogInformation($"{WorkerName} Wroker：Do Task End. SiteId:{task.SiteId} CurrencyId:{task.CurrencyId} . \n"
                         + $"Finish Time (m:s.ms): {Math.Round(sw.Elapsed.TotalMinutes)}:{Math.Round(sw.Elapsed.TotalMinutes)}.{Math.Round(sw.Elapsed.TotalMilliseconds)}.");
                     }
                 }
@@ -80,7 +81,7 @@ public class AngPowEventWorker : BackgroundService
                 //TODO：要去計算下一個排成的時間(校時)
                 var dueTimeSpan = isError ? TimeSpan.FromMinutes(10) : TimeSpan.FromMinutes(CaculateNextExecuteTime(DateTime.Now.Minute));
 
-                _logger.LogInformation($"AngPowEvent Task End. isError = {isError}.\n" +
+                _logger.LogInformation($"{WorkerName} Task End. isError = {isError}.\n" +
                   $"Next Task Will Start At {DateTime.Now.Add(dueTimeSpan).AddHours(8).ToString("yyyy-MM-ddTHH:mm:ss")}");
                 timer.Change(dueTimeSpan, TimeSpan.Zero);
             }
