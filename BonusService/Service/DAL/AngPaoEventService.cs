@@ -33,7 +33,7 @@ public class AngPaoEventService
             _PageNumber = pageNumber,
             _PageSize = pageSize
         };
-        return _reportDbClient.Query<WorkerCustInfo>("Service_EventDrawCustList_Get", new DynamicParameters(p));
+        return _mainDbClient.Query<WorkerCustInfo>("Service_EventDrawCustList_Get", new DynamicParameters(p));
     }
 
     public DrawEventTpBetRecord GetTpBetRecord(int custId, string timeZone)
