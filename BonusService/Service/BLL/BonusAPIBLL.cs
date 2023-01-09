@@ -49,6 +49,7 @@ namespace BonusService.Service.BLL
             if (custRewardInfo.SumDepositAmount < verInfo.MinDeposit)
             {
                 result.ErrorCode = 104;
+                result.Message = "Condition not fulfilled.";
                 return result;
             }
             
@@ -76,7 +77,12 @@ namespace BonusService.Service.BLL
             {
                 if (inputType == OTPTypeEnum.SMS)
                 {
-                    if (custRewardInfo.PhoneReward != null)
+                    if (!custRewardInfo.PhoneVerified)
+                    {
+                        result.ErrorCode = 102;
+                        result.Message = "Condition not fulfilled";
+                    }
+                    else if (custRewardInfo.PhoneReward != null)
                     {
                         //payout before
                         result.ErrorCode = 101;
@@ -90,7 +96,12 @@ namespace BonusService.Service.BLL
                 }
                 else
                 {
-                    if (custRewardInfo.EmailReward != null)
+                    if (!custRewardInfo.EmailVerified)
+                    {
+                        result.ErrorCode = 102;
+                        result.Message = "Condition not fulfilled";
+                    }
+                    else if (custRewardInfo.EmailReward != null)
                     {
                         result.ErrorCode = 101;
                         result.Message = "Reward already payout before";
