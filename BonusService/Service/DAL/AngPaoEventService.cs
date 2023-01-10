@@ -23,15 +23,13 @@ public class AngPaoEventService
         return _reportDbClient.Query<WorkerPeriodTask>("Service_WorkerPeriod_Get", new DynamicParameters(new { _WorkerName = workerName }));
     }
 
-    public IEnumerable<WorkerCustInfo> GetCustList(int siteId, int currencyId, string timeZone, int pageNumber, int pageSize)
+    public IEnumerable<WorkerCustInfo> GetCustList(int siteId, int currencyId, string timeZone)
     {
         var p = new
         {
             _SiteId = siteId,
             _CurrencyId = currencyId,
-            _CurrencyTimeZone = timeZone,
-            _PageNumber = pageNumber,
-            _PageSize = pageSize
+            _CurrencyTimeZone = timeZone
         };
         return _mainDbClient.Query<WorkerCustInfo>("Service_EventDrawCustList_Get", new DynamicParameters(p));
     }
