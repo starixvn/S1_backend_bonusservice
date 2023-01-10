@@ -44,24 +44,19 @@ namespace BonusService.Service.Workers
                         _logger.LogInformation($"VipRebate Wroker：Do Task Start. SiteId:{rebateTask.SiteId} CurrencyId:{rebateTask.CurrencyId} SpecificDate:{rebateTask.SpecificDate}. ");
 
                         var sw = Stopwatch.StartNew();
-                        int pageSize = 1000, pageNumber = 1;
-                        var isRemain = true;
                         var rebatePayoutLimit = _rebateBll.GetRebatePayoutLimit();
 
-                        while (isRemain)
+                        var rebateInfoList = _rebateBll.GetVipRebateCustList(rebateTask.SiteId, rebateTask.CurrencyId, (int)rebateTask.PeriodType, rebateTask.SpecificDate, rebateTask.TimeZone);
+                        foreach (var rebateInfo in rebateInfoList)
                         {
-                            var rebateInfoList = _rebateBll.GetVipRebateCustList(rebateTask.SiteId, rebateTask.CurrencyId, (int)rebateTask.PeriodType, rebateTask.SpecificDate, rebateTask.TimeZone, pageNumber, pageSize);
-                            isRemain = rebateInfoList.Count() >= pageSize;
-                            foreach (var rebateInfo in rebateInfoList)
-                            {
-                                var rebateTpBetRecordList = _rebateBll.GetVipRebateTpBetRecord((int)rebateTask.PeriodType, rebateInfo.CustId, rebateTask.SpecificDate, rebateTask.TimeZone).ToList();
+                            var rebateTpBetRecordList = _rebateBll.GetVipRebateTpBetRecord((int)rebateTask.PeriodType, rebateInfo.CustId, rebateTask.SpecificDate, rebateTask.TimeZone);
 
-                                if (rebateTpBetRecordList.Count > 0)
-                                {
-                                    _rebateBll.PayoutVipRebate(rebateTask.SiteId, rebateInfo, rebateTpBetRecordList, rebatePayoutLimit);
-                                }
+                            if (rebateTpBetRecordList != null && rebateTpBetRecordList.Any())
+                            {
+                                _rebateBll.PayoutVipRebate(rebateTask.SiteId, rebateInfo, rebateTpBetRecordList, rebatePayoutLimit);
                             }
                         }
+                        
                         _rebateBll.SetVipRebateTaskDone(rebateTask.SiteId, rebateTask.CurrencyId);
 
                         _logger.LogInformation($"VipRebate Wroker：Do Task End. SiteId:{rebateTask.SiteId} CurrencyId:{rebateTask.CurrencyId} SpecificDate:{rebateTask.SpecificDate}. \n"
