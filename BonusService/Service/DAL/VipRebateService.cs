@@ -32,7 +32,7 @@ namespace BonusService.Service.DAL
 
             return _reportDbClient.Query<VipRebateTpBetRecord>("Service_VipRebateTpBetRecord_Get_V5", new DynamicParameters(p),300);
         }
-        public IEnumerable<VipRebateInfo> GetVipRebateCustList(int siteId, int currencyId, int periodType, DateTime specificDate, string timeZone, int pageNumber, int pageSize)
+        public IEnumerable<VipRebateInfo> GetVipRebateCustList(int siteId, int currencyId, int periodType, DateTime specificDate, string timeZone)
         {
             var p = new
             {
@@ -40,11 +40,9 @@ namespace BonusService.Service.DAL
                 _CurrencyId = currencyId,
                 _PeriodType = periodType,
                 _SpecificDate = specificDate,
-                _CurrencyTimeZone = timeZone,
-                _PageNumber = pageNumber,
-                _PageSize = pageSize
+                _CurrencyTimeZone = timeZone
             };
-            return _mainDbClient.Query<VipRebateInfo>("Service_VipRebateCustList_Get_V4", new DynamicParameters(p),300);
+            return _reportDbClient.Query<VipRebateInfo>("Service_VipRebateCustList_Get_V5", new DynamicParameters(p),300);
         }
         public IEnumerable<RebateTask> GetVipRebateTask()
         {
