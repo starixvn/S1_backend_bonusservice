@@ -63,9 +63,9 @@ public class AngPaoEventBLL
         return _angPaoEventService.SetTaskDone(siteId, currencyId, workerName);
     }
 
-    public IEnumerable<WorkerCustInfo> GetCustList(int siteId, int currencyId, string currencyTimeZone, int pageNumber, int pageSize)
+    public IEnumerable<WorkerCustInfo> GetCustList(int siteId, int currencyId, string currencyTimeZone)
     {
-        return _angPaoEventService.GetCustList(siteId, currencyId, currencyTimeZone, pageNumber, pageSize);
+        return _angPaoEventService.GetCustList(siteId, currencyId, currencyTimeZone);
     }
 
     public DrawEventTpBetRecord GetTpBetRecord(int custId, string timeZone)

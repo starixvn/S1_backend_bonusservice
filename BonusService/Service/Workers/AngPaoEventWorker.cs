@@ -47,21 +47,16 @@ public class AngPaoEventWorker : BackgroundService
                         _logger.LogInformation($"{WorkerName} Wroker：Do Task Start. SiteId:{task.SiteId} CurrencyId:{task.CurrencyId}. ");
 
                         var sw = Stopwatch.StartNew();
-                        int pageSize = 1000, pageNumber = 1;
-                        var isRemain = true;
 
-                        while (isRemain)
+                        var custInfoList = _angPaoEventBLL.GetCustList(task.SiteId, task.CurrencyId, task.TimeZone);
+
+                        foreach (var custInfo in custInfoList)
                         {
-                            var custInfoList = _angPaoEventBLL.GetCustList(task.SiteId, task.CurrencyId, task.TimeZone, pageNumber, pageSize);
-                            isRemain = custInfoList.Count() >= pageSize;
-                            foreach (var custInfo in custInfoList)
-                            {
-                                var drawEventTpBetRecord = _angPaoEventBLL.GetTpBetRecord(custInfo.CustId, task.TimeZone);
+                            var drawEventTpBetRecord = _angPaoEventBLL.GetTpBetRecord(custInfo.CustId, task.TimeZone);
 
-                                if (drawEventTpBetRecord != null)
-                                {
-                                    _angPaoEventBLL.GenTicket(task.SiteId, task.CurrencyId, custInfo, drawEventTpBetRecord);
-                                }
+                            if (drawEventTpBetRecord != null)
+                            {
+                                _angPaoEventBLL.GenTicket(task.SiteId, task.CurrencyId, custInfo, drawEventTpBetRecord);
                             }
                         }
                         _angPaoEventBLL.SetTaskDone(task.SiteId, task.CurrencyId, WorkerName);
