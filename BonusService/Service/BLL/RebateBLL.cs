@@ -118,9 +118,9 @@ namespace BonusService.Service.BLL
         {
             return _vipRebateService.GetVipRebateTpBetRecord(periodType, custId, specificDate, timeZone);
         }
-        public IEnumerable<VipRebateInfo> GetVipRebateCustList(int siteId, int currencyId, int periodType, DateTime specificDate, string currencyTimeZone,int pageNumber,int pageSize)
+        public IEnumerable<VipRebateInfo> GetVipRebateCustList(int siteId, int currencyId, int periodType, DateTime specificDate, string currencyTimeZone)
         {
-            return _vipRebateService.GetVipRebateCustList(siteId, currencyId, periodType, specificDate, currencyTimeZone,pageNumber,pageSize);
+            return _vipRebateService.GetVipRebateCustList(siteId, currencyId, periodType, specificDate, currencyTimeZone);
         }
         public int PayoutVipRebate(int siteId, VipRebateInfo vipRebateInfo, IEnumerable<VipRebateTpBetRecord> vipRebateTpBetRecords, IEnumerable<RebatePayoutLimit> rebatePayoutLimits)
         {
