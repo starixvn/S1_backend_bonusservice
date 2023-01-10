@@ -49,9 +49,9 @@ namespace BonusService.Service.Workers
                         var rebateInfoList = _rebateBll.GetVipRebateCustList(rebateTask.SiteId, rebateTask.CurrencyId, (int)rebateTask.PeriodType, rebateTask.SpecificDate, rebateTask.TimeZone);
                         foreach (var rebateInfo in rebateInfoList)
                         {
-                            var rebateTpBetRecordList = _rebateBll.GetVipRebateTpBetRecord((int)rebateTask.PeriodType, rebateInfo.CustId, rebateTask.SpecificDate, rebateTask.TimeZone).ToList();
+                            var rebateTpBetRecordList = _rebateBll.GetVipRebateTpBetRecord((int)rebateTask.PeriodType, rebateInfo.CustId, rebateTask.SpecificDate, rebateTask.TimeZone);
 
-                            if (rebateTpBetRecordList.Count > 0)
+                            if (rebateTpBetRecordList != null && rebateTpBetRecordList.Any())
                             {
                                 _rebateBll.PayoutVipRebate(rebateTask.SiteId, rebateInfo, rebateTpBetRecordList, rebatePayoutLimit);
                             }
