@@ -12,14 +12,17 @@ public class AngPaoEventBLL
 {
     private readonly AngPaoEventService _angPaoEventService;
     private readonly ILogger<RebateBLL> _logger;
+    private readonly IHostEnvironment environment;
     private readonly Dictionary<string, decimal> CurrencyExchange = new Dictionary<string, decimal>()
     { { "1_2", 350 }, { "1_4", 2800 }, { "2_51", 2000000 },{ "3_51", 2000000 } }; //Key=SiteId_CurrencyId
 
-    public AngPaoEventBLL(IServiceProvider provider)
+    public AngPaoEventBLL(IServiceProvider provider, IHostEnvironment environment)
     {
         _logger = provider.GetRequiredService<ILogger<RebateBLL>>();
         _angPaoEventService = provider.GetRequiredService<AngPaoEventService>();
+        this.environment = environment;
     }
+
 
     public IEnumerable<WorkerPeriodTask> VerifyTask(string workerName)
     {
@@ -52,6 +55,21 @@ public class AngPaoEventBLL
                     continue;
                 }
             }
+
+            if (environment.IsProduction())
+            {
+                //Step3：檢查幣別時間是否在活動期間
+                //第一次抽獎是1/22，最後一次抽獎是2/5，
+                //故第一次跑排程要在幣別的1/22 00:00~01:00 執行，計算 1/21 的資料
+                //最後一次跑排程要在幣別的2/05 00:00~01:00 執行，計算 2/04 的資料
+                if (task.CurrencyNowTime.Date < new DateTime(2023, 1, 22, 0, 0, 0).Date
+                    || task.CurrencyNowTime.Date > new DateTime(2023, 2, 5, 0, 0, 0).Date)
+                {
+                    _logger.LogWarning($"task.CurrencyNowTime Not during in Event Time. task value={JsonConvert.SerializeObject(task)}");
+                    continue;
+                }
+            }
+
             doTaskList.Add(task);
         }
 
