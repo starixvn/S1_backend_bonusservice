@@ -1,24 +1,20 @@
 ﻿using BonusService.Service.DAL;
-using BonusService.Service.Library;
 using BonusService.Service.Model;
-using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BonusService.Service.BLL;
 
 public class AngPaoEventBLL
 {
     private readonly AngPaoEventService _angPaoEventService;
-    private readonly ILogger<RebateBLL> _logger;
+    private readonly ILogger<AngPaoEventBLL> _logger;
     private readonly IHostEnvironment environment;
     private readonly Dictionary<string, decimal> CurrencyExchange = new Dictionary<string, decimal>()
     { { "1_2", 350 }, { "1_4", 2800 }, { "2_51", 2000000 },{ "3_51", 2000000 } }; //Key=SiteId_CurrencyId
 
     public AngPaoEventBLL(IServiceProvider provider, IHostEnvironment environment)
     {
-        _logger = provider.GetRequiredService<ILogger<RebateBLL>>();
+        _logger = provider.GetRequiredService<ILogger<AngPaoEventBLL>>();
         _angPaoEventService = provider.GetRequiredService<AngPaoEventService>();
         this.environment = environment;
     }

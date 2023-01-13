@@ -2,21 +2,18 @@
 using BonusService.Service.Model.enums;
 using BonusService.Service.Model;
 using Dapper;
-using MySql.Data.MySqlClient;
 using System.Data;
 
 namespace BonusService.Service.DAL;
 
 public class AngPaoEventService
 {
-    private readonly Common common;
     private readonly MySqlClient _mainDbClient;
     private readonly MySqlClient _reportDbClient;
     public AngPaoEventService(IServiceProvider provider)
     {
         _mainDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);
         _reportDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Report);
-        common = provider.GetRequiredService<Common>();
     }
     public IEnumerable<WorkerPeriodTask> GetEventTask(string workerName)
     {
