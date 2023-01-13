@@ -8,7 +8,7 @@ namespace BonusService.Service.Workers;
 public class AngPaoEventWorker : BackgroundService
 {
     private readonly AngPaoEventBLL _angPaoEventBLL;
-    private readonly ILogger<VipRebateWorker> _logger;
+    private readonly ILogger<AngPaoEventWorker> _logger;
     private Timer timer;
     private int execCount = 0;
     private readonly string WorkerName = "AngPaoEvent";
@@ -16,7 +16,7 @@ public class AngPaoEventWorker : BackgroundService
     public AngPaoEventWorker(IServiceProvider provider)
     {
         _angPaoEventBLL = provider.GetRequiredService<AngPaoEventBLL>();
-        _logger = provider.GetRequiredService<ILogger<VipRebateWorker>>();
+        _logger = provider.GetRequiredService<ILogger<AngPaoEventWorker>>();
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
