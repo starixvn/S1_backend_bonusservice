@@ -64,6 +64,8 @@ namespace BonusService
             services.AddSingleton<BonusWalletService>();
             services.AddSingleton<PromotionService>();
             services.AddSingleton<PromotionBll>();
+            services.AddSingleton<AngPaoEventBLL>();
+            services.AddSingleton<AngPaoEventService>();
 
             services.AddControllers();
             services.AddOptionListByDB<AllowIp>("Service_MemberAllowIP_Get");
