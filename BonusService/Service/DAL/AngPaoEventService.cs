@@ -28,7 +28,7 @@ public class AngPaoEventService
             _CurrencyId = currencyId,
             _CurrencyTimeZone = timeZone
         };
-        return _mainDbClient.Query<WorkerCustInfo>("Service_EventDrawCustList_Get", new DynamicParameters(p));
+        return _reportDbClient.Query<WorkerCustInfo>("Service_EventDrawCustList_Get", new DynamicParameters(p));
     }
 
     public DrawEventTpBetRecord GetTpBetRecord(int custId, string timeZone)
