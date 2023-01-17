@@ -52,25 +52,20 @@ namespace BonusService.Service.Library
         {
             T result;
             var sw = Stopwatch.StartNew();
-            MySqlConnection connection = null;
-            
             try
             {
-                connection = new MySqlConnection(_connectionString);
-                result = connection.QueryFirstOrDefault<T>(name, parameters, commandType: CommandType.StoredProcedure);
+                using var connection = new MySqlConnection(_connectionString);
+                var command = new CommandDefinition(name, parameters,
+                    commandType: CommandType.StoredProcedure,
+                    flags: CommandFlags.NoCache);
+                result = connection.QueryFirstOrDefault<T>(command);
+                connection.Close();
+                connection.Dispose();
             }
             catch (Exception e)
             {
                 _logger.LogError(e, name);
                 throw;
-            }
-            finally
-            {
-                if (connection != null)
-                {
-                    connection.Close();
-                    connection.Dispose();
-                }
             }
 
             LogContext.PushProperty("elapsed", sw.Elapsed.TotalMilliseconds);
@@ -78,77 +73,66 @@ namespace BonusService.Service.Library
             return result;
         }
 
-         public IEnumerable<T> Query<T>(string name)
+        public IEnumerable<T> Query<T>(string name)
         {
             IEnumerable<T> result;
             var sw = Stopwatch.StartNew();
-            MySqlConnection connection = null;
-            
             try
             {
-                connection = new MySqlConnection(_connectionString);
-                result = connection.Query<T>(name, commandType: CommandType.Text);
+                using var connection = new MySqlConnection(_connectionString);
+                var command = new CommandDefinition(name,
+                    commandType: CommandType.Text,
+                    flags: CommandFlags.NoCache);
+                result = connection.Query<T>(command);
+                connection.Close();
+                connection.Dispose();
             }
             catch (Exception e)
             {
                 _logger.LogError(e, name);
                 throw;
             }
-            finally
-            {
-                if (connection != null)
-                {
-                    connection.Close();
-                    connection.Dispose();
-                }
-            }
-
+            
             LogContext.PushProperty("elapsed", sw.Elapsed.TotalMilliseconds);
             _logger.LogDebug(name);
-            return result;
+            return result.ToList();
         }
 
         public IEnumerable<T> Query<T>(string name, SqlMapper.IDynamicParameters parameters, int? commandTimeout = null)
         {
             IEnumerable<T> result;
             var sw = Stopwatch.StartNew();
-            MySqlConnection connection = null;
-            
             try
             {
-                connection = new MySqlConnection(_connectionString);
+                using var connection = new MySqlConnection(_connectionString);
                 if (connection.State != ConnectionState.Open) connection.Open();// 自己 Control connection open close，不要讓 ORM 自己做
-                result = connection.Query<T>(name, parameters, commandTimeout: commandTimeout, commandType: CommandType.StoredProcedure);
+                var command = new CommandDefinition(name, parameters,
+                    commandType: CommandType.StoredProcedure,
+                    commandTimeout: commandTimeout,
+                    flags: CommandFlags.NoCache);
+                result = connection.Query<T>(command);
+                connection.Close();
+                connection.Dispose();
             }
             catch (Exception e)
             {
                 _logger.LogError(e, name);
                 throw;
             }
-            finally
-            {
-                if (connection != null)
-                {
-                    connection.Close();
-                    connection.Dispose();
-                }
-            }
 
             LogContext.PushProperty("elapsed", sw.Elapsed.TotalMilliseconds);
             _logger.LogDebug($"{name} {sw.Elapsed:c}");
-            return result;
+            return result.ToList();
         }
 
         public IEnumerable<T> QueryUseCommandDefinition<T>(string name, object parameters, int? commandTimeout = null)
         {
             IEnumerable<T> result;
             var sw = Stopwatch.StartNew();
-            MySqlConnection connection = null;
-            
             try
             {
                 var connectionString = $"{_connectionString}ProcedureCacheSize=0;";
-                connection = new MySqlConnection(connectionString);
+                using var connection = new MySqlConnection(connectionString);
                 if (connection.State != ConnectionState.Open) connection.Open();// 自己 Control connection open close，不要讓 ORM 自己做
 
                 var command = new CommandDefinition(name, parameters, // 使用 CommandDefinition 不讓
@@ -157,53 +141,43 @@ namespace BonusService.Service.Library
                     flags: CommandFlags.NoCache);
 
                 result = connection.Query<T>(command);
+                connection.Close();
+                connection.Dispose();
             }
             catch (Exception e)
             {
                 _logger.LogError(e, name);
                 throw;
-            }finally
-            {
-                if (connection != null)
-                {
-                    connection.Close();
-                    connection.Dispose();
-                }
             }
 
             LogContext.PushProperty("elapsed", sw.Elapsed.TotalMilliseconds);
             _logger.LogDebug($"{name} {sw.Elapsed:c}");
-            return result;
+            return result.ToList();
         }
         
         public IEnumerable<T> Query<T>(string sql, object parameters, CommandType commandType = CommandType.StoredProcedure)
         {
             IEnumerable<T> result;
             var sw = Stopwatch.StartNew();
-            MySqlConnection connection = null;
-            
             try
             {
-                connection = new MySqlConnection(_connectionString);
-                result = connection.Query<T>(sql, param: parameters, commandType: commandType);
+                using var connection = new MySqlConnection(_connectionString);
+                var command = new CommandDefinition(sql, parameters,
+                    commandType: commandType,
+                    flags: CommandFlags.NoCache);
+                result = connection.Query<T>(command);
+                connection.Close();
+                connection.Dispose();
             }
             catch (Exception e)
             {
                 _logger.LogError(e, sql);
                 throw;
             }
-            finally
-            {
-                if (connection != null)
-                {
-                    connection.Close();
-                    connection.Dispose();
-                }
-            }
 
             LogContext.PushProperty("ElapsedMilliseconds", sw.Elapsed.TotalMilliseconds);
             _logger.LogDebug($"{sql} {sw.Elapsed:c}");
-            return result;
+            return result.ToList();
         }
 
         public T Query<T>(string name, SqlMapper.IDynamicParameters parameters, Func<SqlMapper.GridReader, T> func)
@@ -213,7 +187,10 @@ namespace BonusService.Service.Library
             try
             {
                 using var connection = new MySqlConnection(_connectionString);
-                var multiple = connection.QueryMultiple(name, parameters, commandType: CommandType.StoredProcedure);
+                var command = new CommandDefinition(name, parameters,
+                    commandType: CommandType.StoredProcedure,
+                    flags: CommandFlags.NoCache);
+                var multiple = connection.QueryMultiple(command);
                 result = func.Invoke(multiple);
             }
             catch (Exception e)
@@ -234,7 +211,10 @@ namespace BonusService.Service.Library
             try
             {
                 await using var connection = new MySqlConnection(_connectionString);
-                result = await connection.QueryAsync<T>(name, parameters, commandType: CommandType.StoredProcedure);
+                var command = new CommandDefinition(name, parameters,
+                    commandType: CommandType.StoredProcedure,
+                    flags: CommandFlags.NoCache);
+                result = await connection.QueryAsync<T>(command);
             }
             catch (Exception e)
             {
@@ -244,7 +224,7 @@ namespace BonusService.Service.Library
 
             LogContext.PushProperty("elapsed", sw.Elapsed.TotalMilliseconds);
             _logger.LogDebug($"{name} {sw.Elapsed:c}");
-            return result;
+            return result.ToList();
         }
 
         public async Task<T> QueryAsync<T>(string name, SqlMapper.IDynamicParameters parameters, Func<SqlMapper.GridReader, T> func)
@@ -277,27 +257,19 @@ namespace BonusService.Service.Library
         {
             int result;
             var sw = Stopwatch.StartNew();
-            MySqlConnection connection = null;
-            
             try
             {
-                connection = new MySqlConnection(_connectionString);
+                using var connection = new MySqlConnection(_connectionString);
                 result = connection.Execute(name, parameters, commandType: CommandType.StoredProcedure);
+                connection.Close();
+                connection.Dispose();
             }
             catch (Exception e)
             {
                 _logger.LogError(e, name);
                 throw;
             }
-            finally
-            {
-                if (connection != null)
-                {
-                    connection.Close();
-                    connection.Dispose();
-                }
-            }
-
+           
             LogContext.PushProperty("elapsed", sw.Elapsed.TotalMilliseconds);
             _logger.LogDebug($"{name} {sw.Elapsed:c}");
             return result;
@@ -325,25 +297,17 @@ namespace BonusService.Service.Library
         public bool Execute(string command)
         {
             var sw = Stopwatch.StartNew();
-            MySqlConnection connection = null;
-            
             try
             {
-                connection = new MySqlConnection(_connectionString);
+                using var connection = new MySqlConnection(_connectionString);
                 connection.Execute(command, CommandType.Text);
+                connection.Close();
+                connection.Dispose();
             }
             catch (Exception e)
             {
                 _logger.LogError(e, command);
                 throw;
-            }
-            finally
-            {
-                if (connection != null)
-                {
-                    connection.Close();
-                    connection.Dispose();
-                }
             }
 
             LogContext.PushProperty("elapsed", sw.Elapsed.TotalMilliseconds);
@@ -354,25 +318,17 @@ namespace BonusService.Service.Library
         public async Task<bool> ExecuteAsync(string name, SqlMapper.IDynamicParameters parameters)
         {
             var sw = Stopwatch.StartNew();
-            MySqlConnection connection = null;
-            
             try
             {
-                connection = new MySqlConnection(_connectionString);
+                await using var connection = new MySqlConnection(_connectionString);
                 await connection.ExecuteAsync(name, parameters, commandType: CommandType.StoredProcedure);
+                await connection.CloseAsync();
+                await connection.DisposeAsync();
             }
             catch (Exception e)
             {
                 _logger.LogError(e, name);
                 throw;
-            }
-            finally
-            {
-                if (connection != null)
-                {
-                    await connection.CloseAsync();
-                    await connection.DisposeAsync();
-                }
             }
 
             LogContext.PushProperty("elapsed", sw.Elapsed.TotalMilliseconds);
@@ -384,25 +340,17 @@ namespace BonusService.Service.Library
         {
             T result;
             var sw = Stopwatch.StartNew();
-            MySqlConnection connection = null;
-            
             try
             {
-                connection = new MySqlConnection(_connectionString);
+                using var connection = new MySqlConnection(_connectionString);
                 result = connection.ExecuteScalar<T>(name, parameters, commandType: CommandType.StoredProcedure);
+                connection.Close();
+                connection.Dispose();
             }
             catch (Exception e)
             {
                 _logger.LogError(e, name);
                 throw;
-            }
-            finally
-            {
-                if (connection != null)
-                {
-                    connection.Close();
-                    connection.Dispose();
-                }
             }
 
             LogContext.PushProperty("ElapsedMilliseconds", sw.Elapsed.TotalMilliseconds);
