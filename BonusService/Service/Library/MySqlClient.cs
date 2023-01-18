@@ -36,6 +36,8 @@ namespace BonusService.Service.Library
                 await using var connection = new MySqlConnection(_connectionString);
                 result = await connection.QueryFirstOrDefaultAsync<T>(name, parameters,
                     commandType: CommandType.StoredProcedure);
+                await connection.CloseAsync();
+                await connection.DisposeAsync();
             }
             catch (Exception e)
             {
@@ -192,6 +194,8 @@ namespace BonusService.Service.Library
                     flags: CommandFlags.NoCache);
                 var multiple = connection.QueryMultiple(command);
                 result = func.Invoke(multiple);
+                connection.Close();
+                connection.Dispose();
             }
             catch (Exception e)
             {
@@ -211,10 +215,9 @@ namespace BonusService.Service.Library
             try
             {
                 await using var connection = new MySqlConnection(_connectionString);
-                var command = new CommandDefinition(name, parameters,
-                    commandType: CommandType.StoredProcedure,
-                    flags: CommandFlags.NoCache);
-                result = await connection.QueryAsync<T>(command);
+                result = await connection.QueryAsync<T>(name, parameters, commandType: CommandType.StoredProcedure);
+                await connection.CloseAsync();
+                await connection.DisposeAsync();
             }
             catch (Exception e)
             {
@@ -224,7 +227,7 @@ namespace BonusService.Service.Library
 
             LogContext.PushProperty("elapsed", sw.Elapsed.TotalMilliseconds);
             _logger.LogDebug($"{name} {sw.Elapsed:c}");
-            return result.ToList();
+            return result;
         }
 
         public async Task<T> QueryAsync<T>(string name, SqlMapper.IDynamicParameters parameters, Func<SqlMapper.GridReader, T> func)
@@ -237,6 +240,8 @@ namespace BonusService.Service.Library
                 var multiple =
                     connection.QueryMultipleAsync(name, parameters, commandType: CommandType.StoredProcedure);
                 result = func.Invoke(await multiple);
+                await connection.CloseAsync();
+                await connection.DisposeAsync();
             }
             catch (Exception e)
             {
