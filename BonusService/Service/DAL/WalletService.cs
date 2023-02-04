@@ -8,13 +8,11 @@ namespace BonusService.Service.DAL
 {
     public class WalletService
     {
-        private readonly IConfiguration _configuration;
         private readonly MySqlClient _mainDbClient;
         private readonly MySqlClient _reportDbClient;
 
         public WalletService(IServiceProvider serviceProvider)
         {
-            _configuration = serviceProvider.GetRequiredService<IConfiguration>();
             _mainDbClient = serviceProvider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);
             _reportDbClient = serviceProvider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Report);
         }
@@ -42,7 +40,6 @@ namespace BonusService.Service.DAL
 
         public decimal GetBalance(int custId)
         {
-            using var conn = new MySqlConnection(_configuration.GetConnectionString("ConnectionStringReport"));
             return _reportDbClient.ExecuteScalar<decimal>("Balance_Get", new { CustId = custId });
         }
     }

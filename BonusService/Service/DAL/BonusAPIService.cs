@@ -42,10 +42,11 @@ namespace BonusService.Service.DAL
                 return _reportDbClient.QueryFirst<CustVerificationRewardData>("Service_CustVerificationReward_Get_V2", p);
 
         }
-        public int SetCustVerifiedReward(int custId, int siteId, int currencyId, int verifyItem, MySqlConnection conn, MySqlTransaction trans)
+
+        private int SetCustVerifiedReward(int custId, int siteId, int currencyId, int verifyItem, MySqlTransaction trans)
         {
             var p = new DynamicParameters(new { _CustId = custId, _SiteId = siteId, _CurrencyId = currencyId, _VerificationItem = verifyItem });
-            return _mainDbClient.Execute("Service_CustVerificationReward_Set", p, conn, trans);
+            return _mainDbClient.Execute("Service_CustVerificationReward_Set", trans ,p);
         }
 
         public ApiResult PayoutVerificationReward(int custId, int siteId, int currencyId, string userName, OTPVerificationType OTPVerificationtype, decimal reward)
@@ -57,10 +58,9 @@ namespace BonusService.Service.DAL
                 conn.Open();
                 using var trans = conn.BeginTransaction();
 
-                var Type = 20;
+                var type = 20;
                 var transId = "";
-                var result = 0;
-                var comment = "";
+                string comment;
                 if (OTPVerificationtype == OTPVerificationType.Email)
                 {
                     comment = $"email verification reward: {reward:#,##0.##}";
@@ -75,7 +75,7 @@ namespace BonusService.Service.DAL
                 }
 
 
-                result = _walletService.SetBalance(custId, siteId, userName, reward, Type,
+                var result = _walletService.SetBalance(custId, siteId, userName, reward, type,
                     comment, transId, out _, out _, trans);
                 if (result <= 0)
                 {
@@ -89,7 +89,7 @@ namespace BonusService.Service.DAL
                     return apiResult;
                 }
 
-                result = SetCustVerifiedReward(custId, siteId, currencyId, (int)OTPVerificationtype, conn, trans);
+                result = SetCustVerifiedReward(custId, siteId, currencyId, (int)OTPVerificationtype, trans);
                 if (result <= 0)
                 {
                     apiResult.Message = "SetCustVerifiedReward fail";
@@ -97,7 +97,6 @@ namespace BonusService.Service.DAL
                 }
 
                 trans.Commit();
-
                 if(result>0)
                 {
                     apiResult.ErrorCode = 0;
@@ -107,12 +106,16 @@ namespace BonusService.Service.DAL
                 {
                     apiResult.Message = "UnKnow Fail";
                 }
+                
+                conn.Close();
+                conn.Dispose();
             }
             catch (Exception ex)
             {
                 apiResult.ErrorCode = 999;
                 apiResult.RawMessage = ex.ToString();
             }
+            
             return apiResult;
         }
     }
