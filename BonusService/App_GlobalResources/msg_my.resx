@@ -91,6 +91,18 @@
   <data name="msg_DuplicateClaimBonus" xml:space="preserve">
     <value>Tawaran pendua tidak dibenarkan</value>
   </data>
+  <data name="msg_SameIp" xml:space="preserve">
+    <value>Tidak layak untuk promosi berikut, sila hubungi Sokongan Pelanggan kami</value>
+  </data>
+  <data name="msg_SameRealName" xml:space="preserve">
+    <value>Tidak layak untuk promosi berikut, sila hubungi Sokongan Pelanggan kami</value>
+  </data>
+  <data name="msg_SameDeviceId" xml:space="preserve">
+    <value>Tidak layak untuk promosi berikut, sila hubungi Sokongan Pelanggan kami</value>
+  </data>
+  <data name="msg_BlockTag" xml:space="preserve">
+    <value>Tidak layak untuk promosi berikut, sila hubungi Sokongan Pelanggan kami</value>
+  </data>
   <data name="msg_SpBonusNotFound" xml:space="preserve">
     <value>Promosi tidak ditemui</value>
   </data>
