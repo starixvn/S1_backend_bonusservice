@@ -150,6 +150,18 @@
   <data name="msg_DuplicateClaimBonus" xml:space="preserve">
     <value>Do not duplicate redeem promotion</value>
   </data>
+  <data name="msg_SameIp" xml:space="preserve">
+    <value>Not eligible for promotion, please contact Customer Support</value>
+  </data>
+  <data name="msg_SameRealName" xml:space="preserve">
+    <value>Not eligible for promotion, please contact Customer Support</value>
+  </data>
+  <data name="msg_SameDeviceId" xml:space="preserve">
+    <value>Not eligible for promotion, please contact Customer Support</value>
+  </data>
+  <data name="msg_BlockTag" xml:space="preserve">
+    <value>Not eligible for promotion, please contact Customer Support</value>
+  </data>
   <data name="msg_SpBonusNotFound" xml:space="preserve">
     <value>The Promotion can't be found</value>
   </data>

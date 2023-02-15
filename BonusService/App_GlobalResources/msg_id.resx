@@ -91,6 +91,18 @@
   <data name="msg_DuplicateClaimBonus" xml:space="preserve">
     <value>Jangan menduplikat penukaran promosi</value>
   </data>
+  <data name="msg_SameIp" xml:space="preserve">
+    <value>Tidak memenuhi syarat untuk promosi, harap hubungi Dukungan Pelanggan</value>
+  </data>
+  <data name="msg_SameRealName" xml:space="preserve">
+    <value>Tidak memenuhi syarat untuk promosi, harap hubungi Dukungan Pelanggan</value>
+  </data>
+  <data name="msg_SameDeviceId" xml:space="preserve">
+    <value>Tidak memenuhi syarat untuk promosi, harap hubungi Dukungan Pelanggan</value>
+  </data>
+  <data name="msg_BlockTag" xml:space="preserve">
+    <value>Tidak memenuhi syarat untuk promosi, harap hubungi Dukungan Pelanggan</value>
+  </data>
   <data name="msg_SpBonusNotFound" xml:space="preserve">
     <value>Promosi tidak dapat ditemukan</value>
   </data>

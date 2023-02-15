@@ -91,6 +91,18 @@
   <data name="msg_DuplicateClaimBonus" xml:space="preserve">
     <value>请勿重复领取优惠</value>
   </data>
+  <data name="msg_SameIp" xml:space="preserve">
+    <value>无法领取此优惠，请联系客服咨询</value>
+  </data>
+  <data name="msg_SameRealName" xml:space="preserve">
+    <value>无法领取此优惠，请联系客服咨询</value>
+  </data>
+  <data name="msg_SameDeviceId" xml:space="preserve">
+    <value>无法领取此优惠，请联系客服咨询</value>
+  </data>
+  <data name="msg_BlockTag" xml:space="preserve">
+    <value>无法领取此优惠，请联系客服咨询</value>
+  </data>
   <data name="msg_SpBonusNotFound" xml:space="preserve">
     <value>无此优惠</value>
   </data>

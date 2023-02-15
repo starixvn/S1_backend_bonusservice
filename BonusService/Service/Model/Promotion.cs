@@ -85,7 +85,7 @@ namespace BonusService.Service.Model
             }
         }
     }
-    
+
     public class ClaimPromotion : Promotion
     {
         public string CategoryName { get; set; }
@@ -95,10 +95,55 @@ namespace BonusService.Service.Model
         public decimal BonusAmount { get; set; }
         public DateTime ExpiryTime { get; set; }
         public int BonusInfoStatus { get; set; }
-        public CustRollOver custRollOver { get; set; } 
+        public CustRollOver custRollOver { get; set; }
         public bool IsSpecial { get; set; }
         public string SpecialCode { get; set; }
         public decimal MinPayout { get; set; }
+
+        /// <summary>
+        /// 是否有相同 IP 限制
+        /// </summary>
+        public bool SameIpRestrict { get; set; }
+
+        /// <summary>
+        /// 相同 IP 能使用的次數
+        /// </summary>
+        public int SameIpRestrictAvailableCount { get; set; }
+
+        /// <summary>
+        /// 是否有相同 DeviceId 限制
+        /// </summary>
+        public bool SameDeviceIdRestrict { get; set; }
+
+        /// <summary>
+        /// 相同 Device 能使用的次數
+        /// </summary>
+
+        public int SameDeviceIdAvailableCount { get; set; }
+
+        /// <summary>
+        /// 是否有相同 真實姓名 限制
+        /// </summary>
+        public bool SameRealNameRestrict { get; set; }
+
+        /// <summary>
+        /// 相同 真實姓名 能使用的次數
+        /// </summary>
+        public int SameRealNameRestrictAvailableCount { get; set; }
+
+
+        public string BlockTagList { get; set; }
+
+        public List<int> BlockTags {
+            get
+            {
+                var tags = string.IsNullOrEmpty(this.BlockTagList)
+                    ? new List<int>()
+                    : System.Text.Json.JsonSerializer.Deserialize<List<int>>(this.BlockTagList);
+
+                return tags;
+            }
+        }
     }
 
     public class TierAmount
@@ -109,7 +154,7 @@ namespace BonusService.Service.Model
         public int RollOver { get; set; }
         public int WinOver { get; set; }
         public CanJoinTierAmount CalculateTierAmount(BonusType bonusType, decimal depositAmount)
-        {       
+        {
             decimal bonusAmount;
             decimal lockAmount;
             if (bonusType == BonusType.Amount)
@@ -134,14 +179,14 @@ namespace BonusService.Service.Model
                 Bonus = Bonus,
                 BonusAmount = bonusAmount,
                 LockedAmount = lockAmount,
-            }; 
+            };
         }
     }
 
     public class CanJoinTierAmount
     {
         public decimal RequiredAmount { get; set; }
-        public decimal Bonus { get; set; }       
+        public decimal Bonus { get; set; }
         public decimal BonusAmount { get; set; }
         public decimal LockedAmount { get; set; }
     }
@@ -157,16 +202,16 @@ namespace BonusService.Service.Model
         public string DefLang { set; get; }
         public int PromotionType { set; get; }
     }
-    
+
     public class PromotionDetailRequest : CustPromotionRequest
     {
         public string BonusCode { set; get; }
     }
-    
+
     public class CustPromotion : Promotion
     {
         public string Banner { get; set; }
-        public int WalletType { get; set; }        
+        public int WalletType { get; set; }
         public decimal CustRollOver { get; set; }
         public decimal CustTurnOver { get; set; }
         public int Status { get; set; }
@@ -182,8 +227,22 @@ namespace BonusService.Service.Model
         public int? DeviceType { set; get; }
         public CashBackDetails CashBackDetails { get; set; }
         public bool BeenUsed { get; set; }
+
+        public string BlockTagList { get; set; }
+
+        public List<int> BlockTags
+        {
+            get
+            {
+                var tags = string.IsNullOrEmpty(this.BlockTagList)
+                    ? new List<int>()
+                    : System.Text.Json.JsonSerializer.Deserialize<List<int>>(this.BlockTagList);
+
+                return tags;
+            }
+        }
     }
-    
+
     public class SpecialCodeRequest
     {
         public int CustId { set; get; }
@@ -191,18 +250,18 @@ namespace BonusService.Service.Model
         public int DeviceType { set; get; }
         public int SiteId { set; get; }
     }
-    
+
     public class PromotionBySpecialCode
     {
         public string BonusCode { set; get; }
         public int PromotionType { get; set; }
     }
-    
+
     public class PromotionBySpecialScratchCard : PromotionBySpecialCode
     {
         public int CustId { get; set; }
     }
-    
+
     public class BonusInfoByBonusCode
     {
         public int Status { get; set; }
@@ -305,7 +364,50 @@ namespace BonusService.Service.Model
         public decimal InputAmount { set; get; }
         public Customer CustInfo { set; get; }
         public ClaimPromotion ClaimPromotion { set; get; }
-        
+
+        /// <summary>
+        /// 自定義錯誤訊息
+        /// </summary>
+        public string CustomizeErrorMsg { get; set; }
     }
 
+    public class VipLevelWithBlockTagsDto
+    {
+        public string BlockTagList { get; set; }
+
+        public string VipLevelList { get; set; }
+
+        public List<int> BlockTags
+        {
+            get
+            {
+                var tags = string.IsNullOrEmpty(this.BlockTagList)
+                    ? new List<int>()
+                    : System.Text.Json.JsonSerializer.Deserialize<List<int>>(this.BlockTagList);
+
+                return tags;
+            }
+        }
+
+        public List<int> VipLevels
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(this.VipLevelList))
+                {
+                    return new List<int>();
+                }
+                else
+                {
+                    var vipDto = System.Text.Json.JsonSerializer.Deserialize<PromotionVipLevelSettingDto>(this.VipLevelList);
+                    return vipDto.VipLevel;
+                }
+            }
+        }
+    }
+
+    public class PromotionVipLevelSettingDto
+    {
+        public List<int> VipLevel { get; set; }
+    }
 }

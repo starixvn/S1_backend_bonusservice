@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using BonusService.Service.Model;
 using MySql.Data.MySqlClient;
+using MySqlX.XDevAPI.Common;
 
 namespace BonusService.Controllers
 {
@@ -23,7 +24,7 @@ namespace BonusService.Controllers
             _promotionBll = provider.GetRequiredService<PromotionBll>();
             _logger = provider.GetRequiredService<ILogger<APIController>>();
         }
-        
+
         public class SpecialCodeResponse
         {
             public string BonusCode { get; set; }
@@ -57,7 +58,7 @@ namespace BonusService.Controllers
                     result.Message = "Please complete your profile and verify your phone number to enjoy our promotions.";
                     return result;
                 }
-                var Memo = JsonConvert.SerializeObject(new { setAdjustBonusReq.Operator }); 
+                var Memo = JsonConvert.SerializeObject(new { setAdjustBonusReq.Operator });
 
                 result = await _promotionBll.SetAdjustmentBonusV2Async(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode, Memo, setAdjustBonusReq.Amount, setAdjustBonusReq.PromotionType, setAdjustBonusReq.DepositId);
 
@@ -70,7 +71,7 @@ namespace BonusService.Controllers
             }
             if (result.ErrorCode != 0)
             {
-                _logger.LogInformation($"SetAdjustBonusAsync { JsonConvert.SerializeObject(result)}");
+                _logger.LogInformation($"SetAdjustBonusAsync {JsonConvert.SerializeObject(result)}");
             }
             return result;
         }
@@ -87,10 +88,10 @@ namespace BonusService.Controllers
         public ApiResult SetVerificationReward(SetVerificationRewardReq verificationRewardReq)
         {
             var item = OTPTypeEnum.SMS;
-            if(verificationRewardReq.OTPType == 1)
+            if (verificationRewardReq.OTPType == 1)
                 item = OTPTypeEnum.Email;
 
-            return _bonusAPIBLL.SetVerificationReward(verificationRewardReq.CustId, item , false);
+            return _bonusAPIBLL.SetVerificationReward(verificationRewardReq.CustId, item, false);
         }
 
         [HttpPost]
@@ -119,8 +120,12 @@ namespace BonusService.Controllers
             try
             {
                 var lockedAmount = promotionReq.LockedAmount ?? 0;
-                
-                apiResult = await _promotionBll.SetClaimPromotionV2Async(promotionReq.CustId, promotionReq.BonusCode, promotionReq.custIP, lockedAmount, promotionReq.DeviceType, BonusInfoAtPage.Promotion);
+                apiResult = await _promotionBll.SetClaimPromotionV2Async(promotionReq.CustId,
+                    promotionReq.BonusCode,
+                    promotionReq.custIP,
+                    lockedAmount,
+                    promotionReq.DeviceType,
+                    BonusInfoAtPage.Promotion);
             }
             catch (Exception ex)
             {
@@ -131,7 +136,7 @@ namespace BonusService.Controllers
 
             return apiResult;
         }
-        
+
         [HttpPost]
         public ApiResult<List<CustPromotion>> GetPromotionListV3(CustPromotionRequest request)
         {
@@ -139,7 +144,7 @@ namespace BonusService.Controllers
             {
                 ErrorCode = 0
             };
-            
+
             try
             {
                 result.Data = _promotionBll.GetPromotionList(request);
@@ -151,7 +156,7 @@ namespace BonusService.Controllers
 
             return result;
         }
-        
+
         [HttpPost]
         public ApiResult<CustPromotion> GetPromotionDetail(PromotionDetailRequest request)
         {
@@ -179,7 +184,7 @@ namespace BonusService.Controllers
             {
                 ErrorCode = 0
             };
-            
+
             try
             {
                 result.Data = _promotionBll.GetSpecialPromotionList(request);
@@ -191,14 +196,14 @@ namespace BonusService.Controllers
 
             return result;
         }
-        
+
         public ApiResult<List<CustPromotion>> GetDepositPromotionList(CustPromotionRequest request)
         {
             var result = new ApiResult<List<CustPromotion>>
             {
                 ErrorCode = 0
             };
-           
+
             try
             {
                 result.Data = _promotionBll.GetDepositPromotionList(request);
@@ -210,7 +215,7 @@ namespace BonusService.Controllers
 
             return result;
         }
-        
+
         [HttpPost]
         public ApiResult SetSpecialCode(SpecialCodeRequest request)
         {
@@ -218,7 +223,7 @@ namespace BonusService.Controllers
             {
                 ErrorCode = (int)SpecialCode.SpecialCodeError
             };
-
+            
             try
             {
                 if (!_promotionBll.CheckSpecialCode(request.SpecialCode))
@@ -228,6 +233,10 @@ namespace BonusService.Controllers
                 else if (_promotionBll.CheckScratchCardCode(request.SpecialCode.ToUpper()))
                 {
                     result.ErrorCode = _promotionBll.SetScratchCardCode(request);
+                }
+                else if (!_promotionBll.CheckVipLevelWithBlockTags(request.CustId, request.SpecialCode))
+                {
+                    result.ErrorCode = (int)SpecialCode.SpecialCodeVipLevelsOrBlockTagInvalid;
                 }
                 else
                 {
@@ -278,6 +287,12 @@ namespace BonusService.Controllers
                 {
                     apiResult.ErrorCode = (int)SpecialCode.SpecialCodeErrorForCheck;
                     return apiResult;
+                }
+
+                // 檢查 VIP Level & blockTag
+                if (!_promotionBll.CheckVipLevelWithBlockTags(request.CustId, request.SpecialCode))
+                {
+                    apiResult.ErrorCode = (int)SpecialCode.SpecialCodeVipLevelsOrBlockTagInvalid;
                 }
 
                 if (isScratchCardCode)
