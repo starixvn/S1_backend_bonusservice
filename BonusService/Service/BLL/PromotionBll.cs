@@ -1364,6 +1364,9 @@ namespace BonusService.Service.BLL
                 return result;
             }
 
+
+         
+
             // check db 相同 RealName 領取是否達到上限
             result = _promotionService.CheckBlockRealNameFromDb(claimPromotion, custInfo.SiteId, custInfo.AccountName);
             return result;
