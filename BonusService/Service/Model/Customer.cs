@@ -124,10 +124,30 @@ namespace BonusService.Service.Model
         public string DeviceId { get; set; }
     }
 
-    public class CustRealNameDto
+    public class PromotionCustRealNameDto
     {
         public int CustId { get; set; }
         public string UserName { get; set; }
+        public string RealName { get; set; }
+    }
+
+    public class CustSetRealNameLogDto
+    {
+        public int CustId { get; set; }
+
+        public string UserName { get; set; }
+
+        public string BeforeRealName { get; set; }
+
+        public string AfterRealName { get; set; }
+    }
+
+    public class CompareRealNameDto
+    {
+        public int CustId { get; set; }
+
+        public string UserName { get; set; }
+
         public string RealName { get; set; }
     }
 }
