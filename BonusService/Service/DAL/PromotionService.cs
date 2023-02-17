@@ -17,6 +17,8 @@ namespace BonusService.Service.DAL
         private readonly string _apiUrl;
         private readonly CourierAdapter _courierAdapter;
         private readonly IEnumerable<AllowIp> _allowIp;
+        private readonly CustInfoService _custInfoService;
+
 
         public PromotionService(IServiceProvider serviceProvider)
         {
@@ -25,6 +27,7 @@ namespace BonusService.Service.DAL
             _apiUrl = serviceProvider.GetRequiredService<IConfiguration>().GetValue<string>("TpService");
             _courierAdapter = serviceProvider.GetRequiredService<CourierAdapter>();
             _allowIp = serviceProvider.GetRequiredService<IEnumerable<AllowIp>>();
+            _custInfoService = serviceProvider.GetRequiredService<CustInfoService>();
         }
         public T GetPromotion<T>(int custId, int currencyId, int siteId, string bonusCode, int deviceType, bool getDetail)
         {
@@ -94,6 +97,14 @@ namespace BonusService.Service.DAL
             return result;
         }
 
+        /// <summary>
+        /// 去 PromotionSuccessLog 找出領過相同 BonusCode 的紀錄，把 RealName 跟 custId 抓出來
+        /// 再去改名 Log 找出 cusid 有改過的紀錄，最後判斷領取人當下是否跟 bonus log + 改名紀錄有重複名稱
+        /// </summary>
+        /// <param name="claimPromotion"></param>
+        /// <param name="siteId"></param>
+        /// <param name="realName"></param>
+        /// <returns></returns>
         public CheckPromotionBlockRealName CheckBlockRealNameFromDb(ClaimPromotion claimPromotion, int siteId, string realName)
         {
             var result = new CheckPromotionBlockRealName
@@ -103,33 +114,82 @@ namespace BonusService.Service.DAL
                 UseWhitelist = false
             };
 
+            var compareNameInfo = new List<CompareRealNameDto>();
+
+            var p1 = new DynamicParameters(new
+            {
+                _SiteId = siteId,
+                _BonusCode = claimPromotion.BonusCode
+            });
+            var realNameList = _reportDbClient.Query<PromotionCustRealNameDto>("Service_PromotionBlockRealName_Get", p1).ToList();
+            AddPromotionRealNameToCompareList(compareNameInfo, realNameList); // 領過相同 BonusCode 的 CustId + RealName 清單
+
+
+            var p2 = new DynamicParameters(new
+            {
+                _CustIds = JsonConvert.SerializeObject(realNameList.Select(r => r.CustId).ToList()),
+            });
+            var setRealNameLog = _reportDbClient.Query<CustSetRealNameLogDto>("Service_SetRealNameLog_Get", p2).ToList();
+            AddBeforeNameWithAfterNameToCompareList(compareNameInfo, setRealNameLog); // 領過相同 Bonus "且" 有改過名的清單
+
             var patterns = new List<string>
             {
                 realName,
                 realName.Replace(" ", string.Empty)
             };
+            
+            // 檢查是否有相同
+            var realNameCheckResult = compareNameInfo.Where(r => patterns.Contains(r.RealName)).ToList();
 
-            var p = new DynamicParameters(new
+            if (realNameCheckResult.Any() &&
+                realNameCheckResult.Count >= claimPromotion.SameRealNameRestrictAvailableCount)
             {
-                _SiteId = siteId,
-                _BonusCode = claimPromotion.BonusCode,
-                _AccountNames = JsonConvert.SerializeObject(patterns)
-            });
-
-            var realNameList = _reportDbClient.Query<CustRealNameDto>("Service_PromotionBlockRealName_Get", p);
-
-            var realNames = realNameList.Where(x => patterns.Any(y => y.Equals(x.RealName, StringComparison.CurrentCultureIgnoreCase))).ToList();
-
-            if (realNames.Count >= claimPromotion.SameRealNameRestrictAvailableCount)
-            {
+                var custInfo = realNameCheckResult.First();
                 result.BonusErrorCode = BonusErrorCode.SameRealName;
                 result.IsBlockRealName = true;
-                result.ErrorMsg = $"Same Full Name：{realNames.First().RealName} (Account：{realNames.First().UserName})";
+                result.ErrorMsg = $"Same Full Name：{custInfo.RealName} (Account：{custInfo.UserName})";
                 result.UseWhitelist = false;
                 return result;
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// 已經領取相同 Bonus 的玩家清單
+        /// </summary>
+        /// <param name="compareNameInfo"></param>
+        /// <param name="realNameList"></param>
+        private static void AddPromotionRealNameToCompareList(List<CompareRealNameDto> compareNameInfo, List<PromotionCustRealNameDto> realNameList)
+        {
+            compareNameInfo.AddRange(realNameList.Select(r => new CompareRealNameDto()
+            {
+                CustId = r.CustId,
+                UserName = r.UserName,
+                RealName = r.RealName
+            }));
+        }
+
+        /// <summary>
+        /// 已領取相同 Bonus "且" 有改過名的玩家清單
+        /// </summary>
+        /// <param name="compareNameInfo"></param>
+        /// <param name="setRealNameLog"></param>
+        private static void AddBeforeNameWithAfterNameToCompareList(List<CompareRealNameDto> compareNameInfo, List<CustSetRealNameLogDto> setRealNameLog)
+        {
+            compareNameInfo.AddRange(setRealNameLog.Select(r => new CompareRealNameDto()
+            {
+                CustId = r.CustId,
+                UserName = r.UserName,
+                RealName = r.BeforeRealName
+            }));
+
+            compareNameInfo.AddRange(setRealNameLog.Select(r => new CompareRealNameDto()
+            {
+                CustId = r.CustId,
+                UserName = r.UserName,
+                RealName = r.AfterRealName
+            }));
         }
 
         public CustCondition GetCustConditionInfo(int custId, int currencyId, int siteId, string bonusCode, int deviceType)
