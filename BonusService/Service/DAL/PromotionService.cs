@@ -137,8 +137,13 @@ namespace BonusService.Service.DAL
                 realName,
                 realName.Replace(" ", string.Empty)
             };
-            
+
             // 檢查是否有相同
+            foreach (var name in patterns)
+            {
+                compareNameInfo.Where(r => r.RealName.Equals(name, StringComparison.CurrentCultureIgnoreCase)).ToList();
+            }
+
             var realNameCheckResult = compareNameInfo.Where(r => patterns.Contains(r.RealName)).ToList();
 
             if (realNameCheckResult.Any() &&
