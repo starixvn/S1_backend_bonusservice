@@ -21,7 +21,34 @@ namespace BonusService.Service.Model
         public bool IsResetPwd { get; set; }
         public string Aff { get; set; }
         public string SiteName { get; set; }
+        public string AccountName { get; set; }
+
+        public string TagList { get; set; }
+
+        public List<int> Tags
+        {
+            get
+            {
+                var tags = string.IsNullOrEmpty(this.TagList)
+                    ? new List<int>()
+                    : System.Text.Json.JsonSerializer.Deserialize<List<int>>(this.TagList);
+
+                return tags;
+            }
+        }
+
+        /// <summary>
+        /// Nova88 Device => CustIovation.DeviceId
+        /// Bwing goal123 Device => CustShieldRiskInfo.Shield
+        /// </summary>
+        public string DeviceId { get; set; }
+
+        /// <summary>
+        /// IP
+        /// </summary>
+        public string CustIp { get; set; }
     }
+
     public class WalletInfo
     {
         public decimal Balance { set; get; }
@@ -80,5 +107,47 @@ namespace BonusService.Service.Model
         public decimal EmailReward { get; set; }
         public int EnablePromotion { get; set; }
     }
-    
+
+    public class CustPromotionWhiteListSettingDto
+    {
+        public int CustId { get; set; }
+
+        public bool IpEnable { get; set; }
+
+        public bool DeviceEnable { get; set; }
+
+        public bool RealNameEnable { get; set; }
+    }
+
+    public class CustDeviceDto
+    {
+        public string DeviceId { get; set; }
+    }
+
+    public class PromotionCustRealNameDto
+    {
+        public int CustId { get; set; }
+        public string UserName { get; set; }
+        public string RealName { get; set; }
+    }
+
+    public class CustSetRealNameLogDto
+    {
+        public int CustId { get; set; }
+
+        public string UserName { get; set; }
+
+        public string BeforeRealName { get; set; }
+
+        public string AfterRealName { get; set; }
+    }
+
+    public class CompareRealNameDto
+    {
+        public int CustId { get; set; }
+
+        public string UserName { get; set; }
+
+        public string RealName { get; set; }
+    }
 }

@@ -9,6 +9,7 @@ using Dapper;
 using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
 using Enum = System.Enum;
+using MySqlX.XDevAPI.Common;
 
 namespace BonusService.Service.BLL
 {
@@ -43,19 +44,23 @@ namespace BonusService.Service.BLL
             _redisHelper = provider.GetRequiredService<ICacheHelper>();
         }
 
-        private ApiResult MakeErrorMessage(ErrorMessageMakerInput input)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="writeErrorLog">是否要寫 errorLog，(後台手動發放不紀錄，強制取得 en 語系錯誤也不記錄)</param>
+        /// <returns></returns>
+        private ApiResult MakeErrorMessage(ErrorMessageMakerInput input, bool writeErrorLog = true)
         {
             var apiResult1 = new ApiResult
             {
-                //defult Message display
                 ErrorCode = input.Result
             };
-            var showLangId = input.CustInfo.UserLang;
-            if (string.IsNullOrWhiteSpace(showLangId))
-            {
-                showLangId = "en";
-            }
-            
+
+            var showLangId = string.IsNullOrWhiteSpace(input.CustInfo.UserLang)
+                ? "en"
+                : input.CustInfo.UserLang;
+
             switch (input.Result)
             {
                 //API error -10xx
@@ -66,6 +71,12 @@ namespace BonusService.Service.BLL
                 case (int)BonusErrorCode.CalculateCashbackTotalBonusLessThenMinPay:
                 case (int)BonusErrorCode.CalculateUnknownPromotionType:
                 case (int)BonusErrorCode.DuplicateClaimBonus:
+                case (int)BonusErrorCode.TierAmountNoFound:
+                case (int)BonusErrorCode.SameIp:
+                case (int)BonusErrorCode.SameRealName:
+                case (int)BonusErrorCode.SameDeviceId:
+                case (int)BonusErrorCode.BlockTag:
+
                 //SP Return ERROR -11XX
                 case (int)BonusErrorCode.SpBonusNotFound:
                 case (int)BonusErrorCode.SpCustomerNotJoinSpecialCode:
@@ -114,34 +125,34 @@ namespace BonusService.Service.BLL
                     break;
                 //AdjustmentBonus Error -12XX
                 case (int)BonusErrorCode.AdjustmentBonusPromotionTypeNotMatch:
-                {
-                    apiResult1.Message = string.Format(
-                        _selLangBll.GetMsg($"msg_{((BonusErrorCode)input.Result).ToString()}", input.CustInfo.SiteId,
-                            input.CustInfo.SiteName, showLangId), input.InputBonusCode,
-                        Enum.GetName(typeof(PromotionType), (PromotionType)input.InputPromotionType));
-                }
+                    {
+                        apiResult1.Message = string.Format(
+                            _selLangBll.GetMsg($"msg_{((BonusErrorCode)input.Result).ToString()}", input.CustInfo.SiteId,
+                                input.CustInfo.SiteName, showLangId), input.InputBonusCode,
+                            Enum.GetName(typeof(PromotionType), (PromotionType)input.InputPromotionType));
+                    }
                     break;
                 case (int)BonusErrorCode.AdjustmentBonusPromotionNotActive:
-                {
-                    apiResult1.Message = string.Format(
-                        _selLangBll.GetMsg($"msg_{((BonusErrorCode)input.Result).ToString()}", input.CustInfo.SiteId,
-                            input.CustInfo.SiteName, showLangId), input.InputBonusCode);
-                }
+                    {
+                        apiResult1.Message = string.Format(
+                            _selLangBll.GetMsg($"msg_{((BonusErrorCode)input.Result).ToString()}", input.CustInfo.SiteId,
+                                input.CustInfo.SiteName, showLangId), input.InputBonusCode);
+                    }
                     break;
                 case (int)BonusErrorCode.AdjustmentBonusPromotionAmountOverMaxBonus:
-                {
-                    apiResult1.Message = string.Format(
-                        _selLangBll.GetMsg($"msg_{((BonusErrorCode)input.Result).ToString()}", input.CustInfo.SiteId,
-                            input.CustInfo.SiteName, showLangId), input.InputAmount, input.ClaimPromotion.MaxBonus,
-                        input.InputBonusCode);
-                }
+                    {
+                        apiResult1.Message = string.Format(
+                            _selLangBll.GetMsg($"msg_{((BonusErrorCode)input.Result).ToString()}", input.CustInfo.SiteId,
+                                input.CustInfo.SiteName, showLangId), input.InputAmount, input.ClaimPromotion.MaxBonus,
+                            input.InputBonusCode);
+                    }
                     break;
                 case (int)BonusErrorCode.AdjustmentBonusCustomerHasRunningBonus:
-                {
-                    apiResult1.Message = string.Format(
-                        _selLangBll.GetMsg($"msg_{((BonusErrorCode)input.Result).ToString()}", input.CustInfo.SiteId,
-                            input.CustInfo.SiteName, showLangId), input.CustInfo.CustId);
-                }
+                    {
+                        apiResult1.Message = string.Format(
+                            _selLangBll.GetMsg($"msg_{((BonusErrorCode)input.Result).ToString()}", input.CustInfo.SiteId,
+                                input.CustInfo.SiteName, showLangId), input.CustInfo.CustId);
+                    }
                     break;
                 case (int)BonusErrorCode.Error:
                 case (int)BonusErrorCode.UnknownError:
@@ -160,8 +171,40 @@ namespace BonusService.Service.BLL
                     }
                     break;
             }
-            _logger.LogInformation($"CustId={input.CustInfo.CustId} BonusCode={input.InputBonusCode} apiResult={JsonConvert.SerializeObject(apiResult1)}");
+
+            var writeToLogErrorMsg = GetWriteToLogErrorMsg(input, apiResult1);
+            if (writeErrorLog)
+            {
+                _logger.LogInformation($"CustId={input.CustInfo.CustId} BonusCode={input.InputBonusCode} apiResult={JsonConvert.SerializeObject(apiResult1)}");
+                InsertPromotionFailLog(input.CustInfo, input.ClaimPromotion, (BonusErrorCode)input.Result, writeToLogErrorMsg);
+            }
+
             return apiResult1;
+        }
+
+        private string GetWriteToLogErrorMsg(ErrorMessageMakerInput input, ApiResult apiResult1)
+        {
+            // 自訂的ErrorMsg 如果為空，就使用語系檔內的 ErrorMsg，後台 ErrorMsg 一律寫入 en 語系的訊息
+            string writeToLogErrorMsg;
+            if (!string.IsNullOrEmpty(input.CustomizeErrorMsg))
+            {
+                writeToLogErrorMsg = input.CustomizeErrorMsg;
+            }
+            else
+            {
+                if (input.CustInfo.UserLang == "en")
+                {
+                    writeToLogErrorMsg = apiResult1.Message;
+                }
+                else
+                {
+                    input.CustInfo.UserLang = "en";
+                    var error = MakeErrorMessage(input, false);
+                    writeToLogErrorMsg = error.Message;
+                }
+            }
+
+            return writeToLogErrorMsg;
         }
 
         private void CancelAllWaitingBonus(int custId)
@@ -176,39 +219,50 @@ namespace BonusService.Service.BLL
 
         private void AfterRewardSuccess(AfterRewardSuccessInput input)
         {
-            if(input.atPage != BonusInfoAtPage.Deposit) 
+            if (input.atPage != BonusInfoAtPage.Deposit)
                 CancelAllWaitingBonus(input.CustId);
         }
 
         public async Task<ApiResult> SetClaimPromotionV2Async(int custId, string bonusCode, string custIp,
             decimal lockedAmount, int deviceType, BonusInfoAtPage atPage, string depositTransId = null)
         {
-            var apiResult = new ApiResult();
             bonusCode = bonusCode.Trim();
+
+            // 取玩家個人資訊、裝置、白名單設定
             var custInfo = _custInfoService.GetCustInfo(custId);
+            custInfo.DeviceId = _custInfoService.GetCustDeviceId(custInfo.CustId, custInfo.SiteId);
+            custInfo.CustIp = custIp;
+            var custPromotionWhiteSetting = _custInfoService.GetCustPromotionWhiteSetting(custId);
+
+            // 取 Promotion 資料
+            var claimPromotion = _promotionService.GetPromotion<ClaimPromotion>(custId,
+                custInfo.CurrencyId,
+                custInfo.SiteId,
+                bonusCode,
+                deviceType,
+                getDetail: false);
+
             var errorInfo = new ErrorMessageMakerInput
             {
                 Result = (int)BonusErrorCode.PromotionNotFound,
                 InputBonusCode = bonusCode,
                 LockedAmount = lockedAmount,
                 CustInfo = custInfo,
-                ClaimPromotion = new ClaimPromotion { }
+                ClaimPromotion = claimPromotion,
+                CustomizeErrorMsg = string.Empty
             };
 
-            var claimPromotion = _promotionService.GetPromotion<ClaimPromotion>(custId, custInfo.CurrencyId,
-                custInfo.SiteId, bonusCode, deviceType, false);
-            errorInfo.ClaimPromotion = claimPromotion;
-
-            var result = VerifyPromotion(custId, custInfo.SiteId, bonusCode, custIp, claimPromotion);
-            if (result != (int)BonusErrorCode.Success)
+            // 檢核是否可以領取
+            var verifyResult = VerifyPromotion(custInfo, claimPromotion, custPromotionWhiteSetting);
+            if (verifyResult.BonusErrorCode != BonusErrorCode.Success)
             {
-                errorInfo.Result = result;
+                errorInfo.Result = (int)verifyResult.BonusErrorCode;
+                errorInfo.CustomizeErrorMsg = verifyResult.ErrorMsg;
                 return MakeErrorMessage(errorInfo);
             }
 
-            var custConditionInfo = _promotionService.GetCustConditionInfo(custId, custInfo.CurrencyId, custInfo.SiteId,
-                bonusCode, deviceType);
 
+            var custConditionInfo = _promotionService.GetCustConditionInfo(custId, custInfo.CurrencyId, custInfo.SiteId, bonusCode, deviceType);
             if (custConditionInfo.CanJoin != 1)
             {
                 errorInfo.Result = custConditionInfo.Result;
@@ -271,15 +325,21 @@ namespace BonusService.Service.BLL
                 FinancialType = FinancialType.Bonusreward,
                 AtPage = atPage
             };
-            result = Reward(bonusRewardInput, trans);
+            var result = Reward(bonusRewardInput, trans);
 
             if (result > 0)
             {
                 result = _promotionService.AfterReward(claimPromotion, custInfo.SiteId, bonusCode, custInfo.CurrencyId,
                     custIp, trans);
                 if (result > 0)
+                {
                     trans.Commit();
+                    InsertPromotionSuccessLog(custInfo, claimPromotion, verifyResult.UseWhitelist);
+                }
             }
+
+
+            var apiResult = new ApiResult();
 
             if (result > 0)
             {
@@ -365,7 +425,7 @@ namespace BonusService.Service.BLL
             if (result != (int)BonusErrorCode.Success)
             {
                 errorInfo.Result = result;
-                apiResult = MakeErrorMessage(errorInfo);
+                apiResult = MakeErrorMessage(errorInfo, false);
                 return apiResult;
             }
 
@@ -378,7 +438,7 @@ namespace BonusService.Service.BLL
             if (calculateBonus.result <= 0)
             {
                 errorInfo.Result = calculateBonus.result;
-                return MakeErrorMessage(errorInfo);
+                return MakeErrorMessage(errorInfo, false);
             }
 
             var bonusRewardInput = new BonusRewardInput
@@ -400,13 +460,13 @@ namespace BonusService.Service.BLL
                 SiteId = custInfo.SiteId,
                 Memo = memo,
                 Prefix = $"B{_common.GetEnv()}",
-                RefList = !string.IsNullOrEmpty(depositId) ? JsonConvert.SerializeObject(new List<Ref>() 
-                {  
+                RefList = !string.IsNullOrEmpty(depositId) ? JsonConvert.SerializeObject(new List<Ref>()
+                {
                     new Ref ()
-                    { 
+                    {
                         DepositId = depositId,
                         Amount = calculateBonus.DepositAmount
-                    } 
+                    }
                 }) : null,
                 SetBalanceMemo = $"Claim {Enum.GetName(typeof(PromotionType), claimPromotion.PromotionType)} BonusCode: {bonusCode}, Locked Amount: {calculateBonus.LockedAmount:#,##0.##}",
                 RewardBonusMemo = $"Claim {Enum.GetName(typeof(PromotionType), claimPromotion.PromotionType)} BonusCode: {bonusCode}",
@@ -466,22 +526,45 @@ namespace BonusService.Service.BLL
             }
 
             errorInfo.Result = result;
-            return MakeErrorMessage(errorInfo);
+            return MakeErrorMessage(errorInfo, false);
         }
 
-        private int VerifyPromotion(int custId, int siteId, string bonusCode, string custIp, ClaimPromotion claimPromotion)
+        private CheckPromotionResultBaseDto VerifyPromotion(Customer custInfo, ClaimPromotion claimPromotion, CustPromotionWhiteListSettingDto custPromotionWhiteListListSetting)
         {
             if (claimPromotion == null)
-                return (int)BonusErrorCode.PromotionNotFound;
+                return new CheckPromotionResultBaseDto() { BonusErrorCode = BonusErrorCode.PromotionNotFound };
 
-            if (_promotionService.IsBlockIP(claimPromotion, bonusCode, siteId, custIp))
-                return (int)BonusErrorCode.IpIsBlocked;
-            if (!CheckProfileFinish(custId, siteId)) //Profile Finish & Phone Verified
-                return (int)BonusErrorCode.ProfileOrPhoneNotFinish;
-            
-            return (int)BonusErrorCode.Success;
+            if (!CheckProfileFinish(custInfo.CustId, custInfo.SiteId))
+                return new CheckPromotionResultBaseDto() { BonusErrorCode = BonusErrorCode.ProfileOrPhoneNotFinish };
+
+            // 檢查 Tag
+            var checkPromotionBlockTagResult = CheckPromotionBlockTag(custInfo.Tags, claimPromotion.BlockTags);
+            if (checkPromotionBlockTagResult.IsBlockTag)
+                return checkPromotionBlockTagResult;
+
+            // 目前只有 FreeBet、FstDeposit 要檢查 IP、Device、RealName 次數
+            var useWhitelist = false;
+            if (claimPromotion.PromotionType is (PromotionType.FreeBet or PromotionType.FstDeposit))
+            {
+                var checkIpResult = CheckBlockIp(custInfo, claimPromotion, custPromotionWhiteListListSetting);
+                if (checkIpResult.IsBlockIp)
+                    return checkIpResult;
+
+                var checkDeviceIdResult = CheckBlockDeviceId(custInfo, claimPromotion, custPromotionWhiteListListSetting);
+                if (checkDeviceIdResult.IsBlockDeviceId)
+                    return checkDeviceIdResult;
+
+                var checkRealNameResult = CheckBlockRealName(custInfo, claimPromotion, custPromotionWhiteListListSetting);
+                if (checkRealNameResult.IsBlockRealName)
+                    return checkRealNameResult;
+
+                //IP、DeviceID、RealName 其中有一個是因為白名單通過檢查的，都算有使用白名單
+                useWhitelist = (checkIpResult.UseWhitelist || checkDeviceIdResult.UseWhitelist || checkRealNameResult.UseWhitelist);
+            }
+
+            return new CheckPromotionResultBaseDto() { BonusErrorCode = BonusErrorCode.Success, UseWhitelist = useWhitelist };
         }
-        
+
         private int VerifyAdjustmentBonus(int custId, int siteId, decimal amount, int promotionType,
             ClaimPromotion claimPromotion)
         {
@@ -513,14 +596,14 @@ namespace BonusService.Service.BLL
 
             return (int)BonusErrorCode.Success;
         }
-        
+
         private bool CheckProfileFinish(int custId, int siteId) //Profile Finish & Phone Verified
         {
-            var custInfoProfile = _custInfoService.GetCustInfoProfile( custId, siteId);
-            return custInfoProfile.PhoneVerified 
-                   && !string.IsNullOrEmpty(custInfoProfile.AccountName) 
-                   && !string.IsNullOrEmpty(custInfoProfile.Birth_y) 
-                   && !string.IsNullOrEmpty(custInfoProfile.Birth_m) 
+            var custInfoProfile = _custInfoService.GetCustInfoProfile(custId, siteId);
+            return custInfoProfile.PhoneVerified
+                   && !string.IsNullOrEmpty(custInfoProfile.AccountName)
+                   && !string.IsNullOrEmpty(custInfoProfile.Birth_y)
+                   && !string.IsNullOrEmpty(custInfoProfile.Birth_m)
                    && !string.IsNullOrEmpty(custInfoProfile.Birth_d);
         }
 
@@ -542,7 +625,7 @@ namespace BonusService.Service.BLL
                     {
                         if (claimPromotion.PromotionType == PromotionType.ReDeposit && claimPromotion.TierAmountList.Any())
                         {
-                            return CalculateTierRedepositBonus(claimPromotion, custId, siteId, currencyId, lockedAmount, depositId);     
+                            return CalculateTierRedepositBonus(claimPromotion, custId, siteId, currencyId, lockedAmount, depositId);
                         }
 
                         if (claimPromotion.PromotionType == PromotionType.ReDeposit ||
@@ -620,18 +703,18 @@ namespace BonusService.Service.BLL
 
                 case PromotionType.Rebate:
                     return output;
-                
+
                 case PromotionType.SpecialBonus:
                     bonusAmount = amount;
                     lockAmount = 0;
                     rollover = amount * claimPromotion.RollOver;
                     break;
-                
+
                 case PromotionType.RetentionFreeBet:
                     bonusAmount = claimPromotion.Bonus;
-                    lockAmount = 0;         
+                    lockAmount = 0;
                     rollover = bonusAmount * claimPromotion.RollOver;
-                    break;                  
+                    break;
 
                 default:
                     output.result = (int)BonusErrorCode.CalculateUnknownPromotionType;
@@ -668,7 +751,7 @@ namespace BonusService.Service.BLL
             }
             return result;
         }
-        
+
         private int BonusReward(BonusRewardInput bonusRewardInput, MySqlTransaction trans)
         {
             var key = $"BonusReward:{bonusRewardInput.CustId}";
@@ -677,7 +760,7 @@ namespace BonusService.Service.BLL
                 return (int)BonusErrorCode.DuplicateClaimBonus;
             }
             _redisHelper.StringSet(key, bonusRewardInput.CustId, TimeSpan.FromMinutes(1));
-            
+
             var p = new DynamicParameters(new
             {
                 PromotionType = (int)bonusRewardInput.PromotionType,
@@ -744,13 +827,20 @@ namespace BonusService.Service.BLL
 
         public List<CustPromotion> GetPromotionList(CustPromotionRequest request)
         {
-            var promotionList =  _promotionService.GetPromotionList(request);
+            var promotionList = _promotionService.GetPromotionList(request);
             var promotion = new List<CustPromotion>();
+
+            Customer custInfo = null;
+            if (request.IsLogin) custInfo = _custInfoService.GetCustInfo(request.CustId);
+            
 
             foreach (var promo in promotionList)
             {
                 if (request.IsLogin)
                 {
+                    // 加入BlockTag 檢核過濾，如果有Tag命中，列表就不會有這筆
+                    if(BlockTagIgnorePromotion(custInfo.Tags, promo.BlockTags)) continue;
+                    
                     var custCondition = _promotionService.GetCustConditionInfo(request.CustId, request.CurrencyId,
                         request.SiteId, promo.BonusCode, request.DeviceType);
                     SetResult(promo, custCondition);
@@ -792,14 +882,17 @@ namespace BonusService.Service.BLL
 
             return promo;
         }
-        
+
         public List<CustPromotion> GetSpecialPromotionList(CustPromotionRequest request)
         {
             var promotionList = _promotionService.GetSpecialPromotionList(request);
-
+            var custInfo = _custInfoService.GetCustInfo(request.CustId);
+            
             var promotion = new List<CustPromotion>();
             foreach (var promo in promotionList)
             {
+                if (BlockTagIgnorePromotion(custInfo.Tags, promo.BlockTags)) continue;
+
                 var custCondition = _promotionService.GetCustConditionInfo(request.CustId, request.CurrencyId,
                     request.SiteId, promo.BonusCode, request.DeviceType);
                 SetResult(promo, custCondition);
@@ -811,27 +904,29 @@ namespace BonusService.Service.BLL
 
             return promotion;
         }
-        
+
         public List<CustPromotion> GetDepositPromotionList(CustPromotionRequest request)
         {
-            var promotionList = _promotionService.GetDepositPromotionList(request);
-            
+            var promotionList = _promotionService.GetDepositPromotionList(request).Where(r=>r.BonusCode== "wentest0829");
+            var custInfo = _custInfoService.GetCustInfo(request.CustId);
+
             var promotion = new List<CustPromotion>();
             foreach (var promo in promotionList)
-            { 
+            {
+                if (BlockTagIgnorePromotion(custInfo.Tags, promo.BlockTags)) continue;
                 SetPromotionDetail(request.LangId, request.DefLang, true, promo);
                 promotion.Add(promo);
             }
 
             return promotion;
         }
-        
+
         private static void SetResult(CustPromotion promo, CustCondition custCondition)
         {
             promo.canJoin = custCondition.CanJoin == 1;
             promo.Result = custCondition.Result;
         }
-        
+
         private void SetPromotion(int siteId, int custId, int currencyId, bool getCashbackDetail, CustPromotion promo, CustCondition custCondition)
         {
             if (promo.PromotionType is PromotionType.FstDeposit or PromotionType.ReDeposit
@@ -840,21 +935,21 @@ namespace BonusService.Service.BLL
                 promo.DepositId = custCondition.RefId;
                 promo.DepositAmount = custCondition.Amount;
                 promo.RefList = custCondition.reference;
-        
+
                 promo.MaxAmount = promo.PromotionType == PromotionType.FstDeposit
                     ? _walletService.GetBalance(custId)
                     : promo.DepositAmount;
-                
+
                 if (promo.PromotionType == PromotionType.FstDeposit && promo.MaxAmount > promo.DepositAmount)
                 {
                     promo.MaxAmount = promo.DepositAmount;
                 }
-        
+
                 if (promo.RequiredAmount == 0)
                 {
                     promo.RequiredAmount = 1;
                 }
-        
+
                 if (promo.BonusType == BonusType.Amount)
                 {
                     promo.MaxAmount = promo.RequiredAmount;
@@ -870,7 +965,7 @@ namespace BonusService.Service.BLL
                         }
                     }
                 }
-       
+
                 if (promo.RequiredAmount > promo.DepositAmount)
                 {
                     promo.canJoin = false;
@@ -882,7 +977,7 @@ namespace BonusService.Service.BLL
                     promo.canJoin = promo.CanJoinTierAmountList.Any();
                 }
             }
-            
+
             var custBonusInfo = _promotionService.GetBonusInfoByCust(custId, promo);
             if (custBonusInfo != null)
             {
@@ -893,13 +988,13 @@ namespace BonusService.Service.BLL
                 promo.Status = custBonusInfo.Status;
                 promo.isJoin = true;
             }
-            
+
             if (promo.PromotionType == PromotionType.Cashback)
             {
                 GetCashbackInfo(custId, siteId, currencyId, promo, getCashbackDetail);
-            }         
+            }
         }
-        
+
         private void SetPromotionDetail(string langId, string defLang, bool clearDetails, CustPromotion promo)
         {
             if (!string.IsNullOrEmpty(promo.Details))
@@ -951,18 +1046,18 @@ namespace BonusService.Service.BLL
                 }
             }
         }
-        
+
         public int SetScratchCardCode(SpecialCodeRequest request)
         {
             request.SpecialCode = request.SpecialCode.ToUpper();
             return _promotionService.SetScratchCardCode(request);
         }
-        
+
         public bool SetSpecialCode(SpecialCodeRequest request)
         {
             return _promotionService.SetSpecialCode(request);
         }
-        
+
         public bool CheckSpecialCode(string specialCode)
         {
             if (string.IsNullOrEmpty(specialCode) || specialCode.Length > 20)
@@ -972,7 +1067,7 @@ namespace BonusService.Service.BLL
 
             return mPwd.Success;
         }
-        
+
         public bool CheckScratchCardCode(string specialCode)
         {
             if (string.IsNullOrEmpty(specialCode) || specialCode.Length != 12)
@@ -984,16 +1079,39 @@ namespace BonusService.Service.BLL
             return mPwd.Success;
         }
 
+        public bool CheckVipLevelWithBlockTags(int custId, string specialCode)
+        {
+            var custInfo = _custInfoService.GetCustInfo(custId);
+            var vipLevelWithBlockTagsSetting = _promotionService.GetVipLevelWithBlockTags(custInfo.SiteId, specialCode);
+
+
+            if (vipLevelWithBlockTagsSetting.BlockTags.Any())
+            {
+                // 取交集
+                var intersectTagResult = custInfo.Tags.Intersect(vipLevelWithBlockTagsSetting.BlockTags).ToList();
+                // 如果有相同 tag 表示玩家不能領取
+                if (intersectTagResult.Any()) return false;
+            }
+
+            if (vipLevelWithBlockTagsSetting.VipLevels.Any())
+            {
+                // 如果 Vip Level 命中就可以領
+                return vipLevelWithBlockTagsSetting.VipLevels.Any(x => x.Equals(custInfo.UserLevel));
+            }
+
+            return true;
+        }
+
         public PromotionBySpecialCode GetPromotionBySpecialCode(int siteId, string SpecialCode)
         {
-            return _promotionService.GetPromotionBySpecialCode(siteId,SpecialCode);
+            return _promotionService.GetPromotionBySpecialCode(siteId, SpecialCode);
         }
-        
+
         public PromotionBySpecialScratchCard GetPromotionBySpecialScratchCard(int siteId, string SpecialCode)
         {
             return _promotionService.GetPromotionBySpecialScratchCard(siteId, SpecialCode);
         }
-        
+
         public BonusInfoByBonusCode GetBonusInfoByBonusCode(int CustId, string BonusCode)
         {
             return _promotionService.GetBonusInfoByBonusCode(CustId, BonusCode);
@@ -1010,7 +1128,7 @@ namespace BonusService.Service.BLL
 
             promotion.isJoin = result.FirstOrDefault()?.Claimed ?? false;
             promotion.canJoin = result.Any();
-            
+
             ProcessPeriodTime(promotion, currentTime, offset);
 
             if (!getDetail) return;
@@ -1096,7 +1214,7 @@ namespace BonusService.Service.BLL
                 }
                 depositAmount = checkResult.ActualDeposit;
             }
-            
+
             var tierAmount = claimPromotion.FindTierAmountLevel(depositAmount);
             if (tierAmount == null)
             {
@@ -1119,15 +1237,171 @@ namespace BonusService.Service.BLL
             return new CalculateBonusOutput
             {
                 result = (int)BonusErrorCode.Success,
-                BonusInfo = JsonConvert.SerializeObject(claimPromotion,new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }),
+                BonusInfo = JsonConvert.SerializeObject(claimPromotion, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }),
                 ExpiryTime = DateTimeOffset.Now.AddDays(claimPromotion.ExpiryDays).ToUnixTimeSeconds(),
                 BonusAmount = bonusAmount,
-                LockedAmount = lockAmount,  
+                LockedAmount = lockAmount,
                 RollOver = (lockAmount + bonusAmount) * (claimPromotion.FullFillType == (int)FullFillType.RollOver ? claimPromotion.RollOver : claimPromotion.WinOver),
                 DepositAmount = depositAmount
             };
         }
 
+        #region PrivateMethod
 
+        private CheckPromotionBlockIp CheckBlockIp(Customer custInfo, ClaimPromotion claimPromotion, CustPromotionWhiteListSettingDto whiteListSetting)
+        {
+            var result = new CheckPromotionBlockIp
+            {
+                BonusErrorCode = BonusErrorCode.Success,
+                IsBlockIp = false,
+                UseWhitelist = false
+            };
+
+            // 判斷 Promotion 是否有設定要檢查 IP
+            if (!claimPromotion.SameIpRestrict) return result;
+
+            if (whiteListSetting is { IpEnable: true }) // 判斷玩家身上有沒有白名單可以跳過檢查
+            {
+                result.BonusErrorCode = BonusErrorCode.Success;
+                result.IsBlockIp = false;
+                result.UseWhitelist = true;
+                return result;
+            }
+
+            // 沒有 IP 就跳過檢查，不進 db
+            if (string.IsNullOrEmpty(custInfo.CustIp)) return result;
+
+            // check db 相同 IP 領取是否達到上限
+            result = _promotionService.CheckBlockIpFromDb(claimPromotion, custInfo.SiteId, custInfo.CustIp);
+            return result;
+        }
+
+        private CheckPromotionBlockDeviceId CheckBlockDeviceId(Customer custInfo, ClaimPromotion claimPromotion, CustPromotionWhiteListSettingDto whiteListSetting)
+        {
+            var result = new CheckPromotionBlockDeviceId
+            {
+                BonusErrorCode = BonusErrorCode.Success,
+                IsBlockDeviceId = false,
+                UseWhitelist = false
+            };
+
+            // 如果玩家沒有 DeviceId 不檢查
+            if (string.IsNullOrEmpty(custInfo.DeviceId)) return result;
+
+            // 判斷 Promotion 是否有設定要檢查 Device
+            if (!claimPromotion.SameDeviceIdRestrict) return result;
+
+            if (whiteListSetting is { DeviceEnable: true }) // 判斷玩家身上有沒有白名單可以跳過檢查
+            {
+                result.BonusErrorCode = BonusErrorCode.Success;
+                result.IsBlockDeviceId = false;
+                result.UseWhitelist = true;
+                return result;
+            }
+
+            // check db 相同 DeviceId 領取是否達到上限
+            result = _promotionService.CheckBlockDeviceIdFromDb(claimPromotion, custInfo.SiteId, custInfo.DeviceId);
+            return result;
+        }
+
+        private CheckPromotionBlockTags CheckPromotionBlockTag(List<int> custTags, List<int> promotionBlockTags)
+        {
+            var result = new CheckPromotionBlockTags
+            {
+                BonusErrorCode = BonusErrorCode.Success,
+                IsBlockTag = false,
+                UseWhitelist = false
+            };
+
+            // 如果 promotion 沒有設定 tag 就不用檢查
+            if (!promotionBlockTags.Any()) return result;
+
+            // 取交集
+            var intersectTagResult = custTags.Intersect(promotionBlockTags).ToList();
+
+            // 如果沒有相同 tag 表示可以領
+            if (!intersectTagResult.Any()) return result;
+
+            var firstTagId = intersectTagResult.First();
+
+            // db 取得 tagName 
+            var tagName = _promotionService.GetTagName(firstTagId).TagName;
+
+            result.BonusErrorCode = BonusErrorCode.BlockTag;
+            result.IsBlockTag = true;
+            result.ErrorMsg = $"Block Tag：{tagName}";
+            return result;
+        }
+
+        private bool BlockTagIgnorePromotion(List<int> custTags, List<int> promotionBlockTags)
+        {
+            // 如果 promotion 沒有設定 tag 就不用檢查
+            if (!promotionBlockTags.Any()) return false;
+
+            // 取交集
+            var intersectTagResult = custTags.Intersect(promotionBlockTags).ToList();
+
+            return intersectTagResult.Any();
+        }
+
+        private CheckPromotionBlockRealName CheckBlockRealName(Customer custInfo, ClaimPromotion claimPromotion, CustPromotionWhiteListSettingDto whiteListSetting)
+        {
+            var result = new CheckPromotionBlockRealName
+            {
+                BonusErrorCode = BonusErrorCode.Success,
+                IsBlockRealName = false,
+                UseWhitelist = false
+            };
+
+            // 判斷 Promotion 是否有設定要檢查 RealName
+            if (!claimPromotion.SameRealNameRestrict) return result;
+
+            if (whiteListSetting is { RealNameEnable: true })  // 判斷玩家身上有沒有白名單可以跳過檢查
+            {
+                result.BonusErrorCode = BonusErrorCode.Success;
+                result.IsBlockRealName = false;
+                result.UseWhitelist = true;
+                return result;
+            }
+
+
+         
+
+            // check db 相同 RealName 領取是否達到上限
+            result = _promotionService.CheckBlockRealNameFromDb(claimPromotion, custInfo.SiteId, custInfo.AccountName);
+            return result;
+        }
+
+        private int InsertPromotionFailLog(Customer custInfo, ClaimPromotion promotion, BonusErrorCode bonusErrorCode, string errorMsg)
+        {
+            return _promotionService.InsertPromotionFailLog(
+                bonusCode: promotion.BonusCode,
+                promotionType: promotion.PromotionType,
+                errorCode: (int)bonusErrorCode,
+                errorMsg: errorMsg,
+                siteId: custInfo.SiteId,
+                custId: custInfo.CustId,
+                currencyId: custInfo.CurrencyId);
+        }
+
+        private int InsertPromotionSuccessLog(Customer custInfo, ClaimPromotion promotion, bool useWhitelist)
+        {
+            return _promotionService.InsertPromotionSuccessLog(
+                bonusCode: promotion.BonusCode,
+                promotionType: promotion.PromotionType,
+                ip: custInfo.CustIp,
+                deviceId: custInfo.DeviceId,
+                realName: custInfo.AccountName,
+                siteId: custInfo.SiteId,
+                custId: custInfo.CustId,
+                userName: custInfo.UserName,
+                currencyId: custInfo.CurrencyId,
+                useWhitelist: useWhitelist
+            );
+        }
+
+
+
+        #endregion
     }
 }
