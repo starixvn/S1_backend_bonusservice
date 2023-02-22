@@ -193,4 +193,13 @@
         SpecialCodeErrorForCheck = 1000,
         PromoCodeHasBeenUsed = 3000
     }
+    
+    public enum WithdrawalLimitLogCreateFromEnum 
+    {
+        Default = 0,
+        Bonus = 4,
+        ReferralReward = 5,
+        VerificationReward = 6,
+        BonusReward = 7
+    }
 }
