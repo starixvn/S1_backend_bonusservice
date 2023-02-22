@@ -201,7 +201,6 @@
         Default = 0,
         Bonus = 4,
         ReferralReward = 5,
-        VerificationReward = 6,
-        BonusReward = 7
+        VerificationReward = 6
     }
 }
