@@ -195,4 +195,12 @@
         SpecialCodeVipLevelsOrBlockTagInvalid = 1001, // VipLevel 不符合 或是有 BlockTag
         PromoCodeHasBeenUsed = 3000
     }
+    
+    public enum WithdrawalLimitLogCreateFromEnum 
+    {
+        Default = 0,
+        Bonus = 4,
+        ReferralReward = 5,
+        VerificationReward = 6
+    }
 }

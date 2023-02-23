@@ -120,7 +120,7 @@ public class ReferralTests
     {
         public readonly List<TestCustomer> _Customers = new();
         public decimal WithdrawalLimit { get; set; }
-        public int SetWithdrawalLimit(int custId, string userName, int siteId, decimal withdrawalLimit, string memo, string refTransId, out decimal afterWithdrawalLimit, MySqlTransaction trans)
+        public int SetWithdrawalLimit(int custId, string userName, int siteId, decimal withdrawalLimit, string memo, string refTransId,  int createFrom, string creator, out decimal afterWithdrawalLimit, MySqlTransaction trans)
         {
             afterWithdrawalLimit = withdrawalLimit;
             WithdrawalLimit = withdrawalLimit;

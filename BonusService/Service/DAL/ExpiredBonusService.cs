@@ -52,7 +52,7 @@ namespace BonusService.Service.DAL
                 {
                     result = _withdrawalLimitService.SetWithdrawalLimit(expiredBonus.CustId, expiredBonus.UserName,
                         expiredBonus.SiteId, expiredBonus.Refund, "CancelBonus", expiredBonus.BonusId.ToString(),
-                        out _, trans);
+                        (int) WithdrawalLimitLogCreateFromEnum.Bonus, "System" , out _, trans);
                 }
             }
 
