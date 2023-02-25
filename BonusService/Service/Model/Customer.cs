@@ -41,8 +41,9 @@ namespace BonusService.Service.Model
         /// Nova88 Device => CustIovation.DeviceId
         /// Bwing goal123 Device => CustShieldRiskInfo.Shield
         /// </summary>
-        public string DeviceId { get; set; }
+        public IEnumerable<string> DeviceIds { get; set; }
 
+        public string CurrentUseDeviceId { get; set; }
         /// <summary>
         /// IP
         /// </summary>
@@ -122,6 +123,8 @@ namespace BonusService.Service.Model
     public class CustDeviceDto
     {
         public string DeviceId { get; set; }
+
+        public DateTime UpdateTime { get; set; }
     }
 
     public class PromotionCustRealNameDto
@@ -149,5 +152,12 @@ namespace BonusService.Service.Model
         public string UserName { get; set; }
 
         public string RealName { get; set; }
+    }
+
+    public class PromotionDeviceIdsDto
+    {
+        public string UserName { get; set; }
+
+        public string DeviceId { get; set; }
     }
 }
