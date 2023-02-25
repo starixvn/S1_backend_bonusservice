@@ -39,10 +39,10 @@ namespace BonusService.Service.DAL
             return _mainDbClient.QueryFirst<CustPromotionWhiteListSettingDto>("Service_CustPromotionWhiteList_Get", new { CustId = custId });
         }
 
-        public string GetCustDeviceId(int custId, int siteId)
+        public IEnumerable<CustDeviceDto> GetCustDeviceId(int custId, int siteId)
         {
-            var result = _reportDbClient.QueryFirst<CustDeviceDto>("Service_CustDeviceId_Get", new { _CustId = custId, _SiteId = siteId });
-            return result.DeviceId;
+            var result = _reportDbClient.Query<CustDeviceDto>("Service_CustDeviceId_Get", new { _CustId = custId, _SiteId = siteId });
+            return result;
         }
     }
 }

@@ -69,7 +69,7 @@ namespace BonusService.Service.DAL
             return result;
         }
 
-        public CheckPromotionBlockDeviceId CheckBlockDeviceIdFromDb(ClaimPromotion claimPromotion, int siteId, string deviceId)
+        public CheckPromotionBlockDeviceId CheckBlockDeviceIdFromDb(ClaimPromotion claimPromotion, int siteId, IEnumerable<string> deviceIds)
         {
             var result = new CheckPromotionBlockDeviceId
             {
@@ -79,20 +79,20 @@ namespace BonusService.Service.DAL
             };
 
             // check db 相同 DeviceId 領取是否達到上限
-            var p1 = new DynamicParameters(new { _BonusCode = claimPromotion.BonusCode, _SiteId = siteId, _DeviceID = deviceId, _LimitCount = claimPromotion.SameIpRestrictAvailableCount });
-            p1.Add("_IsBlocked", dbType: DbType.Int32, direction: ParameterDirection.Output);
-            p1.Add("_UserName", dbType: DbType.String, direction: ParameterDirection.Output);
-            _reportDbClient.Execute("Service_PromotionBlockDeviceId_Get", p1);
+            var p1 = new DynamicParameters(new { _BonusCode = claimPromotion.BonusCode, _SiteId = siteId, _DeviceIDs = JsonConvert.SerializeObject(deviceIds) });
+            var promotionDeviceIds = _reportDbClient.Query<PromotionDeviceIdsDto>("Service_PromotionBlockDeviceId_Get", p1);
+            var deviceGroupResult = promotionDeviceIds.GroupBy(x => x.DeviceId)
+                .Where(x => x.Count() >= claimPromotion.SameDeviceIdAvailableCount)
+                .Select(r => r)
+                .FirstOrDefault();
 
-            if (p1.Get<int>("_IsBlocked") == 1)
-            {
-                var userName = p1.Get<string>("_UserName");
+            if (deviceGroupResult == null) return result;
 
-                result.BonusErrorCode = BonusErrorCode.SameDeviceId;
-                result.IsBlockDeviceId = true;
-                result.ErrorMsg = $"Same Device：{deviceId} (Account：{userName})";
-                result.UseWhitelist = false;
-            }
+            var userName = deviceGroupResult.First().UserName;
+            result.BonusErrorCode = BonusErrorCode.SameDeviceId;
+            result.IsBlockDeviceId = true;
+            result.ErrorMsg = $"Same Device：{deviceGroupResult.Key} (Account：{userName})";
+            result.UseWhitelist = false;
 
             return result;
         }
@@ -146,17 +146,14 @@ namespace BonusService.Service.DAL
 
             var realNameCheckResult = compareNameInfo.Where(r => patterns.Contains(r.RealName)).ToList();
 
-            if (realNameCheckResult.Any() &&
-                realNameCheckResult.Count >= claimPromotion.SameRealNameRestrictAvailableCount)
-            {
-                var custInfo = realNameCheckResult.First();
-                result.BonusErrorCode = BonusErrorCode.SameRealName;
-                result.IsBlockRealName = true;
-                result.ErrorMsg = $"Same Full Name：{custInfo.RealName} (Account：{custInfo.UserName})";
-                result.UseWhitelist = false;
-                return result;
-            }
+            if (!realNameCheckResult.Any() ||
+                realNameCheckResult.Count < claimPromotion.SameRealNameRestrictAvailableCount) return result;
 
+            var custInfo = realNameCheckResult.First();
+            result.BonusErrorCode = BonusErrorCode.SameRealName;
+            result.IsBlockRealName = true;
+            result.ErrorMsg = $"Same Full Name：{custInfo.RealName} (Account：{custInfo.UserName})";
+            result.UseWhitelist = false;
             return result;
         }
 

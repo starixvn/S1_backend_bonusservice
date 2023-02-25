@@ -230,7 +230,11 @@ namespace BonusService.Service.BLL
 
             // 取玩家個人資訊、裝置、白名單設定
             var custInfo = _custInfoService.GetCustInfo(custId);
-            custInfo.DeviceId = _custInfoService.GetCustDeviceId(custInfo.CustId, custInfo.SiteId);
+            var custDeviceHistory = _custInfoService.GetCustDeviceId(custInfo.CustId, custInfo.SiteId).ToList();
+            custInfo.DeviceIds = custDeviceHistory.Select(r => r.DeviceId);
+            custInfo.CurrentUseDeviceId = custDeviceHistory.Any() ? 
+                custDeviceHistory.OrderByDescending(x => x.UpdateTime).Select(x => x.DeviceId).First()
+                : string.Empty;
             custInfo.CustIp = custIp;
             var custPromotionWhiteSetting = _custInfoService.GetCustPromotionWhiteSetting(custId);
 
@@ -832,15 +836,15 @@ namespace BonusService.Service.BLL
 
             Customer custInfo = null;
             if (request.IsLogin) custInfo = _custInfoService.GetCustInfo(request.CustId);
-            
+
 
             foreach (var promo in promotionList)
             {
                 if (request.IsLogin)
                 {
                     // 加入BlockTag 檢核過濾，如果有Tag命中，列表就不會有這筆
-                    if(BlockTagIgnorePromotion(custInfo.Tags, promo.BlockTags)) continue;
-                    
+                    if (BlockTagIgnorePromotion(custInfo.Tags, promo.BlockTags)) continue;
+
                     var custCondition = _promotionService.GetCustConditionInfo(request.CustId, request.CurrencyId,
                         request.SiteId, promo.BonusCode, request.DeviceType);
                     SetResult(promo, custCondition);
@@ -887,7 +891,7 @@ namespace BonusService.Service.BLL
         {
             var promotionList = _promotionService.GetSpecialPromotionList(request);
             var custInfo = _custInfoService.GetCustInfo(request.CustId);
-            
+
             var promotion = new List<CustPromotion>();
             foreach (var promo in promotionList)
             {
@@ -907,7 +911,7 @@ namespace BonusService.Service.BLL
 
         public List<CustPromotion> GetDepositPromotionList(CustPromotionRequest request)
         {
-            var promotionList = _promotionService.GetDepositPromotionList(request).Where(r=>r.BonusCode== "wentest0829");
+            var promotionList = _promotionService.GetDepositPromotionList(request).Where(r => r.BonusCode == "wentest0829");
             var custInfo = _custInfoService.GetCustInfo(request.CustId);
 
             var promotion = new List<CustPromotion>();
@@ -1286,7 +1290,7 @@ namespace BonusService.Service.BLL
             };
 
             // 如果玩家沒有 DeviceId 不檢查
-            if (string.IsNullOrEmpty(custInfo.DeviceId)) return result;
+            if (!custInfo.DeviceIds.Any()) return result;
 
             // 判斷 Promotion 是否有設定要檢查 Device
             if (!claimPromotion.SameDeviceIdRestrict) return result;
@@ -1300,7 +1304,7 @@ namespace BonusService.Service.BLL
             }
 
             // check db 相同 DeviceId 領取是否達到上限
-            result = _promotionService.CheckBlockDeviceIdFromDb(claimPromotion, custInfo.SiteId, custInfo.DeviceId);
+            result = _promotionService.CheckBlockDeviceIdFromDb(claimPromotion, custInfo.SiteId, custInfo.DeviceIds);
             return result;
         }
 
@@ -1390,7 +1394,7 @@ namespace BonusService.Service.BLL
                 bonusCode: promotion.BonusCode,
                 promotionType: promotion.PromotionType,
                 ip: custInfo.CustIp,
-                deviceId: custInfo.DeviceId,
+                deviceId: custInfo.CurrentUseDeviceId,
                 realName: custInfo.AccountName,
                 siteId: custInfo.SiteId,
                 custId: custInfo.CustId,
