@@ -911,7 +911,7 @@ namespace BonusService.Service.BLL
 
         public List<CustPromotion> GetDepositPromotionList(CustPromotionRequest request)
         {
-            var promotionList = _promotionService.GetDepositPromotionList(request).Where(r => r.BonusCode == "wentest0829");
+            var promotionList = _promotionService.GetDepositPromotionList(request);
             var custInfo = _custInfoService.GetCustInfo(request.CustId);
 
             var promotion = new List<CustPromotion>();
@@ -1087,7 +1087,6 @@ namespace BonusService.Service.BLL
         {
             var custInfo = _custInfoService.GetCustInfo(custId);
             var vipLevelWithBlockTagsSetting = _promotionService.GetVipLevelWithBlockTags(custInfo.SiteId, specialCode);
-
 
             if (vipLevelWithBlockTagsSetting.BlockTags.Any())
             {
