@@ -51,14 +51,16 @@ namespace BonusService.Service.DAL
                 UseWhitelist = false
             };
 
-            // check db 相同 IP 領取是否達到上限
-            var p1 = new DynamicParameters(new { _BonusCode = claimPromotion.BonusCode, _SiteId = siteId, _IP = custIP, _LimitCount = claimPromotion.SameIpRestrictAvailableCount });
-            p1.Add("_IsBlocked", dbType: DbType.Int32, direction: ParameterDirection.Output);
-            p1.Add("_UserName", dbType: DbType.String, direction: ParameterDirection.Output);
-            _reportDbClient.Execute("Service_PromotionBlockIp_Get", p1);
-            if (p1.Get<int>("_IsBlocked") == 1)
+            // check db 相同 IP 領取紀錄
+            var p1 = new DynamicParameters(new { _BonusCode = claimPromotion.BonusCode, _SiteId = siteId, _IP = custIP});
+            var sameIpList = _reportDbClient.Query<PromotionBlockIpsDto>("Service_PromotionBlockIp_Get", p1).ToList();
+
+            // 判斷相同 IP 是否超過領取上限
+            if (sameIpList.Count >= claimPromotion.SameIpRestrictAvailableCount)
             {
-                var userName = p1.Get<string>("_UserName");
+                var userName = sameIpList.OrderByDescending(x => x.CreateTime)
+                    .Select(r => r.UserName)
+                    .First();
 
                 result.BonusErrorCode = BonusErrorCode.SameIp;
                 result.IsBlockIp = true;
