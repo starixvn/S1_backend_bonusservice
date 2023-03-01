@@ -160,4 +160,11 @@ namespace BonusService.Service.Model
 
         public string DeviceId { get; set; }
     }
+
+    public class PromotionBlockIpsDto
+    {
+        public string UserName { get; set; }
+
+        public DateTime CreateTime { get; set; }
+    }
 }
