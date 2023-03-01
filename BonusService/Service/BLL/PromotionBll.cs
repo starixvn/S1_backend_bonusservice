@@ -709,7 +709,7 @@ namespace BonusService.Service.BLL
                 if (result > 0)
                 {
                     _withdrawalLimitService.SetWithdrawalLimit(bonusRewardInput.CustId, bonusRewardInput.UserName, bonusRewardInput.SiteId, bonusRewardInput.LockedAmount * -1,
-                        null, transId, (int)WithdrawalLimitLogCreateFromEnum.Bonus ,"System" ,out _, trans);
+                        0 ,null, transId, (int)WithdrawalLimitLogCreateFromEnum.Bonus ,"System" ,out _, trans);
                 }
                 else
                 {
