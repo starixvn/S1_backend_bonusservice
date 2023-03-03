@@ -52,7 +52,7 @@ namespace BonusService.Service.DAL
             };
 
             // check db 相同 IP 領取紀錄
-            var p1 = new DynamicParameters(new { _BonusCode = claimPromotion.BonusCode, _SiteId = siteId, _IP = custIP});
+            var p1 = new DynamicParameters(new { _BonusCode = claimPromotion.BonusCode, _SiteId = siteId, _IP = custIP });
             var sameIpList = _reportDbClient.Query<PromotionBlockIpsDto>("Service_PromotionBlockIp_Get", p1).ToList();
 
             // 判斷相同 IP 是否超過領取上限
@@ -80,11 +80,27 @@ namespace BonusService.Service.DAL
                 UseWhitelist = false
             };
 
-            // check db 相同 DeviceId 領取是否達到上限
-            var p1 = new DynamicParameters(new { _BonusCode = claimPromotion.BonusCode, _SiteId = siteId, _DeviceIDs = JsonConvert.SerializeObject(deviceIds) });
-            var promotionDeviceIds = _reportDbClient.Query<PromotionDeviceIdsDto>("Service_PromotionBlockDeviceId_Get", p1);
-            var deviceGroupResult = promotionDeviceIds.GroupBy(x => x.DeviceId)
-                .Where(x => x.Count() >= claimPromotion.SameDeviceIdAvailableCount)
+            var compareDeviceIdInfo = new List<CompareDeviceIdDto>();
+
+            // 找出領過相同 BonusCode 的 CustId + UserName + DeviceId
+            var p1 = new DynamicParameters(new { _BonusCode = claimPromotion.BonusCode, _SiteId = siteId });
+            var promotionDeviceIds = _reportDbClient.Query<PromotionDeviceIdsDto>("Service_PromotionBlockDeviceId_Get", p1).ToList();
+            AddPromotionDeviceIdToCompareList(compareDeviceIdInfo, promotionDeviceIds);
+
+            var custIds = promotionDeviceIds
+                .Select(r => r.CustId)
+                .Distinct()
+                .ToList();
+
+            // 找出領過相同 BonusCode 的人，曾經有哪些DeviceId
+            var custDeviceInfos = _custInfoService.GetCustDeviceId(custIds, siteId).ToList();
+            AddPromotionDeviceIdToCompareList(compareDeviceIdInfo, custDeviceInfos);
+
+            var deviceGroupResult = compareDeviceIdInfo
+                .DistinctBy(x => new { x.CustId, x.DeviceId })
+                .Where(r => deviceIds.Contains(r.DeviceId))
+                .GroupBy(x => x.DeviceId)
+                .Where(r => r.Count() >= claimPromotion.SameDeviceIdAvailableCount)
                 .Select(r => r)
                 .FirstOrDefault();
 
@@ -98,6 +114,27 @@ namespace BonusService.Service.DAL
 
             return result;
         }
+
+        private static void AddPromotionDeviceIdToCompareList(List<CompareDeviceIdDto> compareDeviceIdInfo, List<PromotionDeviceIdsDto> deviceIdInfo)
+        {
+            compareDeviceIdInfo.AddRange(deviceIdInfo.Select(r => new CompareDeviceIdDto
+            {
+                CustId = r.CustId,
+                UserName = r.UserName,
+                DeviceId = r.DeviceId
+            }));
+        }
+
+        public static void AddPromotionDeviceIdToCompareList(List<CompareDeviceIdDto> compareDeviceIdInfo, List<CustDeviceDto> deviceIdInfo)
+        {
+            compareDeviceIdInfo.AddRange(deviceIdInfo.Select(r => new CompareDeviceIdDto
+            {
+                CustId = r.CustId,
+                UserName = r.UserName,
+                DeviceId = r.DeviceId
+            }));
+        }
+
 
         /// <summary>
         /// 去 PromotionSuccessLog 找出領過相同 BonusCode 的紀錄，把 RealName 跟 custId 抓出來

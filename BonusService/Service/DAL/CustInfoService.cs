@@ -1,6 +1,7 @@
 ﻿using BonusService.Service.Model;
 using BonusService.Service.Library;
 using BonusService.Service.Model.enums;
+using Newtonsoft.Json;
 
 namespace BonusService.Service.DAL
 {
@@ -39,9 +40,9 @@ namespace BonusService.Service.DAL
             return _mainDbClient.QueryFirst<CustPromotionWhiteListSettingDto>("Service_CustPromotionWhiteList_Get", new { CustId = custId });
         }
 
-        public IEnumerable<CustDeviceDto> GetCustDeviceId(int custId, int siteId)
+        public IEnumerable<CustDeviceDto> GetCustDeviceId(IEnumerable<int> custIds, int siteId)
         {
-            var result = _reportDbClient.Query<CustDeviceDto>("Service_CustDeviceId_Get", new { _CustId = custId, _SiteId = siteId });
+            var result = _reportDbClient.Query<CustDeviceDto>("Service_CustDeviceId_Get", new { _CustIds = JsonConvert.SerializeObject(custIds) , _SiteId = siteId });
             return result;
         }
     }
