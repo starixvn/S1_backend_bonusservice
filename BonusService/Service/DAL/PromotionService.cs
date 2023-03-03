@@ -82,7 +82,7 @@ namespace BonusService.Service.DAL
 
             var compareDeviceIdInfo = new List<CompareDeviceIdDto>();
 
-            // 找出相同 BonusCode 領過的 CustId + UserName + DeviceId
+            // 找出領過相同 BonusCode 的 CustId + UserName + DeviceId
             var p1 = new DynamicParameters(new { _BonusCode = claimPromotion.BonusCode, _SiteId = siteId });
             var promotionDeviceIds = _reportDbClient.Query<PromotionDeviceIdsDto>("Service_PromotionBlockDeviceId_Get", p1).ToList();
             AddPromotionDeviceIdToCompareList(compareDeviceIdInfo, promotionDeviceIds);
