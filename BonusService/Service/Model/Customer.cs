@@ -122,6 +122,10 @@ namespace BonusService.Service.Model
 
     public class CustDeviceDto
     {
+        public int CustId { get; set; }
+
+        public string UserName { get; set; }
+
         public string DeviceId { get; set; }
 
         public DateTime UpdateTime { get; set; }
@@ -154,8 +158,20 @@ namespace BonusService.Service.Model
         public string RealName { get; set; }
     }
 
+    public class CompareDeviceIdDto
+    {
+        public int CustId { get; set; }
+
+        public string UserName { get; set; }
+
+        public string DeviceId { get; set; }
+    }
+
+
     public class PromotionDeviceIdsDto
     {
+        public int CustId { get; set; }
+
         public string UserName { get; set; }
 
         public string DeviceId { get; set; }
@@ -163,6 +179,8 @@ namespace BonusService.Service.Model
 
     public class PromotionBlockIpsDto
     {
+        public int CustId { get; set; }
+
         public string UserName { get; set; }
 
         public DateTime CreateTime { get; set; }

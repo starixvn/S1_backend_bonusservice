@@ -230,9 +230,9 @@ namespace BonusService.Service.BLL
 
             // 取玩家個人資訊、裝置、白名單設定
             var custInfo = _custInfoService.GetCustInfo(custId);
-            var custDeviceHistory = _custInfoService.GetCustDeviceId(custInfo.CustId, custInfo.SiteId).ToList();
+            var custDeviceHistory = _custInfoService.GetCustDeviceId(new List<int>() { custInfo.CustId }, custInfo.SiteId).ToList();
             custInfo.DeviceIds = custDeviceHistory.Select(r => r.DeviceId);
-            custInfo.CurrentUseDeviceId = custDeviceHistory.Any() ? 
+            custInfo.CurrentUseDeviceId = custDeviceHistory.Any() ?
                 custDeviceHistory.OrderByDescending(x => x.UpdateTime).Select(x => x.DeviceId).First()
                 : string.Empty;
             custInfo.CustIp = custIp;
