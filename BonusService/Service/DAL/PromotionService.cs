@@ -178,13 +178,12 @@ namespace BonusService.Service.DAL
             };
 
             // 檢查是否有相同
+            var realNameCheckResult = new List<CompareRealNameDto>();
             foreach (var name in patterns)
             {
-                compareNameInfo.Where(r => r.RealName.Equals(name, StringComparison.CurrentCultureIgnoreCase)).ToList();
+                realNameCheckResult.AddRange(compareNameInfo.Where(r => r.RealName.Equals(name, StringComparison.CurrentCultureIgnoreCase)).ToList());
             }
-
-            var realNameCheckResult = compareNameInfo.Where(r => patterns.Contains(r.RealName)).ToList();
-
+       
             if (!realNameCheckResult.Any() ||
                 realNameCheckResult.Count < claimPromotion.SameRealNameRestrictAvailableCount) return result;
 
