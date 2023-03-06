@@ -230,13 +230,13 @@ namespace BonusService.Controllers
                 {
                     result.ErrorCode = (int)SpecialCode.SpecialCodeError;
                 }
-                else if (_promotionBll.CheckScratchCardCode(request.SpecialCode.ToUpper()))
-                {
-                    result.ErrorCode = _promotionBll.SetScratchCardCode(request);
-                }
                 else if (!_promotionBll.CheckVipLevelWithBlockTags(request.CustId, request.SpecialCode))
                 {
                     result.ErrorCode = (int)SpecialCode.SpecialCodeVipLevelsOrBlockTagInvalid;
+                }
+                else if (_promotionBll.CheckScratchCardCode(request.SpecialCode.ToUpper()))
+                {
+                    result.ErrorCode = _promotionBll.SetScratchCardCode(request);
                 }
                 else
                 {
