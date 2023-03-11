@@ -15,6 +15,8 @@ namespace BonusService.Service.Workers
         private Timer timerDepositBonus;
         private DateTime LastChickDate;
         private readonly Random _random;
+        private int lastNumber = 0;
+        private int randomNumber = 0;
 
         public DepositBonusWorker(ILogger<DepositBonusWorker> logger, DepositBonusBLL depositBonusBLL, PromotionBll promotionBll)
         {
@@ -41,8 +43,14 @@ namespace BonusService.Service.Workers
                     depositBonusBLL.CheckDepositBonusExpired();
                 }
 
-                var depositBonusQueueCustList = depositBonusBLL.GetDepositBonusQueueCustList(_random.Next(950, 1000));
-                logger.LogInformation($"GetDepositBonusQueueCustList Data Count：{depositBonusQueueCustList?.Count()}");
+                while (lastNumber == randomNumber)
+                    randomNumber = _random.Next(950, 1000);
+
+                var depositBonusQueueCustList = depositBonusBLL.GetDepositBonusQueueCustList(randomNumber);
+                logger.LogInformation($"GetDepositBonusQueueCustList Data Count：{depositBonusQueueCustList?.Count()}. " +
+                    $"CustList={JsonConvert.SerializeObject(depositBonusQueueCustList.Select(x => x.CustId))}");
+
+                lastNumber = randomNumber;
 
                 foreach (var depositBonusQueue in depositBonusQueueCustList)
                 {
