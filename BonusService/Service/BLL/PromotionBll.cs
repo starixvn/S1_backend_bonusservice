@@ -206,11 +206,10 @@ namespace BonusService.Service.BLL
 
             return writeToLogErrorMsg;
         }
-
-        private void CancelAllWaitingBonus(int custId)
+        private void CancelAllWaitingBonus(int custId, int limit)
         {
             //當領取BONUS成功   將客戶DepositBonusQueue中的BONUS CANCEL掉
-            var BonusList = _promotionService.GetDepositBonusQueueByCustId(custId);
+            var BonusList = _promotionService.GetDepositBonusQueueByCustId(custId, limit);
             foreach (var depositBonus in BonusList)
             {
                 _depositBonusBll.SetDepositBonusStatus(depositBonus.TransId, (int)DepositBonusQueueStatus.Cancel_other_Bonus);
@@ -220,7 +219,7 @@ namespace BonusService.Service.BLL
         private void AfterRewardSuccess(AfterRewardSuccessInput input)
         {
             if (input.atPage != BonusInfoAtPage.Deposit)
-                CancelAllWaitingBonus(input.CustId);
+                CancelAllWaitingBonus(input.CustId, 50);
         }
 
         public async Task<ApiResult> SetClaimPromotionV2Async(int custId, string bonusCode, string custIp,
@@ -796,7 +795,7 @@ namespace BonusService.Service.BLL
                 if (result > 0)
                 {
                     _withdrawalLimitService.SetWithdrawalLimit(bonusRewardInput.CustId, bonusRewardInput.UserName, bonusRewardInput.SiteId, bonusRewardInput.LockedAmount * -1,
-                        0 ,null, transId, (int)WithdrawalLimitLogCreateFromEnum.Bonus ,"System" ,out _, trans);
+                        0, null, transId, (int)WithdrawalLimitLogCreateFromEnum.Bonus, "System", out _, trans);
                 }
                 else
                 {
@@ -1366,9 +1365,6 @@ namespace BonusService.Service.BLL
                 result.UseWhitelist = true;
                 return result;
             }
-
-
-         
 
             // check db 相同 RealName 領取是否達到上限
             result = _promotionService.CheckBlockRealNameFromDb(claimPromotion, custInfo.SiteId, custInfo.AccountName);

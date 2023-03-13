@@ -1,6 +1,8 @@
 ﻿using BonusService.Service.BLL;
 using BonusService.Service.Extensions;
 using BonusService.Service.Model.enums;
+using MySqlX.XDevAPI.Common;
+using Newtonsoft.Json;
 using Serilog.Context;
 
 namespace BonusService.Service.Workers
@@ -40,32 +42,36 @@ namespace BonusService.Service.Workers
                 }
 
                 var depositBonusQueueCustList = depositBonusBLL.GetDepositBonusQueueCustList(_random.Next(950, 1000));
-                logger.LogInformation($"GetDepositBonusQueueCustList Data Count：{depositBonusQueueCustList?.Count()}");
-                
+                logger.LogInformation($"GetDepositBonusQueueCustList Data Count：{depositBonusQueueCustList?.Count()}. " +
+                    $"CustList={JsonConvert.SerializeObject(depositBonusQueueCustList.Select(x => x.CustId))}");
+
                 foreach (var depositBonusQueue in depositBonusQueueCustList)
                 {
-                    var depositBonusList = depositBonusBLL.GetDepositBonusQueueByCustId(depositBonusQueue.CustId);
+                    var depositBonusList = depositBonusBLL.GetDepositBonusQueueByCustId(depositBonusQueue.CustId, _random.Next(50, 100));
                     foreach (var depositBonus in depositBonusList)
                     {
-                        
+
                         if (depositBonus.DepositStatus == (int)DepositStatusEnum.Approved)
                         {
                             var result = await _promotionBll.SetClaimPromotionV2Async(depositBonus.CustId, depositBonus.BonusCode, depositBonus.IP,
                                 depositBonus.LockedAmount, (int)PromotionDeviceType.All, BonusInfoAtPage.Deposit, depositBonus.TransId);
                             if (result.ErrorCode == 0)
                             {
-                                logger.LogInformation($"DoDepositBonus success TransId: {depositBonus.TransId}");
-                                depositBonusBLL.SetDepositBonusFinish(depositBonus.TransId, depositBonusQueue.CustId);
+                                logger.LogInformation($"CustId={depositBonusQueue.CustId} DoDepositBonus success TransId: {depositBonus.TransId}. SetClaimPromotion result={JsonConvert.SerializeObject(result)}");
+                                depositBonusBLL.SetDepositBonusFinish(depositBonus.TransId, depositBonusQueue.CustId, _random.Next(100, 150));
                                 break;
                             }
 
                             depositBonusBLL.SetDepositBonusStatus(depositBonus.TransId, (int)DepositBonusQueueStatus.Cancel_not_eligible);
                         }
-                       
-                        else if (depositBonus.DepositStatus is (int)DepositStatusEnum.Rejected or (int)DepositStatusEnum.Canceled or (int)DepositStatusEnum.Expired or (int)DepositStatusEnum.Error )
+
+                        else if (depositBonus.DepositStatus is (int)DepositStatusEnum.Rejected or (int)DepositStatusEnum.Canceled or (int)DepositStatusEnum.Expired or (int)DepositStatusEnum.Error)
                         {
+                            logger.LogInformation($"CustId={depositBonusQueue.CustId} TransId={depositBonus.TransId}. DpositStatus={Enum.GetName(typeof(DepositStatusEnum), depositBonus.DepositStatus)}. Change DepositBonusQueueStatus To Cancel_Rejected.");
                             depositBonusBLL.SetDepositBonusStatus(depositBonus.TransId, (int)DepositBonusQueueStatus.Cancel_Rejected);
                         }
+                        else
+                            logger.LogInformation($"CustId={depositBonusQueue.CustId} TransId={depositBonus.TransId}. DpositStatus={Enum.GetName(typeof(DepositStatusEnum), depositBonus.DepositStatus)}. Do nothing.");
                     }
                 }
 
@@ -80,7 +86,7 @@ namespace BonusService.Service.Workers
             }
 
         }
- 
+
         private DateTime GetUTC8Time()
         {
             return DateTime.UtcNow.AddHours(8);
