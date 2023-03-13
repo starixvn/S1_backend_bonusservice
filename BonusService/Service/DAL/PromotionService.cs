@@ -409,7 +409,7 @@ namespace BonusService.Service.DAL
                     _BonusCode = bonusCode,
                     _PromotionType = (int)promotionType,
                     _ErrorCode = errorCode,
-                    _ErrorReason = errorMsg,
+                    _ErrorReason = errorMsg ?? string.Empty,
                     _SiteId = siteId,
                     _CustId = custId,
                     _CurrencyId = currencyId
