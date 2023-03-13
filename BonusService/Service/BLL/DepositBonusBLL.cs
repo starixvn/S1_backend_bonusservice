@@ -24,9 +24,9 @@ namespace BonusService.Service.BLL
             return depositBonusService.GetDepositBonusQueueCustList(limit);
         }
 
-        public IEnumerable<DepositBonus> GetDepositBonusQueueByCustId(int custId)
+        public IEnumerable<DepositBonus> GetDepositBonusQueueByCustId(int custId, int limit)
         {
-                return _promotionService.GetDepositBonusQueueByCustId(custId);
+            return _promotionService.GetDepositBonusQueueByCustId(custId, limit);
         }
 
         public void CheckDepositBonusExpired()
@@ -64,13 +64,13 @@ namespace BonusService.Service.BLL
         {
             _logger.LogInformation($"Change DepositBonus Queue status TransId: {transId} status:{status} {GetDepositBonusQueueStatusComment(status)}");
 
-            return depositBonusService.SetDepositBonusStatus( transId, status);
+            return depositBonusService.SetDepositBonusStatus(transId, status);
         }
-        public int SetDepositBonusFinish(string transId, int custId)
+        public int SetDepositBonusFinish(string transId, int custId, int limit)
         {
-            var BonusList = GetDepositBonusQueueByCustId(custId);
+            var BonusList = GetDepositBonusQueueByCustId(custId, limit);
             foreach (var depositBonus in BonusList)
-            {              
+            {
                 if (depositBonus.TransId == transId)
                 {
                     SetDepositBonusStatus(depositBonus.TransId, (int)DepositBonusQueueStatus.Finish);
