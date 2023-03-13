@@ -1088,7 +1088,7 @@ namespace BonusService.Service.BLL
             var custInfo = _custInfoService.GetCustInfo(custId);
             var vipLevelWithBlockTagsSetting = _promotionService.GetVipLevelWithBlockTags(custInfo.SiteId, specialCode);
 
-            if (vipLevelWithBlockTagsSetting.BlockTags.Any())
+            if (vipLevelWithBlockTagsSetting is { BlockTags: { } } && vipLevelWithBlockTagsSetting.BlockTags.Any())
             {
                 // 取交集
                 var intersectTagResult = custInfo.Tags.Intersect(vipLevelWithBlockTagsSetting.BlockTags).ToList();
@@ -1096,7 +1096,7 @@ namespace BonusService.Service.BLL
                 if (intersectTagResult.Any()) return false;
             }
 
-            if (vipLevelWithBlockTagsSetting.VipLevels.Any())
+            if (vipLevelWithBlockTagsSetting is { VipLevels: { } } && vipLevelWithBlockTagsSetting.VipLevels.Any())
             {
                 // 如果 Vip Level 命中就可以領
                 return vipLevelWithBlockTagsSetting.VipLevels.Any(x => x.Equals(custInfo.UserLevel));
