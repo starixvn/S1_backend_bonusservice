@@ -207,10 +207,10 @@ namespace BonusService.Service.BLL
             return writeToLogErrorMsg;
         }
 
-        private void CancelAllWaitingBonus(int custId)
+        private void CancelAllWaitingBonus(int custId, int limit)
         {
             //當領取BONUS成功   將客戶DepositBonusQueue中的BONUS CANCEL掉
-            var BonusList = _promotionService.GetDepositBonusQueueByCustId(custId);
+            var BonusList = _promotionService.GetDepositBonusQueueByCustId(custId, limit);
             foreach (var depositBonus in BonusList)
             {
                 _depositBonusBll.SetDepositBonusStatus(depositBonus.TransId, (int)DepositBonusQueueStatus.Cancel_other_Bonus);
@@ -220,7 +220,7 @@ namespace BonusService.Service.BLL
         private void AfterRewardSuccess(AfterRewardSuccessInput input)
         {
             if (input.atPage != BonusInfoAtPage.Deposit)
-                CancelAllWaitingBonus(input.CustId);
+                CancelAllWaitingBonus(input.CustId, 50);
         }
 
         public async Task<ApiResult> SetClaimPromotionV2Async(int custId, string bonusCode, string custIp,

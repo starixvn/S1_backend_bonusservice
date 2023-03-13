@@ -183,7 +183,7 @@ namespace BonusService.Service.DAL
             {
                 realNameCheckResult.AddRange(compareNameInfo.Where(r => r.RealName.Equals(name, StringComparison.CurrentCultureIgnoreCase)).ToList());
             }
-       
+
             if (!realNameCheckResult.Any() ||
                 realNameCheckResult.Count < claimPromotion.SameRealNameRestrictAvailableCount) return result;
 
@@ -273,9 +273,9 @@ namespace BonusService.Service.DAL
             return result;
         }
 
-        public IEnumerable<DepositBonus> GetDepositBonusQueueByCustId(int custId)
+        public IEnumerable<DepositBonus> GetDepositBonusQueueByCustId(int custId, int limit)
         {
-            return _mainDbClient.Query<DepositBonus>("Service_DepositBonusQueueByCustId_Get", new { CustId = custId });
+            return _mainDbClient.Query<DepositBonus>("Service_DepositBonusQueueByCustId_Get_V2", new { CustId = custId, Limit = limit });
         }
 
         public IEnumerable<CashBackDetails> GetCustCashBack(int custId, int siteId, int currencyId, CustPromotion promotion, string calculateDate)
