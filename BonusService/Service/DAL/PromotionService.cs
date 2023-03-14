@@ -400,7 +400,7 @@ namespace BonusService.Service.DAL
         /// <param name="custId"></param>
         /// <param name="currencyId"></param>
         /// <returns></returns>
-        public int InsertPromotionFailLog(string bonusCode, PromotionType promotionType, int errorCode, string errorMsg,
+        public int InsertPromotionFailLog(string bonusCode, PromotionType promotionType, BonusErrorCode errorCode, string errorMsg,
             int siteId, int custId, int currencyId)
         {
             return _mainDbClient.Execute("Service_PromotionReceiveFailLog_Ins",
@@ -408,14 +408,13 @@ namespace BonusService.Service.DAL
                 {
                     _BonusCode = bonusCode,
                     _PromotionType = (int)promotionType,
-                    _ErrorCode = errorCode,
-                    _ErrorReason = errorMsg ?? string.Empty,
+                    _ErrorCode = (int)errorCode,
+                    _ErrorReason = errorMsg ?? errorCode.ToString(),
                     _SiteId = siteId,
                     _CustId = custId,
                     _CurrencyId = currencyId
                 }));
         }
-
 
         /// <summary>
         /// 寫入 Bonus 領取成功 log
