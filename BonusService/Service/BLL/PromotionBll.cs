@@ -1087,6 +1087,7 @@ namespace BonusService.Service.BLL
             var custInfo = _custInfoService.GetCustInfo(custId);
             var vipLevelWithBlockTagsSetting = _promotionService.GetVipLevelWithBlockTags(custInfo.SiteId, specialCode);
 
+           
             if (vipLevelWithBlockTagsSetting is { BlockTags: { } } && vipLevelWithBlockTagsSetting.BlockTags.Any())
             {
                 // 取交集
@@ -1376,7 +1377,7 @@ namespace BonusService.Service.BLL
             return _promotionService.InsertPromotionFailLog(
                 bonusCode: promotion.BonusCode,
                 promotionType: promotion.PromotionType,
-                errorCode: (int)bonusErrorCode,
+                errorCode: bonusErrorCode,
                 errorMsg: errorMsg,
                 siteId: custInfo.SiteId,
                 custId: custInfo.CustId,
