@@ -31,7 +31,7 @@ if (!string.IsNullOrEmpty(serviceType) && serviceType.Equals("worker", StringCom
         .AddHostedService<ExpiredBonusWorker>()
         .AddHostedService<ReferralWorker>()
         .AddHostedService<VipUpgradeWorker>()
-        // .AddHostedService<VipRebateWorker>()
+        .AddHostedService<VipRebateWorker>()
         .AddHostedService<VipCashBackWorker>()
         .AddHostedService<PromotionAutoExtendWorker>()
         .AddHostedService<DepositBonusWorker>()
