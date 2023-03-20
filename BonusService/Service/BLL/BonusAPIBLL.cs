@@ -140,7 +140,7 @@ namespace BonusService.Service.BLL
                     var title = string.Format(_selLangBll.GetResourceValue("lbl_VerificationRewardLimitTitle", custInfo.UserLang));
                     var content = string.Format(_selLangBll.GetResourceValue("lbl_VerificationRewardLimit", custInfo.UserLang),
                         currencyName,leftAmountLimit.ToString("#,##0.##"));
-                    _messageService.SendMessage(custInfo.SiteId, "System", title, content, custInfo.CustId, custInfo.UserName, custInfo.UserLang);
+                    _messageService.SendMessage(new Message("System", custInfo.CustId, custInfo.UserLang, title, content));
 
                 }
                 return result;
@@ -173,7 +173,7 @@ namespace BonusService.Service.BLL
                 var content = string.Format(_selLangBll.GetResourceValue("lbl_VerificationRewardContent", custInfo.UserLang),
                     currencyName,
                     reward.ToString("#,##0.##"));
-                _messageService.SendMessage(custInfo.SiteId, "System", title, content, custInfo.CustId, custInfo.UserName, custInfo.UserLang);
+                _messageService.SendMessage(new Message("System", custInfo.CustId, custInfo.UserLang, title, content));
             }
             
             return result;

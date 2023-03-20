@@ -53,12 +53,12 @@ namespace BonusService.Service.BLL
                         dAmount /= 1000;
                     }
                     var referredMessage = string.Format($"{selLangBLL.GetResourceValue("lbl_ReferredBonusCreditedMsg", paidReferral.UserLang)}", $"{referralFreeCredit:#,##0.##}");
-                    messageService.SendMessage(paidReferral.SiteId, "Bonus Service", title, referredMessage, paidReferral.CustId, paidReferral.UserName, paidReferral.UserLang);
+                    messageService.SendMessage(new Message("System", paidReferral.CustId, paidReferral.UserLang, title, referredMessage));
                     
                     msg.AppendLine($"{paidReferral.UserName}: {dAmount:#,##0.##}");
                 }
 
-                messageService.SendMessage(custInfo.SiteId, "Bonus Service", title, msg.ToString(), custInfo.CustId, custInfo.UserName, custInfo.UserLang);
+                messageService.SendMessage(new Message("System", custInfo.CustId, custInfo.UserLang, title, msg.ToString()));
             }
 
             return result;
