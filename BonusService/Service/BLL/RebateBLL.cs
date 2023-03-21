@@ -100,9 +100,9 @@ namespace BonusService.Service.BLL
             var excludeGameList = GetExcludeGameList(siteId);
             foreach (var vipRebateTpBetRecord in vipRebateTpBetRecordList)
             {
-                if (vipRebateTpBetRecord.SettledDate >= excludeDate
-                    && excludeGameList.TryGetValue(vipRebateTpBetRecord.GameType, out var gameTypeExcludeGameList)
-                    && gameTypeExcludeGameList.ContainsKey(vipRebateTpBetRecord.GameID))
+                if (vipRebateTpBetRecord.SettledDate >= excludeDate &&
+                    excludeGameList.TryGetValue(vipRebateTpBetRecord.GameType, out var gameTypeExcludeGameList) &&
+                    gameTypeExcludeGameList.ContainsKey(vipRebateTpBetRecord.GameID))
                 {
                     vipRebateTpBetRecord.RedeemAmount = 0;
                 }
