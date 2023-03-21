@@ -2,6 +2,8 @@
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
 
+using Dapper;
+
 namespace BonusService.Service.DAL
 {
     public class RebateService
@@ -16,6 +18,11 @@ namespace BonusService.Service.DAL
         public IEnumerable<TpCategory> GetTpCategoryList()
         {
             return _reportDbClient.Query<TpCategory>("Common_TpCategory_Get");
+        }
+
+        public IEnumerable<RebateExcludeGame> GetExcludeGameList(int SiteId)
+        {
+            return _reportDbClient.Query<RebateExcludeGame>("Service_RebateExcludeGame_Get", new DynamicParameters(new { SiteId }));
         }
     }
 }
