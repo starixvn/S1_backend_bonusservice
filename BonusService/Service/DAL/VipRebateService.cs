@@ -137,9 +137,7 @@ namespace BonusService.Service.DAL
                     }
                 }
             }
-            trans.Commit();
-            conn.Close();
-            conn.Dispose();
+            _mainDbClient.CommitAndDisposeConnection(conn, trans);
             return result;
         }
         
