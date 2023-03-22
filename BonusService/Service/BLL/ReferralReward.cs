@@ -112,11 +112,13 @@ namespace BonusService.Service.BLL
             
             if (result > 0)
             {
-                trans.Commit();
+                _mainDbClient.CommitAndDisposeConnection(conn, trans);
             }
-
-            conn.Close();
-            conn.Dispose();
+            else
+            {
+                _mainDbClient.RollbackAndDisposeConnection(conn, trans);
+            }
+            
             return result;
         }
     }

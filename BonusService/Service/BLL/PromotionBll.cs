@@ -273,7 +273,7 @@ namespace BonusService.Service.BLL
             }
 
             await using var conn = _mainDbClient.GetMySqlConnection();
-            conn.Open();
+            await conn.OpenAsync();
             await using var trans = await conn.BeginTransactionAsync();
 
             var calculateBonus = CalculateBonus(claimPromotion, custConditionInfo.Amount,
@@ -336,11 +336,15 @@ namespace BonusService.Service.BLL
                     custIp, trans);
                 if (result > 0)
                 {
-                    trans.Commit();
+                    await _mainDbClient.CommitAndDisposeConnectionAsync(conn, trans);
                     InsertPromotionSuccessLog(custInfo, claimPromotion, verifyResult.UseWhitelist);
                 }
             }
 
+            if (result <= 0)
+            {
+                await _mainDbClient.RollbackAndDisposeConnectionAsync(conn, trans);
+            }
 
             var apiResult = new ApiResult();
 
@@ -432,7 +436,7 @@ namespace BonusService.Service.BLL
             }
 
             await using var conn = _mainDbClient.GetMySqlConnection();
-            conn.Open();
+            await conn.OpenAsync();
             await using var trans = await conn.BeginTransactionAsync();
 
             var calculateBonus = CalculateBonus(claimPromotion, amount, lockedAmount, custId,
@@ -482,7 +486,12 @@ namespace BonusService.Service.BLL
                 result = _promotionService.AfterReward(claimPromotion, custInfo.SiteId, bonusCode, custInfo.CurrencyId,
                     null, trans);
                 if (result > 0)
-                    trans.Commit();
+                    await _mainDbClient.CommitAndDisposeConnectionAsync(conn, trans);
+            }
+
+            if (result <= 0)
+            {
+                await _mainDbClient.RollbackAndDisposeConnectionAsync(conn, trans);
             }
 
             if (result > 0)
