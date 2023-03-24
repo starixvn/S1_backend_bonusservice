@@ -29,6 +29,8 @@ namespace BonusService.Service.Model
         public string Details { get; set; }
         public int PromotionAction { get; set; }
         public string TierAmount { get; set; }
+        public WalletType WalletType { get; set; }
+
         public IEnumerable<TierAmount> TierAmountList
         {
             get
@@ -211,7 +213,7 @@ namespace BonusService.Service.Model
     public class CustPromotion : Promotion
     {
         public string Banner { get; set; }
-        public int WalletType { get; set; }
+        
         public decimal CustRollOver { get; set; }
         public decimal CustTurnOver { get; set; }
         public int Status { get; set; }
