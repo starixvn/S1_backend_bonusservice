@@ -1,91 +1,74 @@
 ﻿using BonusService.Service.BLL;
 using BonusService.Service.Extensions;
+using Newtonsoft.Json;
 using Serilog.Context;
 
 namespace BonusService.Service.Workers
 {
     public class PromotionAutoExtendWorker : BackgroundService
     {
-        private readonly ILogger<PromotionAutoExtendWorker> logger;
-        private readonly PromotionAutoExtendBLL promotionAutoExtendBLL;
-        private Timer timerPromotionAutoExtend;
-        private DateTime ExecutTime;
-        private string SpecificDate = null;
+        private readonly ILogger<PromotionAutoExtendWorker> _logger;
+        private readonly PromotionAutoExtendBLL _promotionAutoExtendBll;
+        private Timer _timerPromotionAutoExtend;
+        private readonly string _specificDate = null;
+        private readonly Random _random;
 
-        public PromotionAutoExtendWorker(ILogger<PromotionAutoExtendWorker> logger, PromotionAutoExtendBLL promotionAutoExtendBLL)
+        public PromotionAutoExtendWorker(ILogger<PromotionAutoExtendWorker> logger, PromotionAutoExtendBLL promotionAutoExtendBll)
         {
-            this.logger = logger;
-            this.promotionAutoExtendBLL = promotionAutoExtendBLL;
+            _logger = logger;
+            _promotionAutoExtendBll = promotionAutoExtendBll;
+            _random = new Random();
         }
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             //this.SpecificDate = "2021-06-04 03:00:00";
-            timerPromotionAutoExtend = new Timer(PromotionAutoExtendTaskAsync, null, TimeSpan.Zero, TimeSpan.Zero);
+            _timerPromotionAutoExtend = new Timer(PromotionAutoExtendTaskAsync, null, TimeSpan.Zero, TimeSpan.Zero);
 
             return Task.CompletedTask;
         }
-        private async void PromotionAutoExtendTaskAsync(object state)
+        private void PromotionAutoExtendTaskAsync(object state)
         {
             LogContext.PushProperty("RequestId", Guid.NewGuid().ToString());
-            var nCount = 0;
             try
             {
-                if (GetUTC8Time().Date != ExecutTime.Date)
+                _logger.LogInformation("Promotion Auto Extend Task Start");
+                var data = _promotionAutoExtendBll.GetAutoExtendPromotionExpiredList(_specificDate, _random.Next(950, 1000));
+                _logger.LogInformation($"GetTransferBonusExpired Data Count：{data.Count()}");
+                if (data.Any())
                 {
-                    nCount = 0;
-                    var data = promotionAutoExtendBLL.GetAutoExtendPromotionExpiredList(SpecificDate);
-                    nCount = data.Count();
-                    if (data.Any())
+                    foreach (var item in data)
                     {
-                        var allTasks = new List<Task>();
-                        foreach (var item in data)
+                        try
                         {
-                            //promotionAutoExtendBLL.SetPromotionExtend(item);
-                            allTasks.Add(Task.Run(() =>
-                            {
-                                try
-                                {
-                                    promotionAutoExtendBLL.SetPromotionExtend(item);
-                                }
-                                catch (Exception ex)
-                                {
-                                    logger.LogError(ex, MethodExtension.GetCurrentAsyncMethod());
-                                }
-                            }));
-
-                            if (allTasks.Count >= 4)
-                            {
-                                await Task.WhenAll(allTasks);
-                                allTasks.Clear();
-                            }
+                            var result = _promotionAutoExtendBll.SetPromotionExtend(item);
+                            var status = result > 0 ? "Success" : "Fail";
+                            _logger.LogInformation($"Promotion Auto Extend Status = {status}, Value = {JsonConvert.SerializeObject(item)}");
                         }
-                        
-
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, MethodExtension.GetCurrentAsyncMethod());
+                        }
                     }
-                   
-                    ExecutTime = GetUTC8Time();
-                    Console.WriteLine($"Promotion Auto Extend finish in {ExecutTime} nCount = {nCount}");
+
+
                 }
+
+                _logger.LogInformation($"Promotion Auto Extend Task finish in {DateTime.UtcNow.AddHours(8)} nCount = {data.Count()}");
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, MethodExtension.GetCurrentAsyncMethod());
+                _logger.LogError(ex, MethodExtension.GetCurrentAsyncMethod());
             }
             finally
             {
-
-                timerPromotionAutoExtend.Change(TimeSpan.FromHours(1), TimeSpan.Zero);
-                //timerPromotionAutoExtend.Change(TimeSpan.FromMinutes(5), TimeSpan.Zero);
+                _timerPromotionAutoExtend.Change(TimeSpan.FromHours(1), TimeSpan.Zero);
             }
 
         }
-        private DateTime GetUTC8Time()
-        {
-            return new DateTimeOffset(DateTime.Now).ToOffset(new TimeSpan(8, 0, 0)).DateTime;
-        }
+
         public override Task StopAsync(CancellationToken cancellationToken)
         {
-            timerPromotionAutoExtend?.Change(Timeout.Infinite, 0);
+            _timerPromotionAutoExtend?.Change(Timeout.Infinite, 0);
             return Task.CompletedTask;
         }
     }
