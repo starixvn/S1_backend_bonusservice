@@ -85,7 +85,8 @@ namespace BonusService.UnitTest
                 new() { SettledDate = new DateTime(2023,04,01), CategoryId = 2, GameType = 68, GameID = gameId, RedeemAmount = 100, ValidBet = 10000, Percentage = 1}
             });
             var rebatePayoutLimits = new List<RebatePayoutLimit>();
-            var result = _rebateBLL.PayoutVipRebate(siteId, vipRebateInfo, _vipRebateTpBetRecordList, rebatePayoutLimits);
+            var RelId = DateTime.Now.Ticks;
+            var result = _rebateBLL.PayoutVipRebate(siteId, vipRebateInfo, _vipRebateTpBetRecordList, rebatePayoutLimits, RelId);
             if (result > 0)
             {
                 return GetRebateAmount();
