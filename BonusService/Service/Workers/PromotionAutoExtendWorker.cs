@@ -29,6 +29,8 @@ namespace BonusService.Service.Workers
         private void PromotionAutoExtendTaskAsync(object state)
         {
             LogContext.PushProperty("RequestId", Guid.NewGuid().ToString());
+            var success = 0;
+            var fail = 0;
             try
             {
                 _logger.LogInformation("Promotion Auto Extend Task Start");
@@ -43,17 +45,25 @@ namespace BonusService.Service.Workers
                             var result = _promotionAutoExtendBll.SetPromotionExtend(item);
                             var status = result > 0 ? "Success" : "Fail";
                             _logger.LogInformation($"Promotion Auto Extend Status = {status}, Value = {JsonConvert.SerializeObject(item)}");
+                            
+                            if (result > 0)
+                            {
+                                success++;
+                            }
+                            else
+                            {
+                                fail++;
+                            }
                         }
                         catch (Exception ex)
                         {
+                            fail++;
                             _logger.LogError(ex, MethodExtension.GetCurrentAsyncMethod());
                         }
                     }
-
-
                 }
 
-                _logger.LogInformation($"Promotion Auto Extend Task finish in {DateTime.UtcNow.AddHours(8)} nCount = {data.Count()}");
+                _logger.LogInformation($"Promotion Auto Extend Task finish in {DateTime.UtcNow.AddHours(8)}, Total = {data.Count()}, Success = {success}, Fail = {fail}");
             }
             catch (Exception ex)
             {
