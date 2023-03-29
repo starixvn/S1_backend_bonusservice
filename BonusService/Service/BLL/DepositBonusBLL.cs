@@ -77,7 +77,7 @@ namespace BonusService.Service.BLL
                 }
                 else
                 {
-                    _logger.LogError($"DoDepositBonus cancel TransId: {transId} || {JsonConvert.SerializeObject(depositBonus)}");
+                    _logger.LogWarning($"DoDepositBonus cancel TransId: {transId} || {JsonConvert.SerializeObject(depositBonus)}");
                     SetDepositBonusStatus(depositBonus.TransId, (int)DepositBonusQueueStatus.Cancel_other_Bonus);
                 }
             }

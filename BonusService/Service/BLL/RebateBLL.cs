@@ -79,7 +79,7 @@ namespace BonusService.Service.BLL
                         //}
                         break;
                     default:
-                        _logger.LogError($"task.PeriodType is Invaild. task value={JsonConvert.SerializeObject(task)}.");
+                        _logger.LogWarning($"task.PeriodType is Invaild. task value={JsonConvert.SerializeObject(task)}.");
                         continue;
                 }
 
