@@ -63,7 +63,7 @@ namespace BonusService.Service.BLL
                                     ReferralAmount = rr.BonusAmount, Memo = "", RelId = tc, RewardStatus = 1
                                 });
                             
-                            result = _withdrawalLimitAdapter.SetWithdrawalLimit(rr.CustId, rr.UserName, rr.SiteId, rr.ReferralFreeCredit, $"Referral Free Credit: {rr.ReferralFreeCredit:#,##0.##}", "N/A", out _, trans);
+                            result = _withdrawalLimitAdapter.SetWithdrawalLimit(rr.CustId, rr.UserName, rr.SiteId, rr.ReferralFreeCredit, $"Referral Free Credit: {rr.ReferralFreeCredit:#,##0.##}", "N/A",(int) WithdrawalLimitLogCreateFromEnum.ReferralReward, "System" , out _, trans);
                             payAmount += rr.BonusAmount;
                             paidReferralList.Add(rr);
                             remaining -= 1;
@@ -106,17 +106,19 @@ namespace BonusService.Service.BLL
 
                     var rollOver = 1 * payAmount;
                     if (rollOver > 0)
-                        result = _withdrawalLimitAdapter.SetWithdrawalLimit(agent.AgentId, agent.AgentName, agent.SiteId, rollOver, $"Referral Bonus: {rollOver:#,##0.##}", "N/A", out _, trans);
+                        result = _withdrawalLimitAdapter.SetWithdrawalLimit(agent.AgentId, agent.AgentName, agent.SiteId, rollOver, $"Referral Bonus: {rollOver:#,##0.##}", "N/A", (int) WithdrawalLimitLogCreateFromEnum.ReferralReward, "System" ,out _, trans);
                 }
             }
             
             if (result > 0)
             {
-                trans.Commit();
+                _mainDbClient.CommitAndDisposeConnection(conn, trans);
             }
-
-            conn.Close();
-            conn.Dispose();
+            else
+            {
+                _mainDbClient.RollbackAndDisposeConnection(conn, trans);
+            }
+            
             return result;
         }
     }

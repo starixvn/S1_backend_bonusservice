@@ -82,7 +82,7 @@ namespace BonusService.Service.DAL
                     apiResult.Message = "SetBalance fail";
                     return apiResult;
                 }
-                result = _withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, reward, null, transId, out _, trans);
+                result = _withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, reward, 0 , null, transId, (int) WithdrawalLimitLogCreateFromEnum.VerificationReward, "System" ,out _, trans);
                 if (result <= 0)
                 {
                     apiResult.Message = "SetWithdrawalLimit fail";
@@ -96,7 +96,8 @@ namespace BonusService.Service.DAL
                     return apiResult;
                 }
 
-                trans.Commit();
+                _mainDbClient.CommitAndDisposeConnection(conn, trans);
+                
                 if(result>0)
                 {
                     apiResult.ErrorCode = 0;
@@ -106,9 +107,6 @@ namespace BonusService.Service.DAL
                 {
                     apiResult.Message = "UnKnow Fail";
                 }
-                
-                conn.Close();
-                conn.Dispose();
             }
             catch (Exception ex)
             {

@@ -51,8 +51,8 @@ namespace BonusService.Service.DAL
                 if (result >= 0)
                 {
                     result = _withdrawalLimitService.SetWithdrawalLimit(expiredBonus.CustId, expiredBonus.UserName,
-                        expiredBonus.SiteId, expiredBonus.Refund, "CancelBonus", expiredBonus.BonusId.ToString(),
-                        out _, trans);
+                        expiredBonus.SiteId, expiredBonus.Refund, 0 ,"CancelBonus", expiredBonus.BonusId.ToString(),
+                        (int) WithdrawalLimitLogCreateFromEnum.Bonus, "System" , out _, trans);
                 }
             }
 
@@ -85,11 +85,13 @@ namespace BonusService.Service.DAL
 
             if (result >= 0)
             {
-                trans.Commit();
+                _mainDbClient.CommitAndDisposeConnection(conn, trans);
+            }
+            else
+            {
+                _mainDbClient.RollbackAndDisposeConnection(conn, trans);
             }
             
-            conn.Close();
-            conn.Dispose();
             return result;
         }
     }
