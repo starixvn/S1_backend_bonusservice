@@ -46,7 +46,7 @@ namespace BonusService.Service.DAL
             return _reportDbClient.Query<RebateTask>("Service_VipRebateTask_Get_V2");
         }
 
-        public int PayoutVipRebate(int siteId, VipRebateInfo rebateInfo, IEnumerable<VipRebateTpBetRecord> rebateTpBetRecordList, IEnumerable<RebatePayoutLimit> rebatePayoutLimits, out decimal payAmount, out Dictionary<int, decimal> rebateResultList)
+        public int PayoutVipRebate(int siteId, VipRebateInfo rebateInfo, IEnumerable<VipRebateTpBetRecord> rebateTpBetRecordList, IEnumerable<RebatePayoutLimit> rebatePayoutLimits, out decimal payAmount, out Dictionary<int, decimal> rebateResultList, long RelId)
         {
             var result = 0;
             using var conn = _mainDbClient.GetMySqlConnection();
@@ -58,9 +58,7 @@ namespace BonusService.Service.DAL
             var rebateGametypeLogList = new Dictionary<int, decimal>();   // 使用GameType分類加總金額
             var rebateCategoryLogList = new Dictionary<int, decimal>();   // 使用Category分類加總金額
             rebateResultList = new Dictionary<int, decimal>();            // 檢查上下限額後最後實際發出的金額
-
-            var tc = DateTime.Now.Ticks;
-
+         
             foreach (var rebateTpBetRecord in rebateTpBetRecordList)
             {
                 //寫入原始計算資料到RebateRecord
@@ -71,7 +69,7 @@ namespace BonusService.Service.DAL
                     rebateTpBetRecord.ValidBet, 
                     rebateTpBetRecord.Percentage, 
                     rebateTpBetRecord.RedeemAmount, 
-                    (int)promotionType, tc, trans);
+                    (int)promotionType, RelId, trans);
 
                 //四捨五入
                 rebateTpBetRecord.RedeemAmount = _common.Floor(rebateTpBetRecord.RedeemAmount, 2);
@@ -129,7 +127,7 @@ namespace BonusService.Service.DAL
                     MinPayout = rebatePayoutLimit?.MinPayout ?? 0m,
                     MaxPayout = rebatePayoutLimit?.MaxPayout ?? 0m,
                     Memo = "",
-                    RelId = tc
+                    RelId = RelId
                 });
 
                 if (redeemAmount > 0)
@@ -147,14 +145,14 @@ namespace BonusService.Service.DAL
                 if (result > 0)
                 {
                     //寫入發放總金額紀錄
-                    _mainDbClient.Execute("Common_RebateMLog_Ins", trans , new { CustId = rebateInfo.CustId, CurrencyId = rebateInfo.CurrencyId, RebateType = RebateType.VipRebate, UserName = rebateInfo.UserName, SiteId = siteId, RedeemAmount = payAmount, Memo = "", BonusCode = "VipRebate", RelId = tc });
+                    _mainDbClient.Execute("Common_RebateMLog_Ins", trans , new { CustId = rebateInfo.CustId, CurrencyId = rebateInfo.CurrencyId, RebateType = RebateType.VipRebate, UserName = rebateInfo.UserName, SiteId = siteId, RedeemAmount = payAmount, Memo = "", BonusCode = "VipRebate", RelId = RelId });
 
                     if (result > 0)
                     {
                         //寫入Rebate GameType Log紀錄
                         foreach (var rebateLog in rebateGametypeLogList)
                         {
-                            _mainDbClient.Execute("Common_RebateLog_Ins", trans ,new { CustId = rebateInfo.CustId, CurrencyId = rebateInfo.CurrencyId, GameType = rebateLog.Key, RebateType = RebateType.VipRebate, UserName = rebateInfo.UserName, SiteId = siteId, RedeemAmount = rebateLog.Value, Memo = "", BonusCode = "VipRebate", RelId = tc });
+                            _mainDbClient.Execute("Common_RebateLog_Ins", trans ,new { CustId = rebateInfo.CustId, CurrencyId = rebateInfo.CurrencyId, GameType = rebateLog.Key, RebateType = RebateType.VipRebate, UserName = rebateInfo.UserName, SiteId = siteId, RedeemAmount = rebateLog.Value, Memo = "", BonusCode = "VipRebate", RelId = RelId });
                         }
                     }
                 }

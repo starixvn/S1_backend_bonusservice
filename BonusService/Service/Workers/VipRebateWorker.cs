@@ -53,7 +53,9 @@ namespace BonusService.Service.Workers
 
                             if (rebateTpBetRecordList != null && rebateTpBetRecordList.Any())
                             {
-                                _rebateBll.PayoutVipRebate(rebateTask.SiteId, rebateInfo, rebateTpBetRecordList, rebatePayoutLimit);
+                                var RelId = DateTime.Now.Ticks;
+                                LogContext.PushProperty("RelId", RelId.ToString());
+                                _rebateBll.PayoutVipRebate(rebateTask.SiteId, rebateInfo, rebateTpBetRecordList, rebatePayoutLimit, RelId);
                             }
                         }
                         

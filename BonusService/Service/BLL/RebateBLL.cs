@@ -90,7 +90,7 @@ namespace BonusService.Service.BLL
         {
             return _vipRebateService.GetVipRebateCustList(siteId, currencyId, periodType, specificDate, currencyTimeZone);
         }
-        public int PayoutVipRebate(int siteId, VipRebateInfo vipRebateInfo, IEnumerable<VipRebateTpBetRecord> vipRebateTpBetRecordList, IEnumerable<RebatePayoutLimit> rebatePayoutLimits)
+        public int PayoutVipRebate(int siteId, VipRebateInfo vipRebateInfo, IEnumerable<VipRebateTpBetRecord> vipRebateTpBetRecordList, IEnumerable<RebatePayoutLimit> rebatePayoutLimits, long RelId)
         {
             //原始資料包含相同GameType不同GameId的資料，先用GameId排除不計算Rebate的遊戲
             var excludeDate = _webHostEnvironment.IsDevelopment() 
@@ -129,7 +129,7 @@ namespace BonusService.Service.BLL
                         }).ToList();
             _logger.LogInformation($"gameTypeRebateList:{JsonConvert.SerializeObject(gameTypeRebateList)}");
 
-            var result = _vipRebateService.PayoutVipRebate(siteId, vipRebateInfo, gameTypeRebateList, rebatePayoutLimits, out var payAmount, out var rebateCLogList);
+            var result = _vipRebateService.PayoutVipRebate(siteId, vipRebateInfo, gameTypeRebateList, rebatePayoutLimits, out var payAmount, out var rebateCLogList, RelId);
 
             if (result > 0)
             {
