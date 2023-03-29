@@ -98,13 +98,16 @@ namespace BonusService.Service.BLL
                 : new DateTime(2023, 4, 1); //正式環境4/01生效
 
             var excludeGameList = GetExcludeGameList(siteId);
+            _logger.LogInformation($"excludeGameList:{JsonConvert.SerializeObject(excludeGameList)}");
             foreach (var vipRebateTpBetRecord in vipRebateTpBetRecordList)
             {
+                _logger.LogInformation($"vipRebateTpBetRecord:{JsonConvert.SerializeObject(vipRebateTpBetRecord)}");
                 if (vipRebateTpBetRecord.SettledDate >= excludeDate &&
                     excludeGameList.TryGetValue(vipRebateTpBetRecord.GameType, out var gameTypeExcludeGameList) &&
                     gameTypeExcludeGameList.ContainsKey(vipRebateTpBetRecord.GameID))
                 {
                     vipRebateTpBetRecord.RedeemAmount = 0;
+                    _logger.LogInformation($"exclude Rebate Game:{JsonConvert.SerializeObject(vipRebateTpBetRecord)}");
                 }
             }
 
@@ -124,6 +127,7 @@ namespace BonusService.Service.BLL
                                 ValidBet = gameTypeList.Sum(i => i.ValidBet),
                             };
                         }).ToList();
+            _logger.LogInformation($"gameTypeRebateList:{JsonConvert.SerializeObject(gameTypeRebateList)}");
 
             var result = _vipRebateService.PayoutVipRebate(siteId, vipRebateInfo, gameTypeRebateList, rebatePayoutLimits, out var payAmount, out var rebateCLogList);
 
