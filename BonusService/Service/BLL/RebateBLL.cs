@@ -123,7 +123,7 @@ namespace BonusService.Service.BLL
                                 RedeemAmount = gameTypeList.Sum(i => i.RedeemAmount),
                                 ValidBet = gameTypeList.Sum(i => i.ValidBet),
                             };
-                        });
+                        }).ToList();
 
             var result = _vipRebateService.PayoutVipRebate(siteId, vipRebateInfo, gameTypeRebateList, rebatePayoutLimits, out var payAmount, out var rebateCLogList);
 
