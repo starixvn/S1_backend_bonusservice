@@ -385,8 +385,7 @@ namespace BonusService.Service.BLL
                     {
                         var content = string.Format(_selLangBll.GetMsg("msg_ClaimCashBackBonus", custInfo.SiteId,
                             custInfo.SiteName, custInfo.UserLang), calculateBonus.BonusAmount.ToString("#,##0.##"));
-                        await _messageService.SendMessageAsync(new Message(custInfo.SiteId, "System", content, content,
-                            custInfo.CustId, custInfo.UserName, custInfo.UserLang));
+                        await _messageService.SendMessageAsync(new Message("System", custInfo.CustId, custInfo.UserLang, content, content));
                     });
                 }
 
@@ -497,7 +496,7 @@ namespace BonusService.Service.BLL
 
             if (result > 0)
             {
-                if (claimPromotion.TpId > 0)
+                if (claimPromotion.WalletType == WalletType.Transfer)
                 {
                     var tpBonusTransfer = new TpBonusTransfer
                     {

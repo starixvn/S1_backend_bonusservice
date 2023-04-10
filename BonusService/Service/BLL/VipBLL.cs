@@ -486,9 +486,7 @@ namespace BonusService.Service.BLL
                 currencyName, customer.UpgradeBonus.ToString("#,##0.##"));
             var title = _selLangBLL.GetResourceValue("lbl_VipUpgradeTitle", customer.UserLang);
 
-            await _messageService.SendMessageAsync(new Message(vipSetting.SiteId, "System", title, content,
-                customer.CustId,
-                customer.UserName, customer.UserLang));
+            await _messageService.SendMessageAsync(new Message("System", customer.CustId, customer.UserLang, title, content));
         }
 
         /// <summary>
@@ -607,13 +605,7 @@ namespace BonusService.Service.BLL
             var content = _selLangBLL.GetResourceValue("lbl_VipDowngradeContent", customer.UserLang);
             var title = _selLangBLL.GetResourceValue("lbl_VipDowngradeTitle", customer.UserLang);
 
-            await _messageService.SendMessageAsync(new Message(vipSetting.SiteId,
-                "System",
-                title,
-                content,
-                customer.CustId,
-                customer.UserName,
-                customer.UserLang));
+            await _messageService.SendMessageAsync(new Message("System", customer.CustId, customer.UserLang, title, content));
         }
 
         #endregion

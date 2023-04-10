@@ -36,4 +36,10 @@
         RollOver = 1,
         WinOver = 2
     }
+
+    public enum WalletType
+    {
+        Transfer = 0,
+        Seamless = 1,
+    }
 }
