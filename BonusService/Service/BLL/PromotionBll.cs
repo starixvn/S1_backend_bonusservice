@@ -273,7 +273,7 @@ namespace BonusService.Service.BLL
             }
 
             await using var conn = _mainDbClient.GetMySqlConnection();
-            conn.Open();
+            await conn.OpenAsync();
             await using var trans = await conn.BeginTransactionAsync();
 
             var calculateBonus = CalculateBonus(claimPromotion, custConditionInfo.Amount,
@@ -336,11 +336,15 @@ namespace BonusService.Service.BLL
                     custIp, trans);
                 if (result > 0)
                 {
-                    trans.Commit();
+                    await _mainDbClient.CommitAndDisposeConnectionAsync(conn, trans);
                     InsertPromotionSuccessLog(custInfo, claimPromotion, verifyResult.UseWhitelist);
                 }
             }
 
+            if (result <= 0)
+            {
+                await _mainDbClient.RollbackAndDisposeConnectionAsync(conn, trans);
+            }
 
             var apiResult = new ApiResult();
 
@@ -433,7 +437,7 @@ namespace BonusService.Service.BLL
             }
 
             await using var conn = _mainDbClient.GetMySqlConnection();
-            conn.Open();
+            await conn.OpenAsync();
             await using var trans = await conn.BeginTransactionAsync();
 
             var calculateBonus = CalculateBonus(claimPromotion, amount, lockedAmount, custId,
@@ -483,7 +487,12 @@ namespace BonusService.Service.BLL
                 result = _promotionService.AfterReward(claimPromotion, custInfo.SiteId, bonusCode, custInfo.CurrencyId,
                     null, trans);
                 if (result > 0)
-                    trans.Commit();
+                    await _mainDbClient.CommitAndDisposeConnectionAsync(conn, trans);
+            }
+
+            if (result <= 0)
+            {
+                await _mainDbClient.RollbackAndDisposeConnectionAsync(conn, trans);
             }
 
             if (result > 0)
@@ -1087,7 +1096,8 @@ namespace BonusService.Service.BLL
             var custInfo = _custInfoService.GetCustInfo(custId);
             var vipLevelWithBlockTagsSetting = _promotionService.GetVipLevelWithBlockTags(custInfo.SiteId, specialCode);
 
-            if (vipLevelWithBlockTagsSetting.BlockTags.Any())
+           
+            if (vipLevelWithBlockTagsSetting is { BlockTags: { } } && vipLevelWithBlockTagsSetting.BlockTags.Any())
             {
                 // 取交集
                 var intersectTagResult = custInfo.Tags.Intersect(vipLevelWithBlockTagsSetting.BlockTags).ToList();
@@ -1095,7 +1105,7 @@ namespace BonusService.Service.BLL
                 if (intersectTagResult.Any()) return false;
             }
 
-            if (vipLevelWithBlockTagsSetting.VipLevels.Any())
+            if (vipLevelWithBlockTagsSetting is { VipLevels: { } } && vipLevelWithBlockTagsSetting.VipLevels.Any())
             {
                 // 如果 Vip Level 命中就可以領
                 return vipLevelWithBlockTagsSetting.VipLevels.Any(x => x.Equals(custInfo.UserLevel));
@@ -1376,7 +1386,7 @@ namespace BonusService.Service.BLL
             return _promotionService.InsertPromotionFailLog(
                 bonusCode: promotion.BonusCode,
                 promotionType: promotion.PromotionType,
-                errorCode: (int)bonusErrorCode,
+                errorCode: bonusErrorCode,
                 errorMsg: errorMsg,
                 siteId: custInfo.SiteId,
                 custId: custInfo.CustId,

@@ -364,5 +364,37 @@ namespace BonusService.Service.Library
         }
         
         #endregion
+        
+        public void CommitAndDisposeConnection(MySqlConnection conn, IDbTransaction trans)
+        {
+            trans.Commit();
+            trans.Dispose();
+            conn.Close();
+            conn.Dispose();
+        }
+        
+        public void RollbackAndDisposeConnection(MySqlConnection conn, IDbTransaction trans)
+        {
+            trans.Rollback();
+            trans.Dispose();
+            conn.Close();
+            conn.Dispose();
+        }
+
+        public async Task CommitAndDisposeConnectionAsync(MySqlConnection conn, MySqlTransaction trans)
+        {
+            await trans.CommitAsync();
+            await trans.DisposeAsync();
+            await conn.CloseAsync();
+            await conn.DisposeAsync();
+        }
+        
+        public async Task RollbackAndDisposeConnectionAsync(MySqlConnection conn, MySqlTransaction trans)
+        {
+            await trans.RollbackAsync();
+            await trans.DisposeAsync();
+            await conn.CloseAsync();
+            await conn.DisposeAsync();
+        }
     }
 }

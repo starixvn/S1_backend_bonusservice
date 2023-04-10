@@ -16,9 +16,10 @@ namespace BonusService.Service.DAL
             _reportDbClient = serviceProvider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Report);
         }
         
-        public IEnumerable<PromotionAutoExtend> GetAutoExtendPromotionExpiredList( string specificDate = null)
+        public IEnumerable<PromotionAutoExtend> GetAutoExtendPromotionExpiredList( string specificDate, int limit)
         {
-            return _reportDbClient.Query<PromotionAutoExtend>("Service_PromotionAutoExtend_Get", new { SpecificDate = specificDate }, commandType: CommandType.StoredProcedure);
+            return _reportDbClient.QueryUseCommandDefinition<PromotionAutoExtend>("Service_PromotionAutoExtend_Get_V2",
+                new { SpecificDate = specificDate, Limit = limit });
         }
         
         public int SetPromotionExtend(PromotionAutoExtend PromotionExtend)

@@ -239,7 +239,7 @@ namespace BonusService.Service.DAL
             p.Add("RefId", dbType: DbType.String, direction: ParameterDirection.Output);
             p.Add("Result", dbType: DbType.Int32, direction: ParameterDirection.Output);
             p.Add("RefList", dbType: DbType.String, direction: ParameterDirection.Output);
-            _mainDbClient.Execute("Member_PromotionCanJoin_Get_V8", p);
+            _mainDbClient.Execute("Member_PromotionCanJoin_Get_V9", p);
 
             var custCondition = new CustCondition
             {
@@ -399,7 +399,7 @@ namespace BonusService.Service.DAL
         /// <param name="custId"></param>
         /// <param name="currencyId"></param>
         /// <returns></returns>
-        public int InsertPromotionFailLog(string bonusCode, PromotionType promotionType, int errorCode, string errorMsg,
+        public int InsertPromotionFailLog(string bonusCode, PromotionType promotionType, BonusErrorCode errorCode, string errorMsg,
             int siteId, int custId, int currencyId)
         {
             return _mainDbClient.Execute("Service_PromotionReceiveFailLog_Ins",
@@ -407,14 +407,13 @@ namespace BonusService.Service.DAL
                 {
                     _BonusCode = bonusCode,
                     _PromotionType = (int)promotionType,
-                    _ErrorCode = errorCode,
-                    _ErrorReason = errorMsg,
+                    _ErrorCode = (int)errorCode,
+                    _ErrorReason = errorMsg ?? errorCode.ToString(),
                     _SiteId = siteId,
                     _CustId = custId,
                     _CurrencyId = currencyId
                 }));
         }
-
 
         /// <summary>
         /// 寫入 Bonus 領取成功 log
