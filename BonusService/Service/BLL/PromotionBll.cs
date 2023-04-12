@@ -307,6 +307,8 @@ namespace BonusService.Service.BLL
             {
                 PromotionType = claimPromotion.PromotionType,
                 BonusCode = bonusCode,
+                IsSpecial = claimPromotion.IsSpecial,
+                SpecialCode = claimPromotion.SpecialCode,
                 CategoryId = claimPromotion.CategoryId,
                 TpId = claimPromotion.TpId,
                 BonusInfo = calculateBonus.BonusInfo,
@@ -793,9 +795,19 @@ namespace BonusService.Service.BLL
             var result = _mainDbClient.Execute("Member_BonusInfo_Ins_V3", trans, p);
             var transId = p.Get<string>("TransId");
 
+            if (result > 0 && bonusRewardInput.IsSpecial)
+            {
+                var specialCodeInput = new DynamicParameters(new
+                {
+                    bonusRewardInput.CustId,
+                    bonusRewardInput.SpecialCode,
+                    BonusId = Convert.ToInt32(transId.Replace(bonusRewardInput.Prefix, ""))
+                });
+                result = _mainDbClient.Execute("Member_SpecialScratchCardTable_ClaimPromotion_Set", trans, specialCodeInput);
+            }
+
             if (result > 0 && bonusRewardInput.LockedAmount > 0)
             {
-
                 result = _walletService.SetBalance(bonusRewardInput.CustId, bonusRewardInput.SiteId, bonusRewardInput.UserName, bonusRewardInput.LockedAmount * -1, (int)bonusRewardInput.FinancialType,
                     bonusRewardInput.SetBalanceMemo, transId,
                     out _, out _, trans);
@@ -1095,7 +1107,7 @@ namespace BonusService.Service.BLL
             var custInfo = _custInfoService.GetCustInfo(custId);
             var vipLevelWithBlockTagsSetting = _promotionService.GetVipLevelWithBlockTags(custInfo.SiteId, specialCode);
 
-           
+
             if (vipLevelWithBlockTagsSetting is { BlockTags: { } } && vipLevelWithBlockTagsSetting.BlockTags.Any())
             {
                 // 取交集
