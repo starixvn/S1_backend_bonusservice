@@ -219,4 +219,7 @@
   <data name="msg_AdjustmentBonusCustomerHasRunningBonus" xml:space="preserve">
     <value>Customer still have in Running Bonus. CustId:{0} </value>
   </data>
+  <data name="msg_SpCustomerNotHaveNewScratchCardToJoin" xml:space="preserve">
+    <value>Please enter another New Promo Code</value>
+  </data>
 </root>

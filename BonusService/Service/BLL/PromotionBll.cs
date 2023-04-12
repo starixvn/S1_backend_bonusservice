@@ -93,7 +93,8 @@ namespace BonusService.Service.BLL
                 case (int)BonusErrorCode.SpCustomerJoinThisRebateBefore:
                 case (int)BonusErrorCode.SpCustomerHaveRunningBonusOrJoinThisBonusInPeriodTime:
                 case (int)BonusErrorCode.SpUndefinedPromotionType:
-                    apiResult1.Message = _selLangBll.GetMsg($"msg_{((BonusErrorCode)input.Result).ToString()}", input.CustInfo.SiteId, input.CustInfo.SiteName, showLangId);
+                case (int)BonusErrorCode.SpCustomerNotHaveNewScratchCardToJoin:
+                    apiResult1.Message = _selLangBll.GetMsg($"msg_{(BonusErrorCode)input.Result}", input.CustInfo.SiteId, input.CustInfo.SiteName, showLangId);
                     break;
                 //API error -10xx
                 case (int)BonusErrorCode.DepositAmountNotEnough:
