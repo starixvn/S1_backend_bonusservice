@@ -31,7 +31,7 @@ namespace BonusService.Service.DAL
         }
         public T GetPromotion<T>(int custId, int currencyId, int siteId, string bonusCode, int deviceType, bool getDetail)
         {
-            return _reportDbClient.QueryFirst<T>("Member_Promotion_Get_V4", new DynamicParameters(new
+            return _reportDbClient.QueryFirst<T>("Member_Promotion_Get_V5", new DynamicParameters(new
             {
                 CustId = custId,
                 CurrencyId = currencyId,
