@@ -61,7 +61,7 @@ namespace BonusService.Service.BLL
                     msg.AppendLine(string.Format(_selLangBll.GetResourceValue("lbl_CancelBonus2", expiredBonus.UserLang), refund));
                 }
 
-                _messageService.SendMessage(expiredBonus.SiteId, "Bonus Service", title, msg.ToString(), expiredBonus.CustId, expiredBonus.UserName, expiredBonus.UserLang);
+                _messageService.SendMessage(new Message("System", expiredBonus.CustId, expiredBonus.UserLang, title, msg.ToString()));
             }
             return result;
 
