@@ -156,8 +156,7 @@ namespace BonusService.Service.BLL
                     msg.AppendLine($"{_tpCategoryList[rebateLog.Key]} : {dAmount}");
                 }
 
-
-                _messageService.SendMessage(custInfo.SiteId, "Bonus Service", title, msg.ToString(), custInfo.CustId, custInfo.UserName, custInfo.UserLang);
+                _messageService.SendMessage(new Message("System", custInfo.CustId, custInfo.UserLang, title, msg.ToString()));
             }
 
             return result;
