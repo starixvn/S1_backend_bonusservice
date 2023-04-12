@@ -351,7 +351,7 @@ namespace BonusService.Service.BLL
 
             if (result > 0)
             {
-                if (claimPromotion.TpId > 0)
+                if (claimPromotion.WalletType == WalletType.Transfer)
                 {
                     var tpBonusTransfer = new TpBonusTransfer
                     {
