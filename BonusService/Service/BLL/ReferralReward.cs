@@ -1,9 +1,7 @@
-﻿using System.Data;
-using BonusService.Service.DAL.Interface;
+﻿using BonusService.Service.DAL.Interface;
 using BonusService.Service.Library;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
-using Dapper;
 using MySql.Data.MySqlClient;
 
 namespace BonusService.Service.BLL
@@ -57,15 +55,15 @@ namespace BonusService.Service.BLL
                         result = _walletAdapter.SetBalance(rr.CustId, rr.SiteId, rr.UserName, rr.ReferralFreeCredit, (int)FinancialType.ReferFriendsRewards, $"Referral Free Credit: {rr.ReferralFreeCredit:#,##0.##}", "N/A", out _, out _, trans);
                         if (result > 0)
                         {
-                            conn.Execute("Common_ReferralLog_Ins_V2",
+                            _mainDbClient.Execute("Common_ReferralLog_Ins_V2",trans,
                                 new
                                 {
                                     CustId = rr.CustId, CurrencyId = rr.CurrencyId, UserName = rr.UserName,
                                     SiteId = rr.SiteId, ReferralFreeCredit = rr.ReferralFreeCredit, AgentId = rr.AgentId,
                                     ReferralAmount = rr.BonusAmount, Memo = "", RelId = tc, RewardStatus = 1
-                                }, transaction: trans, commandType: CommandType.StoredProcedure);
+                                });
                             
-                            result = _withdrawalLimitAdapter.SetWithdrawalLimit(rr.CustId, rr.UserName, rr.SiteId, rr.ReferralFreeCredit, $"Referral Free Credit: {rr.ReferralFreeCredit:#,##0.##}", "N/A", out _, trans);
+                            result = _withdrawalLimitAdapter.SetWithdrawalLimit(rr.CustId, rr.UserName, rr.SiteId, rr.ReferralFreeCredit, $"Referral Free Credit: {rr.ReferralFreeCredit:#,##0.##}", "N/A",(int) WithdrawalLimitLogCreateFromEnum.ReferralReward, "System" , out _, trans);
                             payAmount += rr.BonusAmount;
                             paidReferralList.Add(rr);
                             remaining -= 1;
@@ -73,13 +71,13 @@ namespace BonusService.Service.BLL
                     }
                     else
                     {
-                        result = conn.Execute("Common_ReferralLog_Ins_V2",
+                        result = _mainDbClient.Execute("Common_ReferralLog_Ins_V2",trans,
                             new
                             {
                                 CustId = rr.CustId, CurrencyId = rr.CurrencyId, UserName = rr.UserName,
                                 SiteId = rr.SiteId, ReferralFreeCredit = 0m, AgentId = rr.AgentId,
                                 ReferralAmount = 0m, Memo = "", RelId = tc, RewardStatus = 0
-                            }, transaction: trans, commandType: CommandType.StoredProcedure);
+                            });
                     }
                 }
                 catch (MySqlException mySqlEx)
@@ -104,19 +102,23 @@ namespace BonusService.Service.BLL
 
                 if (result > 0)
                 {
-                    conn.Execute("Common_ReferralMLog_Ins", new { CustId = agent.AgentId, CurrencyId = agent.CurrencyId, UserName = agent.AgentName, SiteId = agent.SiteId, ReferralAmount = payAmount, Memo = "", RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
+                    _mainDbClient.Execute("Common_ReferralMLog_Ins", trans ,new { CustId = agent.AgentId, CurrencyId = agent.CurrencyId, UserName = agent.AgentName, SiteId = agent.SiteId, ReferralAmount = payAmount, Memo = "", RelId = tc });
 
                     var rollOver = 1 * payAmount;
                     if (rollOver > 0)
-                        result = _withdrawalLimitAdapter.SetWithdrawalLimit(agent.AgentId, agent.AgentName, agent.SiteId, rollOver, $"Referral Bonus: {rollOver:#,##0.##}", "N/A", out _, trans);
+                        result = _withdrawalLimitAdapter.SetWithdrawalLimit(agent.AgentId, agent.AgentName, agent.SiteId, rollOver, $"Referral Bonus: {rollOver:#,##0.##}", "N/A", (int) WithdrawalLimitLogCreateFromEnum.ReferralReward, "System" ,out _, trans);
                 }
             }
             
             if (result > 0)
             {
-                trans.Commit();
+                _mainDbClient.CommitAndDisposeConnection(conn, trans);
             }
-
+            else
+            {
+                _mainDbClient.RollbackAndDisposeConnection(conn, trans);
+            }
+            
             return result;
         }
     }

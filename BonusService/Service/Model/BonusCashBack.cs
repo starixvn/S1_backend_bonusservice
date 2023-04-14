@@ -23,6 +23,13 @@
         public decimal MinPayout { set; get; }
     }
 
+    public class RebateExcludeGame
+    {              
+        public int GameType { set; get; }
+        public string GameId { set; get; }
+        public string AppId { set; get; }
+    }
+
     public class RebateInfo
     {
         public int CustId { set; get; }
@@ -38,10 +45,10 @@
         public DateTime SettledDate { set; get; }
         public int CategoryId { set; get; }
         public int GameType { set; get; }
+        public string GameID { set; get; }
         public decimal Percentage { set; get; }
         public decimal RedeemAmount { set; get; }
-        public decimal ValidBet { set; get; }
-        public decimal WinlostAmount { set; get; }
+        public decimal ValidBet { set; get; }       
     }
     public class RebatePayoutLimit
     {

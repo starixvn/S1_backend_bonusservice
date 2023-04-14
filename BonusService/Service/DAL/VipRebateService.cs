@@ -3,34 +3,31 @@ using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
 using Dapper;
 using MySql.Data.MySqlClient;
-using System.Data;
 
 namespace BonusService.Service.DAL
 {
     public class VipRebateService
     {
-        private readonly WalletService walletService;
-        private readonly Common common;
+        private readonly WalletService _walletService;
+        private readonly Common _common;
         private readonly MySqlClient _mainDbClient;
         private readonly MySqlClient _reportDbClient;
         public VipRebateService(IServiceProvider provider)
         {
             _mainDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);
             _reportDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Report);
-            walletService = provider.GetRequiredService<WalletService>();
-            common = provider.GetRequiredService<Common>();
+            _walletService = provider.GetRequiredService<WalletService>();
+            _common = provider.GetRequiredService<Common>();
         }
-        public IEnumerable<VipRebateTpBetRecord> GetVipRebateTpBetRecord(int periodType, int custId, DateTime specificDate, string timeZone)
+        public IEnumerable<VipRebateTpBetRecord> GetVipRebateTpBetRecord(int custId, DateTime specificDate, string timeZone)
         {
             var p = new
             {
-                _PeriodType = periodType,
                 _CustId = custId,
                 _SpecificDate = specificDate,
                 _CurrencyTimeZone = timeZone
             };
-
-            return _reportDbClient.Query<VipRebateTpBetRecord>("Service_VipRebateTpBetRecord_Get_V5", new DynamicParameters(p),300);
+            return _reportDbClient.Query<VipRebateTpBetRecord>("Service_VipRebateTpBetRecord_Get_V6", new DynamicParameters(p),300);
         }
         public IEnumerable<VipRebateInfo> GetVipRebateCustList(int siteId, int currencyId, int periodType, DateTime specificDate, string timeZone)
         {
@@ -48,110 +45,132 @@ namespace BonusService.Service.DAL
         {
             return _reportDbClient.Query<RebateTask>("Service_VipRebateTask_Get_V2");
         }
-        public int PayoutVipRebate(int siteId, VipRebateInfo rebateInfo, IEnumerable<VipRebateTpBetRecord> rebateTpBetRecords, IEnumerable<RebatePayoutLimit> rebatePayoutLimits, out decimal payAmount, out Dictionary<int, decimal> rewardRebateCLogList)
+
+        public int PayoutVipRebate(int siteId, VipRebateInfo rebateInfo, IEnumerable<VipRebateTpBetRecord> rebateTpBetRecordList, IEnumerable<RebatePayoutLimit> rebatePayoutLimits, out decimal payAmount, out Dictionary<int, decimal> rebateResultList, long RelId)
         {
             var result = 0;
             using var conn = _mainDbClient.GetMySqlConnection();
             conn.Open();
             using var trans = conn.BeginTransaction();
-            payAmount = 0m;
+            
+            payAmount = 0m; // 發出的總金額
             var promotionType = PromotionType.Rebate;
-            var rebateLogList = new Dictionary<int, decimal>();
-            var rebateCLogList = new Dictionary<int, decimal>();
-            rewardRebateCLogList = new Dictionary<int, decimal>();
-
-            var tc = DateTime.Now.Ticks;
-
-            foreach (var rr in rebateTpBetRecords)
+            var rebateGametypeLogList = new Dictionary<int, decimal>();   // 使用GameType分類加總金額
+            var rebateCategoryLogList = new Dictionary<int, decimal>();   // 使用Category分類加總金額
+            rebateResultList = new Dictionary<int, decimal>();            // 檢查上下限額後最後實際發出的金額
+         
+            foreach (var rebateTpBetRecord in rebateTpBetRecordList)
             {
-                //if (rr.RedeemAmount != 0)
-                //{
-                //var rebateRecord = GetRebateRecord(rebateInfo.CustId, int.Parse(rr.SettledDate.ToString("yyyyMMdd")), rr.GameType, (int)promotionType, conn, trans);
-                //if (rebateRecord == null)
-                //{
-                SetRebateRecord(rebateInfo.CustId, int.Parse(rr.SettledDate.ToString("yyyyMMdd")), rr.GameType, rr.ValidBet, rr.Percentage, rr.RedeemAmount, (int)promotionType, tc, conn, trans);
-                rr.RedeemAmount = common.Floor(rr.RedeemAmount, 2);
+                //寫入原始計算資料到RebateRecord
+                SetRebateRecord(
+                    rebateInfo.CustId, 
+                    int.Parse(rebateTpBetRecord.SettledDate.ToString("yyyyMMdd")), 
+                    rebateTpBetRecord.GameType, 
+                    rebateTpBetRecord.ValidBet, 
+                    rebateTpBetRecord.Percentage, 
+                    rebateTpBetRecord.RedeemAmount, 
+                    (int)promotionType, RelId, trans);
 
-                if (rebateLogList.ContainsKey(rr.GameType))
-                    rebateLogList[rr.GameType] += rr.RedeemAmount;
-                else
-                    rebateLogList.Add(rr.GameType, rr.RedeemAmount);
+                //四捨五入
+                rebateTpBetRecord.RedeemAmount = _common.Floor(rebateTpBetRecord.RedeemAmount, 2);
 
-                if (rebateCLogList.ContainsKey(rr.CategoryId))
-                    rebateCLogList[rr.CategoryId] += rr.RedeemAmount;
-                else
-                    rebateCLogList.Add(rr.CategoryId, rr.RedeemAmount);
-                //}
-                //}
-            }
-            // var newRebateCLogList = new Dictionary<int, decimal>(rebateCLogList);
-            foreach (var rebateKey in rebateCLogList.Keys)
-            {
-                var redeemAmount = rebateCLogList[rebateKey];
-                var rebatePayoutLimit = rebatePayoutLimits.FirstOrDefault(x => x.CurrencyId == rebateInfo.CurrencyId && x.SiteId == siteId && x.CategoryId == rebateKey);
-                if (rebatePayoutLimit != null)
+                //匯總Gametype金額
+                if (rebateGametypeLogList.ContainsKey(rebateTpBetRecord.GameType))
                 {
-                    if (rebateCLogList[rebateKey] < rebatePayoutLimit.MinPayout)
-                        redeemAmount = 0;
-
-                    if (rebatePayoutLimit.MaxPayout != 0 && rebatePayoutLimit.MaxPayout < rebateCLogList[rebateKey])
-                        redeemAmount = rebatePayoutLimit.MaxPayout;
+                    rebateGametypeLogList[rebateTpBetRecord.GameType] += rebateTpBetRecord.RedeemAmount;
+                }
+                else
+                {
+                    rebateGametypeLogList.Add(rebateTpBetRecord.GameType, rebateTpBetRecord.RedeemAmount);
                 }
 
-                conn.Execute("Common_RebateCLog_Set", new
+                //匯總Category金額
+                if (rebateCategoryLogList.ContainsKey(rebateTpBetRecord.CategoryId))
                 {
-                    CustId = rebateInfo.CustId,
-                    CurrencyId = rebateInfo.CurrencyId,
-                    CategoryId = rebateKey,
+                    rebateCategoryLogList[rebateTpBetRecord.CategoryId] += rebateTpBetRecord.RedeemAmount;
+                }
+                else
+                {
+                    rebateCategoryLogList.Add(rebateTpBetRecord.CategoryId, rebateTpBetRecord.RedeemAmount);
+                }    
+            }
+            
+            foreach (var rebateCategory in rebateCategoryLogList)
+            {
+                //檢查上下限額
+                var redeemAmount = rebateCategory.Value;
+                var rebatePayoutLimit = rebatePayoutLimits.FirstOrDefault(x => x.CurrencyId == rebateInfo.CurrencyId && x.SiteId == siteId && x.CategoryId == rebateCategory.Key);
+                if (rebatePayoutLimit != null)
+                {
+                    if (redeemAmount < rebatePayoutLimit.MinPayout)
+                    {
+                        redeemAmount = 0;
+                    }
+
+                    if (rebatePayoutLimit.MaxPayout != 0 && rebatePayoutLimit.MaxPayout < redeemAmount)
+                    {
+                        redeemAmount = rebatePayoutLimit.MaxPayout;
+                    }
+                    
+                }
+
+                _mainDbClient.Execute("Common_RebateCLog_Set", trans ,new
+                {
+                    rebateInfo.CustId,
+                    rebateInfo.CurrencyId,
+                    CategoryId = rebateCategory.Key,
                     RebateType = RebateType.VipRebate,
-                    UserName = rebateInfo.UserName,
+                    rebateInfo.UserName,
                     SiteId = siteId,
-                    CalculatedAmount = rebateCLogList[rebateKey],
+                    CalculatedAmount = rebateCategory.Value,
                     RedeemAmount = redeemAmount,
-                    MinPayout = rebatePayoutLimit.MinPayout,
-                    MaxPayout = rebatePayoutLimit.MaxPayout,
+                    MinPayout = rebatePayoutLimit?.MinPayout ?? 0m,
+                    MaxPayout = rebatePayoutLimit?.MaxPayout ?? 0m,
                     Memo = "",
-                    RelId = tc
-                }, transaction: trans, commandType: CommandType.StoredProcedure);
+                    RelId = RelId
+                });
 
                 if (redeemAmount > 0)
-                    rewardRebateCLogList.Add(rebateKey, redeemAmount);
-
+                {
+                    rebateResultList.Add(rebateCategory.Key, redeemAmount);
+                }
+                
                 payAmount += redeemAmount;
             }
 
             if (payAmount > 0)
             {
-                result = walletService.SetBalance(rebateInfo.CustId, siteId, rebateInfo.UserName, payAmount, 17 - (int)promotionType, $"Rebate: {payAmount:#,##0.##}", "", out _, out _, trans);
+                result = _walletService.SetBalance(rebateInfo.CustId, siteId, rebateInfo.UserName, payAmount, 17 - (int)promotionType, $"Rebate: {payAmount:#,##0.##}", "", out _, out _, trans);
 
                 if (result > 0)
                 {
-                    conn.Execute("Common_RebateMLog_Ins", new { CustId = rebateInfo.CustId, CurrencyId = rebateInfo.CurrencyId, RebateType = RebateType.VipRebate, UserName = rebateInfo.UserName, SiteId = siteId, RedeemAmount = payAmount, Memo = "", BonusCode = "VipRebate", RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
+                    //寫入發放總金額紀錄
+                    _mainDbClient.Execute("Common_RebateMLog_Ins", trans , new { CustId = rebateInfo.CustId, CurrencyId = rebateInfo.CurrencyId, RebateType = RebateType.VipRebate, UserName = rebateInfo.UserName, SiteId = siteId, RedeemAmount = payAmount, Memo = "", BonusCode = "VipRebate", RelId = RelId });
 
                     if (result > 0)
                     {
-                        foreach (var rebateLog in rebateLogList)
+                        //寫入Rebate GameType Log紀錄
+                        foreach (var rebateLog in rebateGametypeLogList)
                         {
-                            conn.Execute("Common_RebateLog_Ins", new { CustId = rebateInfo.CustId, CurrencyId = rebateInfo.CurrencyId, GameType = rebateLog.Key, RebateType = RebateType.VipRebate, UserName = rebateInfo.UserName, SiteId = siteId, RedeemAmount = rebateLog.Value, Memo = "", BonusCode = "VipRebate", RelId = tc }, transaction: trans, commandType: CommandType.StoredProcedure);
+                            _mainDbClient.Execute("Common_RebateLog_Ins", trans ,new { CustId = rebateInfo.CustId, CurrencyId = rebateInfo.CurrencyId, GameType = rebateLog.Key, RebateType = RebateType.VipRebate, UserName = rebateInfo.UserName, SiteId = siteId, RedeemAmount = rebateLog.Value, Memo = "", BonusCode = "VipRebate", RelId = RelId });
                         }
                     }
                 }
             }
-            trans.Commit();
+            _mainDbClient.CommitAndDisposeConnection(conn, trans);
             return result;
-        }
-        public RebateRecord GetRebateRecord(int CustId, int SettledDate, int GameType, int PromotionType, MySqlConnection conn, MySqlTransaction trans)
+        }   
+
+        private int SetRebateRecord(int CustId, int SettledDate, int GameType, decimal ValidBet, decimal Percentage, decimal Sum, int PromotionType, long RelId, MySqlTransaction trans)
         {
-            return conn.Query<RebateRecord>("Service_RebateRecord_Get", new { CustId, SettledDate, GameType, BonusCode = "VipRebate", PromotionType }, transaction: trans, commandType: CommandType.StoredProcedure).FirstOrDefault();
+            return _mainDbClient.Execute("Service_RebateRecord_Set_V3", trans , new { CustId, SettledDate, GameType, ValidBet, Percentage, Sum, PromotionType, BonusCode = "VipRebate", RelId });
         }
-        public int SetRebateRecord(int CustId, int SettledDate, int GameType, decimal ValidBet, decimal Percentage, decimal Sum, int PromotionType, long RelId, MySqlConnection conn, MySqlTransaction trans)
-        {
-            return conn.Execute("Service_RebateRecord_Set_V3", new { CustId, SettledDate, GameType, ValidBet, Percentage, Sum, PromotionType, BonusCode = "VipRebate", RelId }, transaction: trans, commandType: CommandType.StoredProcedure);
-        }
+        
         public IEnumerable<RebatePayoutLimit> GetRebatePayoutLimit()
         {
             return _reportDbClient.Query<RebatePayoutLimit>("Service_RebatePayoutLimit_Get");
         }
+        
         public int SetVipRebateTaskDone(int siteId, int currencyId)
         {
             return _mainDbClient.Execute("Service_VipRebateTaskDone_Set_V2", new DynamicParameters(new { _SiteId = siteId, _CurrencyId = currencyId }));

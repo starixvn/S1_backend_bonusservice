@@ -11,9 +11,9 @@ namespace BonusService.Service.BLL
         {
             this.promotionAutoExtendService = promotionAutoExtendService;
         }
-        public IEnumerable<PromotionAutoExtend> GetAutoExtendPromotionExpiredList(string specificDate = null)
+        public IEnumerable<PromotionAutoExtend> GetAutoExtendPromotionExpiredList(string specificDate, int limit)
         {
-            return promotionAutoExtendService.GetAutoExtendPromotionExpiredList(specificDate);
+            return promotionAutoExtendService.GetAutoExtendPromotionExpiredList(specificDate, limit);
         }
         public int SetPromotionExtend(PromotionAutoExtend PromotionExtend)
         {

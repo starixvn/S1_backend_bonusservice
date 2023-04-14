@@ -92,7 +92,7 @@ public class AngPaoEventBLL
         var ticketQuantity = CaculateTicketQuantity(siteId, currencyId, record.ValidBet);
         if (ticketQuantity > 0 && !_angPaoEventService.GenTicket(custInfo, record, ticketQuantity))
         {
-            _logger.LogError($"GenTicket Fail. task value={JsonConvert.SerializeObject(custInfo)}");
+            _logger.LogWarning($"GenTicket Fail. task value={JsonConvert.SerializeObject(custInfo)}");
         }
     }
 

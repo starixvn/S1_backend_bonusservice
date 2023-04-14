@@ -11,17 +11,15 @@ namespace BonusService.Service.DAL
         private readonly WithdrawalLimitService _withdrawalLimitService;
         private readonly MySqlClient _mainDbClient;
         private readonly MySqlClient _reportDbClient;
-        private readonly string _connectionString;
 
         public ExpiredBonusService(IServiceProvider provider)
         {
-            var configuration = provider.GetRequiredService<IConfiguration>();
-            _connectionString = configuration.GetConnectionString("ConnectionString");
             _walletService = provider.GetRequiredService<WalletService>();
             _withdrawalLimitService = provider.GetRequiredService<WithdrawalLimitService>();
             _mainDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);
             _reportDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Report);
         }
+        
         public IEnumerable<ExpiredBonus> GetBonusExpired(int limit)
         {
             return _reportDbClient.QueryUseCommandDefinition<ExpiredBonus>("Service_BonusExpired_Get", new DynamicParameters(new { Limit = limit }));
@@ -42,6 +40,7 @@ namespace BonusService.Service.DAL
             using var conn = _mainDbClient.GetMySqlConnection();
             conn.Open();
             using var trans = conn.BeginTransaction();
+            
             var result = 0;
             if (expiredBonus.Refund > 0) //money
             {
@@ -52,14 +51,14 @@ namespace BonusService.Service.DAL
                 if (result >= 0)
                 {
                     result = _withdrawalLimitService.SetWithdrawalLimit(expiredBonus.CustId, expiredBonus.UserName,
-                        expiredBonus.SiteId, expiredBonus.Refund, "CancelBonus", expiredBonus.BonusId.ToString(),
-                        out _, trans);
+                        expiredBonus.SiteId, expiredBonus.Refund, 0 ,"CancelBonus", expiredBonus.BonusId.ToString(),
+                        (int) WithdrawalLimitLogCreateFromEnum.Bonus, "System" , out _, trans);
                 }
             }
 
             if (result >= 0)
             {
-                result = _mainDbClient.Execute("Service_BonusExpired_Set_V2",
+                result = _mainDbClient.Execute("Service_BonusExpired_Set_V2",trans,
                     new DynamicParameters(new
                     {
                         expiredBonus.BonusId,
@@ -70,7 +69,7 @@ namespace BonusService.Service.DAL
                         expiredBonus.PromoCategoryId,
                         expiredBonus.Bonus,
                         Memo = "Expired Bonus" 
-                    }), conn, trans);
+                    }));
             }
             
             if (result >= 0)
@@ -81,14 +80,18 @@ namespace BonusService.Service.DAL
                         _BonusId = expiredBonus.BonusId,
                         _CancelBonus = expiredBonus.Bonus - expiredBonus.Refund
                     });
-                result = _mainDbClient.Execute("Service_CancelBonusAmount_Set",cp,conn,trans);
+                result = _mainDbClient.Execute("Service_CancelBonusAmount_Set",trans,cp);
             }
 
             if (result >= 0)
             {
-                trans.Commit();
+                _mainDbClient.CommitAndDisposeConnection(conn, trans);
             }
-
+            else
+            {
+                _mainDbClient.RollbackAndDisposeConnection(conn, trans);
+            }
+            
             return result;
         }
     }

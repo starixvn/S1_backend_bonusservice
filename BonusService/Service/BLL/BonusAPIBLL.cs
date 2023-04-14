@@ -13,6 +13,7 @@ namespace BonusService.Service.BLL
         private readonly SelLangBLL _selLangBll;
         private readonly MessageService _messageService;
         private readonly Currency _currency;
+        private readonly ICacheHelper _redisHelper;
 
         public  BonusAPIBLL(IServiceProvider provider)
         {
@@ -21,6 +22,7 @@ namespace BonusService.Service.BLL
             _selLangBll = provider.GetRequiredService<SelLangBLL>();
             _messageService = provider.GetRequiredService<MessageService>();
             _currency = provider.GetRequiredService<Currency>();
+            _redisHelper = provider.GetRequiredService<ICacheHelper>();
         }
         public CustInfoProfile GetCustInfoProfile(int custId)
         {
@@ -124,6 +126,14 @@ namespace BonusService.Service.BLL
         public ApiResult SetVerificationReward(int custId, OTPTypeEnum inputType , bool isWorker)
         {
             var result = new ApiResult();
+            var key = $"VerificationReward:{custId}";
+            if (_redisHelper.KeyExists(key))
+            {
+                result.ErrorCode = (int)BonusErrorCode.DuplicateClaimBonus;
+                return result;
+            }
+            _redisHelper.StringSet(key, custId, TimeSpan.FromMinutes(1));
+
             var custInfo = _custInfoService.GetCustInfo(custId);
             var verInfo = _bonusAPIService.GetVerificationReward(custInfo.SiteId, custInfo.CurrencyId);
             var custRewardInfo = _bonusAPIService.GetCustVerificationReward(custId, true);
@@ -140,7 +150,7 @@ namespace BonusService.Service.BLL
                     var title = string.Format(_selLangBll.GetResourceValue("lbl_VerificationRewardLimitTitle", custInfo.UserLang));
                     var content = string.Format(_selLangBll.GetResourceValue("lbl_VerificationRewardLimit", custInfo.UserLang),
                         currencyName,leftAmountLimit.ToString("#,##0.##"));
-                    _messageService.SendMessage(custInfo.SiteId, "System", title, content, custInfo.CustId, custInfo.UserName, custInfo.UserLang);
+                    _messageService.SendMessage(new Message("System", custInfo.CustId, custInfo.UserLang, title, content));
 
                 }
                 return result;
@@ -173,7 +183,7 @@ namespace BonusService.Service.BLL
                 var content = string.Format(_selLangBll.GetResourceValue("lbl_VerificationRewardContent", custInfo.UserLang),
                     currencyName,
                     reward.ToString("#,##0.##"));
-                _messageService.SendMessage(custInfo.SiteId, "System", title, content, custInfo.CustId, custInfo.UserName, custInfo.UserLang);
+                _messageService.SendMessage(new Message("System", custInfo.CustId, custInfo.UserLang, title, content));
             }
             
             return result;

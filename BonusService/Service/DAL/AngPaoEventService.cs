@@ -50,19 +50,17 @@ public class AngPaoEventService
             conn.Open();
             using var trans = conn.BeginTransaction();
 
-            var tc = DateTime.Now.Ticks;
-
-            for (int i = 1; i <= ticketQuantity; i++)
+            for (var i = 1; i <= ticketQuantity; i++)
             {
-                conn.Execute("Service_DrawTicket_Ins", new
+                _mainDbClient.Execute("Service_DrawTicket_Ins", trans, new
                 {
                     CustId = custInfo.CustId,
                     SettledDate = int.Parse(record.SettledDate.ToString("yyyyMMdd")),
                     TicketNo = i,
                     ValidBet = record.ValidBet
-                }, transaction: trans, commandType: CommandType.StoredProcedure);
+                });
             }
-            trans.Commit();
+            _mainDbClient.CommitAndDisposeConnection(conn, trans);
             return true;
         }
         catch (Exception ex)
