@@ -93,17 +93,12 @@ namespace BonusService.Service.BLL
         public int PayoutVipRebate(int siteId, VipRebateInfo vipRebateInfo, IEnumerable<VipRebateTpBetRecord> vipRebateTpBetRecordList, IEnumerable<RebatePayoutLimit> rebatePayoutLimits, long RelId)
         {
             //原始資料包含相同GameType不同GameId的資料，先用GameId排除不計算Rebate的遊戲
-            var excludeDate = _webHostEnvironment.IsDevelopment() 
-                ? new DateTime(2023, 3, 21) //測試環境3/21生效
-                : new DateTime(2023, 4, 1); //正式環境4/01生效
-
             var excludeGameList = GetExcludeGameList(siteId);
             _logger.LogInformation($"excludeGameList:{JsonConvert.SerializeObject(excludeGameList)}");
             foreach (var vipRebateTpBetRecord in vipRebateTpBetRecordList)
             {
                 _logger.LogInformation($"vipRebateTpBetRecord:{JsonConvert.SerializeObject(vipRebateTpBetRecord)}");
-                if (vipRebateTpBetRecord.SettledDate >= excludeDate &&
-                    excludeGameList.TryGetValue(vipRebateTpBetRecord.GameType, out var gameTypeExcludeGameList) &&
+                if (excludeGameList.TryGetValue(vipRebateTpBetRecord.GameType, out var gameTypeExcludeGameList) &&
                     gameTypeExcludeGameList.ContainsKey(vipRebateTpBetRecord.GameID))
                 {
                     vipRebateTpBetRecord.RedeemAmount = 0;
