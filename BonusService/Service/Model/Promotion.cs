@@ -84,6 +84,11 @@ namespace BonusService.Service.Model
                 return _canJoinTierAmountList != null ? _canJoinTierAmountList : new List<CanJoinTierAmount>();
             }
         }
+
+        /// <summary>
+        /// 啟用未登入隱藏
+        /// </summary>
+        public bool HideForUnlogin { get; set; }
     }
 
     public class ClaimPromotion : Promotion

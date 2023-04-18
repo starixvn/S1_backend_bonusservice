@@ -857,14 +857,24 @@ namespace BonusService.Service.BLL
                         request.SiteId, promo.BonusCode, request.DeviceType);
                     SetResult(promo, custCondition);
                     SetPromotion(request.SiteId, request.CustId, request.CurrencyId, false, promo, custCondition);
+                    promotion.Add(promo);
                 }
-                else if (promo.PromotionType == PromotionType.Cashback)
+                else
+                {
+                    if (!promo.HideForUnlogin) // HideForUnlogin = Ture話未登入狀態不顯示
+                    {
+                        promotion.Add(promo);
+                    }
+                }
+
+                // 調整Cashback時間
+                if (promo.PromotionType == PromotionType.Cashback)
                 {
                     var offset = GetOffset(request.SiteId);
                     ProcessPeriodTime(promo, DateTime.UtcNow.AddHours(offset), offset);
                 }
 
-                promotion.Add(promo);
+                
             }
 
             return promotion;
@@ -885,7 +895,16 @@ namespace BonusService.Service.BLL
                     SetResult(promo, custCondition);
                     SetPromotion(request.SiteId, request.CustId, request.CurrencyId, true, promo, custCondition);
                 }
-                else if (promo.PromotionType == PromotionType.Cashback)
+                else
+                {
+                    if (promo.HideForUnlogin) // HideForUnlogin = Ture話未登入狀態不顯示
+                    {
+                        promo.canJoin = false;
+                    }
+                }
+
+                // 調整Cashback時間
+                if (promo.PromotionType == PromotionType.Cashback)
                 {
                     var offset = GetOffset(request.SiteId);
                     ProcessPeriodTime(promo, DateTime.UtcNow.AddHours(offset), offset);
