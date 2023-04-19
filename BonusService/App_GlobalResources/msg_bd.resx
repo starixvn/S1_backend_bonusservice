@@ -85,6 +85,18 @@
   <data name="msg_DuplicateClaimBonus" xml:space="preserve">
     <value>ডুপ্লিকেট অফার অনুমোদিত নয়</value>
   </data>
+  <data name="msg_SameIp" xml:space="preserve">
+    <value>প্রচারের জন্য যোগ্য নয়, অনুগ্রহ করে গ্রাহক সহায়তার সাথে যোগাযোগ করুন।</value>
+  </data>
+  <data name="msg_SameRealName" xml:space="preserve">
+    <value>প্রচারের জন্য যোগ্য নয়, অনুগ্রহ করে গ্রাহক সহায়তার সাথে যোগাযোগ করুন।</value>
+  </data>
+    <data name="msg_SameDeviceId" xml:space="preserve">
+    <value>প্রচারের জন্য যোগ্য নয়, অনুগ্রহ করে গ্রাহক সহায়তার সাথে যোগাযোগ করুন।</value>
+  </data>
+    <data name="msg_BlockTag" xml:space="preserve">
+    <value>প্রচারের জন্য যোগ্য নয়, অনুগ্রহ করে গ্রাহক সহায়তার সাথে যোগাযোগ করুন।</value>
+  </data>
   <data name="msg_SpBonusNotFound" xml:space="preserve">
     <value>প্রচার খুঁজে পাওয়া যাবে না</value>
   </data>

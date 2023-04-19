@@ -91,6 +91,18 @@
   <data name="msg_DuplicateClaimBonus" xml:space="preserve">
     <value>रिडीम प्रमोशन की नकल न करें</value>
   </data>
+  <data name="msg_SameIp" xml:space="preserve">
+    <value>पदोन्नति के योग्य नहीं है, कृपया ग्राहक सहायता से संपर्क करें।</value>
+  </data>
+  <data name="msg_SameRealName" xml:space="preserve">
+    <value>पदोन्नति के योग्य नहीं है, कृपया ग्राहक सहायता से संपर्क करें।</value>
+  </data>
+  <data name="msg_SameDeviceId" xml:space="preserve">
+    <value>पदोन्नति के योग्य नहीं है, कृपया ग्राहक सहायता से संपर्क करें।</value>
+  </data>
+  <data name="msg_BlockTag" xml:space="preserve">
+    <value>पदोन्नति के योग्य नहीं है, कृपया ग्राहक सहायता से संपर्क करें।</value>
+  </data>
   <data name="msg_SpBonusNotFound" xml:space="preserve">
     <value>प्रचार नहीं मिल सका</value>
   </data>

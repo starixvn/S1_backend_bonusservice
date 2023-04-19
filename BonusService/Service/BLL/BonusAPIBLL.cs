@@ -13,6 +13,7 @@ namespace BonusService.Service.BLL
         private readonly SelLangBLL _selLangBll;
         private readonly MessageService _messageService;
         private readonly Currency _currency;
+        private readonly ICacheHelper _redisHelper;
 
         public  BonusAPIBLL(IServiceProvider provider)
         {
@@ -21,6 +22,7 @@ namespace BonusService.Service.BLL
             _selLangBll = provider.GetRequiredService<SelLangBLL>();
             _messageService = provider.GetRequiredService<MessageService>();
             _currency = provider.GetRequiredService<Currency>();
+            _redisHelper = provider.GetRequiredService<ICacheHelper>();
         }
         public CustInfoProfile GetCustInfoProfile(int custId)
         {
@@ -49,6 +51,7 @@ namespace BonusService.Service.BLL
             if (custRewardInfo.SumDepositAmount < verInfo.MinDeposit)
             {
                 result.ErrorCode = 104;
+                result.Message = "Condition not fulfilled.";
                 return result;
             }
             
@@ -76,7 +79,12 @@ namespace BonusService.Service.BLL
             {
                 if (inputType == OTPTypeEnum.SMS)
                 {
-                    if (custRewardInfo.PhoneReward != null)
+                    if (!custRewardInfo.PhoneVerified)
+                    {
+                        result.ErrorCode = 102;
+                        result.Message = "Condition not fulfilled";
+                    }
+                    else if (custRewardInfo.PhoneReward != null)
                     {
                         //payout before
                         result.ErrorCode = 101;
@@ -90,7 +98,12 @@ namespace BonusService.Service.BLL
                 }
                 else
                 {
-                    if (custRewardInfo.EmailReward != null)
+                    if (!custRewardInfo.EmailVerified)
+                    {
+                        result.ErrorCode = 102;
+                        result.Message = "Condition not fulfilled";
+                    }
+                    else if (custRewardInfo.EmailReward != null)
                     {
                         result.ErrorCode = 101;
                         result.Message = "Reward already payout before";
@@ -113,6 +126,14 @@ namespace BonusService.Service.BLL
         public ApiResult SetVerificationReward(int custId, OTPTypeEnum inputType , bool isWorker)
         {
             var result = new ApiResult();
+            var key = $"VerificationReward:{custId}";
+            if (_redisHelper.KeyExists(key))
+            {
+                result.ErrorCode = (int)BonusErrorCode.DuplicateClaimBonus;
+                return result;
+            }
+            _redisHelper.StringSet(key, custId, TimeSpan.FromMinutes(1));
+
             var custInfo = _custInfoService.GetCustInfo(custId);
             var verInfo = _bonusAPIService.GetVerificationReward(custInfo.SiteId, custInfo.CurrencyId);
             var custRewardInfo = _bonusAPIService.GetCustVerificationReward(custId, true);
@@ -129,7 +150,7 @@ namespace BonusService.Service.BLL
                     var title = string.Format(_selLangBll.GetResourceValue("lbl_VerificationRewardLimitTitle", custInfo.UserLang));
                     var content = string.Format(_selLangBll.GetResourceValue("lbl_VerificationRewardLimit", custInfo.UserLang),
                         currencyName,leftAmountLimit.ToString("#,##0.##"));
-                    _messageService.SendMessage(custInfo.SiteId, "System", title, content, custInfo.CustId, custInfo.UserName, custInfo.UserLang);
+                    _messageService.SendMessage(new Message("System", custInfo.CustId, custInfo.UserLang, title, content));
 
                 }
                 return result;
@@ -162,7 +183,7 @@ namespace BonusService.Service.BLL
                 var content = string.Format(_selLangBll.GetResourceValue("lbl_VerificationRewardContent", custInfo.UserLang),
                     currencyName,
                     reward.ToString("#,##0.##"));
-                _messageService.SendMessage(custInfo.SiteId, "System", title, content, custInfo.CustId, custInfo.UserName, custInfo.UserLang);
+                _messageService.SendMessage(new Message("System", custInfo.CustId, custInfo.UserLang, title, content));
             }
             
             return result;

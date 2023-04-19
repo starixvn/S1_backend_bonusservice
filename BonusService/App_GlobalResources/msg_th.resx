@@ -91,6 +91,18 @@
   <data name="msg_DuplicateClaimBonus" xml:space="preserve">
     <value>ห้ามใช้โปรโมชั่นซ้ำ</value>
   </data>
+  <data name="msg_SameIp" xml:space="preserve">
+    <value>ไม่มีสิทธิ์รับโปรโมชั่น กรุณาติดต่อฝ่ายบริการลูกค้า</value>
+  </data>
+  <data name="msg_SameRealName" xml:space="preserve">
+    <value>ไม่มีสิทธิ์รับโปรโมชั่น กรุณาติดต่อฝ่ายบริการลูกค้า</value>
+  </data>
+  <data name="msg_SameDeviceId" xml:space="preserve">
+    <value>ไม่มีสิทธิ์รับโปรโมชั่น กรุณาติดต่อฝ่ายบริการลูกค้า</value>
+  </data>
+  <data name="msg_BlockTag" xml:space="preserve">
+    <value>ไม่มีสิทธิ์รับโปรโมชั่น กรุณาติดต่อฝ่ายบริการลูกค้า</value>
+  </data>
   <data name="msg_SpBonusNotFound" xml:space="preserve">
     <value>ไม่พบโปรโมชั่นดังกล่าว</value>
   </data>

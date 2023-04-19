@@ -15,6 +15,11 @@
         CalculateUnknownPromotionType = -1008,
         DuplicateClaimBonus = -1009,
         TierAmountNoFound = -1010,//未找到對應的級距設定
+        SameIp = -1011,
+        SameRealName = -1012,
+        SameDeviceId = -1013,
+        BlockTag = -1014,
+
 
         //SP Return ERROR -11XX
         SpBonusNotFound = -1101,
