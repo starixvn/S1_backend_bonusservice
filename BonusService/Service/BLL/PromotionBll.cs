@@ -544,37 +544,53 @@ namespace BonusService.Service.BLL
         private CheckPromotionResultBaseDto VerifyPromotion(Customer custInfo, ClaimPromotion claimPromotion, CustPromotionWhiteListSettingDto custPromotionWhiteListListSetting)
         {
             if (claimPromotion == null)
+            {
                 return new CheckPromotionResultBaseDto() { BonusErrorCode = BonusErrorCode.PromotionNotFound };
+            }
 
             if (!CheckProfileFinish(custInfo.CustId, custInfo.SiteId))
+            {
                 return new CheckPromotionResultBaseDto() { BonusErrorCode = BonusErrorCode.ProfileOrPhoneNotFinish };
+            } 
 
             // 檢查 Tag
             var checkPromotionBlockTagResult = CheckPromotionBlockTag(custInfo.Tags, claimPromotion.BlockTags);
             if (checkPromotionBlockTagResult.IsBlockTag)
+            {
                 return checkPromotionBlockTagResult;
+            }
 
-            // 目前只有 FreeBet、FstDeposit 要檢查 IP、Device、RealName 次數
+            //檢查IP、Device、RealName
             var useWhitelist = false;
-            if (claimPromotion.PromotionType is (PromotionType.FreeBet or PromotionType.FstDeposit))
+            if (claimPromotion.CheckIPDeviceRealName())
             {
                 var checkIpResult = CheckBlockIp(custInfo, claimPromotion, custPromotionWhiteListListSetting);
                 if (checkIpResult.IsBlockIp)
+                {
                     return checkIpResult;
-
+                }
+                
                 var checkDeviceIdResult = CheckBlockDeviceId(custInfo, claimPromotion, custPromotionWhiteListListSetting);
                 if (checkDeviceIdResult.IsBlockDeviceId)
+                {
                     return checkDeviceIdResult;
-
+                }
+                
                 var checkRealNameResult = CheckBlockRealName(custInfo, claimPromotion, custPromotionWhiteListListSetting);
                 if (checkRealNameResult.IsBlockRealName)
+                {
                     return checkRealNameResult;
-
+                }
+                
                 //IP、DeviceID、RealName 其中有一個是因為白名單通過檢查的，都算有使用白名單
                 useWhitelist = (checkIpResult.UseWhitelist || checkDeviceIdResult.UseWhitelist || checkRealNameResult.UseWhitelist);
             }
 
-            return new CheckPromotionResultBaseDto() { BonusErrorCode = BonusErrorCode.Success, UseWhitelist = useWhitelist };
+            return new CheckPromotionResultBaseDto() 
+            { 
+                BonusErrorCode = BonusErrorCode.Success, 
+                UseWhitelist = useWhitelist 
+            };
         }
 
         private int VerifyAdjustmentBonus(int custId, int siteId, decimal amount, int promotionType,
@@ -743,25 +759,13 @@ namespace BonusService.Service.BLL
 
         private int Reward(BonusRewardInput bonusRewardInput, MySqlTransaction trans)
         {
-            int result;
-            switch (bonusRewardInput.PromotionType)
+            //Rebate發放是透過worker，沒辦法手動領取
+            if (bonusRewardInput.PromotionType == PromotionType.Rebate)
             {
-                case PromotionType.FstDeposit:
-                case PromotionType.ReDeposit:
-                case PromotionType.FreeBet:
-                case PromotionType.Cashback:
-                case PromotionType.SpecialBonus:
-                case PromotionType.RetentionFreeBet:
-                    {
-                        result = BonusReward(bonusRewardInput, trans);
-                        break;
-                    }
-
-                case PromotionType.Rebate:
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-            return result;
+                throw new ArgumentOutOfRangeException();
+            }  
+            
+            return BonusReward(bonusRewardInput, trans);
         }
 
         private int BonusReward(BonusRewardInput bonusRewardInput, MySqlTransaction trans)
