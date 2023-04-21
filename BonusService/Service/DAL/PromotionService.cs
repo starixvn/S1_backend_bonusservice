@@ -245,7 +245,7 @@ namespace BonusService.Service.DAL
             var custCondition = new CustCondition
             {
                 Result = p.Get<int>("Result"),
-                CanJoin = p.Get<bool>("CanJoin"),
+                CanJoin = p.Get<byte>("CanJoin") == 1,
                 Amount = p.Get<decimal?>("Amount") ?? 0,
                 RefList = p.Get<string>("RefList"),
                 RefId = p.Get<string>("RefId"),
