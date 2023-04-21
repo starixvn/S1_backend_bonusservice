@@ -267,7 +267,7 @@ namespace BonusService.Service.BLL
 
 
             var custConditionInfo = _promotionService.GetCustConditionInfo(custId, custInfo.CurrencyId, custInfo.SiteId, bonusCode, deviceType);
-            if (custConditionInfo.CanJoin != 1)
+            if (!custConditionInfo.CanJoin)
             {
                 errorInfo.Result = custConditionInfo.Result;
                 return MakeErrorMessage(errorInfo);
@@ -546,37 +546,53 @@ namespace BonusService.Service.BLL
         private CheckPromotionResultBaseDto VerifyPromotion(Customer custInfo, ClaimPromotion claimPromotion, CustPromotionWhiteListSettingDto custPromotionWhiteListListSetting)
         {
             if (claimPromotion == null)
+            {
                 return new CheckPromotionResultBaseDto() { BonusErrorCode = BonusErrorCode.PromotionNotFound };
+            }
 
             if (!CheckProfileFinish(custInfo.CustId, custInfo.SiteId))
+            {
                 return new CheckPromotionResultBaseDto() { BonusErrorCode = BonusErrorCode.ProfileOrPhoneNotFinish };
+            } 
 
             // 檢查 Tag
             var checkPromotionBlockTagResult = CheckPromotionBlockTag(custInfo.Tags, claimPromotion.BlockTags);
             if (checkPromotionBlockTagResult.IsBlockTag)
+            {
                 return checkPromotionBlockTagResult;
+            }
 
-            // 目前只有 FreeBet、FstDeposit 要檢查 IP、Device、RealName 次數
+            //檢查IP、Device、RealName
             var useWhitelist = false;
-            if (claimPromotion.PromotionType is (PromotionType.FreeBet or PromotionType.FstDeposit))
+            if (claimPromotion.CheckIPDeviceRealName())
             {
                 var checkIpResult = CheckBlockIp(custInfo, claimPromotion, custPromotionWhiteListListSetting);
                 if (checkIpResult.IsBlockIp)
+                {
                     return checkIpResult;
-
+                }
+                
                 var checkDeviceIdResult = CheckBlockDeviceId(custInfo, claimPromotion, custPromotionWhiteListListSetting);
                 if (checkDeviceIdResult.IsBlockDeviceId)
+                {
                     return checkDeviceIdResult;
-
+                }
+                
                 var checkRealNameResult = CheckBlockRealName(custInfo, claimPromotion, custPromotionWhiteListListSetting);
                 if (checkRealNameResult.IsBlockRealName)
+                {
                     return checkRealNameResult;
-
+                }
+                
                 //IP、DeviceID、RealName 其中有一個是因為白名單通過檢查的，都算有使用白名單
                 useWhitelist = (checkIpResult.UseWhitelist || checkDeviceIdResult.UseWhitelist || checkRealNameResult.UseWhitelist);
             }
 
-            return new CheckPromotionResultBaseDto() { BonusErrorCode = BonusErrorCode.Success, UseWhitelist = useWhitelist };
+            return new CheckPromotionResultBaseDto() 
+            { 
+                BonusErrorCode = BonusErrorCode.Success, 
+                UseWhitelist = useWhitelist 
+            };
         }
 
         private int VerifyAdjustmentBonus(int custId, int siteId, decimal amount, int promotionType,
@@ -709,9 +725,10 @@ namespace BonusService.Service.BLL
                     break;
 
                 case PromotionType.FreeBet:
+                case PromotionType.RetentionFreeBet:
+                case PromotionType.DeviceBonus:
                     bonusAmount = claimPromotion.Bonus;
                     rollover = bonusAmount * claimPromotion.RollOver;
-
                     lockAmount = 0;
                     break;
 
@@ -722,12 +739,6 @@ namespace BonusService.Service.BLL
                     bonusAmount = amount;
                     lockAmount = 0;
                     rollover = amount * claimPromotion.RollOver;
-                    break;
-
-                case PromotionType.RetentionFreeBet:
-                    bonusAmount = claimPromotion.Bonus;
-                    lockAmount = 0;
-                    rollover = bonusAmount * claimPromotion.RollOver;
                     break;
 
                 default:
@@ -745,25 +756,13 @@ namespace BonusService.Service.BLL
 
         private int Reward(BonusRewardInput bonusRewardInput, MySqlTransaction trans)
         {
-            int result;
-            switch (bonusRewardInput.PromotionType)
+            //Rebate發放是透過worker，沒辦法手動領取
+            if (bonusRewardInput.PromotionType is PromotionType.Rebate)
             {
-                case PromotionType.FstDeposit:
-                case PromotionType.ReDeposit:
-                case PromotionType.FreeBet:
-                case PromotionType.Cashback:
-                case PromotionType.SpecialBonus:
-                case PromotionType.RetentionFreeBet:
-                    {
-                        result = BonusReward(bonusRewardInput, trans);
-                        break;
-                    }
-
-                case PromotionType.Rebate:
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-            return result;
+                throw new ArgumentOutOfRangeException();
+            }  
+            
+            return BonusReward(bonusRewardInput, trans);
         }
 
         private int BonusReward(BonusRewardInput bonusRewardInput, MySqlTransaction trans)
@@ -866,12 +865,11 @@ namespace BonusService.Service.BLL
                     if (BlockTagIgnorePromotion(custInfo.Tags, promo.BlockTags))
                     {
                         continue;
-                    }
+                    }                    
 
                     var custCondition = _promotionService.GetCustConditionInfo(request.CustId, request.CurrencyId,
                         request.SiteId, promo.BonusCode, request.DeviceType);
-                    SetResult(promo, custCondition);
-                    SetPromotion(request.SiteId, request.CustId, request.CurrencyId, false, promo, custCondition);            
+                    SetPromotion(request.SiteId, request.CustId, request.CurrencyId, false, promo, custCondition);
                 }
                 else
                 {
@@ -906,7 +904,6 @@ namespace BonusService.Service.BLL
                 {
                     var custCondition = _promotionService.GetCustConditionInfo(request.CustId, request.CurrencyId,
                         request.SiteId, promo.BonusCode, request.DeviceType);
-                    SetResult(promo, custCondition);
                     SetPromotion(request.SiteId, request.CustId, request.CurrencyId, true, promo, custCondition);
                 }
                 else
@@ -936,11 +933,13 @@ namespace BonusService.Service.BLL
             var promotion = new List<CustPromotion>();
             foreach (var promo in promotionList)
             {
-                if (BlockTagIgnorePromotion(custInfo.Tags, promo.BlockTags)) continue;
+                if (BlockTagIgnorePromotion(custInfo.Tags, promo.BlockTags))
+                {
+                    continue;
+                }                    
 
                 var custCondition = _promotionService.GetCustConditionInfo(request.CustId, request.CurrencyId,
                     request.SiteId, promo.BonusCode, request.DeviceType);
-                SetResult(promo, custCondition);
                 SetPromotion(request.SiteId, request.CustId, request.CurrencyId, false, promo, custCondition);
                 SetPromotionDetail(request.LangId, request.DefLang, true, promo);
 
@@ -966,14 +965,11 @@ namespace BonusService.Service.BLL
             return promotion;
         }
 
-        private static void SetResult(CustPromotion promo, CustCondition custCondition)
-        {
-            promo.canJoin = custCondition.CanJoin == 1;
-            promo.Result = custCondition.Result;
-        }
-
         private void SetPromotion(int siteId, int custId, int currencyId, bool getCashbackDetail, CustPromotion promo, CustCondition custCondition)
         {
+            promo.canJoin = custCondition.CanJoin;
+            promo.Result = custCondition.Result;
+
             if (promo.PromotionType is PromotionType.FstDeposit or PromotionType.ReDeposit
                 && promo.canJoin)
             {

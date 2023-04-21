@@ -239,12 +239,12 @@ namespace BonusService.Service.DAL
             p.Add("RefId", dbType: DbType.String, direction: ParameterDirection.Output);
             p.Add("Result", dbType: DbType.Int32, direction: ParameterDirection.Output);
             p.Add("RefList", dbType: DbType.String, direction: ParameterDirection.Output);
-            _mainDbClient.Execute("Member_PromotionCanJoin_Get_V9", p);
+            _mainDbClient.Execute("Member_PromotionCanJoin_Get_V10", p);
 
             var custCondition = new CustCondition
             {
                 Result = p.Get<int>("Result"),
-                CanJoin = p.Get<byte?>("CanJoin") ?? 0,
+                CanJoin = p.Get<bool>("CanJoin"),
                 Amount = p.Get<decimal?>("Amount") ?? 0,
                 RefList = p.Get<string>("RefList"),
                 RefId = p.Get<string>("RefId"),
