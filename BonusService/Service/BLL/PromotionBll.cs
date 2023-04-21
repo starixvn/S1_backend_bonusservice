@@ -851,19 +851,21 @@ namespace BonusService.Service.BLL
                 if (request.IsLogin)
                 {
                     // 加入BlockTag 檢核過濾，如果有Tag命中，列表就不會有這筆
-                    if (BlockTagIgnorePromotion(custInfo.Tags, promo.BlockTags)) continue;
+                    if (BlockTagIgnorePromotion(custInfo.Tags, promo.BlockTags))
+                    {
+                        continue;
+                    }
 
                     var custCondition = _promotionService.GetCustConditionInfo(request.CustId, request.CurrencyId,
                         request.SiteId, promo.BonusCode, request.DeviceType);
                     SetResult(promo, custCondition);
-                    SetPromotion(request.SiteId, request.CustId, request.CurrencyId, false, promo, custCondition);
-                    promotion.Add(promo);
+                    SetPromotion(request.SiteId, request.CustId, request.CurrencyId, false, promo, custCondition);            
                 }
                 else
                 {
-                    if (!promo.HideForUnlogin) // HideForUnlogin = Ture話未登入狀態不顯示
+                    if (promo.HideForUnlogin) // HideForUnlogin = Ture話未登入狀態不顯示
                     {
-                        promotion.Add(promo);
+                        continue;
                     }
                 }
 
@@ -874,7 +876,7 @@ namespace BonusService.Service.BLL
                     ProcessPeriodTime(promo, DateTime.UtcNow.AddHours(offset), offset);
                 }
 
-                
+                promotion.Add(promo);
             }
 
             return promotion;
