@@ -267,7 +267,7 @@ namespace BonusService.Service.BLL
 
 
             var custConditionInfo = _promotionService.GetCustConditionInfo(custId, custInfo.CurrencyId, custInfo.SiteId, bonusCode, deviceType);
-            if (custConditionInfo.CanJoin != 1)
+            if (!custConditionInfo.CanJoin)
             {
                 errorInfo.Result = custConditionInfo.Result;
                 return MakeErrorMessage(errorInfo);
@@ -855,11 +855,13 @@ namespace BonusService.Service.BLL
                 if (request.IsLogin)
                 {
                     // 加入BlockTag 檢核過濾，如果有Tag命中，列表就不會有這筆
-                    if (BlockTagIgnorePromotion(custInfo.Tags, promo.BlockTags)) continue;
+                    if (BlockTagIgnorePromotion(custInfo.Tags, promo.BlockTags))
+                    {
+                        continue;
+                    }                    
 
                     var custCondition = _promotionService.GetCustConditionInfo(request.CustId, request.CurrencyId,
                         request.SiteId, promo.BonusCode, request.DeviceType);
-                    SetResult(promo, custCondition);
                     SetPromotion(request.SiteId, request.CustId, request.CurrencyId, false, promo, custCondition);
                 }
                 else if (promo.PromotionType == PromotionType.Cashback)
@@ -886,7 +888,6 @@ namespace BonusService.Service.BLL
                 {
                     var custCondition = _promotionService.GetCustConditionInfo(request.CustId, request.CurrencyId,
                         request.SiteId, promo.BonusCode, request.DeviceType);
-                    SetResult(promo, custCondition);
                     SetPromotion(request.SiteId, request.CustId, request.CurrencyId, true, promo, custCondition);
                 }
                 else if (promo.PromotionType == PromotionType.Cashback)
@@ -907,11 +908,13 @@ namespace BonusService.Service.BLL
             var promotion = new List<CustPromotion>();
             foreach (var promo in promotionList)
             {
-                if (BlockTagIgnorePromotion(custInfo.Tags, promo.BlockTags)) continue;
+                if (BlockTagIgnorePromotion(custInfo.Tags, promo.BlockTags))
+                {
+                    continue;
+                }                    
 
                 var custCondition = _promotionService.GetCustConditionInfo(request.CustId, request.CurrencyId,
                     request.SiteId, promo.BonusCode, request.DeviceType);
-                SetResult(promo, custCondition);
                 SetPromotion(request.SiteId, request.CustId, request.CurrencyId, false, promo, custCondition);
                 SetPromotionDetail(request.LangId, request.DefLang, true, promo);
 
@@ -937,14 +940,11 @@ namespace BonusService.Service.BLL
             return promotion;
         }
 
-        private static void SetResult(CustPromotion promo, CustCondition custCondition)
-        {
-            promo.canJoin = custCondition.CanJoin == 1;
-            promo.Result = custCondition.Result;
-        }
-
         private void SetPromotion(int siteId, int custId, int currencyId, bool getCashbackDetail, CustPromotion promo, CustCondition custCondition)
         {
+            promo.canJoin = custCondition.CanJoin;
+            promo.Result = custCondition.Result;
+
             if (promo.PromotionType is PromotionType.FstDeposit or PromotionType.ReDeposit
                 && promo.canJoin)
             {
