@@ -234,7 +234,7 @@ namespace BonusService.Service.DAL
         public CustCondition GetCustConditionInfo(int custId, int currencyId, int siteId, string bonusCode, int deviceType)
         {
             var p = new DynamicParameters(new { CustId = custId, CurrencyId = currencyId, SiteId = siteId, BonusCode = bonusCode, DeviceType = deviceType });
-            p.Add("CanJoin", dbType: DbType.Boolean, direction: ParameterDirection.Output);
+            p.Add("CanJoin", dbType: DbType.Int32, direction: ParameterDirection.Output);
             p.Add("Amount", dbType: DbType.Decimal, direction: ParameterDirection.Output);
             p.Add("RefId", dbType: DbType.String, direction: ParameterDirection.Output);
             p.Add("Result", dbType: DbType.Int32, direction: ParameterDirection.Output);
@@ -244,7 +244,7 @@ namespace BonusService.Service.DAL
             var custCondition = new CustCondition
             {
                 Result = p.Get<int>("Result"),
-                CanJoin = p.Get<bool>("CanJoin"),
+                CanJoin = p.Get<int>("CanJoin") == 1,
                 Amount = p.Get<decimal?>("Amount") ?? 0,
                 RefList = p.Get<string>("RefList"),
                 RefId = p.Get<string>("RefId"),
