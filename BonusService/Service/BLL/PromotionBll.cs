@@ -723,9 +723,10 @@ namespace BonusService.Service.BLL
                     break;
 
                 case PromotionType.FreeBet:
+                case PromotionType.RetentionFreeBet:
+                case PromotionType.DeviceBonus:
                     bonusAmount = claimPromotion.Bonus;
                     rollover = bonusAmount * claimPromotion.RollOver;
-
                     lockAmount = 0;
                     break;
 
@@ -736,12 +737,6 @@ namespace BonusService.Service.BLL
                     bonusAmount = amount;
                     lockAmount = 0;
                     rollover = amount * claimPromotion.RollOver;
-                    break;
-
-                case PromotionType.RetentionFreeBet:
-                    bonusAmount = claimPromotion.Bonus;
-                    lockAmount = 0;
-                    rollover = bonusAmount * claimPromotion.RollOver;
                     break;
 
                 default:
@@ -760,7 +755,7 @@ namespace BonusService.Service.BLL
         private int Reward(BonusRewardInput bonusRewardInput, MySqlTransaction trans)
         {
             //Rebate發放是透過worker，沒辦法手動領取
-            if (bonusRewardInput.PromotionType == PromotionType.Rebate)
+            if (bonusRewardInput.PromotionType is PromotionType.Rebate)
             {
                 throw new ArgumentOutOfRangeException();
             }  
