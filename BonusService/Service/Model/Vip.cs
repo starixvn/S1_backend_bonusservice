@@ -25,6 +25,7 @@
         public int VipLevel { get; set; }
         public decimal DepositAmount { get; set; }
         public decimal TurnoverAmount { get; set; }
+        public int Exclusive { get; set; }
     }
 
 
