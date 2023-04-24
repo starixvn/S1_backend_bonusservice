@@ -228,6 +228,7 @@ namespace BonusService.Service.BLL
 
                         foreach (var custVip in custDowngradeList)
                         {
+                            var status = (custVip.Exclusive & 1) == 1 ? VipReviewStatus.Pending : VipReviewStatus.Approved;
                             success = SetVipDowngradeReview(new VipDowngradeInfo(custVip.CustId,
                                 calculateMonth,
                                 vipSystem.SiteId,
@@ -238,7 +239,7 @@ namespace BonusService.Service.BLL
                                 downgradeDepositAmount,
                                 custVip.TurnoverAmount,
                                 downgradeTurnoverAmount,
-                                (int) VipReviewStatus.Pending));
+                                (int) status));
                         }
                     }
 
