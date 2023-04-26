@@ -29,6 +29,8 @@ namespace BonusService.Service.Model
     {
         public PromotionType PromotionType { set; get; }
         public string BonusCode { set; get; }
+        public bool IsSpecial { get; set; }
+        public string SpecialCode { get; set; }
         public int CategoryId { set; get; }
         public int TpId { set; get; }
         public string BonusInfo { set; get; }

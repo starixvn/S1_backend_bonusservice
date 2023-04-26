@@ -208,7 +208,7 @@
     <value>The Promotion can't be found</value>
   </data>
   <data name="msg_AdjustmentBonusPromotionTypeNotMatch" xml:space="preserve">
-    <value>BonusCode:{0} is not {1)</value>
+    <value>BonusCode:{0} is not {1}</value>
   </data>
   <data name="msg_AdjustmentBonusPromotionNotActive" xml:space="preserve">
     <value>This offer has not been start. BonusCode:{0}</value>
@@ -218,5 +218,8 @@
   </data>
   <data name="msg_AdjustmentBonusCustomerHasRunningBonus" xml:space="preserve">
     <value>Customer still have in Running Bonus. CustId:{0} </value>
+  </data>
+  <data name="msg_SpCustomerNotHaveNewScratchCardToJoin" xml:space="preserve">
+    <value>Please enter another New Promo Code</value>
   </data>
 </root>
