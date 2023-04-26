@@ -61,7 +61,7 @@ namespace BonusService.Service.DAL
                 cashBackTpBetRecordInput.SiteId,
                 cashBackTpBetRecordInput.CurrencyId
             });
-            return _reportDbClient.Query<CashBackTpBetRecordOutput>("Service_VipCashBackTpBetRecord_Get", parameter, 180);
+            return _reportDbClient.Query<CashBackTpBetRecordOutput>("Service_VipCashBackTpBetRecord_Get_V2", parameter, 180);
         }
         
         public IEnumerable<CustomerVIPInfoOutput> GetCustomerVipInfo(string custIds)
