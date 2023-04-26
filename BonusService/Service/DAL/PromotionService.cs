@@ -31,7 +31,7 @@ namespace BonusService.Service.DAL
         }
         public T GetPromotion<T>(int custId, int currencyId, int siteId, string bonusCode, int deviceType, bool getDetail)
         {
-            return _reportDbClient.QueryFirst<T>("Member_Promotion_Get_V4", new DynamicParameters(new
+            return _reportDbClient.QueryFirst<T>("Member_Promotion_Get_V5", new DynamicParameters(new
             {
                 CustId = custId,
                 CurrencyId = currencyId,
@@ -240,7 +240,7 @@ namespace BonusService.Service.DAL
             p.Add("RefId", dbType: DbType.String, direction: ParameterDirection.Output);
             p.Add("Result", dbType: DbType.Int32, direction: ParameterDirection.Output);
             p.Add("RefList", dbType: DbType.String, direction: ParameterDirection.Output);
-            _mainDbClient.Execute("Member_PromotionCanJoin_Get_V8", p);
+            _mainDbClient.Execute("Member_PromotionCanJoin_Get_V9", p);
 
             var custCondition = new CustCondition
             {
