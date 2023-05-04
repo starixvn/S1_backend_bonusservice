@@ -1,7 +1,5 @@
 ﻿using BonusService.Service.Model.enums;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 
 namespace BonusService.Service.Model
 {
@@ -85,6 +83,18 @@ namespace BonusService.Service.Model
             {
                 return _canJoinTierAmountList != null ? _canJoinTierAmountList : new List<CanJoinTierAmount>();
             }
+        }
+
+        /// <summary>
+        /// 判斷PromotionType是否要檢查 IP、Device、RealName 次數
+        /// </summary>
+        /// <returns></returns>
+        public bool CheckIPDeviceRealName()
+        {
+            return 
+            PromotionType is PromotionType.FreeBet ||
+            PromotionType is PromotionType.FstDeposit ||
+            PromotionType is PromotionType.DeviceBonus;    
         }
     }
 
