@@ -1,7 +1,5 @@
 ﻿using BonusService.Service.Model.enums;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 
 namespace BonusService.Service.Model
 {
@@ -29,6 +27,8 @@ namespace BonusService.Service.Model
         public string Details { get; set; }
         public int PromotionAction { get; set; }
         public string TierAmount { get; set; }
+        public WalletType WalletType { get; set; }
+
         public IEnumerable<TierAmount> TierAmountList
         {
             get
@@ -89,6 +89,17 @@ namespace BonusService.Service.Model
         /// 啟用未登入隱藏
         /// </summary>
         public bool HideForUnlogin { get; set; }
+        
+        /// 判斷PromotionType是否要檢查 IP、Device、RealName 次數
+        /// </summary>
+        /// <returns></returns>
+        public bool CheckIPDeviceRealName()
+        {
+            return 
+            PromotionType is PromotionType.FreeBet ||
+            PromotionType is PromotionType.FstDeposit ||
+            PromotionType is PromotionType.DeviceBonus;    
+        }
     }
 
     public class ClaimPromotion : Promotion
@@ -216,7 +227,7 @@ namespace BonusService.Service.Model
     public class CustPromotion : Promotion
     {
         public string Banner { get; set; }
-        public int WalletType { get; set; }
+        
         public decimal CustRollOver { get; set; }
         public decimal CustTurnOver { get; set; }
         public int Status { get; set; }
