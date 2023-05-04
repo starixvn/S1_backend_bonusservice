@@ -22,12 +22,12 @@ namespace BonusService.Service.DAL
         
         public IEnumerable<ExpiredBonus> GetBonusExpired(int limit)
         {
-            return _reportDbClient.QueryUseCommandDefinition<ExpiredBonus>("Service_BonusExpired_Get", new DynamicParameters(new { Limit = limit }));
+            return _reportDbClient.QueryUseCommandDefinition<ExpiredBonus>("Service_BonusExpired_Get_V2", new DynamicParameters(new { Limit = limit }));
         }
         
         public IEnumerable<ExpiredBonus> GetTransferBonusExpired(int limit)
         {
-            return _reportDbClient.QueryUseCommandDefinition<ExpiredBonus>("Service_TransferBonusExpired_Get", new DynamicParameters(new { Limit = limit }));
+            return _reportDbClient.QueryUseCommandDefinition<ExpiredBonus>("Service_TransferBonusExpired_Get_V2", new DynamicParameters(new { Limit = limit }));
         }
         
         public IEnumerable<decimal> GetBonusWinLoss(int bonusId)
