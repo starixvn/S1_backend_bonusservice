@@ -1,0 +1,103 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="lbl_CancelBonus1" xml:space="preserve">
+    <value>ប្រាក់រង្វាន់ប្រូម៉ូសិនរបស់អ្នកត្រូវបានលុបចោល។</value>
+  </data>
+  <data name="lbl_CancelBonus2" xml:space="preserve">
+    <value>ប្រាក់រង្វាន់ប្រូម៉ូសិនរបស់អ្នក ត្រូវបានលុបចោល ចំនួនទឹកប្រាក់ដែលអាចបង្វិលសងវិញ គឺ {0}។</value>
+  </data>
+  <data name="lbl_CancelBonusTitle" xml:space="preserve">
+    <value>សេចក្តីជូនដំណឹងស្តីពីការផុតកំណត់ប្រូម៉ូសិន។</value>
+  </data>
+  <data name="lbl_RebateMsg" xml:space="preserve">
+    <value>សូមអបអរសាទរ ប្រាក់បង្វិលសងរបស់អ្នក {0} ត្រូវបានបញ្ចូលទៅក្នុងគណនីរបស់អ្នក!</value>
+  </data>
+  <data name="lbl_ReferralBonusCreditedMsg" xml:space="preserve">
+    <value>សូមអបអរសាទរ! ប្រាក់រង្វាន់ណែនាំរបស់អ្នក {0} ត្រូវបានបញ្ចូលទៅក្នុងគណនីរបស់អ្នក!</value>
+  </data>
+  <data name="lbl_ReferralBonusCreditedTitle" xml:space="preserve">
+    <value>ប្រាក់រង្វាន់ណែនាំមិត្តភក្តិ [ណែនាំ&amp;រកចំណូល]</value>
+  </data>
+  <data name="lbl_VipDowngradeContent" xml:space="preserve">
+    <value>យើងមានក្តីសោកស្ដាយក្នុងការជូនដំណឹងថា កម្រិតវីអាយភីរបស់អ្នកត្រូវបានទម្លាក់ចំណាត់ថ្នាក់ ដោយសារបរាជ័យក្នុងការបំពេញតម្រូវការថែទាំ។ សូមអរគុណ!</value>
+  </data>
+  <data name="lbl_VipDowngradeTitle" xml:space="preserve">
+    <value>សេចក្តីជូនដំណឹងអំពីសមាជិកភាពវីអាយភី</value>
+  </data>
+  <data name="lbl_VipUpgrade" xml:space="preserve">
+    <value>សូមអបអរសាទរ! កម្រិតវីអាយភីរបស់អ្នកត្រូវបានដំឡើង អ្នកទទួលបានរង្វាន់ {0} {1} សូមអរគុណ!</value>
+  </data>
+  <data name="lbl_VipUpgradeTitle" xml:space="preserve">
+    <value>ការដំឡើងកម្រិតវីអាយភី</value>
+  </data>
+  <data name="lbl_VerificationRewardContent" xml:space="preserve">
+    <value>Congratulation! You have received {0} {1} of your Verification Reward.</value>
+  </data>
+  <data name="lbl_VerificationRewardLimit" xml:space="preserve">
+    <value>Please fulfill the remaining deposit {0} {1} to enjoy the Verification Rewards.</value>
+  </data>
+  <data name="lbl_VerificationRewardLimitTitle" xml:space="preserve">
+    <value>Verification Rewards</value>
+  </data>
+  <data name="lbl_ReferredBonusCreditedMsg" xml:space="preserve">
+    <value>Congratulation! You have received your REFERRED FREE CREDIT {0} !</value>
+  </data>
+</root>

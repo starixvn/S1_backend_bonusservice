@@ -93,7 +93,8 @@ namespace BonusService.Service.BLL
                 case (int)BonusErrorCode.SpCustomerJoinThisRebateBefore:
                 case (int)BonusErrorCode.SpCustomerHaveRunningBonusOrJoinThisBonusInPeriodTime:
                 case (int)BonusErrorCode.SpUndefinedPromotionType:
-                    apiResult1.Message = _selLangBll.GetMsg($"msg_{((BonusErrorCode)input.Result).ToString()}", input.CustInfo.SiteId, input.CustInfo.SiteName, showLangId);
+                case (int)BonusErrorCode.SpCustomerNotHaveNewScratchCardToJoin:
+                    apiResult1.Message = _selLangBll.GetMsg($"msg_{(BonusErrorCode)input.Result}", input.CustInfo.SiteId, input.CustInfo.SiteName, showLangId);
                     break;
                 //API error -10xx
                 case (int)BonusErrorCode.DepositAmountNotEnough:
@@ -267,7 +268,7 @@ namespace BonusService.Service.BLL
 
 
             var custConditionInfo = _promotionService.GetCustConditionInfo(custId, custInfo.CurrencyId, custInfo.SiteId, bonusCode, deviceType);
-            if (custConditionInfo.CanJoin != 1)
+            if (!custConditionInfo.CanJoin)
             {
                 errorInfo.Result = custConditionInfo.Result;
                 return MakeErrorMessage(errorInfo);
@@ -308,6 +309,8 @@ namespace BonusService.Service.BLL
             {
                 PromotionType = claimPromotion.PromotionType,
                 BonusCode = bonusCode,
+                IsSpecial = claimPromotion.IsSpecial,
+                SpecialCode = claimPromotion.SpecialCode,
                 CategoryId = claimPromotion.CategoryId,
                 TpId = claimPromotion.TpId,
                 BonusInfo = calculateBonus.BonusInfo,
@@ -351,7 +354,7 @@ namespace BonusService.Service.BLL
 
             if (result > 0)
             {
-                if (claimPromotion.TpId > 0)
+                if (claimPromotion.WalletType == WalletType.Transfer)
                 {
                     var tpBonusTransfer = new TpBonusTransfer
                     {
@@ -497,7 +500,7 @@ namespace BonusService.Service.BLL
 
             if (result > 0)
             {
-                if (claimPromotion.TpId > 0)
+                if (claimPromotion.WalletType == WalletType.Transfer)
                 {
                     var tpBonusTransfer = new TpBonusTransfer
                     {
@@ -544,37 +547,53 @@ namespace BonusService.Service.BLL
         private CheckPromotionResultBaseDto VerifyPromotion(Customer custInfo, ClaimPromotion claimPromotion, CustPromotionWhiteListSettingDto custPromotionWhiteListListSetting)
         {
             if (claimPromotion == null)
+            {
                 return new CheckPromotionResultBaseDto() { BonusErrorCode = BonusErrorCode.PromotionNotFound };
+            }
 
             if (!CheckProfileFinish(custInfo.CustId, custInfo.SiteId))
+            {
                 return new CheckPromotionResultBaseDto() { BonusErrorCode = BonusErrorCode.ProfileOrPhoneNotFinish };
+            } 
 
             // 檢查 Tag
             var checkPromotionBlockTagResult = CheckPromotionBlockTag(custInfo.Tags, claimPromotion.BlockTags);
             if (checkPromotionBlockTagResult.IsBlockTag)
+            {
                 return checkPromotionBlockTagResult;
+            }
 
-            // 目前只有 FreeBet、FstDeposit 要檢查 IP、Device、RealName 次數
+            //檢查IP、Device、RealName
             var useWhitelist = false;
-            if (claimPromotion.PromotionType is (PromotionType.FreeBet or PromotionType.FstDeposit))
+            if (claimPromotion.CheckIPDeviceRealName())
             {
                 var checkIpResult = CheckBlockIp(custInfo, claimPromotion, custPromotionWhiteListListSetting);
                 if (checkIpResult.IsBlockIp)
+                {
                     return checkIpResult;
-
+                }
+                
                 var checkDeviceIdResult = CheckBlockDeviceId(custInfo, claimPromotion, custPromotionWhiteListListSetting);
                 if (checkDeviceIdResult.IsBlockDeviceId)
+                {
                     return checkDeviceIdResult;
-
+                }
+                
                 var checkRealNameResult = CheckBlockRealName(custInfo, claimPromotion, custPromotionWhiteListListSetting);
                 if (checkRealNameResult.IsBlockRealName)
+                {
                     return checkRealNameResult;
-
+                }
+                
                 //IP、DeviceID、RealName 其中有一個是因為白名單通過檢查的，都算有使用白名單
                 useWhitelist = (checkIpResult.UseWhitelist || checkDeviceIdResult.UseWhitelist || checkRealNameResult.UseWhitelist);
             }
 
-            return new CheckPromotionResultBaseDto() { BonusErrorCode = BonusErrorCode.Success, UseWhitelist = useWhitelist };
+            return new CheckPromotionResultBaseDto() 
+            { 
+                BonusErrorCode = BonusErrorCode.Success, 
+                UseWhitelist = useWhitelist 
+            };
         }
 
         private int VerifyAdjustmentBonus(int custId, int siteId, decimal amount, int promotionType,
@@ -707,9 +726,10 @@ namespace BonusService.Service.BLL
                     break;
 
                 case PromotionType.FreeBet:
+                case PromotionType.RetentionFreeBet:
+                case PromotionType.DeviceBonus:
                     bonusAmount = claimPromotion.Bonus;
                     rollover = bonusAmount * claimPromotion.RollOver;
-
                     lockAmount = 0;
                     break;
 
@@ -720,12 +740,6 @@ namespace BonusService.Service.BLL
                     bonusAmount = amount;
                     lockAmount = 0;
                     rollover = amount * claimPromotion.RollOver;
-                    break;
-
-                case PromotionType.RetentionFreeBet:
-                    bonusAmount = claimPromotion.Bonus;
-                    lockAmount = 0;
-                    rollover = bonusAmount * claimPromotion.RollOver;
                     break;
 
                 default:
@@ -743,25 +757,13 @@ namespace BonusService.Service.BLL
 
         private int Reward(BonusRewardInput bonusRewardInput, MySqlTransaction trans)
         {
-            int result;
-            switch (bonusRewardInput.PromotionType)
+            //Rebate發放是透過worker，沒辦法手動領取
+            if (bonusRewardInput.PromotionType is PromotionType.Rebate)
             {
-                case PromotionType.FstDeposit:
-                case PromotionType.ReDeposit:
-                case PromotionType.FreeBet:
-                case PromotionType.Cashback:
-                case PromotionType.SpecialBonus:
-                case PromotionType.RetentionFreeBet:
-                    {
-                        result = BonusReward(bonusRewardInput, trans);
-                        break;
-                    }
-
-                case PromotionType.Rebate:
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-            return result;
+                throw new ArgumentOutOfRangeException();
+            }  
+            
+            return BonusReward(bonusRewardInput, trans);
         }
 
         private int BonusReward(BonusRewardInput bonusRewardInput, MySqlTransaction trans)
@@ -794,9 +796,19 @@ namespace BonusService.Service.BLL
             var result = _mainDbClient.Execute("Member_BonusInfo_Ins_V3", trans, p);
             var transId = p.Get<string>("TransId");
 
+            if (result > 0 && bonusRewardInput.IsSpecial)
+            {
+                var specialCodeInput = new DynamicParameters(new
+                {
+                    bonusRewardInput.CustId,
+                    bonusRewardInput.SpecialCode,
+                    BonusId = Convert.ToInt32(transId.Replace(bonusRewardInput.Prefix, ""))
+                });
+                result = _mainDbClient.Execute("Member_SpecialScratchCardTable_ClaimPromotion_Set", trans, specialCodeInput);
+            }
+
             if (result > 0 && bonusRewardInput.LockedAmount > 0)
             {
-
                 result = _walletService.SetBalance(bonusRewardInput.CustId, bonusRewardInput.SiteId, bonusRewardInput.UserName, bonusRewardInput.LockedAmount * -1, (int)bonusRewardInput.FinancialType,
                     bonusRewardInput.SetBalanceMemo, transId,
                     out _, out _, trans);
@@ -804,7 +816,7 @@ namespace BonusService.Service.BLL
                 if (result > 0)
                 {
                     _withdrawalLimitService.SetWithdrawalLimit(bonusRewardInput.CustId, bonusRewardInput.UserName, bonusRewardInput.SiteId, bonusRewardInput.LockedAmount * -1,
-                        0 ,null, transId, (int)WithdrawalLimitLogCreateFromEnum.Bonus ,"System" ,out _, trans);
+                        0, null, transId, (int)WithdrawalLimitLogCreateFromEnum.Bonus, "System", out _, trans);
                 }
                 else
                 {
@@ -851,14 +863,25 @@ namespace BonusService.Service.BLL
                 if (request.IsLogin)
                 {
                     // 加入BlockTag 檢核過濾，如果有Tag命中，列表就不會有這筆
-                    if (BlockTagIgnorePromotion(custInfo.Tags, promo.BlockTags)) continue;
+                    if (BlockTagIgnorePromotion(custInfo.Tags, promo.BlockTags))
+                    {
+                        continue;
+                    }                    
 
                     var custCondition = _promotionService.GetCustConditionInfo(request.CustId, request.CurrencyId,
                         request.SiteId, promo.BonusCode, request.DeviceType);
-                    SetResult(promo, custCondition);
                     SetPromotion(request.SiteId, request.CustId, request.CurrencyId, false, promo, custCondition);
                 }
-                else if (promo.PromotionType == PromotionType.Cashback)
+                else
+                {
+                    if (promo.HideForUnlogin) // HideForUnlogin = Ture話未登入狀態不顯示
+                    {
+                        continue;
+                    }
+                }
+
+                // 調整Cashback時間
+                if (promo.PromotionType == PromotionType.Cashback)
                 {
                     var offset = GetOffset(request.SiteId);
                     ProcessPeriodTime(promo, DateTime.UtcNow.AddHours(offset), offset);
@@ -882,10 +905,18 @@ namespace BonusService.Service.BLL
                 {
                     var custCondition = _promotionService.GetCustConditionInfo(request.CustId, request.CurrencyId,
                         request.SiteId, promo.BonusCode, request.DeviceType);
-                    SetResult(promo, custCondition);
                     SetPromotion(request.SiteId, request.CustId, request.CurrencyId, true, promo, custCondition);
                 }
-                else if (promo.PromotionType == PromotionType.Cashback)
+                else
+                {
+                    if (promo.HideForUnlogin) // HideForUnlogin = Ture話未登入狀態不顯示
+                    {
+                        promo.canJoin = false;
+                    }
+                }
+
+                // 調整Cashback時間
+                if (promo.PromotionType == PromotionType.Cashback)
                 {
                     var offset = GetOffset(request.SiteId);
                     ProcessPeriodTime(promo, DateTime.UtcNow.AddHours(offset), offset);
@@ -903,11 +934,13 @@ namespace BonusService.Service.BLL
             var promotion = new List<CustPromotion>();
             foreach (var promo in promotionList)
             {
-                if (BlockTagIgnorePromotion(custInfo.Tags, promo.BlockTags)) continue;
+                if (BlockTagIgnorePromotion(custInfo.Tags, promo.BlockTags))
+                {
+                    continue;
+                }                    
 
                 var custCondition = _promotionService.GetCustConditionInfo(request.CustId, request.CurrencyId,
                     request.SiteId, promo.BonusCode, request.DeviceType);
-                SetResult(promo, custCondition);
                 SetPromotion(request.SiteId, request.CustId, request.CurrencyId, false, promo, custCondition);
                 SetPromotionDetail(request.LangId, request.DefLang, true, promo);
 
@@ -933,14 +966,11 @@ namespace BonusService.Service.BLL
             return promotion;
         }
 
-        private static void SetResult(CustPromotion promo, CustCondition custCondition)
-        {
-            promo.canJoin = custCondition.CanJoin == 1;
-            promo.Result = custCondition.Result;
-        }
-
         private void SetPromotion(int siteId, int custId, int currencyId, bool getCashbackDetail, CustPromotion promo, CustCondition custCondition)
         {
+            promo.canJoin = custCondition.CanJoin;
+            promo.Result = custCondition.Result;
+
             if (promo.PromotionType is PromotionType.FstDeposit or PromotionType.ReDeposit
                 && promo.canJoin)
             {
@@ -1096,7 +1126,7 @@ namespace BonusService.Service.BLL
             var custInfo = _custInfoService.GetCustInfo(custId);
             var vipLevelWithBlockTagsSetting = _promotionService.GetVipLevelWithBlockTags(custInfo.SiteId, specialCode);
 
-           
+
             if (vipLevelWithBlockTagsSetting is { BlockTags: { } } && vipLevelWithBlockTagsSetting.BlockTags.Any())
             {
                 // 取交集
