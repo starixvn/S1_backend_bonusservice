@@ -53,6 +53,7 @@ namespace BonusService.Service.Workers
                             case PromotionType.Cashback:
                             case PromotionType.SpecialBonus:
                             case PromotionType.RetentionFreeBet:
+                            case PromotionType.DeviceBonus:
 
                                 //確認剩餘本金
                                 var refundAmount = remainingBonus - item.BonusAmount;

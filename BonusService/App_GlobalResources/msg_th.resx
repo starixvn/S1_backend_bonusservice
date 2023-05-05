@@ -1,37 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
-          <xsd:element name="metadata">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
-              </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="assembly">
-            <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string" />
-              <xsd:attribute name="name" type="xsd:string" />
-            </xsd:complexType>
-          </xsd:element>
           <xsd:element name="data">
             <xsd:complexType>
               <xsd:sequence>
                 <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
                 <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
               <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
               <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
-              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="resheader">
@@ -46,106 +27,34 @@
       </xsd:complexType>
     </xsd:element>
   </xsd:schema>
-  <resheader name="resmimetype">
-    <value>text/microsoft-resx</value>
-  </resheader>
-  <resheader name="version">
-    <value>2.0</value>
-  </resheader>
-  <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <data name="msg_Ineligible" xml:space="preserve">
-    <value>สมาชิกไม่มีสิทธิ์รับโปรโมชั่นนี้ สามารถติดต่อแชทสดสำหรับรายละเอียดเพิ่มเติมค่ะ</value>
-  </data>
-  <data name="msg_ClaimCashBackBonus" xml:space="preserve">
-    <value>ขอแสดงความยินดีเครดิตเงินคืน {0} ของคุณเข้าบัญชีของคุณแล้ว!</value>
-  </data>
-  <data name="msg_PromotionNotFound" xml:space="preserve">
-    <value>ไม่พบโปรโมชั่นดังกล่าว</value>
-  </data>
-  <data name="msg_IpIsBlocked" xml:space="preserve">
-    <value>ข้อมูลบัญชีที่ซ้ำกันได้ใช้สิทธิ์ในโปรโมชั่นนี้แล้ว</value>
-  </data>
-  <data name="msg_ProfileOrPhoneNotFinish" xml:space="preserve">
-    <value>ข้อมูลบัญชีไม่ครบถ้วน กรุณาทำการยืนยันบัญชีของท่าน</value>
-  </data>
-  <data name="msg_DepositAmountNotEnough" xml:space="preserve">
-    <value>จำนวนเงินฝากต้องเป็น {0} ขึ้นไปหรือมากกว่าเพื่อเข้าร่วมในโปรโมชั่นนี้</value>
-  </data>
-  <data name="msg_MainWalletAmountNotEnough" xml:space="preserve">
-    <value>ยอดเงินกระเป๋าเงินหลักไม่ควรต่ำกว่า {0}</value>
-  </data>
-  <data name="msg_CalculateAmountIsNegative" xml:space="preserve">
-    <value>ไม่สามารถเข้าร่วมโปรโมชั่นนี้ได้</value>
-  </data>
-  <data name="msg_CalculateCashbackTotalBonusLessThenMinPay" xml:space="preserve">
-    <value>ยอดเงินคืนขั้นต่ำไม่ถึงตามที่กำหนด</value>
-  </data>
-  <data name="msg_CalculateUnknownPromotionType" xml:space="preserve">
-    <value>ไม่พบโปรโมชั่นดังกล่าว</value>
-  </data>
-  <data name="msg_DuplicateClaimBonus" xml:space="preserve">
-    <value>ห้ามใช้โปรโมชั่นซ้ำ</value>
-  </data>
-  <data name="msg_SameIp" xml:space="preserve">
-    <value>ไม่มีสิทธิ์รับโปรโมชั่น กรุณาติดต่อฝ่ายบริการลูกค้า</value>
-  </data>
-  <data name="msg_SameRealName" xml:space="preserve">
-    <value>ไม่มีสิทธิ์รับโปรโมชั่น กรุณาติดต่อฝ่ายบริการลูกค้า</value>
-  </data>
-  <data name="msg_SameDeviceId" xml:space="preserve">
-    <value>ไม่มีสิทธิ์รับโปรโมชั่น กรุณาติดต่อฝ่ายบริการลูกค้า</value>
-  </data>
-  <data name="msg_BlockTag" xml:space="preserve">
-    <value>ไม่มีสิทธิ์รับโปรโมชั่น กรุณาติดต่อฝ่ายบริการลูกค้า</value>
-  </data>
-  <data name="msg_SpBonusNotFound" xml:space="preserve">
-    <value>ไม่พบโปรโมชั่นดังกล่าว</value>
-  </data>
-  <data name="msg_SpCustomerNotJoinSpecialCode" xml:space="preserve">
-    <value>กรุณากรอกโค้ดโปรโมชั่น</value>
-  </data>
-  <data name="msg_SpCustomerJoinThisPromotionBefore" xml:space="preserve">
-    <value>ถึงขีดจำกัดการเข้าร่วมแล้ว</value>
-  </data>
-  <data name="msg_SpCustomerBonusStillRunning" xml:space="preserve">
-    <value>ยังมีโปรโมชั่นที่ยังต้องทำยอดเทิร์นให้ครบอยู่ กรุณาลองใหม่ภายหลัง</value>
-  </data>
-  <data name="msg_SpCustomerDepositNotExceedRequiredAmount" xml:space="preserve">
-    <value>จำนวนเงินฝากดังกล่าวไม่สามารถเข้าร่วมโปรโมชั่นนี้ได้</value>
-  </data>
-  <data name="msg_SpCustomerDontHaveFirstDeposit" xml:space="preserve">
-    <value>กรุณาทำรายการฝาก</value>
-  </data>
-  <data name="msg_SpCustomerFirstDepositRuleDontMatch" xml:space="preserve">
-    <value>ไม่มีสามารถเข้าร่วมโปรโมชั่นนี้ได้</value>
-  </data>
-  <data name="msg_SpCustomerWithdrawalBefore" xml:space="preserve">
-    <value>พบรายการถอนของท่าน ไม่สามารถเข้าร่วมโปรโมชั่นนี้ได้</value>
-  </data>
-  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusInPeriodTime" xml:space="preserve">
-    <value>ยังมีโปรโมชั่นที่ยังต้องทำยอดเทิร์นให้ครบอยู่ กรุณาลองใหม่ภายหลัง</value>
-  </data>
-  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusWhichPromotionTypeIn135" xml:space="preserve">
-    <value>ยังมีโปรโมชั่นที่ยังต้องทำยอดเทิร์นให้ครบอยู่ หรือถึงขีดจำกัดของการเข้าร่วมในโปรโมชั่นนี้แล้ว</value>
-  </data>
-  <data name="msg_SpCustomerDepositApproveBefore" xml:space="preserve">
-    <value>พบรายการฝากของท่าน ไม่สามารถเข้าร่วมโปรโมชั่นนี้ได้</value>
-  </data>
-  <data name="msg_SpCustomerBonusStillRunningOrAddThisBonusBefore" xml:space="preserve">
-    <value>ยังมีโปรโมชั่นที่ยังต้องทำยอดเทิร์นให้ครบอยู่ หรือถึงขีดจำกัดของการเข้าร่วมในโปรโมชั่นนี้แล้ว</value>
-  </data>
-  <data name="msg_SpCustomerJoinThisRebateBefore" xml:space="preserve">
-    <value>ได้เข้าร่วมโปรโมชั่นนี้เรียบร้อยแล้ว</value>
-  </data>
-  <data name="msg_SpCustomerHaveRunningBonusOrJoinThisBonusInPeriodTime" xml:space="preserve">
-    <value>ยังมีโปรโมชั่นที่ยังต้องทำยอดเทิร์นให้ครบอยู่ หรือถึงขีดจำกัดของการเข้าร่วมในโปรโมชั่นนี้แล้ว</value>
-  </data>
-  <data name="msg_SpUndefinedPromotionType" xml:space="preserve">
-    <value>ไม่พบโปรโมชั่นดังกล่าว</value>
-  </data>
-</root>
+<resheader name="resmimetype"><value>text/microsoft-resx</value></resheader><resheader name="version"><value>1.3</value></resheader><resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader><resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader><data name="msg_SameRealName"><value>ไม่มีสิทธิ์รับโปรโมชั่น กรุณาติดต่อฝ่ายบริการลูกค้า</value></data>
+  <data name="msg_SpCustomerFirstDepositRuleDontMatch"><value>ไม่มีสามารถเข้าร่วมโปรโมชั่นนี้ได้</value></data>
+  <data name="msg_PromotionNotFound"><value>ไม่พบโปรโมชั่นดังกล่าว</value></data>
+  <data name="msg_SpCustomerNotJoinSpecialCode"><value>กรุณากรอกโค้ดโปรโมชั่น</value></data>
+  <data name="msg_SpCustomerBonusStillRunning"><value>ยังมีโปรโมชั่นที่ยังต้องทำยอดเทิร์นให้ครบอยู่ กรุณาลองใหม่ภายหลัง</value></data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusWhichPromotionTypeIn135"><value>ยังมีโปรโมชั่นที่ยังต้องทำยอดเทิร์นให้ครบอยู่ หรือถึงขีดจำกัดของการเข้าร่วมในโปรโมชั่นนี้แล้ว</value></data>
+  <data name="msg_ProfileOrPhoneNotFinish"><value>ข้อมูลบัญชีไม่ครบถ้วน กรุณาทำการยืนยันบัญชีของท่าน</value></data>
+  <data name="msg_IpIsBlocked"><value>ข้อมูลบัญชีที่ซ้ำกันได้ใช้สิทธิ์ในโปรโมชั่นนี้แล้ว</value></data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusInPeriodTime"><value>ยังมีโปรโมชั่นที่ยังต้องทำยอดเทิร์นให้ครบอยู่ กรุณาลองใหม่ภายหลัง</value></data>
+  <data name="msg_SpCustomerJoinThisPromotionBefore"><value>ถึงขีดจำกัดการเข้าร่วมแล้ว</value></data>
+  <data name="msg_MainWalletAmountNotEnough"><value>ยอดเงินกระเป๋าเงินหลักไม่ควรต่ำกว่า {0}</value></data>
+  <data name="msg_CalculateUnknownPromotionType"><value>ไม่พบโปรโมชั่นดังกล่าว</value></data>
+  <data name="msg_SpCustomerDepositNotExceedRequiredAmount"><value>จำนวนเงินฝากดังกล่าวไม่สามารถเข้าร่วมโปรโมชั่นนี้ได้</value></data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddThisBonusBefore"><value>ยังมีโปรโมชั่นที่ยังต้องทำยอดเทิร์นให้ครบอยู่ หรือถึงขีดจำกัดของการเข้าร่วมในโปรโมชั่นนี้แล้ว</value></data>
+  <data name="msg_SpBonusNotFound"><value>ไม่พบโปรโมชั่นดังกล่าว</value></data>
+  <data name="msg_SameDeviceId"><value>ไม่มีสิทธิ์รับโปรโมชั่น กรุณาติดต่อฝ่ายบริการลูกค้า</value></data>
+  <data name="msg_CalculateAmountIsNegative"><value>ไม่สามารถเข้าร่วมโปรโมชั่นนี้ได้</value></data>
+  <data name="msg_CalculateCashbackTotalBonusLessThenMinPay"><value>ยอดเงินคืนขั้นต่ำไม่ถึงตามที่กำหนด</value></data>
+  <data name="msg_SameIp"><value>ไม่มีสิทธิ์รับโปรโมชั่น กรุณาติดต่อฝ่ายบริการลูกค้า</value></data>
+  <data name="msg_SpCustomerHaveRunningBonusOrJoinThisBonusInPeriodTime"><value>ยังมีโปรโมชั่นที่ยังต้องทำยอดเทิร์นให้ครบอยู่ หรือถึงขีดจำกัดของการเข้าร่วมในโปรโมชั่นนี้แล้ว</value></data>
+  <data name="msg_SpCustomerDepositApproveBefore"><value>พบรายการฝากของท่าน ไม่สามารถเข้าร่วมโปรโมชั่นนี้ได้</value></data>
+  <data name="msg_SpCustomerJoinThisRebateBefore"><value>ได้เข้าร่วมโปรโมชั่นนี้เรียบร้อยแล้ว</value></data>
+  <data name="msg_SpCustomerDontHaveFirstDeposit"><value>กรุณาทำรายการฝาก</value></data>
+  <data name="msg_SpCustomerWithdrawalBefore"><value>พบรายการถอนของท่าน ไม่สามารถเข้าร่วมโปรโมชั่นนี้ได้</value></data>
+  <data name="msg_DepositAmountNotEnough"><value>จำนวนเงินฝากต้องเป็น {0} ขึ้นไปหรือมากกว่าเพื่อเข้าร่วมในโปรโมชั่นนี้</value></data>
+  <data name="msg_DuplicateClaimBonus"><value>ห้ามใช้โปรโมชั่นซ้ำ</value></data>
+  <data name="msg_SpUndefinedPromotionType"><value>ไม่พบโปรโมชั่นดังกล่าว</value></data>
+  <data name="msg_BlockTag"><value>ไม่มีสิทธิ์รับโปรโมชั่น กรุณาติดต่อฝ่ายบริการลูกค้า</value></data>
+  <data name="msg_ClaimCashBackBonus"><value>ขอแสดงความยินดีเครดิตเงินคืน {0} ของคุณเข้าบัญชีของคุณแล้ว!</value></data>
+  <data name="msg_Ineligible"><value>สมาชิกไม่มีสิทธิ์รับโปรโมชั่นนี้ สามารถติดต่อแชทสดสำหรับรายละเอียดเพิ่มเติมค่ะ</value></data>
+  </root>

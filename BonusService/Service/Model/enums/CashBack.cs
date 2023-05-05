@@ -8,7 +8,8 @@
         Rebate = 6,
         Cashback = 7,
         SpecialBonus = 8,
-        RetentionFreeBet = 9
+        RetentionFreeBet = 9,
+        DeviceBonus = 10
     }
 
     public enum PromotionCategoryId
@@ -35,5 +36,11 @@
     {
         RollOver = 1,
         WinOver = 2
+    }
+
+    public enum WalletType
+    {
+        Transfer = 0,
+        Seamless = 1,
     }
 }

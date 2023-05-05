@@ -31,7 +31,7 @@ namespace BonusService.Service.DAL
         }
         public T GetPromotion<T>(int custId, int currencyId, int siteId, string bonusCode, int deviceType, bool getDetail)
         {
-            return _reportDbClient.QueryFirst<T>("Member_Promotion_Get_V4", new DynamicParameters(new
+            return _reportDbClient.QueryFirst<T>("Member_Promotion_Get_V5", new DynamicParameters(new
             {
                 CustId = custId,
                 CurrencyId = currencyId,
@@ -235,17 +235,17 @@ namespace BonusService.Service.DAL
         public CustCondition GetCustConditionInfo(int custId, int currencyId, int siteId, string bonusCode, int deviceType)
         {
             var p = new DynamicParameters(new { CustId = custId, CurrencyId = currencyId, SiteId = siteId, BonusCode = bonusCode, DeviceType = deviceType });
-            p.Add("CanJoin", dbType: DbType.Boolean, direction: ParameterDirection.Output);
+            p.Add("CanJoin", dbType: DbType.Int32, direction: ParameterDirection.Output);
             p.Add("Amount", dbType: DbType.Decimal, direction: ParameterDirection.Output);
             p.Add("RefId", dbType: DbType.String, direction: ParameterDirection.Output);
             p.Add("Result", dbType: DbType.Int32, direction: ParameterDirection.Output);
             p.Add("RefList", dbType: DbType.String, direction: ParameterDirection.Output);
-            _mainDbClient.Execute("Member_PromotionCanJoin_Get_V8", p);
+            _mainDbClient.Execute("Member_PromotionCanJoin_Get_V10", p);
 
             var custCondition = new CustCondition
             {
                 Result = p.Get<int>("Result"),
-                CanJoin = p.Get<byte?>("CanJoin") ?? 0,
+                CanJoin = p.Get<int>("CanJoin") == 1,
                 Amount = p.Get<decimal?>("Amount") ?? 0,
                 RefList = p.Get<string>("RefList"),
                 RefId = p.Get<string>("RefId"),

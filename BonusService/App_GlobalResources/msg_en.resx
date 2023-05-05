@@ -1,96 +1,18 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
-    Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
-    associated with the data types.
-    
-    Example:
-    
-    ... ado.net/XML headers & schema ...
-    <resheader name="resmimetype">text/microsoft-resx</resheader>
-    <resheader name="version">2.0</resheader>
-    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
-    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
-    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
-    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
-    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
-        <value>[base64 mime encoded serialized .NET Framework object]</value>
-    </data>
-    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
-        <comment>This is a comment</comment>
-    </data>
-                
-    There are any number of "resheader" rows that contain simple 
-    name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
-    mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
-    extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
-    read any of the formats listed below.
-    
-    mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
-            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
-            : and then encoded with base64 encoding.
-    
-    mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
-            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
-            : and then encoded with base64 encoding.
-
-    mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
-            : using a System.ComponentModel.TypeConverter
-            : and then encoded with base64 encoding.
-    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
-          <xsd:element name="metadata">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
-              </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="assembly">
-            <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string" />
-              <xsd:attribute name="name" type="xsd:string" />
-            </xsd:complexType>
-          </xsd:element>
           <xsd:element name="data">
             <xsd:complexType>
               <xsd:sequence>
                 <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
                 <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
               <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
               <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
-              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="resheader">
@@ -105,118 +27,39 @@
       </xsd:complexType>
     </xsd:element>
   </xsd:schema>
-  <resheader name="resmimetype">
-    <value>text/microsoft-resx</value>
-  </resheader>
-  <resheader name="version">
-    <value>2.0</value>
-  </resheader>
-  <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <data name="msg_Ineligible" xml:space="preserve">
-    <value>You are not eligible for this promotion. Please contact our support for more details.</value>
-  </data>
-  <data name="msg_ClaimCashBackBonus" xml:space="preserve">
-    <value>Congratulations, your CASHBACK {0} has been credited to your account!</value>
-  </data>
-  <data name="msg_PromotionNotFound" xml:space="preserve">
-    <value>The Promotion can't be found</value>
-  </data>
-  <data name="msg_IpIsBlocked" xml:space="preserve">
-    <value>Duplicate Account information has been claimed this promotion</value>
-  </data>
-  <data name="msg_ProfileOrPhoneNotFinish" xml:space="preserve">
-    <value>Account information has not been completed, please verify the account information</value>
-  </data>
-  <data name="msg_DepositAmountNotEnough" xml:space="preserve">
-    <value>The deposit amount to participate in this promotion must be {0} or above</value>
-  </data>
-  <data name="msg_MainWalletAmountNotEnough" xml:space="preserve">
-    <value>Main wallet balance should not be lower than {0}</value>
-  </data>
-  <data name="msg_CalculateAmountIsNegative" xml:space="preserve">
-    <value>Not entitled to join this Promotion</value>
-  </data>
-  <data name="msg_CalculateCashbackTotalBonusLessThenMinPay" xml:space="preserve">
-    <value>Minimum cashback amount not reached</value>
-  </data>
-  <data name="msg_CalculateUnknownPromotionType" xml:space="preserve">
-    <value>The Promotion can't be found</value>
-  </data>
-  <data name="msg_DuplicateClaimBonus" xml:space="preserve">
-    <value>Do not duplicate redeem promotion</value>
-  </data>
-  <data name="msg_SameIp" xml:space="preserve">
-    <value>Not eligible for promotion, please contact Customer Support</value>
-  </data>
-  <data name="msg_SameRealName" xml:space="preserve">
-    <value>Not eligible for promotion, please contact Customer Support</value>
-  </data>
-  <data name="msg_SameDeviceId" xml:space="preserve">
-    <value>Not eligible for promotion, please contact Customer Support</value>
-  </data>
-  <data name="msg_BlockTag" xml:space="preserve">
-    <value>Not eligible for promotion, please contact Customer Support</value>
-  </data>
-  <data name="msg_SpBonusNotFound" xml:space="preserve">
-    <value>The Promotion can't be found</value>
-  </data>
-  <data name="msg_SpCustomerNotJoinSpecialCode" xml:space="preserve">
-    <value>Please enter the Promo Code</value>
-  </data>
-  <data name="msg_SpCustomerJoinThisPromotionBefore" xml:space="preserve">
-    <value>Participation limit reached</value>
-  </data>
-  <data name="msg_SpCustomerBonusStillRunning" xml:space="preserve">
-    <value>Still have in Running Bonus, please try again later</value>
-  </data>
-  <data name="msg_SpCustomerDepositNotExceedRequiredAmount" xml:space="preserve">
-    <value>Deposit amount is not eligible to participate in this promotion</value>
-  </data>
-  <data name="msg_SpCustomerDontHaveFirstDeposit" xml:space="preserve">
-    <value>Please Complete your First Deposit</value>
-  </data>
-  <data name="msg_SpCustomerFirstDepositRuleDontMatch" xml:space="preserve">
-    <value>Not eligible to participate in this promotion</value>
-  </data>
-  <data name="msg_SpCustomerWithdrawalBefore" xml:space="preserve">
-    <value>A withdrawal record has been found, unable to join this promotion</value>
-  </data>
-  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusInPeriodTime" xml:space="preserve">
-    <value>Still have in Running Bonus, please try again later</value>
-  </data>
-  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusWhichPromotionTypeIn135" xml:space="preserve">
-    <value>Still have in Running Bonus, or the limit of participation in this offer has been reached</value>
-  </data>
-  <data name="msg_SpCustomerDepositApproveBefore" xml:space="preserve">
-    <value>A successful deposit record has been found unable to join this promotion</value>
-  </data>
-  <data name="msg_SpCustomerBonusStillRunningOrAddThisBonusBefore" xml:space="preserve">
-    <value>Still have in Running Bonus, or the limit of participation in this offer has been reached</value>
-  </data>
-  <data name="msg_SpCustomerJoinThisRebateBefore" xml:space="preserve">
-    <value>This promotion has been claimed</value>
-  </data>
-  <data name="msg_SpCustomerHaveRunningBonusOrJoinThisBonusInPeriodTime" xml:space="preserve">
-    <value>Still have in Running Bonus, or the limit of participation in this offer has been reached</value>
-  </data>
-  <data name="msg_SpUndefinedPromotionType" xml:space="preserve">
-    <value>The Promotion can't be found</value>
-  </data>
-  <data name="msg_AdjustmentBonusPromotionTypeNotMatch" xml:space="preserve">
-    <value>BonusCode:{0} is not {1)</value>
-  </data>
-  <data name="msg_AdjustmentBonusPromotionNotActive" xml:space="preserve">
-    <value>This offer has not been start. BonusCode:{0}</value>
-  </data>
-  <data name="msg_AdjustmentBonusPromotionAmountOverMaxBonus" xml:space="preserve">
-    <value>The amount has reached the limit. Amount:{0} is over MaxBonus{1}, BonusCode:{2}</value>
-  </data>
-  <data name="msg_AdjustmentBonusCustomerHasRunningBonus" xml:space="preserve">
-    <value>Customer still have in Running Bonus. CustId:{0} </value>
-  </data>
-</root>
+<resheader name="resmimetype"><value>text/microsoft-resx</value></resheader><resheader name="version"><value>1.3</value></resheader><resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader><resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader><data name="msg_SameRealName"><value>Not eligible for promotion, please contact Customer Support</value></data>
+  <data name="msg_SpCustomerFirstDepositRuleDontMatch"><value>Not eligible to participate in this promotion</value></data>
+  <data name="msg_PromotionNotFound"><value>The Promotion can't be found</value></data>
+  <data name="msg_SpCustomerNotJoinSpecialCode"><value>Please enter the Promo Code</value></data>
+  <data name="msg_SpCustomerBonusStillRunning"><value>Still have in Running Bonus, please try again later</value></data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusWhichPromotionTypeIn135"><value>Still have in Running Bonus, or the limit of participation in this offer has been reached</value></data>
+  <data name="msg_ProfileOrPhoneNotFinish"><value>Account information has not been completed, please verify the account information</value></data>
+  <data name="msg_IpIsBlocked"><value>Duplicate Account information has been claimed this promotion</value></data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusInPeriodTime"><value>Still have in Running Bonus, please try again later</value></data>
+  <data name="msg_SpCustomerJoinThisPromotionBefore"><value>Participation limit reached</value></data>
+  <data name="msg_MainWalletAmountNotEnough"><value>Main wallet balance should not be lower than {0}</value></data>
+  <data name="msg_CalculateUnknownPromotionType"><value>The Promotion can't be found</value></data>
+  <data name="msg_SpCustomerDepositNotExceedRequiredAmount"><value>Deposit amount is not eligible to participate in this promotion</value></data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddThisBonusBefore"><value>Still have in Running Bonus, or the limit of participation in this offer has been reached</value></data>
+  <data name="msg_SpBonusNotFound"><value>The Promotion can't be found</value></data>
+  <data name="msg_SameDeviceId"><value>Not eligible for promotion, please contact Customer Support</value></data>
+  <data name="msg_CalculateAmountIsNegative"><value>Not entitled to join this Promotion</value></data>
+  <data name="msg_CalculateCashbackTotalBonusLessThenMinPay"><value>Minimum cashback amount not reached</value></data>
+  <data name="msg_SameIp"><value>Not eligible for promotion, please contact Customer Support</value></data>
+  <data name="msg_SpCustomerHaveRunningBonusOrJoinThisBonusInPeriodTime"><value>Still have in Running Bonus, or the limit of participation in this offer has been reached</value></data>
+  <data name="msg_SpCustomerDepositApproveBefore"><value>A successful deposit record has been found unable to join this promotion</value></data>
+  <data name="msg_SpCustomerJoinThisRebateBefore"><value>This promotion has been claimed</value></data>
+  <data name="msg_SpCustomerDontHaveFirstDeposit"><value>Please Complete your First Deposit</value></data>
+  <data name="msg_SpCustomerWithdrawalBefore"><value>A withdrawal record has been found, unable to join this promotion</value></data>
+  <data name="msg_DepositAmountNotEnough"><value>The deposit amount to participate in this promotion must be {0} or above</value></data>
+  <data name="msg_DuplicateClaimBonus"><value>Do not duplicate redeem promotion</value></data>
+  <data name="msg_SpUndefinedPromotionType"><value>The Promotion can't be found</value></data>
+  <data name="msg_BlockTag"><value>Not eligible for promotion, please contact Customer Support</value></data>
+  <data name="msg_ClaimCashBackBonus"><value>Congratulations, your CASHBACK {0} has been credited to your account!</value></data>
+  <data name="msg_Ineligible"><value>You are not eligible for this promotion. Please contact our support for more details.</value></data>
+  <data name="msg_AdjustmentBonusPromotionNotActive"><value>This offer has not been start. BonusCode:{0}</value></data>
+  <data name="msg_AdjustmentBonusPromotionAmountOverMaxBonus"><value>The amount has reached the limit. Amount:{0} is over MaxBonus{1}, BonusCode:{2}</value></data>
+  <data name="msg_AdjustmentBonusCustomerHasRunningBonus"><value>Customer still have in Running Bonus. CustId:{0}</value></data>
+  <data name="msg_SpCustomerNotHaveNewScratchCardToJoin"><value>Please enter another New Promo Code</value></data>
+  <data name="msg_AdjustmentBonusPromotionTypeNotMatch"><value>BonusCode:{0} is not {1}</value></data>
+  </root>

@@ -37,6 +37,7 @@
         SpCustomerJoinThisRebateBefore = -1113,
         SpCustomerHaveRunningBonusOrJoinThisBonusInPeriodTime = -1114,
         SpUndefinedPromotionType = -1115,
+        SpCustomerNotHaveNewScratchCardToJoin = -1116,
 
         //AdjustmentBonus Error -12XX
         AdjustmentBonusPromotionTypeNotMatch = -1202,

@@ -17,7 +17,7 @@ namespace BonusService.Service.Model
     }
     public class CustCondition
     {
-        public byte CanJoin { set; get; }
+        public bool CanJoin { set; get; }
         public decimal Amount { set; get; }
         public string RefId { set; get; }
         public int Result { set; get; }
@@ -29,6 +29,8 @@ namespace BonusService.Service.Model
     {
         public PromotionType PromotionType { set; get; }
         public string BonusCode { set; get; }
+        public bool IsSpecial { get; set; }
+        public string SpecialCode { get; set; }
         public int CategoryId { set; get; }
         public int TpId { set; get; }
         public string BonusInfo { set; get; }

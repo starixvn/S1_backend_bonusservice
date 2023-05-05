@@ -1,37 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
-          <xsd:element name="metadata">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
-              </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="assembly">
-            <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string" />
-              <xsd:attribute name="name" type="xsd:string" />
-            </xsd:complexType>
-          </xsd:element>
           <xsd:element name="data">
             <xsd:complexType>
               <xsd:sequence>
                 <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
                 <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
               <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
               <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
-              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="resheader">
@@ -46,58 +27,18 @@
       </xsd:complexType>
     </xsd:element>
   </xsd:schema>
-  <resheader name="resmimetype">
-    <value>text/microsoft-resx</value>
-  </resheader>
-  <resheader name="version">
-    <value>2.0</value>
-  </resheader>
-  <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <data name="lbl_CancelBonus1" xml:space="preserve">
-    <value>आपका बोनस प्रमोशन रद्द कर दिया गया है</value>
-  </data>
-  <data name="lbl_CancelBonus2" xml:space="preserve">
-    <value>आपका बोनस प्रमोशन रद्द कर दिया गया है, योग्य धनवापसी राशि {0} है।</value>
-  </data>
-  <data name="lbl_CancelBonusTitle" xml:space="preserve">
-    <value>प्रमोशन समाप्ति सूचना</value>
-  </data>
-  <data name="lbl_RebateMsg" xml:space="preserve">
-    <value>बधाई हो, आपकी छूट {0} आपके खाते में क्रेडिट कर दी गई है!</value>
-  </data>
-  <data name="lbl_ReferralBonusCreditedMsg" xml:space="preserve">
-    <value>बधाई हो! आपका रेफ़रल बोनस {0} आपके खाते में क्रेडिट कर दिया गया है!</value>
-  </data>
-  <data name="lbl_ReferralBonusCreditedTitle" xml:space="preserve">
-    <value>रेफ़र फ्रेंड्स रिवॉर्ड्स [रेफ़र करें और कमाएँ]</value>
-  </data>
-  <data name="lbl_VipUpgrade" xml:space="preserve">
-    <value>बधाई! आपका वीआईपी स्तर अपग्रेड कर दिया गया है, आपको सम्मानित किया गया है {0} {1} धन्यवाद!</value>
-  </data>
-  <data name="lbl_VipUpgradeTitle" xml:space="preserve">
-    <value>वीआईपी अपग्रेड</value>
-  </data>
-  <data name="lbl_VipDowngradeContent" xml:space="preserve">
-    <value>हमें यह बताते हुए खेद हो रहा है कि संरक्षण की आवश्यकता को पूरा करने में विफल रहने के कारण आपके वीआईपी स्तर को डाउनग्रेड कर दिया गया है। धन्यवाद!</value>
-  </data>
-  <data name="lbl_VipDowngradeTitle" xml:space="preserve">
-    <value>वीआईपी सदस्यता सूचना</value>
-  </data>
-  <data name="lbl_VerificationRewardContent" xml:space="preserve">
-    <value>बधाई! आपको अपने सत्यापन पुरस्कार का {0} {1} प्राप्त हो गया है।</value>
-  </data>
-  <data name="lbl_VerificationRewardLimit" xml:space="preserve">
-    <value>सत्यापन पुरस्कारों का आनंद लेने के लिए कृपया {0} {1} जमा करें।</value>
-  </data>
-  <data name="lbl_VerificationRewardLimitTitle" xml:space="preserve">
-    <value>सत्यापन इनाम</value>
-  </data>
-  <data name="lbl_ReferredBonusCreditedMsg" xml:space="preserve">
-    <value>बधाई हो! आपको अपना रेफ़रर्ड मुफ़्त क्रेडिट {0} मिल गया है!</value>
-  </data>
-</root>
+<resheader name="resmimetype"><value>text/microsoft-resx</value></resheader><resheader name="version"><value>1.3</value></resheader><resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader><resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader><data name="lbl_VipUpgradeTitle"><value>वीआईपी अपग्रेड</value></data>
+  <data name="lbl_ReferredBonusCreditedMsg"><value>बधाई हो! आपको अपना रेफ़रर्ड मुफ़्त क्रेडिट {0} मिल गया है!</value></data>
+  <data name="lbl_VipUpgrade"><value>बधाई! आपका वीआईपी स्तर अपग्रेड कर दिया गया है, आपको सम्मानित किया गया है {0} {1} धन्यवाद!</value></data>
+  <data name="lbl_CancelBonusTitle"><value>प्रमोशन समाप्ति सूचना</value></data>
+  <data name="lbl_ReferralBonusCreditedMsg"><value>बधाई हो! आपका रेफ़रल बोनस {0} आपके खाते में क्रेडिट कर दिया गया है!</value></data>
+  <data name="lbl_RebateMsg"><value>बधाई हो, आपकी छूट {0} आपके खाते में क्रेडिट कर दी गई है!</value></data>
+  <data name="lbl_CancelBonus2"><value>आपका बोनस प्रमोशन रद्द कर दिया गया है, योग्य धनवापसी राशि {0} है।</value></data>
+  <data name="lbl_CancelBonus1"><value>आपका बोनस प्रमोशन रद्द कर दिया गया है</value></data>
+  <data name="lbl_VipDowngradeContent"><value>हमें यह बताते हुए खेद हो रहा है कि संरक्षण की आवश्यकता को पूरा करने में विफल रहने के कारण आपके वीआईपी स्तर को डाउनग्रेड कर दिया गया है। धन्यवाद!</value></data>
+  <data name="lbl_VipDowngradeTitle"><value>वीआईपी सदस्यता सूचना</value></data>
+  <data name="lbl_ReferralBonusCreditedTitle"><value>रेफ़र फ्रेंड्स रिवॉर्ड्स [रेफ़र करें और कमाएँ]</value></data>
+  <data name="lbl_VerificationRewardContent"><value>बधाई! आपको अपने सत्यापन पुरस्कार का {0} {1} प्राप्त हो गया है।</value></data>
+  <data name="lbl_VerificationRewardLimitTitle"><value>सत्यापन इनाम</value></data>
+  <data name="lbl_VerificationRewardLimit"><value>सत्यापन पुरस्कारों का आनंद लेने के लिए कृपया {0} {1} जमा करें।</value></data>
+  </root>
