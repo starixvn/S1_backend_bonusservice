@@ -1,37 +1,18 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
-          <xsd:element name="metadata">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
-              </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="assembly">
-            <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string" />
-              <xsd:attribute name="name" type="xsd:string" />
-            </xsd:complexType>
-          </xsd:element>
           <xsd:element name="data">
             <xsd:complexType>
               <xsd:sequence>
                 <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
                 <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
               <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
               <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
-              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="resheader">
@@ -46,106 +27,34 @@
       </xsd:complexType>
     </xsd:element>
   </xsd:schema>
-  <resheader name="resmimetype">
-    <value>text/microsoft-resx</value>
-  </resheader>
-  <resheader name="version">
-    <value>2.0</value>
-  </resheader>
-  <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <data name="msg_Ineligible" xml:space="preserve">
-    <value>Anda tidak layak untuk guna promosi ini. Sila hubungi sokongan pelanggan kami untuk maklumat yang lebih lanjut.</value>
-  </data>
-  <data name="msg_ClaimCashBackBonus" xml:space="preserve">
-    <value>Tahniah, PULANGAN TUNAI {0} anda telah dikreditkan ke akaun anda!</value>
-  </data>
-  <data name="msg_PromotionNotFound" xml:space="preserve">
-    <value>Promosi tidak ditemui</value>
-  </data>
-  <data name="msg_IpIsBlocked" xml:space="preserve">
-    <value>Maklumat Akaun Pendua telah dituntut promosi ini</value>
-  </data>
-  <data name="msg_ProfileOrPhoneNotFinish" xml:space="preserve">
-    <value>Maklumat akaun belum lengkap, sila sahkan maklumat akaun</value>
-  </data>
-  <data name="msg_DepositAmountNotEnough" xml:space="preserve">
-    <value>deposit untuk menyertai promosi ini mestilah {0} atau ke atas</value>
-  </data>
-  <data name="msg_MainWalletAmountNotEnough" xml:space="preserve">
-    <value>Baki dompet utama tidak boleh rendah dari {0}</value>
-  </data>
-  <data name="msg_CalculateAmountIsNegative" xml:space="preserve">
-    <value>Tidak layak untuk menyertai Promosi</value>
-  </data>
-  <data name="msg_CalculateCashbackTotalBonusLessThenMinPay" xml:space="preserve">
-    <value>Jumlah pulangan tunai minimum tidak dicapai</value>
-  </data>
-  <data name="msg_CalculateUnknownPromotionType" xml:space="preserve">
-    <value>Promosi tidak ditemui</value>
-  </data>
-  <data name="msg_DuplicateClaimBonus" xml:space="preserve">
-    <value>Tawaran pendua tidak dibenarkan</value>
-  </data>
-  <data name="msg_SameIp" xml:space="preserve">
-    <value>Tidak layak untuk promosi berikut, sila hubungi Sokongan Pelanggan kami</value>
-  </data>
-  <data name="msg_SameRealName" xml:space="preserve">
-    <value>Tidak layak untuk promosi berikut, sila hubungi Sokongan Pelanggan kami</value>
-  </data>
-  <data name="msg_SameDeviceId" xml:space="preserve">
-    <value>Tidak layak untuk promosi berikut, sila hubungi Sokongan Pelanggan kami</value>
-  </data>
-  <data name="msg_BlockTag" xml:space="preserve">
-    <value>Tidak layak untuk promosi berikut, sila hubungi Sokongan Pelanggan kami</value>
-  </data>
-  <data name="msg_SpBonusNotFound" xml:space="preserve">
-    <value>Promosi tidak ditemui</value>
-  </data>
-  <data name="msg_SpCustomerNotJoinSpecialCode" xml:space="preserve">
-    <value>Sila masukkan Kod Promosi</value>
-  </data>
-  <data name="msg_SpCustomerJoinThisPromotionBefore" xml:space="preserve">
-    <value>Had penyertaan dicapai</value>
-  </data>
-  <data name="msg_SpCustomerBonusStillRunning" xml:space="preserve">
-    <value>Masih ada dalam Running Bonus, sila cuba lagi nanti</value>
-  </data>
-  <data name="msg_SpCustomerDepositNotExceedRequiredAmount" xml:space="preserve">
-    <value>Jumlah deposit tidak layak untuk menyertai promosi ini</value>
-  </data>
-  <data name="msg_SpCustomerDontHaveFirstDeposit" xml:space="preserve">
-    <value>Sila Lengkapkan Deposit Pertama anda</value>
-  </data>
-  <data name="msg_SpCustomerFirstDepositRuleDontMatch" xml:space="preserve">
-    <value>Tidak layak untuk menyertai promosi ini</value>
-  </data>
-  <data name="msg_SpCustomerWithdrawalBefore" xml:space="preserve">
-    <value>Rekod pengeluaran telah ditemui, tidak dapat menyertai promosi ini</value>
-  </data>
-  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusInPeriodTime" xml:space="preserve">
-    <value>Masih ada dalam Running Bonus, sila cuba lagi nanti</value>
-  </data>
-  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusWhichPromotionTypeIn135" xml:space="preserve">
-    <value>Masih ada dalam Running Bonus, atau had penyertaan dalam tawaran ini telah dicapai</value>
-  </data>
-  <data name="msg_SpCustomerDepositApproveBefore" xml:space="preserve">
-    <value>Rekod deposit yang berjaya ditemui, tidak dapat menyertai promosi ini</value>
-  </data>
-  <data name="msg_SpCustomerBonusStillRunningOrAddThisBonusBefore" xml:space="preserve">
-    <value>Masih ada dalam Running Bonus, atau had penyertaan dalam tawaran ini telah dicapai</value>
-  </data>
-  <data name="msg_SpCustomerJoinThisRebateBefore" xml:space="preserve">
-    <value>Promosi ini telah dituntut</value>
-  </data>
-  <data name="msg_SpCustomerHaveRunningBonusOrJoinThisBonusInPeriodTime" xml:space="preserve">
-    <value>Masih ada dalam Running Bonus, atau had penyertaan dalam tawaran ini telah dicapai</value>
-  </data>
-  <data name="msg_SpUndefinedPromotionType" xml:space="preserve">
-    <value>Promosi tidak ditemui</value>
-  </data>
-</root>
+<resheader name="resmimetype"><value>text/microsoft-resx</value></resheader><resheader name="version"><value>1.3</value></resheader><resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader><resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader><data name="msg_SameRealName"><value>Tidak layak untuk promosi berikut, sila hubungi Sokongan Pelanggan kami</value></data>
+  <data name="msg_SpCustomerFirstDepositRuleDontMatch"><value>Tidak layak untuk menyertai promosi ini</value></data>
+  <data name="msg_PromotionNotFound"><value>Promosi tidak ditemui</value></data>
+  <data name="msg_SpCustomerNotJoinSpecialCode"><value>Sila masukkan Kod Promosi</value></data>
+  <data name="msg_SpCustomerBonusStillRunning"><value>Masih ada dalam Running Bonus, sila cuba lagi nanti</value></data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusWhichPromotionTypeIn135"><value>Masih ada dalam Running Bonus, atau had penyertaan dalam tawaran ini telah dicapai</value></data>
+  <data name="msg_ProfileOrPhoneNotFinish"><value>Maklumat akaun belum lengkap, sila sahkan maklumat akaun</value></data>
+  <data name="msg_IpIsBlocked"><value>Maklumat Akaun Pendua telah dituntut promosi ini</value></data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusInPeriodTime"><value>Masih ada dalam Running Bonus, sila cuba lagi nanti</value></data>
+  <data name="msg_SpCustomerJoinThisPromotionBefore"><value>Had penyertaan dicapai</value></data>
+  <data name="msg_MainWalletAmountNotEnough"><value>Baki dompet utama tidak boleh rendah dari {0}</value></data>
+  <data name="msg_CalculateUnknownPromotionType"><value>Promosi tidak ditemui</value></data>
+  <data name="msg_SpCustomerDepositNotExceedRequiredAmount"><value>Jumlah deposit tidak layak untuk menyertai promosi ini</value></data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddThisBonusBefore"><value>Masih ada dalam Running Bonus, atau had penyertaan dalam tawaran ini telah dicapai</value></data>
+  <data name="msg_SpBonusNotFound"><value>Promosi tidak ditemui</value></data>
+  <data name="msg_SameDeviceId"><value>Tidak layak untuk promosi berikut, sila hubungi Sokongan Pelanggan kami</value></data>
+  <data name="msg_CalculateAmountIsNegative"><value>Tidak layak untuk menyertai Promosi</value></data>
+  <data name="msg_CalculateCashbackTotalBonusLessThenMinPay"><value>Jumlah pulangan tunai minimum tidak dicapai</value></data>
+  <data name="msg_SameIp"><value>Tidak layak untuk promosi berikut, sila hubungi Sokongan Pelanggan kami</value></data>
+  <data name="msg_SpCustomerHaveRunningBonusOrJoinThisBonusInPeriodTime"><value>Masih ada dalam Running Bonus, atau had penyertaan dalam tawaran ini telah dicapai</value></data>
+  <data name="msg_SpCustomerDepositApproveBefore"><value>Rekod deposit yang berjaya ditemui, tidak dapat menyertai promosi ini</value></data>
+  <data name="msg_SpCustomerJoinThisRebateBefore"><value>Promosi ini telah dituntut</value></data>
+  <data name="msg_SpCustomerDontHaveFirstDeposit"><value>Sila Lengkapkan Deposit Pertama anda</value></data>
+  <data name="msg_SpCustomerWithdrawalBefore"><value>Rekod pengeluaran telah ditemui, tidak dapat menyertai promosi ini</value></data>
+  <data name="msg_DepositAmountNotEnough"><value>deposit untuk menyertai promosi ini mestilah {0} atau ke atas</value></data>
+  <data name="msg_DuplicateClaimBonus"><value>Tawaran pendua tidak dibenarkan</value></data>
+  <data name="msg_SpUndefinedPromotionType"><value>Promosi tidak ditemui</value></data>
+  <data name="msg_BlockTag"><value>Tidak layak untuk promosi berikut, sila hubungi Sokongan Pelanggan kami</value></data>
+  <data name="msg_ClaimCashBackBonus"><value>Tahniah, PULANGAN TUNAI {0} anda telah dikreditkan ke akaun anda!</value></data>
+  <data name="msg_Ineligible"><value>Anda tidak layak untuk guna promosi ini. Sila hubungi sokongan pelanggan kami untuk maklumat yang lebih lanjut.</value></data>
+  </root>

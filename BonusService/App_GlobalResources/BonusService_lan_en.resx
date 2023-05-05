@@ -1,37 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
-          <xsd:element name="metadata">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
-              </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="assembly">
-            <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string" />
-              <xsd:attribute name="name" type="xsd:string" />
-            </xsd:complexType>
-          </xsd:element>
           <xsd:element name="data">
             <xsd:complexType>
               <xsd:sequence>
                 <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
                 <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
               <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
               <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
-              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="resheader">
@@ -46,58 +27,18 @@
       </xsd:complexType>
     </xsd:element>
   </xsd:schema>
-  <resheader name="resmimetype">
-    <value>text/microsoft-resx</value>
-  </resheader>
-  <resheader name="version">
-    <value>2.0</value>
-  </resheader>
-  <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <data name="lbl_CancelBonus1" xml:space="preserve">
-    <value>Your bonus promotion has been canceled.</value>
-  </data>
-  <data name="lbl_CancelBonus2" xml:space="preserve">
-    <value>Your bonus promotion has been canceled, the eligible refund amount are {0}.</value>
-  </data>
-  <data name="lbl_CancelBonusTitle" xml:space="preserve">
-    <value>Promotion expiration notice.</value>
-  </data>
-  <data name="lbl_RebateMsg" xml:space="preserve">
-    <value>Congratulations, your rebate {0} has been credited to your account!</value>
-  </data>
-  <data name="lbl_ReferralBonusCreditedMsg" xml:space="preserve">
-    <value>Congratulations! Your referral bonus {0} has been credited to your account!</value>
-  </data>
-  <data name="lbl_ReferralBonusCreditedTitle" xml:space="preserve">
-    <value>Refer Friends Rewards [Refer &amp; Earn]</value>
-  </data>
-  <data name="lbl_VipDowngradeContent" xml:space="preserve">
-    <value>We are regret to inform, your VIP tier has been downgraded due to failed to fulfil the maintenance requirement. Thank you!</value>
-  </data>
-  <data name="lbl_VipDowngradeTitle" xml:space="preserve">
-    <value>VIP Membership Notice</value>
-  </data>
-  <data name="lbl_VipUpgrade" xml:space="preserve">
-    <value>Congratulation! Your VIP level has been upgraded, you are awarded {0} {1} Thank You!</value>
-  </data>
-  <data name="lbl_VipUpgradeTitle" xml:space="preserve">
-    <value>VIP Upgrade</value>
-  </data>
-  <data name="lbl_VerificationRewardContent" xml:space="preserve">
-    <value>Congratulation! You have received {0} {1} of your Verification Reward.</value>
-  </data>
-  <data name="lbl_VerificationRewardLimit" xml:space="preserve">
-    <value>Please fulfill the remaining deposit {0} {1} to enjoy the Verification Rewards.</value>
-  </data>
-  <data name="lbl_VerificationRewardLimitTitle" xml:space="preserve">
-    <value>Verification Rewards</value>
-  </data>
-  <data name="lbl_ReferredBonusCreditedMsg" xml:space="preserve">
-    <value>Congratulation! You have received your REFERRED FREE CREDIT {0} !</value>
-  </data>
-</root>
+<resheader name="resmimetype"><value>text/microsoft-resx</value></resheader><resheader name="version"><value>1.3</value></resheader><resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader><resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader><data name="lbl_VipUpgradeTitle"><value>VIP Upgrade</value></data>
+  <data name="lbl_ReferredBonusCreditedMsg"><value>Congratulation! You have received your REFERRED FREE CREDIT {0} !</value></data>
+  <data name="lbl_VipUpgrade"><value>Congratulation! Your VIP level has been upgraded, you are awarded {0} {1} Thank You!</value></data>
+  <data name="lbl_CancelBonusTitle"><value>Promotion expiration notice.</value></data>
+  <data name="lbl_ReferralBonusCreditedMsg"><value>Congratulations! Your referral bonus {0} has been credited to your account!</value></data>
+  <data name="lbl_RebateMsg"><value>Congratulations, your rebate {0} has been credited to your account!</value></data>
+  <data name="lbl_CancelBonus2"><value>Your bonus promotion has been canceled, the eligible refund amount are {0}.</value></data>
+  <data name="lbl_CancelBonus1"><value>Your bonus promotion has been canceled.</value></data>
+  <data name="lbl_VipDowngradeContent"><value>We are regret to inform, your VIP tier has been downgraded due to failed to fulfil the maintenance requirement. Thank you!</value></data>
+  <data name="lbl_VipDowngradeTitle"><value>VIP Membership Notice</value></data>
+  <data name="lbl_ReferralBonusCreditedTitle"><value>Refer Friends Rewards [Refer &amp; Earn]</value></data>
+  <data name="lbl_VerificationRewardContent"><value>Congratulation! You have received {0} {1} of your Verification Reward.</value></data>
+  <data name="lbl_VerificationRewardLimitTitle"><value>Verification Rewards</value></data>
+  <data name="lbl_VerificationRewardLimit"><value>Please fulfill the remaining deposit {0} {1} to enjoy the Verification Rewards.</value></data>
+  </root>

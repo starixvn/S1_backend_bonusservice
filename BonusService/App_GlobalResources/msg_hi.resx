@@ -1,37 +1,18 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
-          <xsd:element name="metadata">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
-              </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="assembly">
-            <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string" />
-              <xsd:attribute name="name" type="xsd:string" />
-            </xsd:complexType>
-          </xsd:element>
           <xsd:element name="data">
             <xsd:complexType>
               <xsd:sequence>
                 <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
                 <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
               <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
               <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
-              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="resheader">
@@ -46,106 +27,34 @@
       </xsd:complexType>
     </xsd:element>
   </xsd:schema>
-  <resheader name="resmimetype">
-    <value>text/microsoft-resx</value>
-  </resheader>
-  <resheader name="version">
-    <value>2.0</value>
-  </resheader>
-  <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <data name="msg_Ineligible" xml:space="preserve">
-    <value>आप इस पदोन्नति के योग्य नहीं हैं। अधिक जानकारी के लिए कृपया हमारे समर्थन से संपर्क करें।</value>
-  </data>
-  <data name="msg_ClaimCashBackBonus" xml:space="preserve">
-    <value>बधाई हो, आपका कैशबैक {0} आपके खाते में क्रेडिट कर दिया गया है!.</value>
-  </data>
-  <data name="msg_PromotionNotFound" xml:space="preserve">
-    <value>पदोन्नति पाया नहीं जा सकता</value>
-  </data>
-  <data name="msg_IpIsBlocked" xml:space="preserve">
-    <value>डुप्लिकेट खाता जानकारी इस प्रचार पर दावा किया गया है</value>
-  </data>
-  <data name="msg_ProfileOrPhoneNotFinish" xml:space="preserve">
-    <value>खाते की जानकारी पूरी नहीं हुई है, कृपया खाते की जानकारी की पुष्टि करें</value>
-  </data>
-  <data name="msg_DepositAmountNotEnough" xml:space="preserve">
-    <value>इस प्रचार में भाग लेने के लिए जमा राशि {0} या अधिक होनी चाहिए</value>
-  </data>
-  <data name="msg_MainWalletAmountNotEnough" xml:space="preserve">
-    <value>मुख्य वॉलेट बैलेंस {0} से कम नहीं होना चाहिए</value>
-  </data>
-  <data name="msg_CalculateAmountIsNegative" xml:space="preserve">
-    <value>इस प्रमोशन में शामिल होने का हकदार नहीं ह</value>
-  </data>
-  <data name="msg_CalculateCashbackTotalBonusLessThenMinPay" xml:space="preserve">
-    <value>न्यूनतम कैशबैक राशि नहीं पहुंची</value>
-  </data>
-  <data name="msg_CalculateUnknownPromotionType" xml:space="preserve">
-    <value>प्रचार नहीं मिल सका</value>
-  </data>
-  <data name="msg_DuplicateClaimBonus" xml:space="preserve">
-    <value>रिडीम प्रमोशन की नकल न करें</value>
-  </data>
-  <data name="msg_SameIp" xml:space="preserve">
-    <value>पदोन्नति के योग्य नहीं है, कृपया ग्राहक सहायता से संपर्क करें।</value>
-  </data>
-  <data name="msg_SameRealName" xml:space="preserve">
-    <value>पदोन्नति के योग्य नहीं है, कृपया ग्राहक सहायता से संपर्क करें।</value>
-  </data>
-  <data name="msg_SameDeviceId" xml:space="preserve">
-    <value>पदोन्नति के योग्य नहीं है, कृपया ग्राहक सहायता से संपर्क करें।</value>
-  </data>
-  <data name="msg_BlockTag" xml:space="preserve">
-    <value>पदोन्नति के योग्य नहीं है, कृपया ग्राहक सहायता से संपर्क करें।</value>
-  </data>
-  <data name="msg_SpBonusNotFound" xml:space="preserve">
-    <value>प्रचार नहीं मिल सका</value>
-  </data>
-  <data name="msg_SpCustomerNotJoinSpecialCode" xml:space="preserve">
-    <value>कृपया प्रोमो कोड दर्ज करें</value>
-  </data>
-  <data name="msg_SpCustomerJoinThisPromotionBefore" xml:space="preserve">
-    <value>भागीदारी की सीमा पूरी हो गई</value>
-  </data>
-  <data name="msg_SpCustomerBonusStillRunning" xml:space="preserve">
-    <value>अभी भी बोनस चल रहा है, कृपया बाद में पुनः प्रयास करें</value>
-  </data>
-  <data name="msg_SpCustomerDepositNotExceedRequiredAmount" xml:space="preserve">
-    <value>जमा राशि इस पदोन्नति में भाग लेने के लिए पात्र नहीं है</value>
-  </data>
-  <data name="msg_SpCustomerDontHaveFirstDeposit" xml:space="preserve">
-    <value>कृपया अपना पहला जमा पूरा करें</value>
-  </data>
-  <data name="msg_SpCustomerFirstDepositRuleDontMatch" xml:space="preserve">
-    <value>इस पदोन्नति में भाग लेने के लिए पात्र नहीं</value>
-  </data>
-  <data name="msg_SpCustomerWithdrawalBefore" xml:space="preserve">
-    <value>एक निकासी रिकॉर्ड पाया गया है, इस प्रचार में शामिल होने में असमर्थ</value>
-  </data>
-  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusInPeriodTime" xml:space="preserve">
-    <value>अभी भी रनिंग बोनस में है, कृपया बाद में पुनः प्रयास करें</value>
-  </data>
-  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusWhichPromotionTypeIn135" xml:space="preserve">
-    <value>अभी भी रनिंग बोनस में है, या इस ऑफ़र में भागीदारी की सीमा पूरी हो चुकी है</value>
-  </data>
-  <data name="msg_SpCustomerDepositApproveBefore" xml:space="preserve">
-    <value>एक सफल जमा रिकॉर्ड इस प्रचार में शामिल होने में असमर्थ पाया गया है</value>
-  </data>
-  <data name="msg_SpCustomerBonusStillRunningOrAddThisBonusBefore" xml:space="preserve">
-    <value>अभी भी रनिंग बोनस में है, या इस ऑफ़र में भागीदारी की सीमा पूरी हो चुकी है</value>
-  </data>
-  <data name="msg_SpCustomerJoinThisRebateBefore" xml:space="preserve">
-    <value>इस पदोन्नति का दावा किया गया है</value>
-  </data>
-  <data name="msg_SpCustomerHaveRunningBonusOrJoinThisBonusInPeriodTime" xml:space="preserve">
-    <value>अभी भी चल रहे बोनस में हैं, या इस ऑफ़र में भागीदारी की सीमा पूरी हो चुकी है</value>
-  </data>
-  <data name="msg_SpUndefinedPromotionType" xml:space="preserve">
-    <value>प्रचार नहीं मिल सका</value>
-  </data>
-</root>
+<resheader name="resmimetype"><value>text/microsoft-resx</value></resheader><resheader name="version"><value>1.3</value></resheader><resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader><resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader><data name="msg_SameRealName"><value>पदोन्नति के योग्य नहीं है, कृपया ग्राहक सहायता से संपर्क करें।</value></data>
+  <data name="msg_SpCustomerFirstDepositRuleDontMatch"><value>इस पदोन्नति में भाग लेने के लिए पात्र नहीं</value></data>
+  <data name="msg_PromotionNotFound"><value>पदोन्नति पाया नहीं जा सकता</value></data>
+  <data name="msg_SpCustomerNotJoinSpecialCode"><value>कृपया प्रोमो कोड दर्ज करें</value></data>
+  <data name="msg_SpCustomerBonusStillRunning"><value>अभी भी बोनस चल रहा है, कृपया बाद में पुनः प्रयास करें</value></data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusWhichPromotionTypeIn135"><value>अभी भी रनिंग बोनस में है, या इस ऑफ़र में भागीदारी की सीमा पूरी हो चुकी है</value></data>
+  <data name="msg_ProfileOrPhoneNotFinish"><value>खाते की जानकारी पूरी नहीं हुई है, कृपया खाते की जानकारी की पुष्टि करें</value></data>
+  <data name="msg_IpIsBlocked"><value>डुप्लिकेट खाता जानकारी इस प्रचार पर दावा किया गया है</value></data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusInPeriodTime"><value>अभी भी रनिंग बोनस में है, कृपया बाद में पुनः प्रयास करें</value></data>
+  <data name="msg_SpCustomerJoinThisPromotionBefore"><value>भागीदारी की सीमा पूरी हो गई</value></data>
+  <data name="msg_MainWalletAmountNotEnough"><value>मुख्य वॉलेट बैलेंस {0} से कम नहीं होना चाहिए</value></data>
+  <data name="msg_CalculateUnknownPromotionType"><value>प्रचार नहीं मिल सका</value></data>
+  <data name="msg_SpCustomerDepositNotExceedRequiredAmount"><value>जमा राशि इस पदोन्नति में भाग लेने के लिए पात्र नहीं है</value></data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddThisBonusBefore"><value>अभी भी रनिंग बोनस में है, या इस ऑफ़र में भागीदारी की सीमा पूरी हो चुकी है</value></data>
+  <data name="msg_SpBonusNotFound"><value>प्रचार नहीं मिल सका</value></data>
+  <data name="msg_SameDeviceId"><value>पदोन्नति के योग्य नहीं है, कृपया ग्राहक सहायता से संपर्क करें।</value></data>
+  <data name="msg_CalculateAmountIsNegative"><value>इस प्रमोशन में शामिल होने का हकदार नहीं ह</value></data>
+  <data name="msg_CalculateCashbackTotalBonusLessThenMinPay"><value>न्यूनतम कैशबैक राशि नहीं पहुंची</value></data>
+  <data name="msg_SameIp"><value>पदोन्नति के योग्य नहीं है, कृपया ग्राहक सहायता से संपर्क करें।</value></data>
+  <data name="msg_SpCustomerHaveRunningBonusOrJoinThisBonusInPeriodTime"><value>अभी भी चल रहे बोनस में हैं, या इस ऑफ़र में भागीदारी की सीमा पूरी हो चुकी है</value></data>
+  <data name="msg_SpCustomerDepositApproveBefore"><value>एक सफल जमा रिकॉर्ड इस प्रचार में शामिल होने में असमर्थ पाया गया है</value></data>
+  <data name="msg_SpCustomerJoinThisRebateBefore"><value>इस पदोन्नति का दावा किया गया है</value></data>
+  <data name="msg_SpCustomerDontHaveFirstDeposit"><value>कृपया अपना पहला जमा पूरा करें</value></data>
+  <data name="msg_SpCustomerWithdrawalBefore"><value>एक निकासी रिकॉर्ड पाया गया है, इस प्रचार में शामिल होने में असमर्थ</value></data>
+  <data name="msg_DepositAmountNotEnough"><value>इस प्रचार में भाग लेने के लिए जमा राशि {0} या अधिक होनी चाहिए</value></data>
+  <data name="msg_DuplicateClaimBonus"><value>रिडीम प्रमोशन की नकल न करें</value></data>
+  <data name="msg_SpUndefinedPromotionType"><value>प्रचार नहीं मिल सका</value></data>
+  <data name="msg_BlockTag"><value>पदोन्नति के योग्य नहीं है, कृपया ग्राहक सहायता से संपर्क करें।</value></data>
+  <data name="msg_ClaimCashBackBonus"><value>बधाई हो, आपका कैशबैक {0} आपके खाते में क्रेडिट कर दिया गया है!.</value></data>
+  <data name="msg_Ineligible"><value>आप इस पदोन्नति के योग्य नहीं हैं। अधिक जानकारी के लिए कृपया हमारे समर्थन से संपर्क करें।</value></data>
+  </root>
