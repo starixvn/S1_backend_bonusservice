@@ -1,37 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
-          <xsd:element name="metadata">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
-              </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="assembly">
-            <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string" />
-              <xsd:attribute name="name" type="xsd:string" />
-            </xsd:complexType>
-          </xsd:element>
           <xsd:element name="data">
             <xsd:complexType>
               <xsd:sequence>
                 <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
                 <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
               <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
               <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
-              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="resheader">
@@ -46,106 +27,34 @@
       </xsd:complexType>
     </xsd:element>
   </xsd:schema>
-  <resheader name="resmimetype">
-    <value>text/microsoft-resx</value>
-  </resheader>
-  <resheader name="version">
-    <value>2.0</value>
-  </resheader>
-  <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <data name="msg_Ineligible" xml:space="preserve">
-    <value>Tài khoản của bạn chưa may mắn trong ngày hôm nay, xin vui lòng thử lại vào ngày hôm sau.</value>
-  </data>
-  <data name="msg_ClaimCashBackBonus" xml:space="preserve">
-    <value>Xin chúc mừng, khoản tiền hoàn lại {0} của bạn đã được ghi có vào tài khoản của bạn!</value>
-  </data>
-  <data name="msg_PromotionNotFound" xml:space="preserve">
-    <value>Không thể tìm thấy Khuyến mãi</value>
-  </data>
-  <data name="msg_IpIsBlocked" xml:space="preserve">
-    <value>Khuyến mãi đã được nhận bởi tài khoản trùng lặp thông tin</value>
-  </data>
-  <data name="msg_ProfileOrPhoneNotFinish" xml:space="preserve">
-    <value>Thông tin tài khoản chưa được điền đầy đủ, vui lòng xác minh thông tin tài khoản</value>
-  </data>
-  <data name="msg_DepositAmountNotEnough" xml:space="preserve">
-    <value>Bạn cần nạp tối thiểu {0} để tham gia khuyến mãi này</value>
-  </data>
-  <data name="msg_MainWalletAmountNotEnough" xml:space="preserve">
-    <value>Số dư trong ví chính không được nhỏ hơn {0}</value>
-  </data>
-  <data name="msg_CalculateAmountIsNegative" xml:space="preserve">
-    <value>Không đủ điều kiện tham gia khuyến mãi này</value>
-  </data>
-  <data name="msg_CalculateCashbackTotalBonusLessThenMinPay" xml:space="preserve">
-    <value>Không đạt đủ số tiền hoàn lại tối thiểu</value>
-  </data>
-  <data name="msg_CalculateUnknownPromotionType" xml:space="preserve">
-    <value>Khuyến mãi không hợp lệ</value>
-  </data>
-  <data name="msg_DuplicateClaimBonus" xml:space="preserve">
-    <value>Không trùng lặp khuyến mãi</value>
-  </data>
-  <data name="msg_SameIp" xml:space="preserve">
-    <value>Không đủ điều kiện nhận khuyến mãi, vui lòng liên hệ bộ phận Hỗ trợ khách hàng</value>
-  </data>
-  <data name="msg_SameRealName" xml:space="preserve">
-    <value>Không đủ điều kiện nhận khuyến mãi, vui lòng liên hệ bộ phận Hỗ trợ khách hàng</value>
-  </data>
-   <data name="msg_SameDeviceId" xml:space="preserve">
-    <value>Không đủ điều kiện nhận khuyến mãi, vui lòng liên hệ bộ phận Hỗ trợ khách hàng</value>
-  </data>
-  <data name="msg_BlockTag" xml:space="preserve">
-    <value>Không đủ điều kiện nhận khuyến mãi, vui lòng liên hệ bộ phận Hỗ trợ khách hàng</value>
-  </data>
-  <data name="msg_SpBonusNotFound" xml:space="preserve">
-    <value>Không tìm thấy Khuyến mãi</value>
-  </data>
-  <data name="msg_SpCustomerNotJoinSpecialCode" xml:space="preserve">
-    <value>Vui lòng nhập mã khuyến mãi</value>
-  </data>
-  <data name="msg_SpCustomerJoinThisPromotionBefore" xml:space="preserve">
-    <value>Đã nhận đủ giới hạn khuyến mãi này </value>
-  </data>
-  <data name="msg_SpCustomerBonusStillRunning" xml:space="preserve">
-    <value>Khuyến mãi vẫn chưa hoàn thành, vui lòng thử lại sau</value>
-  </data>
-  <data name="msg_SpCustomerDepositNotExceedRequiredAmount" xml:space="preserve">
-    <value>Số tiền gửi không đủ điều kiện để tham gia chương trình khuyến mãi này</value>
-  </data>
-  <data name="msg_SpCustomerDontHaveFirstDeposit" xml:space="preserve">
-    <value>Vui lòng hoàn thành khoản nạp đầu tiên của bạn</value>
-  </data>
-  <data name="msg_SpCustomerFirstDepositRuleDontMatch" xml:space="preserve">
-    <value>Không đủ điều kiện để tham gia chương trình khuyến mãi này</value>
-  </data>
-  <data name="msg_SpCustomerWithdrawalBefore" xml:space="preserve">
-    <value>Đã rút tiền , không thể tham gia khuyến mãi này</value>
-  </data>
-  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusInPeriodTime" xml:space="preserve">
-    <value>Khuyến mãi vẫn chưa hoàn thành, vui lòng thử lại sau</value>
-  </data>
-  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusWhichPromotionTypeIn135" xml:space="preserve">
-    <value>Khuyến mãi chưa hoàn thành ,hoặc đã nhận khuyến mãi nạp lần đầu, khuyến mãi trải nghiệm</value>
-  </data>
-  <data name="msg_SpCustomerDepositApproveBefore" xml:space="preserve">
-    <value>Đã nạp tiền nhưng không thể tham gia khuyến mãi này</value>
-  </data>
-  <data name="msg_SpCustomerBonusStillRunningOrAddThisBonusBefore" xml:space="preserve">
-    <value>Khuyến mãi chưa hoàn thành ,hoặc đã nhận khuyến mãi trước đó</value>
-  </data>
-  <data name="msg_SpCustomerJoinThisRebateBefore" xml:space="preserve">
-    <value>Khuyến mãi đã được cập nhật thành công</value>
-  </data>
-  <data name="msg_SpCustomerHaveRunningBonusOrJoinThisBonusInPeriodTime" xml:space="preserve">
-    <value>Khuyến mãi chưa hoàn thành ,hoặc đã nhận khuyến mãi trong thời gian quy định</value>
-  </data>
-  <data name="msg_SpUndefinedPromotionType" xml:space="preserve">
-    <value>Không thể tìm thấy Khuyến mãi</value>
-  </data>
-</root>
+<resheader name="resmimetype"><value>text/microsoft-resx</value></resheader><resheader name="version"><value>1.3</value></resheader><resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader><resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader><data name="msg_SameRealName"><value>Không đủ điều kiện nhận khuyến mãi, vui lòng liên hệ bộ phận Hỗ trợ khách hàng</value></data>
+  <data name="msg_SpCustomerFirstDepositRuleDontMatch"><value>Không đủ điều kiện để tham gia chương trình khuyến mãi này</value></data>
+  <data name="msg_PromotionNotFound"><value>Không thể tìm thấy Khuyến mãi</value></data>
+  <data name="msg_SpCustomerNotJoinSpecialCode"><value>Vui lòng nhập mã khuyến mãi</value></data>
+  <data name="msg_SpCustomerBonusStillRunning"><value>Khuyến mãi vẫn chưa hoàn thành, vui lòng thử lại sau</value></data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusWhichPromotionTypeIn135"><value>Khuyến mãi chưa hoàn thành ,hoặc đã nhận khuyến mãi nạp lần đầu, khuyến mãi trải nghiệm</value></data>
+  <data name="msg_ProfileOrPhoneNotFinish"><value>Thông tin tài khoản chưa được điền đầy đủ, vui lòng xác minh thông tin tài khoản</value></data>
+  <data name="msg_IpIsBlocked"><value>Khuyến mãi đã được nhận bởi tài khoản trùng lặp thông tin</value></data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusInPeriodTime"><value>Khuyến mãi vẫn chưa hoàn thành, vui lòng thử lại sau</value></data>
+  <data name="msg_SpCustomerJoinThisPromotionBefore"><value>Đã nhận đủ giới hạn khuyến mãi này</value></data>
+  <data name="msg_MainWalletAmountNotEnough"><value>Số dư trong ví chính không được nhỏ hơn {0}</value></data>
+  <data name="msg_CalculateUnknownPromotionType"><value>Khuyến mãi không hợp lệ</value></data>
+  <data name="msg_SpCustomerDepositNotExceedRequiredAmount"><value>Số tiền gửi không đủ điều kiện để tham gia chương trình khuyến mãi này</value></data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddThisBonusBefore"><value>Khuyến mãi chưa hoàn thành ,hoặc đã nhận khuyến mãi trước đó</value></data>
+  <data name="msg_SpBonusNotFound"><value>Không tìm thấy Khuyến mãi</value></data>
+  <data name="msg_SameDeviceId"><value>Không đủ điều kiện nhận khuyến mãi, vui lòng liên hệ bộ phận Hỗ trợ khách hàng</value></data>
+  <data name="msg_CalculateAmountIsNegative"><value>Không đủ điều kiện tham gia khuyến mãi này</value></data>
+  <data name="msg_CalculateCashbackTotalBonusLessThenMinPay"><value>Không đạt đủ số tiền hoàn lại tối thiểu</value></data>
+  <data name="msg_SameIp"><value>Không đủ điều kiện nhận khuyến mãi, vui lòng liên hệ bộ phận Hỗ trợ khách hàng</value></data>
+  <data name="msg_SpCustomerHaveRunningBonusOrJoinThisBonusInPeriodTime"><value>Khuyến mãi chưa hoàn thành ,hoặc đã nhận khuyến mãi trong thời gian quy định</value></data>
+  <data name="msg_SpCustomerDepositApproveBefore"><value>Đã nạp tiền nhưng không thể tham gia khuyến mãi này</value></data>
+  <data name="msg_SpCustomerJoinThisRebateBefore"><value>Khuyến mãi đã được cập nhật thành công</value></data>
+  <data name="msg_SpCustomerDontHaveFirstDeposit"><value>Vui lòng hoàn thành khoản nạp đầu tiên của bạn</value></data>
+  <data name="msg_SpCustomerWithdrawalBefore"><value>Đã rút tiền , không thể tham gia khuyến mãi này</value></data>
+  <data name="msg_DepositAmountNotEnough"><value>Bạn cần nạp tối thiểu {0} để tham gia khuyến mãi này</value></data>
+  <data name="msg_DuplicateClaimBonus"><value>Không trùng lặp khuyến mãi</value></data>
+  <data name="msg_SpUndefinedPromotionType"><value>Không thể tìm thấy Khuyến mãi</value></data>
+  <data name="msg_BlockTag"><value>Không đủ điều kiện nhận khuyến mãi, vui lòng liên hệ bộ phận Hỗ trợ khách hàng</value></data>
+  <data name="msg_ClaimCashBackBonus"><value>Xin chúc mừng, khoản tiền hoàn lại {0} của bạn đã được ghi có vào tài khoản của bạn!</value></data>
+  <data name="msg_Ineligible"><value>Tài khoản của bạn chưa may mắn trong ngày hôm nay, xin vui lòng thử lại vào ngày hôm sau.</value></data>
+  </root>

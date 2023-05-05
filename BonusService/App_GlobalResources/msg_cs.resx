@@ -1,37 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
-          <xsd:element name="metadata">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
-              </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="assembly">
-            <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string" />
-              <xsd:attribute name="name" type="xsd:string" />
-            </xsd:complexType>
-          </xsd:element>
           <xsd:element name="data">
             <xsd:complexType>
               <xsd:sequence>
                 <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
                 <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
               <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
               <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
-              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="resheader">
@@ -46,106 +27,34 @@
       </xsd:complexType>
     </xsd:element>
   </xsd:schema>
-  <resheader name="resmimetype">
-    <value>text/microsoft-resx</value>
-  </resheader>
-  <resheader name="version">
-    <value>2.0</value>
-  </resheader>
-  <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <data name="msg_Ineligible" xml:space="preserve">
-    <value>您不符合领取此优惠，请联系客服以了解详情。</value>
-  </data>
-  <data name="msg_ClaimCashBackBonus" xml:space="preserve">
-    <value>恭喜，您的现金返还 {0} 已汇入您的户口！</value>
-  </data>
-  <data name="msg_PromotionNotFound" xml:space="preserve">
-    <value>查无此优惠</value>
-  </data>
-  <data name="msg_IpIsBlocked" xml:space="preserve">
-    <value>相同账户信息已领取此优惠</value>
-  </data>
-  <data name="msg_ProfileOrPhoneNotFinish" xml:space="preserve">
-    <value>未完善账户信息，请先完善账户信息</value>
-  </data>
-  <data name="msg_DepositAmountNotEnough" xml:space="preserve">
-    <value>参与此优惠存款金额需为{0}或以上</value>
-  </data>
-  <data name="msg_MainWalletAmountNotEnough" xml:space="preserve">
-    <value>中心钱包余额不可少于 {0}</value>
-  </data>
-  <data name="msg_CalculateAmountIsNegative" xml:space="preserve">
-    <value>优惠金额为负值，暂时无法领取此优惠</value>
-  </data>
-  <data name="msg_CalculateCashbackTotalBonusLessThenMinPay" xml:space="preserve">
-    <value>未达最低返现金额</value>
-  </data>
-  <data name="msg_CalculateUnknownPromotionType" xml:space="preserve">
-    <value>暂无此优惠</value>
-  </data>
-  <data name="msg_DuplicateClaimBonus" xml:space="preserve">
-    <value>请勿重复领取优惠</value>
-  </data>
-  <data name="msg_SameIp" xml:space="preserve">
-    <value>无法领取此优惠，请联系客服咨询</value>
-  </data>
-  <data name="msg_SameRealName" xml:space="preserve">
-    <value>无法领取此优惠，请联系客服咨询</value>
-  </data>
-  <data name="msg_SameDeviceId" xml:space="preserve">
-    <value>无法领取此优惠，请联系客服咨询</value>
-  </data>
-  <data name="msg_BlockTag" xml:space="preserve">
-    <value>无法领取此优惠，请联系客服咨询</value>
-  </data>
-  <data name="msg_SpBonusNotFound" xml:space="preserve">
-    <value>无此优惠</value>
-  </data>
-  <data name="msg_SpCustomerNotJoinSpecialCode" xml:space="preserve">
-    <value>请输入优惠码</value>
-  </data>
-  <data name="msg_SpCustomerJoinThisPromotionBefore" xml:space="preserve">
-    <value>领取次数已达限</value>
-  </data>
-  <data name="msg_SpCustomerBonusStillRunning" xml:space="preserve">
-    <value>您尚有未完成优惠，请稍后再尝试</value>
-  </data>
-  <data name="msg_SpCustomerDepositNotExceedRequiredAmount" xml:space="preserve">
-    <value>存款金额不符合参与此优惠</value>
-  </data>
-  <data name="msg_SpCustomerDontHaveFirstDeposit" xml:space="preserve">
-    <value>您尚未完成首存，请先存款</value>
-  </data>
-  <data name="msg_SpCustomerFirstDepositRuleDontMatch" xml:space="preserve">
-    <value>不符合参与此优惠</value>
-  </data>
-  <data name="msg_SpCustomerWithdrawalBefore" xml:space="preserve">
-    <value>已有提款记录，无法参与此优惠</value>
-  </data>
-  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusInPeriodTime" xml:space="preserve">
-    <value>您尚有未完成优惠，请稍后再尝试</value>
-  </data>
-  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusWhichPromotionTypeIn135" xml:space="preserve">
-    <value>尚有未完成优惠或参与此优惠次数已达限</value>
-  </data>
-  <data name="msg_SpCustomerDepositApproveBefore" xml:space="preserve">
-    <value>已有成功存款记录，无法参与此优惠</value>
-  </data>
-  <data name="msg_SpCustomerBonusStillRunningOrAddThisBonusBefore" xml:space="preserve">
-    <value>尚有未完成优惠或参与此优惠次数已达限</value>
-  </data>
-  <data name="msg_SpCustomerJoinThisRebateBefore" xml:space="preserve">
-    <value>已领取此优惠</value>
-  </data>
-  <data name="msg_SpCustomerHaveRunningBonusOrJoinThisBonusInPeriodTime" xml:space="preserve">
-    <value>您尚有未完成优惠或领取优惠次数已达上限</value>
-  </data>
-  <data name="msg_SpUndefinedPromotionType" xml:space="preserve">
-    <value>暂无此优惠</value>
-  </data>
-</root>
+<resheader name="resmimetype"><value>text/microsoft-resx</value></resheader><resheader name="version"><value>1.3</value></resheader><resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader><resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader><data name="msg_SameRealName"><value>无法领取此优惠，请联系客服咨询</value></data>
+  <data name="msg_SpCustomerFirstDepositRuleDontMatch"><value>不符合参与此优惠</value></data>
+  <data name="msg_PromotionNotFound"><value>查无此优惠</value></data>
+  <data name="msg_SpCustomerNotJoinSpecialCode"><value>请输入优惠码</value></data>
+  <data name="msg_SpCustomerBonusStillRunning"><value>您尚有未完成优惠，请稍后再尝试</value></data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusWhichPromotionTypeIn135"><value>尚有未完成优惠或参与此优惠次数已达限</value></data>
+  <data name="msg_ProfileOrPhoneNotFinish"><value>未完善账户信息，请先完善账户信息</value></data>
+  <data name="msg_IpIsBlocked"><value>相同账户信息已领取此优惠</value></data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusInPeriodTime"><value>您尚有未完成优惠，请稍后再尝试</value></data>
+  <data name="msg_SpCustomerJoinThisPromotionBefore"><value>领取次数已达限</value></data>
+  <data name="msg_MainWalletAmountNotEnough"><value>中心钱包余额不可少于 {0}</value></data>
+  <data name="msg_CalculateUnknownPromotionType"><value>暂无此优惠</value></data>
+  <data name="msg_SpCustomerDepositNotExceedRequiredAmount"><value>存款金额不符合参与此优惠</value></data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddThisBonusBefore"><value>尚有未完成优惠或参与此优惠次数已达限</value></data>
+  <data name="msg_SpBonusNotFound"><value>无此优惠</value></data>
+  <data name="msg_SameDeviceId"><value>无法领取此优惠，请联系客服咨询</value></data>
+  <data name="msg_CalculateAmountIsNegative"><value>优惠金额为负值，暂时无法领取此优惠</value></data>
+  <data name="msg_CalculateCashbackTotalBonusLessThenMinPay"><value>未达最低返现金额</value></data>
+  <data name="msg_SameIp"><value>无法领取此优惠，请联系客服咨询</value></data>
+  <data name="msg_SpCustomerHaveRunningBonusOrJoinThisBonusInPeriodTime"><value>您尚有未完成优惠或领取优惠次数已达上限</value></data>
+  <data name="msg_SpCustomerDepositApproveBefore"><value>已有成功存款记录，无法参与此优惠</value></data>
+  <data name="msg_SpCustomerJoinThisRebateBefore"><value>已领取此优惠</value></data>
+  <data name="msg_SpCustomerDontHaveFirstDeposit"><value>您尚未完成首存，请先存款</value></data>
+  <data name="msg_SpCustomerWithdrawalBefore"><value>已有提款记录，无法参与此优惠</value></data>
+  <data name="msg_DepositAmountNotEnough"><value>参与此优惠存款金额需为{0}或以上</value></data>
+  <data name="msg_DuplicateClaimBonus"><value>请勿重复领取优惠</value></data>
+  <data name="msg_SpUndefinedPromotionType"><value>暂无此优惠</value></data>
+  <data name="msg_BlockTag"><value>无法领取此优惠，请联系客服咨询</value></data>
+  <data name="msg_ClaimCashBackBonus"><value>恭喜，您的现金返还 {0} 已汇入您的户口！</value></data>
+  <data name="msg_Ineligible"><value>您不符合领取此优惠，请联系客服以了解详情。</value></data>
+  </root>
