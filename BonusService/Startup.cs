@@ -25,6 +25,7 @@ namespace BonusService
             services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(_configuration.GetValue<string>("RedisConnection")));
             services.AddSingleton<ICacheHelper, RedisCacheHelper>();
             services.AddDatabaseConnection(_configuration);
+            services.AddMessageQueueConnection(_configuration);
             services.AddSingleton<Common>();
             services.AddSingleton<Currency>();
             services.AddSingleton<CourierAdapter>();
@@ -58,6 +59,7 @@ namespace BonusService
             services.AddSingleton<VipCashBackBLL>();
             services.AddSingleton<PromotionAutoExtendBLL>();
             services.AddSingleton<DepositBonusBLL>();
+            services.AddSingleton<IMessageHandler, MessageHandler>();
 
             services.AddSingleton<BonusAPIBLL>();
             services.AddSingleton<BonusAPIService>();

@@ -2,6 +2,17 @@
 
 namespace MemberSite.Service.Model
 {
+    public class SetVerificationRewardReq
+    {
+        public int CustId { get; set; }
+        public OTPTypeEnum OTPType { get; set; }//0.SMS 1.EMAIL
+
+    }
+    public class SetVerificationRewardByDeposit
+    {
+        public int CustId { get; set; }
+
+    }
     public class VerificationRewardData
     {
         public int SiteId { get; set; }

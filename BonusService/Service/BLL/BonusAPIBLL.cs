@@ -126,14 +126,6 @@ namespace BonusService.Service.BLL
         public ApiResult SetVerificationReward(int custId, OTPTypeEnum inputType , bool isWorker)
         {
             var result = new ApiResult();
-            var key = $"VerificationReward:{custId}";
-            if (_redisHelper.KeyExists(key))
-            {
-                result.ErrorCode = (int)BonusErrorCode.DuplicateClaimBonus;
-                return result;
-            }
-            _redisHelper.StringSet(key, custId, TimeSpan.FromMinutes(1));
-
             var custInfo = _custInfoService.GetCustInfo(custId);
             var verInfo = _bonusAPIService.GetVerificationReward(custInfo.SiteId, custInfo.CurrencyId);
             var custRewardInfo = _bonusAPIService.GetCustVerificationReward(custId, true);
