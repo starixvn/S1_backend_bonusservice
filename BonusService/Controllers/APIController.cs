@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using BonusService.Service.Model;
 using MySql.Data.MySqlClient;
-using MySqlX.XDevAPI.Common;
 
 namespace BonusService.Controllers
 {
@@ -76,32 +75,16 @@ namespace BonusService.Controllers
             return result;
         }
 
-
-
-        public class SetVerificationRewardReq
-        {
-            public int CustId { get; set; }
-            public int OTPType { get; set; }//0.SMS 1.EMAIL
-
-        }
         [HttpPost]
         public ApiResult SetVerificationReward(SetVerificationRewardReq verificationRewardReq)
         {
-            var item = OTPTypeEnum.SMS;
-            if (verificationRewardReq.OTPType == 1)
-                item = OTPTypeEnum.Email;
-
-            return _bonusAPIBLL.SetVerificationReward(verificationRewardReq.CustId, item, false);
+            return _bonusAPIBLL.SetVerificationReward(verificationRewardReq.CustId, verificationRewardReq.OTPType, false);
         }
 
         [HttpPost]
         public ApiResult CheckRewardCondination(SetVerificationRewardReq verificationRewardReq)
         {
-            var item = OTPTypeEnum.SMS;
-            if (verificationRewardReq.OTPType == 1)
-                item = OTPTypeEnum.Email;
-
-            return _bonusAPIBLL.CheckRewardCondination(verificationRewardReq.CustId, item);
+            return _bonusAPIBLL.CheckRewardCondination(verificationRewardReq.CustId, verificationRewardReq.OTPType);
         }
 
         public class PromotionReq
