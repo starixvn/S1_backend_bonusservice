@@ -39,5 +39,12 @@ namespace BonusService.Service.Workers
 
             return Task.CompletedTask;
         }
+
+        public override void Dispose()
+        {
+            _channel.Close();
+            _connection.Close();
+            base.Dispose();
+        }
     }
 }
