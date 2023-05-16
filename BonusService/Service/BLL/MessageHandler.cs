@@ -34,18 +34,19 @@ namespace BonusService.Service.BLL
                     if (verify != null) 
                     {
                         result = _bonusAPIBLL.SetVerificationReward(verify.CustId, verify.OTPType, false);
-                        _logger.LogInformation($"SetVerificationReward result:{result.ErrorCode}, {result.Message}");
+                        _logger.LogInformation($"SetVerificationReward {verify.OTPType} result:{result.ErrorCode}, {result.Message}");
                     }
                     
                     break;
-                case "deposit":
+                case "deposit.payment":
+                case "deposit.local":
                     var deposit = JsonConvert.DeserializeObject<SetVerificationRewardByDeposit>(message);
                     if (deposit != null) 
                     {
                         result = _bonusAPIBLL.SetVerificationReward(deposit.CustId, OTPTypeEnum.SMS, false);
-                        _logger.LogInformation($"SetVerificationReward CustId:{deposit.CustId}");
+                        _logger.LogInformation($"SetVerificationReward SMS result:{result.ErrorCode}, {result.Message}");
                         result = _bonusAPIBLL.SetVerificationReward(deposit.CustId, OTPTypeEnum.Email, false);
-                        _logger.LogInformation(result.ErrorCode.ToString());
+                        _logger.LogInformation($"SetVerificationReward Email result:{result.ErrorCode}, {result.Message}");
                     }
                     break;
                 default:
