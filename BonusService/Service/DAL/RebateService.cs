@@ -9,7 +9,7 @@ namespace BonusService.Service.DAL
     public class RebateService
     {
         private readonly MySqlClient _reportDbClient;
-        
+
         public RebateService(IServiceProvider serviceProvider)
         {
             _reportDbClient = serviceProvider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Report);
@@ -20,9 +20,9 @@ namespace BonusService.Service.DAL
             return _reportDbClient.Query<TpCategory>("Common_TpCategory_Get");
         }
 
-        public IEnumerable<RebateExcludeGame> GetExcludeGameList(int SiteId)
+        public IEnumerable<RebateExcludeGame> GetExcludeGameList(int siteId, int currencyId)
         {
-            return _reportDbClient.Query<RebateExcludeGame>("Service_RebateExcludeGame_Get", new DynamicParameters(new { SiteId }));
+            return _reportDbClient.Query<RebateExcludeGame>("Service_RebateExcludeGame_Get_V2", new DynamicParameters(new { _SiteId = siteId, _CurrencyId = currencyId }));
         }
     }
 }
