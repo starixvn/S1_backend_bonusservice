@@ -90,10 +90,10 @@ namespace BonusService.Service.BLL
         {
             return _vipRebateService.GetVipRebateCustList(siteId, currencyId, periodType, specificDate, currencyTimeZone);
         }
-        public int PayoutVipRebate(int siteId, VipRebateInfo vipRebateInfo, IEnumerable<VipRebateTpBetRecord> vipRebateTpBetRecordList, IEnumerable<RebatePayoutLimit> rebatePayoutLimits, long RelId)
+        public int PayoutVipRebate(int siteId,int currencyId, VipRebateInfo vipRebateInfo, IEnumerable<VipRebateTpBetRecord> vipRebateTpBetRecordList, IEnumerable<RebatePayoutLimit> rebatePayoutLimits, long RelId)
         {
             //原始資料包含相同GameType不同GameId的資料，先用GameId排除不計算Rebate的遊戲
-            var excludeGameList = GetExcludeGameList(siteId);
+            var excludeGameList = GetExcludeGameList(siteId, currencyId);
             _logger.LogInformation($"excludeGameList:{JsonConvert.SerializeObject(excludeGameList)}");
             foreach (var vipRebateTpBetRecord in vipRebateTpBetRecordList)
             {
@@ -161,16 +161,16 @@ namespace BonusService.Service.BLL
             return _vipRebateService.GetRebatePayoutLimit();
         }
 
-        public Dictionary<int, Dictionary<string, string>> GetExcludeGameList(int siteId)
+        public Dictionary<int, Dictionary<string, string>> GetExcludeGameList(int siteId,int currencyId)
         {
-            var key = $"Rebate:ExcludeGameList:{siteId}";
+            var key = $"Rebate:ExcludeGameList:{siteId}_{currencyId}";
             return _cacheHelper.TryGetOrCreate(key,
                 new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(10)),
                 i => 
                     {
                         var result = new Dictionary<int, Dictionary<string, string>>();
                         //用GameType分類建立GameId檢查字典
-                        var gameTypeGroups = _rebateService.GetExcludeGameList(siteId).GroupBy(i => i.GameType);                        
+                        var gameTypeGroups = _rebateService.GetExcludeGameList(siteId, currencyId).GroupBy(i => i.GameType);                        
                         foreach (var gameTypeList in gameTypeGroups)
                         {
                             var gameTypeResult = new Dictionary<string, string>();
