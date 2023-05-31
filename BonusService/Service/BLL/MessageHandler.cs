@@ -24,6 +24,7 @@ namespace BonusService.Service.BLL
         public async Task HandleMessageAsync(string key, string message)
         {
             LogContext.PushProperty("RequestId", Guid.NewGuid().ToString());
+            LogContext.PushProperty("Handler", "VerificationReward");
             _logger.LogInformation($"key:{key} message:{message}");
             var result = new ApiResult();
             switch (key) 
