@@ -30,7 +30,7 @@ namespace BonusService.Service.BLL
             var customer = _custInfoService.GetCustInfoProfile(custId, custInfo.SiteId);
             return customer;
         }
-        public ApiResult CheckRewardCondination(int custId, OTPTypeEnum inputType ,Customer custInfo = null, VerificationRewardData verInfo = null, CustVerificationRewardData custRewardInfo = null )
+        public ApiResult CheckRewardCondination(int custId, OTPTypeEnum inputType, bool isWorker, Customer custInfo = null, VerificationRewardData verInfo = null, CustVerificationRewardData custRewardInfo = null )
         {
             var result = new ApiResult();
             if(custInfo == null)
@@ -40,6 +40,13 @@ namespace BonusService.Service.BLL
             if (custRewardInfo == null)
                 custRewardInfo = _bonusAPIService.GetCustVerificationReward(custId, true);
             //var rewardLimit = _bonusAPIService.GetVerificationRewardLimit(custInfo.SiteId, custInfo.CurrencyId, inputType);
+
+            var verifyTime = _bonusAPIService.GetVerifyTime(custInfo.CustId, inputType);
+            if (isWorker && !verifyTime.HasValue) 
+            {
+                result.ErrorCode = 105;
+                result.Message = "Mismatch condition";
+            }
 
             if (verInfo == null)
             {
@@ -130,7 +137,7 @@ namespace BonusService.Service.BLL
             var verInfo = _bonusAPIService.GetVerificationReward(custInfo.SiteId, custInfo.CurrencyId);
             var custRewardInfo = _bonusAPIService.GetCustVerificationReward(custId, true);
             
-            result = CheckRewardCondination(custId, inputType, custInfo, verInfo, custRewardInfo);//領獎條件規則
+            result = CheckRewardCondination(custId, inputType, isWorker, custInfo, verInfo, custRewardInfo);//領獎條件規則
             
             if (result.ErrorCode != 0)
             {
