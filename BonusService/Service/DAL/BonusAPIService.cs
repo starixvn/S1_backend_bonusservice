@@ -32,7 +32,14 @@ namespace BonusService.Service.DAL
             var p = new DynamicParameters(new { _SiteId = siteId, _CurrencyId = currencyId , _Type = type});
             return _reportDbClient.QueryFirst<VerificationRewardLimit>("Service_VerificationRewardLimit_Get", p);
         }
-        
+
+        public DateTime? GetVerifyTime(int custId, OTPTypeEnum type)
+        {
+            var taskId = (int)type + 3;
+            var p = new DynamicParameters(new { _CustId = custId, _TaskId = taskId });
+            return _reportDbClient.QueryFirst<DateTime?>("Service_CustVerifyTime_Get", p);
+        }
+
         public CustVerificationRewardData GetCustVerificationReward(int custId,bool usedMainDb = false)
         {
             var p = new DynamicParameters(new { _CustId = custId });
