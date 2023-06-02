@@ -42,19 +42,20 @@ namespace BonusService.Service.BLL
             //var rewardLimit = _bonusAPIService.GetVerificationRewardLimit(custInfo.SiteId, custInfo.CurrencyId, inputType);
 
             var verifyTime = _bonusAPIService.GetVerifyTime(custInfo.CustId, inputType);
-            if (isWorker && !verifyTime.HasValue) 
-            {
-                result.ErrorCode = 105;
-                result.Message = "Mismatch condition";
-            }
-
             if (verInfo == null)
             {
                 result.ErrorCode = 103;
                 result.Message = $"SiteId:{custInfo.SiteId} CurrencyId:{custInfo.CurrencyId} setting not found";
                 return result;
             }
-            
+
+            if (isWorker && !verifyTime.HasValue)
+            {
+                result.ErrorCode = 105;
+                result.Message = "Mismatch condition";
+                return result;
+            }
+
             if (custRewardInfo.SumDepositAmount < verInfo.MinDeposit)
             {
                 result.ErrorCode = 104;
