@@ -1184,8 +1184,16 @@ namespace BonusService.Service.BLL
             //將該名玩家沒有下注紀錄的TpId與CategoryId組合加入到detail,輸贏預設為0
             promotionCashBackSetting.ForEach(x =>
             {
-                if(!detail.Exists(y=> y.TpId == x.TpId && y.CategoryId == x.CategoryId))
+                var cashBackSetting = detail.Find(y => y.TpId == x.TpId && y.CategoryId == x.CategoryId && y.Percentage == x.Percentage);
+                if (cashBackSetting is null)
+                {
                     detail.Add(x);
+                }
+                else
+                {
+                    cashBackSetting.MinLossAmount = x.MinLossAmount;
+                }
+
             });
 
             if (detail.Any() && detail.First().TpId == (int)Tp.Saba)
