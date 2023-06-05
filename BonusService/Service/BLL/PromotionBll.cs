@@ -1176,9 +1176,12 @@ namespace BonusService.Service.BLL
             if (!getDetail) return;
             var lastMonday = StartOfWeek(currentTime.AddDays(-7), DayOfWeek.Monday).Date;
             var lastSunday = lastMonday.AddDays(6);
+            //用promotion取得該名玩家的相關輸贏紀錄
             var detail = _promotionService.GetCashBackInfo(custId, promotion, lastMonday, lastSunday).ToList();
+            //取得該promotion設定的所有TpId與CategoryId組合
             var promotionCashBackSetting = _promotionService.GetCashBackSetting(custId, promotion).ToList();
 
+            //將該名玩家沒有下注紀錄的TpId與CategoryId組合加入到detail,輸贏預設為0
             promotionCashBackSetting.ForEach(x =>
             {
                 if(!detail.Exists(y=> y.TpId == x.TpId && y.CategoryId == x.CategoryId))
