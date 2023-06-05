@@ -1177,6 +1177,13 @@ namespace BonusService.Service.BLL
             var lastMonday = StartOfWeek(currentTime.AddDays(-7), DayOfWeek.Monday).Date;
             var lastSunday = lastMonday.AddDays(6);
             var detail = _promotionService.GetCashBackInfo(custId, promotion, lastMonday, lastSunday).ToList();
+            var promotionCashBackSetting = _promotionService.GetCashBackSetting(custId, promotion).ToList();
+
+            promotionCashBackSetting.ForEach(x =>
+            {
+                if(!detail.Exists(y=> y.TpId == x.TpId && y.CategoryId == x.CategoryId))
+                    detail.Add(x);
+            });
 
             if (detail.Any() && detail.First().TpId == (int)Tp.Saba)
             {
@@ -1193,11 +1200,11 @@ namespace BonusService.Service.BLL
                 }
             }
 
-            var details = _promotionService.GetCustCashBack(custId, siteId, currencyId, promotion, calculateDate).ToList();
+            var promotionSpecific = _promotionService.GetCustCashBack(custId, siteId, currencyId, promotion, calculateDate).ToList();
 
-            if (!details.Any()) return;
-            details.First().CashBackDetail = detail;
-            promotion.CashBackDetails = details.First();
+            if (!promotionSpecific.Any()) return;
+            promotionSpecific.First().CashBackDetail = detail;
+            promotion.CashBackDetails = promotionSpecific.First();
         }
 
         private void ProcessPeriodTime(CustPromotion promotion, DateTime currentTime, int offset)

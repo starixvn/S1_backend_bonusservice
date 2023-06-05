@@ -306,7 +306,7 @@ namespace BonusService.Service.DAL
 
         public IEnumerable<CashBackDetail> GetCashBackInfo(int custId, CustPromotion promotion, DateTime lastMonday, DateTime lastSunday)
         {
-            return _reportDbClient.Query<CashBackDetail>("Member_CashBackInfo_Get",
+            return _reportDbClient.Query<CashBackDetail>("Member_CashBackInfo_Get_V2",
                 new DynamicParameters(new
                 {
                     CustId = custId,
@@ -452,6 +452,16 @@ namespace BonusService.Service.DAL
         public VipLevelWithBlockTagsDto GetVipLevelWithBlockTags(int siteId, string specialCode)
         {
             return _reportDbClient.QueryFirst<VipLevelWithBlockTagsDto>("Service_PromotionSpecialCodeCondition_Get ", new DynamicParameters(new { _SiteId = siteId, _SpecialCode = specialCode }));
+        }
+
+        public IEnumerable<CashBackDetail> GetCashBackSetting(int custId, CustPromotion promotion)
+        {
+            return _reportDbClient.Query<CashBackDetail>("Member_PromotionCashBackSetting_Get",
+                new DynamicParameters(new
+                {
+                    CustId = custId,
+                    promotion.BonusCode
+                }));
         }
     }
 }
