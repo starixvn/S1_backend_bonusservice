@@ -306,7 +306,7 @@ namespace BonusService.Service.DAL
 
         public IEnumerable<CashBackDetail> GetCashBackInfo(int custId, CustPromotion promotion, DateTime lastMonday, DateTime lastSunday)
         {
-            return _reportDbClient.Query<CashBackDetail>("Member_CashBackInfo_Get_V2",
+            return _reportDbClient.Query<CashBackDetail>("Service_CashBackInfo_Get",
                 new DynamicParameters(new
                 {
                     CustId = custId,
@@ -456,7 +456,7 @@ namespace BonusService.Service.DAL
 
         public IEnumerable<CashBackDetail> GetCashBackSetting(int custId, CustPromotion promotion)
         {
-            return _reportDbClient.Query<CashBackDetail>("Member_PromotionCashBackSetting_Get",
+            return _reportDbClient.Query<CashBackDetail>("Service_PromotionCashBackSetting_Get_V2",
                 new DynamicParameters(new
                 {
                     CustId = custId,
