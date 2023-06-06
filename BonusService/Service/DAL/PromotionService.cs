@@ -457,7 +457,7 @@ namespace BonusService.Service.DAL
         public IEnumerable<RebateExcludeGameDetail> GetRebateExcludeGameList(GetRebateExcludeGameListRequest request)
         {
             return  _reportDbClient.Query<RebateExcludeGameDetail>("Member_RebateExclude_Get",
-                new DynamicParameters(new { _SiteId = request.SiteId, _CurrencyId = request.CurrencyId, _VipLevel = request.VipLevel, Lang = request.LangId }));
+                new DynamicParameters(new { _SiteId = request.SiteId, _CurrencyId = request.CurrencyId, _VipLevel = request.VipLevel, _Lang = request.LangId }));
         }
     }
 }
