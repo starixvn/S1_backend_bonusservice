@@ -370,5 +370,25 @@ namespace BonusService.Controllers
 
             return apiResult;
         }
+
+        [HttpPost]
+        public ApiResult<IEnumerable<RebateExcludeGameDetail>> GetRebateExcludeGameList(GetRebateExcludeGameListRequest request)
+        {
+            var result = new ApiResult<IEnumerable<RebateExcludeGameDetail>>
+            {
+                ErrorCode = 0
+            };
+
+            try
+            {
+                result.Data = _promotionBll.GetRebateExcludeGameList(request);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, MethodExtension.GetCurrentMethod());
+            }
+
+            return result;
+        }
     }
 }
