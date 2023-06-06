@@ -24,6 +24,7 @@ namespace BonusService.Service.BLL
         public async Task HandleMessageAsync(string key, string message)
         {
             LogContext.PushProperty("RequestId", Guid.NewGuid().ToString());
+            LogContext.PushProperty("Handler", "VerificationReward");
             _logger.LogInformation($"key:{key} message:{message}");
             var result = new ApiResult();
             switch (key) 
@@ -33,7 +34,7 @@ namespace BonusService.Service.BLL
                     var verify = JsonConvert.DeserializeObject<SetVerificationRewardReq>(message);
                     if (verify != null) 
                     {
-                        result = _bonusAPIBLL.SetVerificationReward(verify.CustId, verify.OTPType, false);
+                        result = _bonusAPIBLL.SetVerificationReward(verify.CustId, verify.OTPType, true);
                         _logger.LogInformation($"SetVerificationReward {verify.OTPType} result:{result.ErrorCode}, {result.Message}");
                     }
                     
@@ -43,9 +44,9 @@ namespace BonusService.Service.BLL
                     var deposit = JsonConvert.DeserializeObject<SetVerificationRewardByDeposit>(message);
                     if (deposit != null) 
                     {
-                        result = _bonusAPIBLL.SetVerificationReward(deposit.CustId, OTPTypeEnum.SMS, false);
+                        result = _bonusAPIBLL.SetVerificationReward(deposit.CustId, OTPTypeEnum.SMS, true);
                         _logger.LogInformation($"SetVerificationReward SMS result:{result.ErrorCode}, {result.Message}");
-                        result = _bonusAPIBLL.SetVerificationReward(deposit.CustId, OTPTypeEnum.Email, false);
+                        result = _bonusAPIBLL.SetVerificationReward(deposit.CustId, OTPTypeEnum.Email, true);
                         _logger.LogInformation($"SetVerificationReward Email result:{result.ErrorCode}, {result.Message}");
                     }
                     break;
