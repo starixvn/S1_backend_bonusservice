@@ -37,7 +37,7 @@ namespace BonusService.Service.DAL
         {
             var taskId = (int)type + 3;
             var p = new DynamicParameters(new { _CustId = custId, _TaskId = taskId });
-            return _reportDbClient.QueryFirst<DateTime?>("Service_CustVerifyTime_Get", p);
+            return _mainDbClient.QueryFirst<DateTime?>("Service_CustVerifyTime_Get", p);
         }
 
         public CustVerificationRewardData GetCustVerificationReward(int custId,bool usedMainDb = false)
