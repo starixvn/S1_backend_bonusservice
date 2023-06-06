@@ -106,7 +106,7 @@ namespace BonusService.Service.Workers
             }
             finally
             {
-                _timerExpiredTransferBonus?.Change(TimeSpan.FromMinutes(10), TimeSpan.Zero);
+                _timerExpiredTransferBonus?.Change(TimeSpan.FromMinutes(30), TimeSpan.Zero);
             }
         }
 
@@ -139,7 +139,7 @@ namespace BonusService.Service.Workers
             }
             finally
             {
-                _timerExpiredBonus?.Change(TimeSpan.FromMinutes(10), TimeSpan.Zero);
+                _timerExpiredBonus?.Change(TimeSpan.FromMinutes(30), TimeSpan.Zero);
             }
 
         }
