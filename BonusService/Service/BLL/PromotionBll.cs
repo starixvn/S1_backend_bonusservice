@@ -1192,19 +1192,19 @@ namespace BonusService.Service.BLL
                     {
                         detail.MinLossAmount = cashBackSetting.MinLossAmount;
                     }
-                }
-
-                //取得該Promotion計算發放的總金額
-                var custCashBack = _promotionService.GetCustCashBack(custId, siteId, currencyId, promotion, calculateDate);
-                if (custCashBack is null)
-                {
-                    return;
-                }
-
-                //設定回傳結果
-                custCashBack.CashBackDetail = cashBackDetails;
-                promotion.CashBackDetails = custCashBack;
+                }              
             }
+
+            //取得該Promotion計算發放的總金額
+            var custCashBack = _promotionService.GetCustCashBack(custId, siteId, currencyId, promotion, calculateDate);
+            if (custCashBack is null)
+            {
+                return;
+            }
+
+            //設定回傳結果
+            custCashBack.CashBackDetail = cashBackDetails;
+            promotion.CashBackDetails = custCashBack;
         }
 
         private void ProcessPeriodTime(CustPromotion promotion, DateTime currentTime, int offset)
