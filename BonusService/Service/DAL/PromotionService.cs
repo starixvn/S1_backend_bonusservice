@@ -278,9 +278,9 @@ namespace BonusService.Service.DAL
             return _mainDbClient.QueryUseCommandDefinition<DepositBonus>("Service_DepositBonusQueueByCustId_Get_V2", new { CustId = custId, Limit = limit });
         }
 
-        public IEnumerable<CashBackDetails> GetCustCashBack(int custId, int siteId, int currencyId, CustPromotion promotion, string calculateDate)
+        public CashBackDetails GetCustCashBack(int custId, int siteId, int currencyId, CustPromotion promotion, string calculateDate)
         {
-            return _reportDbClient.Query<CashBackDetails>("Member_CustCashBack_Get",
+            return _reportDbClient.QueryFirst<CashBackDetails>("Member_CustCashBack_Get",
                 new DynamicParameters(new
                 {
                     CustId = custId,
@@ -304,7 +304,7 @@ namespace BonusService.Service.DAL
                 }));
         }
 
-        public IEnumerable<CashBackDetail> GetCashBackInfo(int custId, CustPromotion promotion, DateTime lastMonday, DateTime lastSunday)
+        public IEnumerable<CashBackDetail> GetCustCashBackDetails(int custId, CustPromotion promotion, DateTime lastMonday, DateTime lastSunday)
         {
             return _reportDbClient.Query<CashBackDetail>("Service_CashBackInfo_Get",
                 new DynamicParameters(new
