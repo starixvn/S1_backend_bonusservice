@@ -438,7 +438,7 @@ namespace BonusService.Service.Model
         public string TpName { get; set; }
         public string TpCategoryName { get; set; }
         public int TpGameType { get; set; }
-        public int TpGameTypeName { get; set; }
-        public int GameName { get; set; }
+        public string TpGameTypeName { get; set; }
+        public string GameName { get; set; }
     }
 }
