@@ -295,18 +295,8 @@ namespace BonusService.Service.Model
         public int CategoryId { get; set; }
         public int TpId { get; set; }
         public string TpName { get; set; }
-        public decimal LossAmount
-        {
-            get => Math.Abs(_LossAmount);
-            set => _LossAmount = value;
-        }
-        private decimal _LossAmount { get; set; }
-        public decimal LossAmountWithBonus
-        {
-            get => Math.Abs(_LossAmountWithBonus);
-            set => _LossAmountWithBonus = value;
-        }
-        private decimal _LossAmountWithBonus { get; set; }
+        public decimal LossAmount{ get; set; }
+        public decimal LossAmountWithBonus { get; set; }
         public decimal Percentage { get; set; }
         public string PercentageName => $"{Percentage:G29}%";
         public decimal BonusAmount { get; set; }
