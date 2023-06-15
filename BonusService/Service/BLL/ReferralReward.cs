@@ -14,7 +14,11 @@ namespace BonusService.Service.BLL
         private readonly MySqlClient _mainDbClient;
         private readonly ILogger<ReferralReward> _logger;
 
-        public ReferralReward(IReferralService referralService, IWalletAdapter walletAdapter, IWithdrawalLimitAdapter withdrawalLimitAdapter, IEnumerable<MySqlClient> dbClients, ILogger<ReferralReward> logger)
+        public ReferralReward(IReferralService referralService,
+            IWalletAdapter walletAdapter,
+            IWithdrawalLimitAdapter withdrawalLimitAdapter,
+            IEnumerable<MySqlClient> dbClients,
+            ILogger<ReferralReward> logger)
         {
             _referralService = referralService;
             _walletAdapter = walletAdapter;
