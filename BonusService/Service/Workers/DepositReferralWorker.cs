@@ -11,6 +11,7 @@ namespace BonusService.Service.Workers
         private Timer _timer;
         private readonly IHostEnvironment _environment;
         private readonly ILogger<DepositReferralWorker> _logger;
+        private readonly string WorkerName = "DepositReferral";
 
         public DepositReferralWorker(IServiceProvider provider)
         {
@@ -28,37 +29,35 @@ namespace BonusService.Service.Workers
         {
             LogContext.PushProperty("RequestId", Guid.NewGuid().ToString());
 
+            _logger.LogInformation($"{WorkerName} Wroker Start.");
+
             bool isError = false;
             try
             {
                 if (VerifyExecute(DateTime.Now.Minute))
                 {
-                    _logger.LogInformation($"DepositReferral Wroker：Verify Task Start.");
-
                     var doTaskList = _referralBLL.VerifyTask(WorkerName);
-
-                    _logger.LogInformation($"DepositReferral Wroker：Verify Task End. Count = {doTaskList.Count()}");
 
                     foreach (var task in doTaskList)
                     {
-                        _logger.LogInformation($"DepositReferral Wroker：Do Task Start. SiteId:{task.SiteId} CurrencyId:{task.CurrencyId}. ");
+                        _logger.LogInformation($"{WorkerName} Wroker：Do Task Start. SiteId:{task.SiteId} CurrencyId:{task.CurrencyId}. ");
 
                         var sw = Stopwatch.StartNew();
 
-                        var custInfoList = _angPaoEventBLL.GetCustList(task.SiteId, task.CurrencyId, task.TimeZone);
+                        //var custInfoList = _angPaoEventBLL.GetCustList(task.SiteId, task.CurrencyId, task.TimeZone);
 
-                        foreach (var custInfo in custInfoList)
-                        {
-                            var drawEventTpBetRecord = _angPaoEventBLL.GetTpBetRecord(custInfo.CustId, task.TimeZone);
+                        //foreach (var custInfo in custInfoList)
+                        //{
+                        //    var drawEventTpBetRecord = _angPaoEventBLL.GetTpBetRecord(custInfo.CustId, task.TimeZone);
 
-                            if (drawEventTpBetRecord != null)
-                            {
-                                _angPaoEventBLL.GenTicket(task.SiteId, task.CurrencyId, custInfo, drawEventTpBetRecord);
-                            }
-                        }
-                        _angPaoEventBLL.SetTaskDone(task.SiteId, task.CurrencyId, WorkerName);
+                        //    if (drawEventTpBetRecord != null)
+                        //    {
+                        //        _angPaoEventBLL.GenTicket(task.SiteId, task.CurrencyId, custInfo, drawEventTpBetRecord);
+                        //    }
+                        //}
+                        _referralBLL.SetTaskDone(task.SiteId, task.CurrencyId, WorkerName);
 
-                        _logger.LogInformation($"DepositReferral Wroker：Do Task End. SiteId:{task.SiteId} CurrencyId:{task.CurrencyId} . \n"
+                        _logger.LogInformation($"{WorkerName} Wroker：Do Task End. SiteId:{task.SiteId} CurrencyId:{task.CurrencyId} . \n"
                         + $"Finish Time (m:s.ms): {Math.Round(sw.Elapsed.TotalMinutes)}:{Math.Round(sw.Elapsed.TotalMinutes)}.{Math.Round(sw.Elapsed.TotalMilliseconds)}.");
                     }
                 }
@@ -73,8 +72,8 @@ namespace BonusService.Service.Workers
                 var dueTimeSpan = isError ? TimeSpan.FromMinutes(10)
                     : TimeSpan.FromMinutes(CaculateNextExecuteTime(DateTime.Now.Minute));
 
-                _logger.LogInformation($"{WorkerName} Task End. isError = {isError}.\n" +
-                  $"Next Task Will Start At {DateTime.Now.Add(dueTimeSpan).AddHours(8).ToString("yyyy-MM-ddTHH:mm:ss")}");
+                _logger.LogInformation($"{WorkerName} End. isError = {isError}.\n" +
+                  $"Next Will Start At {DateTime.Now.Add(dueTimeSpan).AddHours(8).ToString("yyyy-MM-ddTHH:mm:ss")}");
                 _timer.Change(dueTimeSpan, TimeSpan.Zero);
             }
 
