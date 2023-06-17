@@ -31,6 +31,7 @@ if (!string.IsNullOrEmpty(serviceType) && serviceType.Equals("worker", StringCom
         .AddHostedService<ExpiredBonusWorker>()
         .AddHostedService<ReferralWorker>()
         .AddHostedService<VipUpgradeWorker>()
+        .AddHostedService<VipDowngradeWorker>()
         .AddHostedService<VipRebateWorker>()
         .AddHostedService<VipCashBackWorker>()
         .AddHostedService<PromotionAutoExtendWorker>()
@@ -38,12 +39,6 @@ if (!string.IsNullOrEmpty(serviceType) && serviceType.Equals("worker", StringCom
         .AddHostedService<RabbitMQConsumer>();
         //.AddHostedService<RewardWorker>();
         //.AddHostedService<AngPaoEventWorker>(); //活動結束，關閉排程
-
-
-    if (builder.Configuration.GetSection("RunVipDowngradeWorker").Get<bool>())
-    {
-        builder.Services.AddHostedService<VipDowngradeWorker>();
-    }
 }
     var app = builder.Build();
 startup.Configure(app, builder.Environment);

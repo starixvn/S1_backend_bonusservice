@@ -1188,28 +1188,35 @@ namespace BonusService.Service.BLL
             if (!getDetail) return;
             var lastMonday = StartOfWeek(currentTime.AddDays(-7), DayOfWeek.Monday).Date;
             var lastSunday = lastMonday.AddDays(6);
-            var detail = _promotionService.GetCashBackInfo(custId, promotion, lastMonday, lastSunday).ToList();
-
-            if (detail.Any() && detail.First().TpId == (int)Tp.Saba)
+            
+            //用BonusCode取得該名玩家上周Cashback的第三方遊戲輸贏明細
+            var cashBackDetails = _promotionService.GetCustCashBackDetails(custId, promotion, lastMonday, lastSunday);
+            if (cashBackDetails.Any())
             {
-                foreach (var d in detail)
+                //取得該Promotion的設定
+                var promotionCashBackSetting = _promotionService.GetCashBackSetting(custId, promotion);
+
+                //將Promotion設定的MinLossAmount，填入玩家第三方遊戲明細紀錄
+                foreach (var detail in cashBackDetails)
                 {
-                    d.TpName = d.CategoryId switch
+                    var cashBackSetting = promotionCashBackSetting.FirstOrDefault(setting => setting.TpId == detail.TpId && setting.CategoryId == detail.CategoryId && setting.Percentage == detail.Percentage);
+                    if (cashBackSetting is not null)
                     {
-                        (int)TpCategoryId.Sports => _selLangBll.GetResourceValue("lbl_Cashback_Sports", custInfo.UserLang),
-                        (int)TpCategoryId.Casino => _selLangBll.GetResourceValue("lbl_Cashback_RNG", custInfo.UserLang),
-                        (int)TpCategoryId.Lottery => _selLangBll.GetResourceValue("lbl_Cashback_Lottery", custInfo.UserLang),
-                        (int)TpCategoryId.VirtualSports => _selLangBll.GetResourceValue("lbl_Cashback_Virtual_Sports", custInfo.UserLang),
-                        _ => d.TpName
-                    };
-                }
+                        detail.MinLossAmount = cashBackSetting.MinLossAmount;
+                    }
+                }              
             }
 
-            var details = _promotionService.GetCustCashBack(custId, siteId, currencyId, promotion, calculateDate).ToList();
+            //取得該Promotion計算發放的總金額
+            var custCashBack = _promotionService.GetCustCashBack(custId, siteId, currencyId, promotion, calculateDate);
+            if (custCashBack is null)
+            {
+                return;
+            }
 
-            if (!details.Any()) return;
-            details.First().CashBackDetail = detail;
-            promotion.CashBackDetails = details.First();
+            //設定回傳結果
+            custCashBack.CashBackDetail = cashBackDetails;
+            promotion.CashBackDetails = custCashBack;
         }
 
         private void ProcessPeriodTime(CustPromotion promotion, DateTime currentTime, int offset)
