@@ -454,6 +454,12 @@ namespace BonusService.Service.DAL
             return _reportDbClient.QueryFirst<VipLevelWithBlockTagsDto>("Service_PromotionSpecialCodeCondition_Get ", new DynamicParameters(new { _SiteId = siteId, _SpecialCode = specialCode }));
         }
 
+        public IEnumerable<RebateExcludeGameDetail> GetRebateExcludeGameList(GetRebateExcludeGameListRequest request)
+        {
+            return _reportDbClient.Query<RebateExcludeGameDetail>("Service_RebateExcludeGameList_Get",
+                new DynamicParameters(new { _SiteId = request.SiteId, _CurrencyId = request.CurrencyId, _VipLevel = request.VipLevel, _Lang = request.LangId }));
+        }
+
         public IEnumerable<CashBackDetail> GetCashBackSetting(int custId, CustPromotion promotion)
         {
             return _reportDbClient.Query<CashBackDetail>("Service_PromotionCashBackSetting_Get_V2",

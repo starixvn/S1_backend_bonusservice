@@ -416,4 +416,23 @@ namespace BonusService.Service.Model
     {
         public List<int> VipLevel { get; set; }
     }
+
+    public class GetRebateExcludeGameListRequest
+    {
+
+        public int SiteId { get; set; }
+        public int CurrencyId { get; set; }
+        public int VipLevel { get; set; }
+        public string LangId { get; set; }
+
+    }
+
+    public class RebateExcludeGameDetail
+    {
+        public string TpName { get; set; }
+        public string TpCategoryName { get; set; }
+        public int TpGameType { get; set; }
+        public string TpGameTypeName { get; set; }
+        public string GameName { get; set; }
+    }
 }

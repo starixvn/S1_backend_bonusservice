@@ -206,7 +206,7 @@ namespace BonusService.Controllers
             {
                 ErrorCode = (int)SpecialCode.SpecialCodeError
             };
-            
+
             try
             {
                 if (!_promotionBll.CheckSpecialCode(request.SpecialCode))
@@ -369,6 +369,29 @@ namespace BonusService.Controllers
             }
 
             return apiResult;
+        }
+
+        [HttpPost]
+        public ApiResult<IEnumerable<RebateExcludeGameDetail>> GetRebateExcludeGameList(GetRebateExcludeGameListRequest request)
+        {
+            try
+            {
+                return new ApiResult<IEnumerable<RebateExcludeGameDetail>>
+                {
+                    Data = _promotionBll.GetRebateExcludeGameList(request),
+                    ErrorCode = 0
+                };
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, MethodExtension.GetCurrentMethod());
+
+                return new ApiResult<IEnumerable<RebateExcludeGameDetail>>
+                {
+                    ErrorCode = -1,
+                    RawMessage = e.Message
+                };
+            }
         }
     }
 }
