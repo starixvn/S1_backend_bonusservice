@@ -435,4 +435,11 @@ namespace BonusService.Service.Model
         public string TpGameTypeName { get; set; }
         public string GameName { get; set; }
     }
+    
+    public class BonusCustUsingList
+    {
+        public int CustId { get; set; }
+        public string Currency { get; set; }
+        public string UserName { get; set; }
+    }
 }
