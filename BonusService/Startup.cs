@@ -45,6 +45,7 @@ namespace BonusService
             services.AddSingleton<PromotionAutoExtendService>();
             services.AddSingleton<DepositBonusService>();
             services.AddSingleton<ConfigService>();
+            services.AddSingleton<WorkerPeriodService>();
             services.AddSingleton<IWalletAdapter, WalletAdapter>();
             services.AddSingleton<IWithdrawalLimitAdapter, WithdrawalLimitAdapter>();
             services.AddSingleton<IReferralService, ReferralService>();

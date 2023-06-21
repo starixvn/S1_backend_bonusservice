@@ -4,7 +4,7 @@
     {
         Success = 0
     }
-    
+
     public enum Tp
     {
         None = 0,
@@ -57,7 +57,7 @@
         LastMonth = 1,
         LastThreeMonth = 2
     }
-    
+
     public enum BonusType
     {
         Percentage = 1,
@@ -70,7 +70,7 @@
         Web = 2,
         App = 3
     }
-    
+
     public enum LockedType
     {
         FromBonus = 1,
@@ -81,7 +81,7 @@
         public decimal RollOver { get; set; }
         public decimal TurnOver { get; set; }
     }
-    
+
     public enum DataBase
     {
         Main, //ConnectionString
@@ -89,7 +89,7 @@
         Wager,//ConnectionStringWager
         Log,//ConnectionStringLog
     }
-    
+
     public enum RedisDataBase
     {
         Member = 0,
@@ -99,7 +99,7 @@
         Admin = 4,
         Payment = 5
     }
-    
+
     public enum FinancialType
     {
         LocalBankDeposit = 1,
@@ -149,7 +149,7 @@
     }
     public enum OTPVerificationType
     {
-        
+
         SMS = 0,
         Email = 1,
         All = 2,
@@ -161,15 +161,15 @@
     }
     public enum DepositStatusEnum
     {
-        Draft = 0,    
+        Draft = 0,
         Pending = 1,
-        Paid = 2,     
+        Paid = 2,
         Approved = 3,
         Rejected = 4,
         Canceled = 5,
-        Expired = 6,  
-        OnHold = 7,   
-        Error = 99    
+        Expired = 6,
+        OnHold = 7,
+        Error = 99
     }
 
     public enum AllowIpType
@@ -186,7 +186,7 @@
     {
         VipRebate = 1,
     }
-    
+
     public enum SpecialCode
     {
         Success = 0,
@@ -195,12 +195,32 @@
         SpecialCodeVipLevelsOrBlockTagInvalid = 1001, // VipLevel 不符合 或是有 BlockTag
         PromoCodeHasBeenUsed = 3000
     }
-    
-    public enum WithdrawalLimitLogCreateFromEnum 
+
+    public enum WithdrawalLimitLogCreateFromEnum
     {
         Default = 0,
         Bonus = 4,
         ReferralReward = 5,
         VerificationReward = 6
+    }
+
+    public enum CustomerStatusEnum
+    {
+        Running = 1,
+        Suspend = 2,
+        Closed = 3,
+        Lock = 4,
+    }
+
+    public enum ActStatusEnum
+    {
+        NonDepoist = 1,
+        Deposited = 2,
+    }
+
+    public enum ReferralStatusEnum
+    {
+        NotAllowReward = 0,
+        AllowReward = 1,
     }
 }

@@ -1,5 +1,6 @@
 ﻿using BonusService.Service.BLL;
 using BonusService.Service.Extensions;
+using Newtonsoft.Json;
 using Serilog.Context;
 using System.Diagnostics;
 
@@ -44,17 +45,20 @@ namespace BonusService.Service.Workers
 
                         var sw = Stopwatch.StartNew();
 
-                        //var custInfoList = _angPaoEventBLL.GetCustList(task.SiteId, task.CurrencyId, task.TimeZone);
+                        var depositReferralCustList = _referralBLL.GetDepositReferralCustList(task.SiteId, task.CurrencyId, task.SpecificDate, task.TimeZone);
 
-                        //foreach (var custInfo in custInfoList)
-                        //{
-                        //    var drawEventTpBetRecord = _angPaoEventBLL.GetTpBetRecord(custInfo.CustId, task.TimeZone);
+                        var referrerCustIdList = depositReferralCustList.Select(x => x.Referrer_CustId).Distinct();
 
-                        //    if (drawEventTpBetRecord != null)
-                        //    {
-                        //        _angPaoEventBLL.GenTicket(task.SiteId, task.CurrencyId, custInfo, drawEventTpBetRecord);
-                        //    }
-                        //}
+                        foreach (var custId in referrerCustIdList)
+                        {
+                            var caculateResult = _referralBLL.CaculateReferrerDepositReferral(depositReferralCustList.Where(x => x.Referrer_CustId == custId));
+
+                            if (caculateResult != null && _referralBLL.PayoutDepositReferral(task.SiteId, task.CurrencyId, caculateResult) > 0)
+                            {
+                                _logger.LogInformation($"{WorkerName}:{JsonConvert.SerializeObject(caculateResult)}");
+                            }
+                        }
+
                         _referralBLL.SetTaskDone(task.SiteId, task.CurrencyId, WorkerName);
 
                         _logger.LogInformation($"{WorkerName} Wroker：Do Task End. SiteId:{task.SiteId} CurrencyId:{task.CurrencyId} . \n"

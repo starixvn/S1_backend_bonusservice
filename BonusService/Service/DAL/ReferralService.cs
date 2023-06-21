@@ -28,14 +28,14 @@ namespace BonusService.Service.DAL
             return _reportDbClient.QueryFirst<int>("Service_ReferralRemainingCount_Get", p);
         }
 
-        public IEnumerable<WorkerCustInfo> GetDepositReferralCustList(int siteId, int currencyId, DateTime specificDate, string currencyTimeZone)
+        public IEnumerable<DepositReferralCustInfo> GetDepositReferralCustList(int siteId, int currencyId, DateTime specificDate, string currencyTimeZone)
         {
             var p = new DynamicParameters();
             p.Add("_SiteId", siteId);
             p.Add("_CurrencyId", currencyId);
             p.Add("_SpecificDate", specificDate);
             p.Add("_CurrencyTimeZone", currencyTimeZone);
-            return _reportDbClient.Query<WorkerCustInfo>("Service_DepositReferralCustList_Get", p);
+            return _reportDbClient.Query<DepositReferralCustInfo>("Service_DepositReferralCustList_Get", p);
         }
     }
 }
