@@ -86,7 +86,7 @@ namespace BonusService.UnitTest
             });
             var rebatePayoutLimits = new List<RebatePayoutLimit>();
             var RelId = DateTime.Now.Ticks;
-            var result = _rebateBLL.PayoutVipRebate(siteId, vipRebateInfo, _vipRebateTpBetRecordList, rebatePayoutLimits, RelId);
+            var result = _rebateBLL.PayoutVipRebate(siteId, vipRebateInfo.CurrencyId, vipRebateInfo, _vipRebateTpBetRecordList, rebatePayoutLimits, RelId);
             if (result > 0)
             {
                 return GetRebateAmount();
