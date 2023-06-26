@@ -931,6 +931,8 @@ namespace BonusService.Service.BLL
                 {
                     var offset = GetOffset(request.SiteId);
                     ProcessPeriodTime(promo, DateTime.UtcNow.AddHours(offset), offset);
+                    
+                    // 調整顯示
                 }
             }
 
