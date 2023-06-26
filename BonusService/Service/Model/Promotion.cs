@@ -292,8 +292,8 @@ namespace BonusService.Service.Model
         public decimal MinLossAmount => CashBackDetail.Any()
             ? CashBackDetail.Max(i => i.MinLossAmount) * -1 : 0;
         // TotalLossAmount > 0 則不算 Bonus
-        public decimal OriginalTotalBonus => CashBackDetail.Any() && TotalLossAmount > 0
-            ? CashBackDetail.Sum(i => i.BonusAmount) : 0;
+        public decimal OriginalTotalBonus => CashBackDetail.Any() && TotalLossAmount < 0
+            ? Math.Abs(CashBackDetail.Sum(i => i.BonusAmount)) : 0;
         public string Percentage => CashBackDetail.Select(i => i.PercentageName).FirstOrDefault();
         public IEnumerable<CashBackDetail> CashBackDetail { get; set; }
     }
