@@ -859,10 +859,18 @@ namespace BonusService.Service.BLL
 
             Customer custInfo = null;
             if (request.IsLogin) custInfo = _custInfoService.GetCustInfo(request.CustId);
-
-
+            
             foreach (var promo in promotionList)
             {
+                if (promo.PromotionType == PromotionType.RetentionFreeBet)
+                {
+                    var usable = GetBonusUsingUsable(request.SiteId, request.CustId , promo);
+                    if (!usable) //未在清單內則不顯示
+                    {
+                        continue;
+                    }
+                }
+                
                 if (request.IsLogin)
                 {
                     // 加入BlockTag 檢核過濾，如果有Tag命中，列表就不會有這筆
@@ -1040,6 +1048,14 @@ namespace BonusService.Service.BLL
             }
         }
 
+        private bool GetBonusUsingUsable(int siteId, int custId, Promotion promo)
+        {
+            var usingList = _promotionService.GetBonusCustUsingDetail(siteId, promo.BonusCode);
+            var usable = usingList.Any(x => x.CustId == custId);
+            
+            return usable;
+        }
+         
         private void SetPromotionDetail(string langId, string defLang, bool clearDetails, CustPromotion promo)
         {
             if (!string.IsNullOrEmpty(promo.Details))

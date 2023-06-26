@@ -240,7 +240,7 @@ namespace BonusService.Service.DAL
             p.Add("RefId", dbType: DbType.String, direction: ParameterDirection.Output);
             p.Add("Result", dbType: DbType.Int32, direction: ParameterDirection.Output);
             p.Add("RefList", dbType: DbType.String, direction: ParameterDirection.Output);
-            _mainDbClient.Execute("Member_PromotionCanJoin_Get_V10", p);
+            _mainDbClient.Execute("Member_PromotionCanJoin_Get_V11", p);
 
             var custCondition = new CustCondition
             {
@@ -332,7 +332,7 @@ namespace BonusService.Service.DAL
 
         public IEnumerable<CustPromotion> GetPromotionList(CustPromotionRequest request)
         {
-            return _reportDbClient.Query<CustPromotion>("Member_PromotionList_Get_V8",
+            return _reportDbClient.Query<CustPromotion>("Member_PromotionList_Get_V9",
                 new { request.CustId, request.SiteId, request.CurrencyId, request.DeviceType, request.LangId, request.PromotionType });
         }
 
@@ -468,6 +468,20 @@ namespace BonusService.Service.DAL
                     CustId = custId,
                     promotion.BonusCode
                 }));
+        }
+        
+        /// <summary>
+        /// 取得 bonus允許名單
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<BonusCustUsingList> GetBonusCustUsingDetail(int siteId, string bonusCode)
+        {
+            var p = new DynamicParameters();
+            p.Add("_SiteId", siteId);
+            p.Add("_BonusCode", bonusCode);
+            var result = _reportDbClient.Query<BonusCustUsingList>("Service_BonusCustUsingDetail_Get", p);
+            
+            return result ;
         }
     }
 }
