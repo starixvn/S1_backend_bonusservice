@@ -1,4 +1,5 @@
 ﻿using BonusService.Service.BLL;
+using BonusService.Service.DAL;
 using BonusService.Service.Extensions;
 using Newtonsoft.Json;
 using Serilog.Context;
@@ -8,6 +9,7 @@ namespace BonusService.Service.Workers
 {
     public class DepositReferralWorker : BackgroundService
     {
+        private readonly CustInfoBLL _custInfoBLL;
         private readonly ReferralBLL _referralBLL;
         private Timer _timer;
         private readonly IHostEnvironment _environment;
@@ -16,6 +18,7 @@ namespace BonusService.Service.Workers
 
         public DepositReferralWorker(IServiceProvider provider)
         {
+            _custInfoBLL = provider.GetService<CustInfoBLL>();
             _referralBLL = provider.GetService<ReferralBLL>();
             _environment = provider.GetRequiredService<IHostEnvironment>();
             _logger = provider.GetRequiredService<ILogger<DepositReferralWorker>>();
@@ -47,13 +50,14 @@ namespace BonusService.Service.Workers
 
                         var depositReferralCustList = _referralBLL.GetDepositReferralCustList(task.SiteId, task.CurrencyId, task.SpecificDate, task.TimeZone);
 
-                        var referrerCustIdList = depositReferralCustList.Select(x => x.Referrer_CustId).Distinct();
+                        var referrerCustList = depositReferralCustList.Select(x => x.Referrer_CustId).Distinct();
 
-                        foreach (var custId in referrerCustIdList)
+                        foreach (var custId in referrerCustList)
                         {
-                            var caculateResult = _referralBLL.CaculateReferrerDepositReferral(depositReferralCustList.Where(x => x.Referrer_CustId == custId));
+                            var referrerInfo = _custInfoBLL.GetCustInfo(custId);
+                            var caculateResult = _referralBLL.CaculateReferrerDepositReferral(referrerInfo, depositReferralCustList.Where(x => x.Referrer_CustId == custId));
 
-                            if (caculateResult != null && _referralBLL.PayoutDepositReferral(task.SiteId, task.CurrencyId, caculateResult) > 0)
+                            if (caculateResult != null && _referralBLL.PayoutDepositReferral(referrerInfo, caculateResult) > 0)
                             {
                                 _logger.LogInformation($"{WorkerName}:{JsonConvert.SerializeObject(caculateResult)}");
                             }

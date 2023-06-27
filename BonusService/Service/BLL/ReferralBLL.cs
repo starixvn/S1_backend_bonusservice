@@ -2,9 +2,7 @@
 using BonusService.Service.DAL.Interface;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using System;
 using System.Text;
 
 namespace BonusService.Service.BLL
@@ -17,6 +15,7 @@ namespace BonusService.Service.BLL
         private readonly ReferralReward _referralReward;
         private readonly WorkerPeriodService _workerPeriodService;
         private readonly IReferralService _referralService;
+        private readonly IVerifyService _verifyService;
         private readonly ILogger<ReferralBLL> _logger;
 
         public ReferralBLL(SelLangBLL selLangBll,
@@ -25,6 +24,7 @@ namespace BonusService.Service.BLL
             ReferralReward referralReward,
             WorkerPeriodService workerPeriodService,
             IReferralService referralService,
+            IVerifyService verifyService,
             ILogger<ReferralBLL> logger)
         {
             _selLangBll = selLangBll;
@@ -33,6 +33,7 @@ namespace BonusService.Service.BLL
             _referralReward = referralReward;
             _referralService = referralService;
             _workerPeriodService = workerPeriodService;
+            _verifyService = verifyService;
             _logger = logger;
         }
         public IEnumerable<ReferralInfo> GetReferralSettlement()
@@ -126,23 +127,24 @@ namespace BonusService.Service.BLL
             string currencyTimeZone)
             => _referralService.GetDepositReferralCustList(siteId, currencyId, specificDate, currencyTimeZone);
 
-        public DepositReferralReferrerCaculateResult CaculateReferrerDepositReferral(IEnumerable<DepositReferralCustInfo> referrerInfo)
+        public DepositReferralReferrerCaculateResult CaculateReferrerDepositReferral(Customer referrerInfo,IEnumerable<DepositReferralCustInfo> referrerDetail)
         {
-            if (!IsAllowToRewardDepositReferral(referrerInfo))
+            if (!IsAllowToRewardDepositReferral(referrerInfo, referrerDetail.Select(x => x.Referred_CustId)))
                 return null;
 
-            return CaculateDepositReferral(referrerInfo);
+            return CaculateDepositReferral(referrerDetail);
         }
 
-        private bool IsAllowToRewardDepositReferral(IEnumerable<DepositReferralCustInfo> custInfo)
+        private bool IsAllowToRewardDepositReferral(Customer referrerInfo, IEnumerable<int> referredList)
         {
-            if (custInfo.First().Referrer_Status == (int)CustomerStatusEnum.Suspend)
+            if (referrerInfo.Status == (int)CustomerStatusEnum.Suspend)
                 return false;
 
-            if (custInfo.First().Referrer_ActStatus == (int)ActStatusEnum.NonDepoist)
+            if (referrerInfo.ActStatus == (int)ActStatusEnum.NonDepoist)
                 return false;
 
-            //TODO：RealName Verify Logic
+            if (_verifyService.IsRealNameVaild(referrerInfo, referredList))
+                return false;
 
             return true;
         }
@@ -174,23 +176,22 @@ namespace BonusService.Service.BLL
                 referredInfo);
         }
 
-        public int PayoutDepositReferral(int siteId, int currencyId, DepositReferralReferrerCaculateResult caculateResult)
+        public int PayoutDepositReferral(Customer referrerInfo, DepositReferralReferrerCaculateResult caculateResult)
         {
-            var result = _referralReward.DepositReferralPayout(siteId, currencyId, caculateResult);
+            var result = _referralReward.DepositReferralPayout(referrerInfo.SiteId, referrerInfo.CurrencyId, caculateResult);
             if (result > 0 && caculateResult.RewardDepositReferral > 0)
             {
-                var custInfo = _custInfoService.GetCustInfo(caculateResult.Referrer_CustId);
                 var msg = new StringBuilder();
 
                 var dpayAmount = caculateResult.RewardDepositReferral.ToString("#,##0.##");
-                if (_custInfoService.IsConvertRequired(custInfo.CurrencyId))
+                if (_custInfoService.IsConvertRequired(referrerInfo.CurrencyId))
                     dpayAmount = $"{caculateResult.RewardDepositReferral / 1000:#,##0.##}";
 
-                var title = _selLangBll.GetResourceValue("lbl_ReferralBonusCreditedTitle", custInfo.UserLang);
-                var message = string.Format($" {_selLangBll.GetResourceValue("lbl_ReferralBonusCreditedMsg", custInfo.UserLang)}", dpayAmount);
+                var title = _selLangBll.GetResourceValue("lbl_ReferralBonusCreditedTitle", referrerInfo.UserLang);
+                var message = string.Format($" {_selLangBll.GetResourceValue("lbl_ReferralBonusCreditedMsg", referrerInfo.UserLang)}", dpayAmount);
                 msg.AppendLine(message);
 
-                _messageService.SendMessage(new Message("System", custInfo.CustId, custInfo.UserLang, title, msg.ToString()));
+                _messageService.SendMessage(new Message("System", referrerInfo.CustId, referrerInfo.UserLang, title, msg.ToString()));
             }
 
             return result;
