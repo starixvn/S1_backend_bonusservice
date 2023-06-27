@@ -1,4 +1,5 @@
 ﻿using BonusService.Service.DAL;
+using BonusService.Service.DAL.Interface;
 using BonusService.Service.Model;
 using Newtonsoft.Json;
 
@@ -7,6 +8,7 @@ namespace BonusService.Service.BLL;
 public class AngPaoEventBLL
 {
     private readonly AngPaoEventService _angPaoEventService;
+    private readonly IWorkerPeriodService _workerPeriodService;
     private readonly ILogger<AngPaoEventBLL> _logger;
     private readonly IHostEnvironment environment;
     private readonly Dictionary<string, decimal> CurrencyExchange = new Dictionary<string, decimal>()
@@ -16,6 +18,7 @@ public class AngPaoEventBLL
     {
         _logger = provider.GetRequiredService<ILogger<AngPaoEventBLL>>();
         _angPaoEventService = provider.GetRequiredService<AngPaoEventService>();
+        _workerPeriodService = provider.GetRequiredService<IWorkerPeriodService>();
         this.environment = environment;
     }
 
@@ -26,7 +29,7 @@ public class AngPaoEventBLL
         //0.檢查參數是否正確
         //2.檢查期間型別需檢查項目是否符合
 
-        var TaskList = _angPaoEventService.GetEventTask(workerName);
+        var TaskList = _workerPeriodService.GetTask(workerName);
 
         var doTaskList = new List<WorkerPeriodTask>();
 
@@ -74,7 +77,7 @@ public class AngPaoEventBLL
 
     public int SetTaskDone(int siteId, int currencyId, string workerName)
     {
-        return _angPaoEventService.SetTaskDone(siteId, currencyId, workerName);
+        return _workerPeriodService.SetTaskDone(siteId, currencyId, workerName);
     }
 
     public IEnumerable<WorkerCustInfo> GetCustList(int siteId, int currencyId, string currencyTimeZone)

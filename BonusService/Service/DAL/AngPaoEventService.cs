@@ -15,10 +15,6 @@ public class AngPaoEventService
         _mainDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);
         _reportDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Report);
     }
-    public IEnumerable<WorkerPeriodTask> GetEventTask(string workerName)
-    {
-        return _reportDbClient.Query<WorkerPeriodTask>("Service_WorkerPeriod_Get", new DynamicParameters(new { _WorkerName = workerName }));
-    }
 
     public IEnumerable<WorkerCustInfo> GetCustList(int siteId, int currencyId, string timeZone)
     {
@@ -67,11 +63,5 @@ public class AngPaoEventService
         {
             return false;
         }
-    }
-
-    public int SetTaskDone(int siteId, int currencyId, string workerName)
-    {
-        return _mainDbClient.Execute("Service_WorkerPeriod_TaskDone_Set",
-            new DynamicParameters(new { _SiteId = siteId, _CurrencyId = currencyId, _WorkerName = workerName }));
     }
 }

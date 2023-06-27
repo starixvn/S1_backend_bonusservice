@@ -73,7 +73,6 @@ public class AngPaoEventWorker : BackgroundService
             }
             finally
             {
-                //TODO：要去計算下一個排成的時間(校時)
                 var dueTimeSpan = isError ? TimeSpan.FromMinutes(10) : TimeSpan.FromMinutes(CaculateNextExecuteTime(DateTime.Now.Minute));
 
                 _logger.LogInformation($"{WorkerName} Task End. isError = {isError}.\n" +
