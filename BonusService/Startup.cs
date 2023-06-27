@@ -45,9 +45,11 @@ namespace BonusService
             services.AddSingleton<PromotionAutoExtendService>();
             services.AddSingleton<DepositBonusService>();
             services.AddSingleton<ConfigService>();
+            services.AddSingleton<WorkerPeriodService>();
             services.AddSingleton<IWalletAdapter, WalletAdapter>();
             services.AddSingleton<IWithdrawalLimitAdapter, WithdrawalLimitAdapter>();
             services.AddSingleton<IReferralService, ReferralService>();
+            services.AddSingleton<IVerifyService, VerifyService>();
 
             services.AddSingleton<RebateBLL>();
             services.AddSingleton<ReferralBLL>();
@@ -59,6 +61,7 @@ namespace BonusService
             services.AddSingleton<VipCashBackBLL>();
             services.AddSingleton<PromotionAutoExtendBLL>();
             services.AddSingleton<DepositBonusBLL>();
+            services.AddSingleton<CustInfoBLL>();
             services.AddSingleton<IMessageHandler, MessageHandler>();
 
             services.AddSingleton<BonusAPIBLL>();
