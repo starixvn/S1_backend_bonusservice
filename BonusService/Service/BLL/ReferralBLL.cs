@@ -13,7 +13,7 @@ namespace BonusService.Service.BLL
         private readonly MessageService _messageService;
         private readonly CustInfoService _custInfoService;
         private readonly ReferralReward _referralReward;
-        private readonly WorkerPeriodService _workerPeriodService;
+        private readonly IWorkerPeriodService _workerPeriodService;
         private readonly IReferralService _referralService;
         private readonly IVerifyService _verifyService;
         private readonly ILogger<ReferralBLL> _logger;
@@ -22,7 +22,7 @@ namespace BonusService.Service.BLL
             MessageService messageService,
             CustInfoService custInfoService,
             ReferralReward referralReward,
-            WorkerPeriodService workerPeriodService,
+            IWorkerPeriodService workerPeriodService,
             IReferralService referralService,
             IVerifyService verifyService,
             ILogger<ReferralBLL> logger)

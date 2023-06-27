@@ -1,11 +1,12 @@
-﻿using BonusService.Service.Library;
+﻿using BonusService.Service.DAL.Interface;
+using BonusService.Service.Library;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
 using Dapper;
 
 namespace BonusService.Service.DAL;
 
-public class WorkerPeriodService
+public class WorkerPeriodService : IWorkerPeriodService
 {
     private readonly MySqlClient _mainDbClient;
     private readonly MySqlClient _reportDbClient;
