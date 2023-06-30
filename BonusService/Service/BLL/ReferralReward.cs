@@ -143,7 +143,7 @@ namespace BonusService.Service.BLL
             return result;
         }
 
-        public int DepositReferralPayout(int siteId,int currencyId, DepositReferralReferrerCaculateResult caculateResult)
+        public int DepositReferralPayout(int siteId, int currencyId, DepositReferralReferrerCaculateResult caculateResult)
         {
             var result = 0;
 
@@ -169,7 +169,7 @@ namespace BonusService.Service.BLL
                             ReferralAmount = referredInfo.CaculateDepositReferral,
                             CalculateSummary = referredInfo.TotalDeposit,
                             RewardPercentage = referredInfo.DepositRewardPercentage,
-                            RefList = JsonConvert.SerializeObject(referredInfo.DepositInfo.Select(x=>x.Key)),
+                            RefList = JsonConvert.SerializeObject(referredInfo.DepositInfo.Select(x => x.Key)),
                             caculateResult.SettledDate,
                             Memo = "DepositReferral",
                             RelId = tc,
@@ -188,46 +188,47 @@ namespace BonusService.Service.BLL
 
             // 推薦人領取獎勵
 
-            //不論有沒有發獎勵，都需要紀錄 For 報表
-            result = _mainDbClient.Execute("Common_ReferralMLog_Ins_V2", trans,
-                new
-                {
-                    CustId = caculateResult.Referrer_CustId,
-                    CurrencyId = currencyId,
-                    UserName = caculateResult.Referrer_UserName,
-                    SiteId = siteId,
-                    ReferralAmount = caculateResult.RewardDepositReferral,
-                    CalculateAmount = caculateResult.CaculateDepositReferral,
-                    caculateResult.MinPayout,
-                    caculateResult.MaxPayout,
-                    Memo = "DepositReferral",
-                    RelId = tc
-                });
-
             if (result > 0 && caculateResult.RewardDepositReferral > 0)
             {
+                result = _mainDbClient.Execute("Common_ReferralMLog_Ins_V2", trans,
+                    new
+                    {
+                        CustId = caculateResult.Referrer_CustId,
+                        CurrencyId = currencyId,
+                        UserName = caculateResult.Referrer_UserName,
+                        SiteId = siteId,
+                        ReferralAmount = caculateResult.RewardDepositReferral,
+                        CalculateAmount = caculateResult.CaculateDepositReferral,
+                        caculateResult.MinPayout,
+                        caculateResult.MaxPayout,
+                        Memo = "DepositReferral",
+                        RelId = tc
+                    });
 
-                result = _walletAdapter.SetBalance(caculateResult.Referrer_CustId,
-                    siteId,
-                    caculateResult.Referrer_UserName,
-                    caculateResult.RewardDepositReferral,
-                    (int)FinancialType.ReferFriendsRewards,
-                    $"Referral Bonus: {caculateResult.RewardDepositReferral:#,##0.##}", "N/A", out _, out _, trans);
-
-                if (result > 0)
+                if (result > 0 && caculateResult.RewardDepositReferral > 0)
                 {
-                    var rollOver = 1 * caculateResult.RewardDepositReferral;
-                    if (rollOver > 0)
-                        result = _withdrawalLimitAdapter.SetWithdrawalLimit(
-                            caculateResult.Referrer_CustId,
-                            caculateResult.Referrer_UserName,
-                            siteId,
-                            rollOver,
-                            $"Referral Bonus: {rollOver:#,##0.##}",
-                            "N/A",
-                            (int)WithdrawalLimitLogCreateFromEnum.ReferralReward,
-                            "System",
-                            out _, trans);
+                    result = _walletAdapter.SetBalance(caculateResult.Referrer_CustId,
+                        siteId,
+                        caculateResult.Referrer_UserName,
+                        caculateResult.RewardDepositReferral,
+                        (int)FinancialType.ReferFriendsRewards,
+                        $"Referral Bonus: {caculateResult.RewardDepositReferral:#,##0.##}", "N/A", out _, out _, trans);
+
+                    if (result > 0)
+                    {
+                        var rollOver = 1 * caculateResult.RewardDepositReferral;
+                        if (rollOver > 0)
+                            result = _withdrawalLimitAdapter.SetWithdrawalLimit(
+                                caculateResult.Referrer_CustId,
+                                caculateResult.Referrer_UserName,
+                                siteId,
+                                rollOver,
+                                $"Referral Bonus: {rollOver:#,##0.##}",
+                                "N/A",
+                                (int)WithdrawalLimitLogCreateFromEnum.ReferralReward,
+                                "System",
+                                out _, trans);
+                    }
                 }
             }
 
