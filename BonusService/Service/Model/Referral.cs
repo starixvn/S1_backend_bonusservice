@@ -58,10 +58,11 @@ namespace BonusService.Service.Model
             MinPayout = minPayout;
             MaxPayout = maxPayout;
             CaculateDepositReferral = caculateDepositReferral;
-            RewardDepositReferral = minPayout > caculateDepositReferral ? 0
-                : maxPayout < caculateDepositReferral ? maxPayout : caculateDepositReferral;
+            RewardDepositReferral = (minPayout != 0 && minPayout > caculateDepositReferral) ? 0
+                : (maxPayout != 0 && maxPayout < caculateDepositReferral) ? maxPayout : caculateDepositReferral;
             ReferredDetail = referredDetail;
         }
+
     }
 
     public class DepositReferralReferredInfo

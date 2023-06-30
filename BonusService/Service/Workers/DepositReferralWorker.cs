@@ -55,11 +55,24 @@ namespace BonusService.Service.Workers
                         foreach (var custId in referrerCustList)
                         {
                             var referrerInfo = _custInfoBLL.GetCustInfo(custId);
-                            var caculateResult = _referralBLL.CaculateReferrerDepositReferral(referrerInfo, depositReferralCustList.Where(x => x.Referrer_CustId == custId));
+                            var referredDetails = depositReferralCustList.Where(x => x.Referrer_CustId == custId);
 
+                            //檢查推薦人是否可以獲得
+                            if (!_referralBLL.IsReferrerAllowToRewardDepositReferral(referrerInfo)) continue;
+
+                            //塞選可納入計算的被推薦人資料
+                            _referralBLL.FilterReferredDetailForRewardDepositReferral(referrerInfo, referredDetails);
+
+                            if (!referredDetails.Any()) continue;
+
+                            //計算推薦獎金
+                            var caculateResult = _referralBLL.CaculateDepositReferral(referredDetails);
+
+                            //派發
                             if (caculateResult != null && _referralBLL.PayoutDepositReferral(referrerInfo, caculateResult) > 0)
                             {
-                                _logger.LogInformation($"{WorkerName}:{JsonConvert.SerializeObject(caculateResult)}");
+                                _logger.LogInformation($"{WorkerName} : {referrerInfo.CustId}_{referrerInfo.UserName} Reward Success. \n" +
+                                    $"Detail = {JsonConvert.SerializeObject(caculateResult)}");
                             }
                         }
 
