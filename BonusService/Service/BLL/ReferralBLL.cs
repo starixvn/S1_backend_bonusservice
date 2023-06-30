@@ -3,6 +3,7 @@ using BonusService.Service.DAL.Interface;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
 using Newtonsoft.Json;
+using System.Linq;
 using System.Text;
 
 namespace BonusService.Service.BLL
@@ -127,53 +128,55 @@ namespace BonusService.Service.BLL
             string currencyTimeZone)
             => _referralService.GetDepositReferralCustList(siteId, currencyId, specificDate, currencyTimeZone);
 
-        public DepositReferralReferrerCaculateResult CaculateReferrerDepositReferral(Customer referrerInfo,IEnumerable<DepositReferralCustInfo> referrerDetail)
+        public bool IsReferrerAllowToRewardDepositReferral(Customer referrerInfo)
         {
-            if (!IsAllowToRewardDepositReferral(referrerInfo, referrerDetail.Select(x => x.Referred_CustId)))
-                return null;
-
-            return CaculateDepositReferral(referrerDetail);
-        }
-
-        private bool IsAllowToRewardDepositReferral(Customer referrerInfo, IEnumerable<int> referredList)
-        {
+            //推薦人是suspend狀態就不派發
             if (referrerInfo.Status == (int)CustomerStatusEnum.Suspend)
                 return false;
 
+            //推荐人的账号必须是有存款过的记录
             if (referrerInfo.ActStatus == (int)ActStatusEnum.NonDepoist)
-                return false;
-
-            if (_verifyService.IsRealNameVaild(referrerInfo, referredList))
                 return false;
 
             return true;
         }
 
-        private DepositReferralReferrerCaculateResult CaculateDepositReferral(IEnumerable<DepositReferralCustInfo> custInfo)
+        public void FilterReferredDetailForRewardDepositReferral(Customer referrerInfo, IEnumerable<DepositReferralCustInfo> referredList)
         {
-            var referredInfo = new List<DepositReferralReferredInfo>();
-            var referredCustList = custInfo.Select(x => x.Referred_CustId).Distinct();
-            foreach (var referredCustId in referredCustList)
-            {
-                var referredCustIdInfo = custInfo.Where(x => x.Referred_CustId == referredCustId);
-                referredInfo.Add(new DepositReferralReferredInfo()
+            //被推薦人是suspend狀態就不派發
+            referredList = referredList.Where(x => x.Referred_Status != (int)CustomerStatusEnum.Suspend);
+
+            var referredCustList = referredList.Select(x => x.Referred_CustId).Distinct();
+
+            //同姓名限制：推薦人跟被推薦人不可相同姓名(包含修改過的姓名)，如果同名，則該被推薦人資料不計算
+            _verifyService.IsRealNameVaild(referrerInfo, referredCustList, out List<CompareRealNameDto> realNameCheckResult);
+            referredCustList = referredCustList.Except(realNameCheckResult.Select(x => x.CustId));
+            referredList = referredList.Where(x => referredCustList.Contains(x.Referred_CustId));
+        }
+
+        public DepositReferralReferrerCaculateResult CaculateDepositReferral(IEnumerable<DepositReferralCustInfo> custInfo)
+        {
+            var referredInfo = custInfo.GroupBy(x => x.Referred_CustId)
+                .Select(group => new DepositReferralReferredInfo()
                 {
-                    Referred_CustId = referredCustId,
-                    Referred_UserName = referredCustIdInfo.First().Referred_UserName,
-                    TotalDeposit = referredCustIdInfo.Sum(x => x.ActualDeposit),
-                    DepositRewardPercentage = referredCustIdInfo.First().DepositRewardPercentage,
-                    DepositInfo = referredCustIdInfo.ToDictionary(o => o.TransId, o => o.ActualDeposit)
-                });
-            }
+                    Referred_CustId = group.Key,
+                    Referred_UserName = group.First().Referred_UserName,
+                    TotalDeposit = group.Sum(x => x.ActualDeposit),
+                    DepositRewardPercentage = group.First().DepositRewardPercentage,
+                    DepositInfo = group.ToDictionary(o => o.TransId, o => o.ActualDeposit)
+                })
+                .ToList();
+
+            var firstCustInfo = custInfo.First();
 
             return new DepositReferralReferrerCaculateResult(
-                custInfo.First().SettledDate,
-                custInfo.First().Referrer_CustId,
-                custInfo.First().Referrer_UserName,
-                custInfo.First().MinPayout,
-                custInfo.First().MaxPayout,
-                referredInfo.Sum(x => x.CaculateDepositReferral),
-                referredInfo);
+            firstCustInfo.SettledDate,
+            firstCustInfo.Referrer_CustId,
+            firstCustInfo.Referrer_UserName,
+            firstCustInfo.MinPayout,
+            firstCustInfo.MaxPayout,
+            referredInfo.Sum(x => x.CaculateDepositReferral),
+            referredInfo);
         }
 
         public int PayoutDepositReferral(Customer referrerInfo, DepositReferralReferrerCaculateResult caculateResult)

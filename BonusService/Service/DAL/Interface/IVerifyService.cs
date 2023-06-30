@@ -4,6 +4,6 @@ namespace BonusService.Service.DAL.Interface
 {
     public interface IVerifyService
     {
-        public bool IsRealNameVaild(Customer custInfo, IEnumerable<int> custIds);
+        public bool IsRealNameVaild(Customer custInfo, IEnumerable<int> custIds, out List<CompareRealNameDto> realNameCheckResult);
     }
 }

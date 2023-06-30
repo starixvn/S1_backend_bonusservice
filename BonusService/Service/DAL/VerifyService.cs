@@ -22,7 +22,7 @@ namespace BonusService.Service.DAL
         /// <param name="custInfo">受惠會員資訊(欲拿或領取獎勵的人)</param>
         /// <param name="custIds">需比較的會員清單</param>
         /// <returns></returns>
-        public bool IsRealNameVaild(Customer custInfo, IEnumerable<int> custIds)
+        public bool IsRealNameVaild(Customer custInfo, IEnumerable<int> custIds, out List<CompareRealNameDto> realNameCheckResult)
         {
             var compareNameInfo = new List<CompareRealNameDto>();
             var p2 = new DynamicParameters(new
@@ -39,7 +39,7 @@ namespace BonusService.Service.DAL
             };
 
             // 檢查是否有相同
-            var realNameCheckResult = new List<CompareRealNameDto>();
+            realNameCheckResult = new List<CompareRealNameDto>();
             foreach (var name in patterns)
             {
                 realNameCheckResult.AddRange(compareNameInfo.Where(r => r.RealName.Equals(name, StringComparison.CurrentCultureIgnoreCase)).ToList());
