@@ -48,7 +48,8 @@
         public string GameID { set; get; }
         public decimal Percentage { set; get; }
         public decimal RedeemAmount { set; get; }
-        public decimal ValidBet { set; get; }       
+        public decimal ValidBet { set; get; }
+        public decimal ValidTurnover { set; get; }
     }
     public class RebatePayoutLimit
     {
