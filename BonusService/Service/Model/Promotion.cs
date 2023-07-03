@@ -288,8 +288,12 @@ namespace BonusService.Service.Model
         public decimal TotalBonus { get; set; }
         public decimal MaxBonus { get; set; }
         public decimal TotalLossAmount => CashBackDetail.Any() ? CashBackDetail.Sum(i => i.LossAmount) : 0;
-        public decimal MinLossAmount => CashBackDetail.Any() ? CashBackDetail.Max(i => i.MinLossAmount) : 0;
-        public decimal OriginalTotalBonus => CashBackDetail.Any() ? CashBackDetail.Sum(i => i.BonusAmount) : 0;
+        // 改變顯示為負數
+        public decimal MinLossAmount => CashBackDetail.Any()
+            ? CashBackDetail.Max(i => i.MinLossAmount) * -1 : 0;
+        // TotalLossAmount > 0 則不算 Bonus
+        public decimal OriginalTotalBonus => CashBackDetail.Any() && TotalLossAmount < 0
+            ? Math.Abs(CashBackDetail.Sum(i => i.BonusAmount)) : 0;
         public string Percentage => CashBackDetail.Select(i => i.PercentageName).FirstOrDefault();
         public IEnumerable<CashBackDetail> CashBackDetail { get; set; }
     }
@@ -434,5 +438,12 @@ namespace BonusService.Service.Model
         public int TpGameType { get; set; }
         public string TpGameTypeName { get; set; }
         public string GameName { get; set; }
+    }
+    
+    public class BonusCustUsingList
+    {
+        public int CustId { get; set; }
+        public string Currency { get; set; }
+        public string UserName { get; set; }
     }
 }

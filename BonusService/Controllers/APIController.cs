@@ -84,7 +84,7 @@ namespace BonusService.Controllers
         [HttpPost]
         public ApiResult CheckRewardCondination(SetVerificationRewardReq verificationRewardReq)
         {
-            return _bonusAPIBLL.CheckRewardCondination(verificationRewardReq.CustId, verificationRewardReq.OTPType, false);
+            return _bonusAPIBLL.CheckRewardCondination(verificationRewardReq.CustId, verificationRewardReq.OTPType);
         }
 
         public class PromotionReq
