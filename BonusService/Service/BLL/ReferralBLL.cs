@@ -5,6 +5,7 @@ using BonusService.Service.Model.enums;
 using Newtonsoft.Json;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace BonusService.Service.BLL
 {
@@ -128,7 +129,7 @@ namespace BonusService.Service.BLL
             string currencyTimeZone)
             => _referralService.GetDepositReferralCustList(siteId, currencyId, specificDate, currencyTimeZone);
 
-        public bool IsReferrerAllowToRewardDepositReferral(Customer referrerInfo)
+        public bool IsReferrerValid(Customer referrerInfo)
         {
             //推薦人是suspend狀態就不派發
             if (referrerInfo.Status == (int)CustomerStatusEnum.Suspend)
@@ -141,7 +142,7 @@ namespace BonusService.Service.BLL
             return true;
         }
 
-        public void FilterReferredDetailForRewardDepositReferral(Customer referrerInfo, IEnumerable<DepositReferralCustInfo> referredList)
+        public void FilterReferredDetail(Customer referrerInfo, IEnumerable<DepositReferralCustInfo> referredList)
         {
             //被推薦人是suspend狀態就不派發
             referredList = referredList.Where(x => x.Referred_Status != (int)CustomerStatusEnum.Suspend);
@@ -150,7 +151,12 @@ namespace BonusService.Service.BLL
 
             //同姓名限制：推薦人跟被推薦人不可相同姓名(包含修改過的姓名)，如果同名，則該被推薦人資料不計算
             _verifyService.IsRealNameVaild(referrerInfo, referredCustList, out List<CompareRealNameDto> realNameCheckResult);
-            referredCustList = referredCustList.Except(realNameCheckResult.Select(x => x.CustId));
+            if (realNameCheckResult.Any())
+            {
+                referredCustList = referredCustList.Except(realNameCheckResult.Select(x => x.CustId));
+                _logger.LogInformation($"Real Name Check={referrerInfo.SiteId}-{referrerInfo.CurrencyId}-{referrerInfo.CustId}-{referrerInfo.UserName} \n" +
+                    $"Result={JsonConvert.SerializeObject(realNameCheckResult)}");
+            }
             referredList = referredList.Where(x => referredCustList.Contains(x.Referred_CustId));
         }
 
