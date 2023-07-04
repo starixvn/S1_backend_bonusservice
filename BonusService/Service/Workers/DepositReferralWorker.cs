@@ -58,10 +58,10 @@ namespace BonusService.Service.Workers
                             var referredDetails = depositReferralCustList.Where(x => x.Referrer_CustId == custId);
 
                             //檢查推薦人是否可以獲得
-                            if (!_referralBLL.IsReferrerAllowToRewardDepositReferral(referrerInfo)) continue;
+                            if (!_referralBLL.IsReferrerValid(referrerInfo)) continue;
 
                             //塞選可納入計算的被推薦人資料
-                            _referralBLL.FilterReferredDetailForRewardDepositReferral(referrerInfo, referredDetails);
+                            _referralBLL.FilterReferredDetail(referrerInfo, referredDetails);
 
                             if (!referredDetails.Any()) continue;
 
