@@ -798,6 +798,16 @@ namespace BonusService.Service.BLL
             var result = _mainDbClient.Execute("Member_BonusInfo_Ins_V3", trans, p);
             var transId = p.Get<string>("TransId");
 
+            if (result > 0 && bonusRewardInput.PromotionType == PromotionType.RetentionFreeBet)
+            {
+                var bonusCustUsingPara = new DynamicParameters(new { 
+                    _CustId = bonusRewardInput.CustId, 
+                    _SiteId = bonusRewardInput.SiteId,  
+                    _BonusCode = bonusRewardInput.BonusCode 
+                });
+                result = _mainDbClient.Execute("Service_BonusCustUsingDetail_Set", trans, bonusCustUsingPara);
+            }
+            
             if (result > 0 && bonusRewardInput.IsSpecial)
             {
                 var specialCodeInput = new DynamicParameters(new
@@ -1032,6 +1042,12 @@ namespace BonusService.Service.BLL
                 }
             }
 
+            if (promo.PromotionType == PromotionType.RetentionFreeBet)
+            {
+                var isUsed = GetCustBonusUsing(siteId, custId , promo);
+                if (!isUsed) return;
+            }
+            
             var custBonusInfo = _promotionService.GetBonusInfoByCust(custId, promo);
             if (custBonusInfo != null)
             {
@@ -1049,6 +1065,14 @@ namespace BonusService.Service.BLL
             }
         }
 
+        private bool GetCustBonusUsing(int siteId, int custId, Promotion promo)
+        {
+            var isUsed = _promotionService.GetBonusCustUsingDetail(siteId, promo.BonusCode)
+                .Any(x=>x.Status == (int)BonusUsingStatusEnum.Used && x.CustId == custId);
+           
+            return isUsed;
+        }
+        
         private bool GetBonusUsingUsable(int siteId, int custId, Promotion promo)
         {
             var usingList = _promotionService.GetBonusCustUsingDetail(siteId, promo.BonusCode);

@@ -224,4 +224,10 @@
         NotAllowReward = 0,
         AllowReward = 1,
     }
+    
+    public enum BonusUsingStatusEnum
+    {
+        NotUsed = 0,
+        Used = 1,
+    }
 }
