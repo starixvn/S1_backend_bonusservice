@@ -203,4 +203,10 @@
         ReferralReward = 5,
         VerificationReward = 6
     }
+    
+    public enum BonusUsingStatusEnum
+    {
+        NotUsed = 0,
+        Used = 1,
+    }
 }
