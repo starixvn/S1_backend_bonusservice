@@ -219,6 +219,12 @@
         Deposited = 2,
     }
 
+    public enum ReferralTypeEnum
+    {
+        Referral = 1,
+        DepositReferral = 2
+    }
+
     public enum ReferralStatusEnum
     {
         NotAllowReward = 0,
