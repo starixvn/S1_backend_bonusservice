@@ -62,19 +62,24 @@ namespace BonusService.Service.BLL
                         result = _walletAdapter.SetBalance(rr.CustId, rr.SiteId, rr.UserName, rr.ReferralFreeCredit, (int)FinancialType.ReferFriendsRewards, $"Referral Free Credit: {rr.ReferralFreeCredit:#,##0.##}", "N/A", out _, out _, trans);
                         if (result > 0)
                         {
-                            _mainDbClient.Execute("Common_ReferralLog_Ins_V2", trans,
+                            _mainDbClient.Execute("Common_ReferralLog_Ins_V3", trans,
                                 new
                                 {
                                     CustId = rr.CustId,
                                     CurrencyId = rr.CurrencyId,
+                                    Type = ReferralTypeEnum.Referral,
                                     UserName = rr.UserName,
                                     SiteId = rr.SiteId,
                                     ReferralFreeCredit = rr.ReferralFreeCredit,
                                     AgentId = rr.AgentId,
                                     ReferralAmount = rr.BonusAmount,
+                                    CalculateSummary = 0m,
+                                    RewardPercentage = 0m,
+                                    RefList = "",
+                                    SettledDate = 0,
                                     Memo = "",
                                     RelId = tc,
-                                    RewardStatus = 1
+                                    RewardStatus = ReferralStatusEnum.AllowReward
                                 });
 
                             result = _withdrawalLimitAdapter.SetWithdrawalLimit(rr.CustId, rr.UserName, rr.SiteId, rr.ReferralFreeCredit, $"Referral Free Credit: {rr.ReferralFreeCredit:#,##0.##}", "N/A", (int)WithdrawalLimitLogCreateFromEnum.ReferralReward, "System", out _, trans);
@@ -85,16 +90,21 @@ namespace BonusService.Service.BLL
                     }
                     else
                     {
-                        result = _mainDbClient.Execute("Common_ReferralLog_Ins_V2", trans,
+                        result = _mainDbClient.Execute("Common_ReferralLog_Ins_V3", trans,
                             new
                             {
                                 CustId = rr.CustId,
                                 CurrencyId = rr.CurrencyId,
+                                Type = ReferralTypeEnum.Referral,
                                 UserName = rr.UserName,
                                 SiteId = rr.SiteId,
                                 ReferralFreeCredit = 0m,
                                 AgentId = rr.AgentId,
                                 ReferralAmount = 0m,
+                                CalculateSummary = 0m,
+                                RewardPercentage = 0m,
+                                RefList = "",
+                                SettledDate = 0,
                                 Memo = "",
                                 RelId = tc,
                                 RewardStatus = ReferralStatusEnum.NotAllowReward
@@ -123,7 +133,21 @@ namespace BonusService.Service.BLL
 
                 if (result > 0)
                 {
-                    _mainDbClient.Execute("Common_ReferralMLog_Ins", trans, new { CustId = agent.AgentId, CurrencyId = agent.CurrencyId, UserName = agent.AgentName, SiteId = agent.SiteId, ReferralAmount = payAmount, Memo = "", RelId = tc });
+                    _mainDbClient.Execute("Common_ReferralMLog_Ins_V2", trans,
+                        new
+                        {
+                            CustId = agent.AgentId,
+                            CurrencyId = agent.CurrencyId,
+                            Type = ReferralTypeEnum.Referral,
+                            UserName = agent.AgentName,
+                            SiteId = agent.SiteId,
+                            ReferralAmount = payAmount,
+                            CalculateAmount = 0,
+                            MinPayout = 0m,
+                            MaxPayout = 0m,
+                            Memo = "",
+                            RelId = tc
+                        });
 
                     var rollOver = 1 * payAmount;
                     if (rollOver > 0)
@@ -162,6 +186,7 @@ namespace BonusService.Service.BLL
                         {
                             CustId = referredInfo.Referred_CustId,
                             CurrencyId = currencyId,
+                            Type = ReferralTypeEnum.DepositReferral,
                             UserName = referredInfo.Referred_UserName,
                             SiteId = siteId,
                             ReferralFreeCredit = 0m,
@@ -188,13 +213,14 @@ namespace BonusService.Service.BLL
 
             // 推薦人領取獎勵
 
-            if (result > 0 && caculateResult.RewardDepositReferral > 0)
+            if (result > 0 && caculateResult.ReferredDetail.Any())
             {
                 result = _mainDbClient.Execute("Common_ReferralMLog_Ins_V2", trans,
                     new
                     {
                         CustId = caculateResult.Referrer_CustId,
                         CurrencyId = currencyId,
+                        Type = ReferralTypeEnum.DepositReferral,
                         UserName = caculateResult.Referrer_UserName,
                         SiteId = siteId,
                         ReferralAmount = caculateResult.RewardDepositReferral,
