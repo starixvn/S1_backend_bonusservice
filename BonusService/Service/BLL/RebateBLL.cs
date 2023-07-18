@@ -181,9 +181,16 @@ namespace BonusService.Service.BLL
                             foreach (var game in gameTypeList)
                             {
                                 //先加入GameId到字典
-                                gameTypeResult.Add(game.GameId, game.GameId);
+                                if (!string.IsNullOrWhiteSpace(game.GameId))
+                                    gameTypeResult.Add(game.GameId, game.GameId);
+
                                 //再用AppId加入字典，避免第三方注單提供的GameId與我們Table設定的GameId不同
-                                gameTypeResult.TryAdd(game.AppId, game.AppId);
+                                if (!string.IsNullOrWhiteSpace(game.AppId))
+                                    gameTypeResult.TryAdd(game.AppId, game.AppId);
+
+                                //再用SettleGameId加入字典，避免第三方注單提供的GameId與Settle的GameId不同
+                                if (!string.IsNullOrWhiteSpace(game.SettleGameId))
+                                    gameTypeResult.TryAdd(game.SettleGameId, game.SettleGameId);
                             }
                             result.Add(gameTypeList.Key, gameTypeResult);
                         }
