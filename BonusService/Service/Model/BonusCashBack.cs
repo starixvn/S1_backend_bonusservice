@@ -28,6 +28,7 @@
         public int GameType { set; get; }
         public string GameId { set; get; }
         public string AppId { set; get; }
+        public string SettleGameId { set; get; }
     }
 
     public class RebateInfo
