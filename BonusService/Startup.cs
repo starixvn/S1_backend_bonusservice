@@ -48,6 +48,7 @@ namespace BonusService
             services.AddSingleton<IWalletAdapter, WalletAdapter>();
             services.AddSingleton<IWithdrawalLimitAdapter, WithdrawalLimitAdapter>();
             services.AddSingleton<IReferralService, ReferralService>();
+            services.AddSingleton<ICommonService, CommonService>();
 
             services.AddSingleton<RebateBLL>();
             services.AddSingleton<ReferralBLL>();
