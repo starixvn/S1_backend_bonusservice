@@ -55,7 +55,7 @@ namespace BonusService.Service.Workers
                             {
                                 var RelId = DateTime.Now.Ticks;
                                 LogContext.PushProperty("RelId", RelId.ToString());
-                                _rebateBll.PayoutVipRebate(rebateTask.SiteId, rebateTask.CurrencyId, rebateInfo, rebateTpBetRecordList, rebatePayoutLimit, RelId);
+                                _rebateBll.PayoutVipRebate(rebateTask.SiteId, rebateInfo, rebateTpBetRecordList, rebatePayoutLimit, RelId);
                             }
                         }
                         
