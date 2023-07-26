@@ -123,7 +123,7 @@ namespace BonusService.Service.BLL
                     _logger.LogInformation(@$"Step3 promotions Result：{JsonConvert.SerializeObject(promotions)} ,logKey:{logKey}");
                     #endregion
 
-                    // 判斷是否只執行某個 BonusCode
+                    // 判斷是否指定 BonusCode 重跑
                     if (!string.IsNullOrWhiteSpace(cashBackSetting.BonusCode))
                     {
                         promotions = promotions.Where(r => r.BonusCode == cashBackSetting.BonusCode);
