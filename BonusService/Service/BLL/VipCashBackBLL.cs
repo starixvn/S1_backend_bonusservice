@@ -200,9 +200,12 @@ namespace BonusService.Service.BLL
                             var winLostAmount = customerGroupByCustId.Sum(i => i.WinlostAmount);
                             if (winLostAmount >= 0 || Math.Abs(winLostAmount) < setting?.LossAmount)
                             {
+                                #region log Step7
+
                                 _logger.LogInformation(@$"Step7 custId: {customerGroupByCustId.First().CustId} winLostAmountNotEnough,
                                                             winLostAmount Result：{winLostAmount},
-                                                           ,logKey:{logKey}");                                                        
+                                                           ,logKey:{logKey}");
+                                #endregion
                                 continue;
                             }
 
@@ -384,10 +387,14 @@ namespace BonusService.Service.BLL
             // 玩家存款金額加總
             var custDepositAmountSummary = custDepositList.Sum(r => r.ActualDepositAmount);
 
-            //log 
+            #region log Step8
+
             _logger.LogInformation(@$"Step8 CashBack VerifyCustDepositAmount CustId：{custId},
                             DepositList：{JsonConvert.SerializeObject(custDepositList)},
-                            custDepositAmountSummary：{custDepositAmountSummary}");
+                            custDepositAmountSummary：{custDepositAmountSummary}
+                            logKey:{logKey}");
+
+            #endregion
 
             // 存款金額條件等於 0 就不檢查
             if (promotion.RequiredAmount == 0) return true;
@@ -395,7 +402,7 @@ namespace BonusService.Service.BLL
             // 如果存款金額不等於 0，且玩家身上沒有符合資格的存款單，就不會符合資格
             if (!custDepositList.Any()) return false;
 
-            return custDepositAmountSummary > promotion.RequiredAmount;
+            return custDepositAmountSummary >= promotion.RequiredAmount;
         }
 
         #endregion
