@@ -339,12 +339,25 @@ namespace BonusService.Service.BLL
 
             if (result > 0)
             {
-                result = _promotionService.AfterReward(claimPromotion, custInfo.SiteId, bonusCode, custInfo.CurrencyId,
-                    custIp, trans);
+                if (bonusRewardInput.PromotionType == PromotionType.RetentionFreeBet)
+                {
+                    var bonusCustUsingPara = new DynamicParameters(new { 
+                        _CustId = bonusRewardInput.CustId, 
+                        _SiteId = bonusRewardInput.SiteId,  
+                        _BonusCode = bonusRewardInput.BonusCode 
+                    });
+                    result = _mainDbClient.Execute("Service_BonusCustUsingDetail_Set", trans, bonusCustUsingPara);
+                }
+                
                 if (result > 0)
                 {
-                    await _mainDbClient.CommitAndDisposeConnectionAsync(conn, trans);
-                    InsertPromotionSuccessLog(custInfo, claimPromotion, verifyResult.UseWhitelist);
+                    result = _promotionService.AfterReward(claimPromotion, custInfo.SiteId, bonusCode, custInfo.CurrencyId,
+                        custIp, trans);
+                    if (result > 0)
+                    {
+                        await _mainDbClient.CommitAndDisposeConnectionAsync(conn, trans);
+                        InsertPromotionSuccessLog(custInfo, claimPromotion, verifyResult.UseWhitelist);
+                    }
                 }
             }
 
@@ -798,16 +811,6 @@ namespace BonusService.Service.BLL
             p.Add("TransId", dbType: DbType.String, direction: ParameterDirection.Output);
             var result = _mainDbClient.Execute("Member_BonusInfo_Ins_V3", trans, p);
             var transId = p.Get<string>("TransId");
-
-            if (result > 0 && bonusRewardInput.PromotionType == PromotionType.RetentionFreeBet)
-            {
-                var bonusCustUsingPara = new DynamicParameters(new { 
-                    _CustId = bonusRewardInput.CustId, 
-                    _SiteId = bonusRewardInput.SiteId,  
-                    _BonusCode = bonusRewardInput.BonusCode 
-                });
-                result = _mainDbClient.Execute("Service_BonusCustUsingDetail_Set", trans, bonusCustUsingPara);
-            }
             
             if (result > 0 && bonusRewardInput.IsSpecial)
             {
