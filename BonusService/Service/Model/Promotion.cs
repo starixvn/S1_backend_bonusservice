@@ -445,6 +445,5 @@ namespace BonusService.Service.Model
         public int CustId { get; set; }
         public string Currency { get; set; }
         public string UserName { get; set; }
-        public int Status { get; set; }
     }
 }
