@@ -51,6 +51,8 @@ namespace BonusService.Service.Model
         public string RewardBonusMemo { set; get; }
         public FinancialType FinancialType { set; get; }
         public BonusInfoAtPage AtPage { set; get; }
+
+        public VipPeriodType PeriodType { get; set; }
     }
     public class CalculateBonusOutput
     {

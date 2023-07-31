@@ -22,7 +22,7 @@ namespace BonusService.Service.Workers
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            //_cashBackWeekTimer = new Timer(DoCashBackByWeek, null, TimeSpan.Zero, TimeSpan.Zero); //週返
+            _cashBackWeekTimer = new Timer(DoCashBackByWeek, null, TimeSpan.Zero, TimeSpan.Zero); //週返
             _cashBackDailyTimer = new Timer(DoCashBackByDaily, null, TimeSpan.Zero, TimeSpan.Zero); //日返
             return Task.CompletedTask;
         }

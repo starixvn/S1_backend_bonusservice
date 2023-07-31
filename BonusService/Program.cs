@@ -28,19 +28,19 @@ var serviceType = Environment.GetEnvironmentVariable("ServiceType");
 if (!string.IsNullOrEmpty(serviceType) && serviceType.Equals("worker", StringComparison.OrdinalIgnoreCase))
 {
     builder.Services
-        //.AddHostedService<ExpiredBonusWorker>()
-        //.AddHostedService<ReferralWorker>()
-        //.AddHostedService<VipUpgradeWorker>()
-        //.AddHostedService<VipDowngradeWorker>()
-        //.AddHostedService<VipRebateWorker>()
-        .AddHostedService<VipCashBackWorker>();
-    //.AddHostedService<PromotionAutoExtendWorker>()
-    //.AddHostedService<DepositBonusWorker>()
-    //.AddHostedService<RabbitMQConsumer>();
+        .AddHostedService<ExpiredBonusWorker>()
+        .AddHostedService<ReferralWorker>()
+        .AddHostedService<VipUpgradeWorker>()
+        .AddHostedService<VipDowngradeWorker>()
+        .AddHostedService<VipRebateWorker>()
+        .AddHostedService<VipCashBackWorker>()
+        .AddHostedService<PromotionAutoExtendWorker>()
+        .AddHostedService<DepositBonusWorker>()
+       . AddHostedService<RabbitMQConsumer>();
     //.AddHostedService<RewardWorker>();
     //.AddHostedService<AngPaoEventWorker>(); //活動結束，關閉排程
 }
-    var app = builder.Build();
+var app = builder.Build();
 startup.Configure(app, builder.Environment);
 
 app.Run();
