@@ -67,7 +67,7 @@ namespace BonusService.Service.DAL
                 CurrencyId = cashBackTpBetRecordInput.CurrencyId,
             });
 
-            var spName = cashBackTpBetRecordInput.PeriodType == VipPeriodType.Monthly
+            var spName = cashBackTpBetRecordInput.PeriodType == VipPeriodType.Weekly
                 ? "Service_VipCashBackTpBetRecord_Get_V2"
                 : "Service_VipCashBackTpBetRecordByDaily_Get";
 

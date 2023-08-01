@@ -1216,8 +1216,6 @@ namespace BonusService.Service.BLL
 
             var dateRange = GetCashBackInfoDateRange(promotion.PeriodType, currentTime);
 
-            // todo 外層寫死 BonusCode 記得拔掉，Worker 設定記得要反註解
-
             // 用 BonusCode 取得該名玩家(上周 or 昨日) CashBackInfo 的第三方遊戲輸贏明細
             var cashBackDetails = _promotionService.GetCustCashBackDetails(custId, promotion, dateRange.StartDate, dateRange.EndDate).ToList();
             if (cashBackDetails.Any())
