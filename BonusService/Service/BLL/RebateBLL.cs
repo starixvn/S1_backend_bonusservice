@@ -93,7 +93,7 @@ namespace BonusService.Service.BLL
         public int PayoutVipRebate(int siteId, VipRebateInfo vipRebateInfo, IEnumerable<VipRebateTpBetRecord> vipRebateTpBetRecordList, IEnumerable<RebatePayoutLimit> rebatePayoutLimits, long RelId)
         {
             //原始資料包含相同GameType不同GameId的資料，先用GameId排除不計算Rebate的遊戲
-            var excludeGameList = GetExcludeGameList(siteId);
+            var excludeGameList = GetExcludeGameList(siteId, vipRebateInfo.CurrencyId);
             _logger.LogInformation($"excludeGameList:{JsonConvert.SerializeObject(excludeGameList)}");
             foreach (var vipRebateTpBetRecord in vipRebateTpBetRecordList)
             {
@@ -101,15 +101,18 @@ namespace BonusService.Service.BLL
                 if (excludeGameList.TryGetValue(vipRebateTpBetRecord.GameType, out var gameTypeExcludeGameList) &&
                     gameTypeExcludeGameList.ContainsKey(vipRebateTpBetRecord.GameID))
                 {
+                    vipRebateTpBetRecord.ValidTurnover = 0;
                     vipRebateTpBetRecord.RedeemAmount = 0;
                     _logger.LogInformation($"exclude Rebate Game:{JsonConvert.SerializeObject(vipRebateTpBetRecord)}");
                 }
+                else
+                    vipRebateTpBetRecord.ValidTurnover = vipRebateTpBetRecord.ValidBet;
             }
 
             //下個流程寫Log會錯誤，重新用GameType匯總資料
             var gameTypeRebateList = vipRebateTpBetRecordList
                     .GroupBy(x => x.GameType)
-                    .Select(gameTypeList => 
+                    .Select(gameTypeList =>
                         {
                             var first = gameTypeList.First();
                             return new VipRebateTpBetRecord
@@ -120,6 +123,7 @@ namespace BonusService.Service.BLL
                                 Percentage = first.Percentage,
                                 RedeemAmount = gameTypeList.Sum(i => i.RedeemAmount),
                                 ValidBet = gameTypeList.Sum(i => i.ValidBet),
+                                ValidTurnover = gameTypeList.Sum(i => i.ValidTurnover),
                             };
                         }).ToList();
             _logger.LogInformation($"gameTypeRebateList:{JsonConvert.SerializeObject(gameTypeRebateList)}");
@@ -161,30 +165,37 @@ namespace BonusService.Service.BLL
             return _vipRebateService.GetRebatePayoutLimit();
         }
 
-        public Dictionary<int, Dictionary<string, string>> GetExcludeGameList(int siteId)
+        public Dictionary<int, Dictionary<string, string>> GetExcludeGameList(int siteId, int currencyId)
         {
-            var key = $"Rebate:ExcludeGameList:{siteId}";
+            var key = $"Rebate:ExcludeGameList:{siteId}_{currencyId}";
             return _cacheHelper.TryGetOrCreate(key,
                 new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(10)),
-                i => 
+                i =>
                     {
                         var result = new Dictionary<int, Dictionary<string, string>>();
                         //用GameType分類建立GameId檢查字典
-                        var gameTypeGroups = _rebateService.GetExcludeGameList(siteId).GroupBy(i => i.GameType);                        
+                        var gameTypeGroups = _rebateService.GetExcludeGameList(siteId, currencyId).GroupBy(i => i.GameType);
                         foreach (var gameTypeList in gameTypeGroups)
                         {
                             var gameTypeResult = new Dictionary<string, string>();
                             foreach (var game in gameTypeList)
                             {
                                 //先加入GameId到字典
-                                gameTypeResult.Add(game.GameId, game.GameId);
+                                if (!string.IsNullOrWhiteSpace(game.GameId))
+                                    gameTypeResult.Add(game.GameId, game.GameId);
+
                                 //再用AppId加入字典，避免第三方注單提供的GameId與我們Table設定的GameId不同
-                                gameTypeResult.TryAdd(game.AppId, game.AppId);
+                                if (!string.IsNullOrWhiteSpace(game.AppId))
+                                    gameTypeResult.TryAdd(game.AppId, game.AppId);
+
+                                //再用SettleGameId加入字典，避免第三方注單提供的GameId與Settle的GameId不同
+                                if (!string.IsNullOrWhiteSpace(game.SettleGameId))
+                                    gameTypeResult.TryAdd(game.SettleGameId, game.SettleGameId);
                             }
                             result.Add(gameTypeList.Key, gameTypeResult);
                         }
                         return result;
-                    }                
+                    }
                 );
         }
     }

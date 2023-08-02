@@ -28,6 +28,7 @@
         public int GameType { set; get; }
         public string GameId { set; get; }
         public string AppId { set; get; }
+        public string SettleGameId { set; get; }
     }
 
     public class RebateInfo
@@ -48,7 +49,8 @@
         public string GameID { set; get; }
         public decimal Percentage { set; get; }
         public decimal RedeemAmount { set; get; }
-        public decimal ValidBet { set; get; }       
+        public decimal ValidBet { set; get; }
+        public decimal ValidTurnover { set; get; }
     }
     public class RebatePayoutLimit
     {

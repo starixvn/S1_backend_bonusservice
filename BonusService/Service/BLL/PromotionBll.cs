@@ -10,6 +10,7 @@ using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
 using Enum = System.Enum;
 using MySqlX.XDevAPI.Common;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace BonusService.Service.BLL
 {
@@ -27,6 +28,7 @@ namespace BonusService.Service.BLL
         private readonly BonusWalletService _bonusWalletService;
         private readonly ILogger<PromotionBll> _logger;
         private readonly ICacheHelper _redisHelper;
+        private readonly CacheHelper _cacheHelper;
 
         public PromotionBll(IServiceProvider provider)
         {
@@ -42,6 +44,7 @@ namespace BonusService.Service.BLL
             _bonusWalletService = provider.GetRequiredService<BonusWalletService>();
             _logger = provider.GetRequiredService<ILogger<PromotionBll>>();
             _redisHelper = provider.GetRequiredService<ICacheHelper>();
+            _cacheHelper = provider.GetRequiredService<CacheHelper>();
         }
 
         /// <summary>
@@ -554,7 +557,7 @@ namespace BonusService.Service.BLL
             if (!CheckProfileFinish(custInfo.CustId, custInfo.SiteId))
             {
                 return new CheckPromotionResultBaseDto() { BonusErrorCode = BonusErrorCode.ProfileOrPhoneNotFinish };
-            } 
+            }
 
             // 檢查 Tag
             var checkPromotionBlockTagResult = CheckPromotionBlockTag(custInfo.Tags, claimPromotion.BlockTags);
@@ -572,27 +575,27 @@ namespace BonusService.Service.BLL
                 {
                     return checkIpResult;
                 }
-                
+
                 var checkDeviceIdResult = CheckBlockDeviceId(custInfo, claimPromotion, custPromotionWhiteListListSetting);
                 if (checkDeviceIdResult.IsBlockDeviceId)
                 {
                     return checkDeviceIdResult;
                 }
-                
+
                 var checkRealNameResult = CheckBlockRealName(custInfo, claimPromotion, custPromotionWhiteListListSetting);
                 if (checkRealNameResult.IsBlockRealName)
                 {
                     return checkRealNameResult;
                 }
-                
+
                 //IP、DeviceID、RealName 其中有一個是因為白名單通過檢查的，都算有使用白名單
                 useWhitelist = (checkIpResult.UseWhitelist || checkDeviceIdResult.UseWhitelist || checkRealNameResult.UseWhitelist);
             }
 
-            return new CheckPromotionResultBaseDto() 
-            { 
-                BonusErrorCode = BonusErrorCode.Success, 
-                UseWhitelist = useWhitelist 
+            return new CheckPromotionResultBaseDto()
+            {
+                BonusErrorCode = BonusErrorCode.Success,
+                UseWhitelist = useWhitelist
             };
         }
 
@@ -761,8 +764,8 @@ namespace BonusService.Service.BLL
             if (bonusRewardInput.PromotionType is PromotionType.Rebate)
             {
                 throw new ArgumentOutOfRangeException();
-            }  
-            
+            }
+
             return BonusReward(bonusRewardInput, trans);
         }
 
@@ -856,17 +859,25 @@ namespace BonusService.Service.BLL
 
             Customer custInfo = null;
             if (request.IsLogin) custInfo = _custInfoService.GetCustInfo(request.CustId);
-
-
+            
             foreach (var promo in promotionList)
             {
+                if (promo.PromotionType == PromotionType.RetentionFreeBet)
+                {
+                    var usable = GetBonusUsingUsable(request.SiteId, request.CustId , promo);
+                    if (!usable) //未在清單內則不顯示
+                    {
+                        continue;
+                    }
+                }
+                
                 if (request.IsLogin)
                 {
                     // 加入BlockTag 檢核過濾，如果有Tag命中，列表就不會有這筆
                     if (BlockTagIgnorePromotion(custInfo.Tags, promo.BlockTags))
                     {
                         continue;
-                    }                    
+                    }
 
                     var custCondition = _promotionService.GetCustConditionInfo(request.CustId, request.CurrencyId,
                         request.SiteId, promo.BonusCode, request.DeviceType);
@@ -920,6 +931,8 @@ namespace BonusService.Service.BLL
                 {
                     var offset = GetOffset(request.SiteId);
                     ProcessPeriodTime(promo, DateTime.UtcNow.AddHours(offset), offset);
+                    
+                    // 調整顯示
                 }
             }
 
@@ -937,7 +950,7 @@ namespace BonusService.Service.BLL
                 if (BlockTagIgnorePromotion(custInfo.Tags, promo.BlockTags))
                 {
                     continue;
-                }                    
+                }
 
                 var custCondition = _promotionService.GetCustConditionInfo(request.CustId, request.CurrencyId,
                     request.SiteId, promo.BonusCode, request.DeviceType);
@@ -1037,6 +1050,14 @@ namespace BonusService.Service.BLL
             }
         }
 
+        private bool GetBonusUsingUsable(int siteId, int custId, Promotion promo)
+        {
+            var usingList = _promotionService.GetBonusCustUsingDetail(siteId, promo.BonusCode);
+            var usable = usingList.Any(x => x.CustId == custId);
+            
+            return usable;
+        }
+         
         private void SetPromotionDetail(string langId, string defLang, bool clearDetails, CustPromotion promo)
         {
             if (!string.IsNullOrEmpty(promo.Details))
@@ -1158,6 +1179,15 @@ namespace BonusService.Service.BLL
         {
             return _promotionService.GetBonusInfoByBonusCode(CustId, BonusCode);
         }
+
+        public IEnumerable<RebateExcludeGameDetail> GetRebateExcludeGameList(GetRebateExcludeGameListRequest request)
+        {
+            var key = $"GetRebateExcludeGameList_{request.SiteId}_{request.CurrencyId}_{request.VipLevel}_{request.LangId}";
+            return _cacheHelper.TryGetOrCreate(key,
+                new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(10)),
+                i => _promotionService.GetRebateExcludeGameList(request));
+        }
+
 
         private void GetCashbackInfo(int custId, int siteId, int currencyId, CustPromotion promotion, bool getDetail)
         {
