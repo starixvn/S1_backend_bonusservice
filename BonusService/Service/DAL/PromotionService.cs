@@ -303,15 +303,15 @@ namespace BonusService.Service.DAL
                 }));
         }
 
-        public IEnumerable<CashBackDetail> GetCustCashBackDetails(int custId, CustPromotion promotion, DateTime lastMonday, DateTime lastSunday)
+        public IEnumerable<CashBackDetail> GetCustCashBackDetails(int custId, CustPromotion promotion, DateTime PeriodFrom, DateTime PeriodTo)
         {
             return _reportDbClient.Query<CashBackDetail>("Service_CashBackInfo_Get",
                 new DynamicParameters(new
                 {
                     CustId = custId,
                     promotion.BonusCode,
-                    PeriodFrom = lastMonday.ToString("yyyy-MM-dd"),
-                    PeriodTo = lastSunday.ToString("yyyy-MM-dd"),
+                    PeriodFrom = PeriodFrom.ToString("yyyy-MM-dd"),
+                    PeriodTo = PeriodTo.ToString("yyyy-MM-dd"),
                     PromoCategoryId = promotion.CategoryId
                 }));
         }

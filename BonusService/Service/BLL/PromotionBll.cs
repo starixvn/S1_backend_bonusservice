@@ -332,7 +332,8 @@ namespace BonusService.Service.BLL
                 SetBalanceMemo = $"Claim {Enum.GetName(typeof(PromotionType), claimPromotion.PromotionType)} BonusCode: {bonusCode}, Locked Amount: {calculateBonus.LockedAmount:#,##0.##}",
                 RewardBonusMemo = $"Claim {Enum.GetName(typeof(PromotionType), claimPromotion.PromotionType)} BonusCode: {bonusCode}",
                 FinancialType = FinancialType.Bonusreward,
-                AtPage = atPage
+                AtPage = atPage,
+                PeriodType = claimPromotion.PeriodType
             };
             var result = Reward(bonusRewardInput, trans);
 
@@ -721,9 +722,10 @@ namespace BonusService.Service.BLL
                     var custPromotion = new CustPromotion
                     {
                         BonusCode = claimPromotion.BonusCode,
-                        CategoryId = claimPromotion.CategoryId
+                        CategoryId = claimPromotion.CategoryId,
+                        PeriodType = claimPromotion.PeriodType,
                     };
-                    GetCashbackInfo(custId, siteId, currencyId, custPromotion, true);
+                    GetCashBackInfo(custId, siteId, currencyId, custPromotion, true);
                     if (!(custPromotion.canJoin && custPromotion.CashBackDetails?.TotalBonus > claimPromotion.MinPayout))
                     {
                         output.result = (int)BonusErrorCode.CalculateCashbackTotalBonusLessThenMinPay;
@@ -855,7 +857,10 @@ namespace BonusService.Service.BLL
             {
                 var offset = GetOffset(bonusRewardInput.SiteId);
                 var currentTime = DateTime.UtcNow.AddHours(offset);
-                var calculateDate = StartOfWeek(currentTime, DayOfWeek.Monday).ToString("yyyy-MM-dd");
+
+                var calculateDate = bonusRewardInput.PeriodType == VipPeriodType.Weekly
+                    ? StartOfWeek(currentTime, DayOfWeek.Monday).ToString("yyyy-MM-dd")
+                    : currentTime.ToString("yyyy-MM-dd");
 
                 result = _bonusWalletService.RewardCashBack(
                     new CustCashBackInput(bonusRewardInput.CustId, bonusRewardInput.BonusCode, bonusRewardInput.CategoryId, calculateDate),
@@ -871,18 +876,18 @@ namespace BonusService.Service.BLL
 
             Customer custInfo = null;
             if (request.IsLogin) custInfo = _custInfoService.GetCustInfo(request.CustId);
-            
+
             foreach (var promo in promotionList)
             {
                 if (promo.PromotionType == PromotionType.RetentionFreeBet)
                 {
-                    var usable = GetBonusUsingUsable(request.SiteId, request.CustId , promo);
+                    var usable = GetBonusUsingUsable(request.SiteId, request.CustId, promo);
                     if (!usable) //未在清單內則不顯示
                     {
                         continue;
                     }
                 }
-                
+
                 if (request.IsLogin)
                 {
                     // 加入BlockTag 檢核過濾，如果有Tag命中，列表就不會有這筆
@@ -943,7 +948,7 @@ namespace BonusService.Service.BLL
                 {
                     var offset = GetOffset(request.SiteId);
                     ProcessPeriodTime(promo, DateTime.UtcNow.AddHours(offset), offset);
-                    
+
                     // 調整顯示
                 }
             }
@@ -1045,12 +1050,6 @@ namespace BonusService.Service.BLL
                 }
             }
 
-            if (promo.PromotionType == PromotionType.RetentionFreeBet)
-            {
-                var isUsed = GetCustBonusUsing(siteId, custId , promo);
-                if (!isUsed) return;
-            }
-            
             var custBonusInfo = _promotionService.GetBonusInfoByCust(custId, promo);
             if (custBonusInfo != null)
             {
@@ -1064,26 +1063,18 @@ namespace BonusService.Service.BLL
 
             if (promo.PromotionType == PromotionType.Cashback)
             {
-                GetCashbackInfo(custId, siteId, currencyId, promo, getCashbackDetail);
+                GetCashBackInfo(custId, siteId, currencyId, promo, getCashbackDetail);
             }
         }
 
-        private bool GetCustBonusUsing(int siteId, int custId, Promotion promo)
-        {
-            var isUsed = _promotionService.GetBonusCustUsingDetail(siteId, promo.BonusCode)
-                .Any(x=>x.Status == (int)BonusUsingStatusEnum.Used && x.CustId == custId);
-           
-            return isUsed;
-        }
-        
         private bool GetBonusUsingUsable(int siteId, int custId, Promotion promo)
         {
             var usingList = _promotionService.GetBonusCustUsingDetail(siteId, promo.BonusCode);
             var usable = usingList.Any(x => x.CustId == custId);
-            
+
             return usable;
         }
-         
+
         private void SetPromotionDetail(string langId, string defLang, bool clearDetails, CustPromotion promo)
         {
             if (!string.IsNullOrEmpty(promo.Details))
@@ -1215,32 +1206,40 @@ namespace BonusService.Service.BLL
         }
 
 
-        private void GetCashbackInfo(int custId, int siteId, int currencyId, CustPromotion promotion, bool getDetail)
+        private void GetCashBackInfo(int custId, int siteId, int currencyId, CustPromotion promotion, bool getDetail)
         {
-            var custInfo = _custInfoService.GetCustInfo(custId);
             var offset = GetOffset(siteId);
             var currentTime = DateTime.UtcNow.AddHours(offset);
-            var calculateDate = StartOfWeek(currentTime, DayOfWeek.Monday).ToString("yyyy-MM-dd");
+            var calculateDate = promotion.PeriodType == VipPeriodType.Weekly
+                ? StartOfWeek(currentTime, DayOfWeek.Monday).ToString("yyyy-MM-dd")
+                : currentTime.ToString("yyyy-MM-dd");
 
+            // 用 calculateDate 去 CustCashBack 資料表找有沒有相對應的 Bonus
             var result = _promotionService.GetCustCashBackCheck(custId, promotion, calculateDate).ToList();
 
+            // 判斷領取時間是 null，並且有 CustCashBack 資料
             promotion.isJoin = result.FirstOrDefault()?.Claimed ?? false;
             promotion.canJoin = result.Any();
 
+            // SET promotion.PeriodFrom & promotion.PeriodTo
             ProcessPeriodTime(promotion, currentTime, offset);
 
             if (!getDetail) return;
-            var lastMonday = StartOfWeek(currentTime.AddDays(-7), DayOfWeek.Monday).Date;
-            var lastSunday = lastMonday.AddDays(6);
-            
-            //用BonusCode取得該名玩家上周Cashback的第三方遊戲輸贏明細
-            var cashBackDetails = _promotionService.GetCustCashBackDetails(custId, promotion, lastMonday, lastSunday);
+
+            var dateRange = GetCashBackInfoDateRange(promotion.PeriodType, currentTime);
+
+            // 用 BonusCode 取得該名玩家(上周 or 昨日) CashBackInfo 的第三方遊戲輸贏明細，輸贏值 0 不填入
+            var cashBackDetails = _promotionService
+                .GetCustCashBackDetails(custId, promotion, dateRange.StartDate, dateRange.EndDate)
+                .Where(r => r.LossAmount != 0)
+                .ToList();
+                
             if (cashBackDetails.Any())
             {
-                //取得該Promotion的設定
-                var promotionCashBackSetting = _promotionService.GetCashBackSetting(custId, promotion);
+                // 取得該 Promotion 的設定
+                var promotionCashBackSetting = _promotionService.GetCashBackSetting(custId, promotion).ToList();
 
-                //將Promotion設定的MinLossAmount，填入玩家第三方遊戲明細紀錄
+                // 將Promotion 設定的 MinLossAmount，填入玩家第三方遊戲明細紀錄
                 foreach (var detail in cashBackDetails)
                 {
                     var cashBackSetting = promotionCashBackSetting.FirstOrDefault(setting => setting.TpId == detail.TpId && setting.CategoryId == detail.CategoryId && setting.Percentage == detail.Percentage);
@@ -1248,19 +1247,34 @@ namespace BonusService.Service.BLL
                     {
                         detail.MinLossAmount = cashBackSetting.MinLossAmount;
                     }
-                }              
+                }
             }
 
-            //取得該Promotion計算發放的總金額
+            // 取得該 Promotion 計算發放的總金額 => CustCashBack
             var custCashBack = _promotionService.GetCustCashBack(custId, siteId, currencyId, promotion, calculateDate);
             if (custCashBack is null)
             {
                 return;
             }
 
-            //設定回傳結果
+            // 設定回傳結果，輸贏值是 0 的過濾
             custCashBack.CashBackDetail = cashBackDetails;
             promotion.CashBackDetails = custCashBack;
+        }
+
+        private CashBackInfoDateRange GetCashBackInfoDateRange(VipPeriodType periodType, DateTime currentTime)
+        {
+            switch (periodType)
+            {
+                case VipPeriodType.Weekly:
+                    var lastMonday = StartOfWeek(currentTime.AddDays(-7), DayOfWeek.Monday).Date;
+                    var lastSunday = lastMonday.AddDays(6);
+                    return new CashBackInfoDateRange(lastMonday, lastSunday);
+                case VipPeriodType.Daily:
+                    return new CashBackInfoDateRange(currentTime.AddDays(-1), currentTime);
+                default:
+                    throw new NotImplementedException("GetCashBackInfoDateRange VipPeriodType Implemented");
+            }
         }
 
         private void ProcessPeriodTime(CustPromotion promotion, DateTime currentTime, int offset)
@@ -1268,10 +1282,22 @@ namespace BonusService.Service.BLL
             var checkTime = ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeSeconds();
             if (promotion.PeriodFrom <= checkTime && checkTime <= promotion.PeriodTo)
             {
-                var utcMonday = StartOfWeek(currentTime, DayOfWeek.Monday).AddHours(-offset);
-                var utcSunday = utcMonday.AddDays(7).AddTicks(-1);
-                promotion.PeriodFrom = ((DateTimeOffset)utcMonday).ToUnixTimeSeconds();
-                promotion.PeriodTo = ((DateTimeOffset)utcSunday).ToUnixTimeSeconds();
+                switch (promotion.PeriodType)
+                {
+                    case VipPeriodType.Weekly:
+                        var utcMonday = StartOfWeek(currentTime, DayOfWeek.Monday).AddHours(-offset);
+                        var utcSunday = utcMonday.AddDays(7).AddTicks(-1);
+                        promotion.PeriodFrom = ((DateTimeOffset)utcMonday).ToUnixTimeSeconds();
+                        promotion.PeriodTo = ((DateTimeOffset)utcSunday).ToUnixTimeSeconds();
+                        break;
+                    case VipPeriodType.Daily:
+                        var today = currentTime.Date;
+                        var startTime = new DateTimeOffset(new DateTime(today.Year, today.Month, today.Day), TimeSpan.FromHours(offset));
+                        var endTime = new DateTimeOffset(startTime.DateTime.AddDays(1).AddTicks(-1), TimeSpan.FromHours(offset));
+                        promotion.PeriodFrom = startTime.ToUnixTimeSeconds();
+                        promotion.PeriodTo = endTime.ToUnixTimeSeconds();
+                        break;
+                }
             }
         }
 

@@ -29,6 +29,8 @@ namespace BonusService.Service.Model
         public string TierAmount { get; set; }
         public WalletType WalletType { get; set; }
 
+        public VipPeriodType PeriodType { get; set; }
+
         public IEnumerable<TierAmount> TierAmountList
         {
             get
@@ -445,6 +447,5 @@ namespace BonusService.Service.Model
         public int CustId { get; set; }
         public string Currency { get; set; }
         public string UserName { get; set; }
-        public int Status { get; set; }
     }
 }
