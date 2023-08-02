@@ -1216,8 +1216,12 @@ namespace BonusService.Service.BLL
 
             var dateRange = GetCashBackInfoDateRange(promotion.PeriodType, currentTime);
 
-            // 用 BonusCode 取得該名玩家(上周 or 昨日) CashBackInfo 的第三方遊戲輸贏明細
-            var cashBackDetails = _promotionService.GetCustCashBackDetails(custId, promotion, dateRange.StartDate, dateRange.EndDate).ToList();
+            // 用 BonusCode 取得該名玩家(上周 or 昨日) CashBackInfo 的第三方遊戲輸贏明細，輸贏值 0 不填入
+            var cashBackDetails = _promotionService
+                .GetCustCashBackDetails(custId, promotion, dateRange.StartDate, dateRange.EndDate)
+                .Where(r => r.LossAmount != 0)
+                .ToList();
+                
             if (cashBackDetails.Any())
             {
                 // 取得該 Promotion 的設定
@@ -1242,7 +1246,7 @@ namespace BonusService.Service.BLL
             }
 
             // 設定回傳結果，輸贏值是 0 的過濾
-            custCashBack.CashBackDetail = cashBackDetails.Where(r => r.LossAmount != 0);
+            custCashBack.CashBackDetail = cashBackDetails;
             promotion.CashBackDetails = custCashBack;
         }
 
