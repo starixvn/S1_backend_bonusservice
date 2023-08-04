@@ -92,8 +92,7 @@ namespace BonusService.Service.BLL
                     #region log Step1
 
                     logKey = $"CashBackLogKey_{cashBackSetting.SiteId}_{cashBackSetting.CurrencyId}_{periodType}";
-                    _logger.LogInformation(@$"Step1 CashBackLog SiteId：{cashBackSetting.SiteId}, CurrencyId：{cashBackSetting.CurrencyId}, 
-                                              PeriodType:{periodType}, SettleTime：{cashBackSetting.SettleTime}, UtcNow：{DateTime.UtcNow} logKey:{logKey}");
+                    _logger.LogInformation($"Step1 CashBackLog SiteId：{cashBackSetting.SiteId}, CurrencyId：{cashBackSetting.CurrencyId},PeriodType:{periodType}, SettleTime：{cashBackSetting.SettleTime}, UtcNow：{DateTime.UtcNow}, logKey:{logKey}");
 
                     #endregion
 
@@ -102,11 +101,7 @@ namespace BonusService.Service.BLL
 
                     #region log Step2
 
-                    _logger.LogInformation(@$"Step2 TpBetRecordStartDate：{dateRange.TpBetRecordStartDate},
-                                                    TpBetRecordEndDate：{dateRange.TpBetRecordEndDate},
-                                                    DepositStartDate：{dateRange.DepositStartDate},
-                                                    DepositEndDate：{dateRange.DepositEndDate},
-                                                    logKey:{logKey}");
+                    _logger.LogInformation($"Step2 TpBetRecordStartDate：{dateRange.TpBetRecordStartDate},TpBetRecordEndDate：{dateRange.TpBetRecordEndDate},DepositStartDate：{dateRange.DepositStartDate},DepositEndDate：{dateRange.DepositEndDate},logKey:{logKey}");
 
                     #endregion
 
@@ -120,7 +115,7 @@ namespace BonusService.Service.BLL
                     });
 
                     #region log Step3
-                    _logger.LogInformation(@$"Step3 promotions Result：{JsonConvert.SerializeObject(promotions)} ,logKey:{logKey}");
+                    _logger.LogInformation(@$"Step3 promotions Result：{JsonConvert.SerializeObject(promotions)},logKey:{logKey}");
                     #endregion
 
                     // 判斷是否指定 BonusCode 重跑
@@ -141,7 +136,7 @@ namespace BonusService.Service.BLL
                         if (!settings.Any()) { continue; }
 
                         #region log Step4
-                        _logger.LogInformation(@$"Step4 settings Result：{JsonConvert.SerializeObject(settings)} ,logKey:{logKey}");
+                        _logger.LogInformation($"Step4 settings Result：{JsonConvert.SerializeObject(settings)},logKey:{logKey}");
                         #endregion
 
                         // 取得注單
@@ -150,9 +145,7 @@ namespace BonusService.Service.BLL
 
                         #region log Step5
 
-                        _logger.LogInformation(@$"Step5 cashBackTpBetRecordInput Result：{JsonConvert.SerializeObject(cashBackTpBetRecordInput)}
-                                                        customersTpBetRecord Result {JsonConvert.SerializeObject(customersTpBetRecord)}
-                                                        ,logKey:{logKey}");
+                        _logger.LogInformation($"Step5 cashBackTpBetRecordInput Result：{JsonConvert.SerializeObject(cashBackTpBetRecordInput)},customersTpBetRecord Result {JsonConvert.SerializeObject(customersTpBetRecord)},logKey:{logKey}");
 
                         #endregion
 
@@ -162,9 +155,7 @@ namespace BonusService.Service.BLL
 
                         #region log Step6
 
-                        _logger.LogInformation(@$"Step6 custIds Result：{JsonConvert.SerializeObject(custIds)}
-                                                        vipInfos Result {JsonConvert.SerializeObject(vipInfos)}
-                                                        ,logKey:{logKey}");
+                        _logger.LogInformation($"Step6 custIds Result：{JsonConvert.SerializeObject(custIds)},vipInfos Result {JsonConvert.SerializeObject(vipInfos)},logKey:{logKey}");
                         #endregion
 
                         foreach (var customerGroupByCustId in customersTpBetRecord.GroupBy(output => output.CustId))
@@ -202,9 +193,7 @@ namespace BonusService.Service.BLL
                             {
                                 #region log Step7
 
-                                _logger.LogInformation(@$"Step7 custId: {customerGroupByCustId.First().CustId} winLostAmountNotEnough,
-                                                            winLostAmount Result：{winLostAmount},
-                                                           ,logKey:{logKey}");
+                                _logger.LogInformation($"Step7 custId: {customerGroupByCustId.First().CustId} winLostAmountNotEnough,winLostAmount Result：{winLostAmount},logKey:{logKey}");
                                 #endregion
                                 continue;
                             }
@@ -244,7 +233,7 @@ namespace BonusService.Service.BLL
 
                     #region log
 
-                    _logger.LogInformation(@$"StepEnd，NextSettleTime：{settleTime} logKey:{logKey}");
+                    _logger.LogInformation($"StepEnd，NextSettleTime：{settleTime} logKey:{logKey}");
 
                     #endregion
                 }
@@ -389,10 +378,7 @@ namespace BonusService.Service.BLL
 
             #region log Step8
 
-            _logger.LogInformation(@$"Step8 CashBack VerifyCustDepositAmount CustId：{custId},
-                            DepositList：{JsonConvert.SerializeObject(custDepositList)},
-                            custDepositAmountSummary：{custDepositAmountSummary}
-                            logKey:{logKey}");
+            _logger.LogInformation($"Step8 CashBack VerifyCustDepositAmount CustId：{custId},DepositList：{JsonConvert.SerializeObject(custDepositList)},custDepositAmountSummary：{custDepositAmountSummary},logKey:{logKey}");
 
             #endregion
 
