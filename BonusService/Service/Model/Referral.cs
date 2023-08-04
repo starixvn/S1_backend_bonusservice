@@ -20,10 +20,12 @@ namespace BonusService.Service.Model
         public int SettledDate { set; get; }
         public int Referrer_CustId { set; get; }
         public string Referrer_UserName { private set; get; }
+        public string Referrer_AccountName { private set; get; }
         public int Referrer_ActStatus { set; get; }
         public int Referrer_Status { set; get; }
         public int Referred_CustId { set; get; }
         public string Referred_UserName { set; get; }
+        public string Referred_AccountName { private set; get; }
         public int Referred_Status { set; get; }
         public int DepositId { set; get; }
         public string TransId { set; get; }
