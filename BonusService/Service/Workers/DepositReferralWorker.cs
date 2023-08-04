@@ -1,6 +1,7 @@
 ﻿using BonusService.Service.BLL;
 using BonusService.Service.DAL;
 using BonusService.Service.Extensions;
+using BonusService.Service.Model;
 using Newtonsoft.Json;
 using Serilog.Context;
 using System.Diagnostics;
@@ -61,12 +62,12 @@ namespace BonusService.Service.Workers
                             if (!_referralBLL.IsReferrerValid(referrerInfo)) continue;
 
                             //塞選可納入計算的被推薦人資料
-                            _referralBLL.FilterReferredDetail(referrerInfo, referredDetails);
+                            _referralBLL.FilterReferredDetail(referrerInfo, referredDetails, out IEnumerable<DepositReferralCustInfo> filteredReferredDetail);
 
-                            if (!referredDetails.Any()) continue;
+                            if (!filteredReferredDetail.Any()) continue;
 
                             //計算推薦獎金
-                            var caculateResult = _referralBLL.CaculateDepositReferral(referredDetails);
+                            var caculateResult = _referralBLL.CaculateDepositReferral(filteredReferredDetail);
 
                             //派發
                             if (caculateResult != null && _referralBLL.PayoutDepositReferral(referrerInfo, caculateResult) > 0)
