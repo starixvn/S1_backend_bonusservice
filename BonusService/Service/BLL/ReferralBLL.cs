@@ -142,22 +142,28 @@ namespace BonusService.Service.BLL
             return true;
         }
 
-        public void FilterReferredDetail(Customer referrerInfo, IEnumerable<DepositReferralCustInfo> referredList)
+        public void FilterReferredDetail(Customer referrerInfo, IEnumerable<DepositReferralCustInfo> referredList,
+            out IEnumerable<DepositReferralCustInfo> filterReferredList)
         {
             //被推薦人是suspend狀態就不派發
             referredList = referredList.Where(x => x.Referred_Status != (int)CustomerStatusEnum.Suspend);
 
-            var referredCustList = referredList.Select(x => x.Referred_CustId).Distinct();
+            var referredCustList = referredList.Select(x => new CompareRealNameDto()
+            {
+                CustId = x.Referred_CustId,
+                UserName = x.Referred_UserName,
+                RealName = x.Referred_AccountName.Replace(" ", string.Empty)
+            }).Distinct();
 
             //同姓名限制：推薦人跟被推薦人不可相同姓名(包含修改過的姓名)，如果同名，則該被推薦人資料不計算
             _verifyService.IsRealNameVaild(referrerInfo, referredCustList, out List<CompareRealNameDto> realNameCheckResult);
             if (realNameCheckResult.Any())
             {
-                referredCustList = referredCustList.Except(realNameCheckResult.Select(x => x.CustId));
+                referredCustList = referredCustList.Where(x => !realNameCheckResult.Select(x => x.CustId).Contains(x.CustId));
                 _logger.LogInformation($"Real Name Check={referrerInfo.SiteId}-{referrerInfo.CurrencyId}-{referrerInfo.CustId}-{referrerInfo.UserName} \n" +
                     $"Result={JsonConvert.SerializeObject(realNameCheckResult)}");
             }
-            referredList = referredList.Where(x => referredCustList.Contains(x.Referred_CustId));
+            filterReferredList = referredList.Where(x => referredCustList.Select(x => x.CustId).Contains(x.Referred_CustId));
         }
 
         public DepositReferralReferrerCaculateResult CaculateDepositReferral(IEnumerable<DepositReferralCustInfo> custInfo)
