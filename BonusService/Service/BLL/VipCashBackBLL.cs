@@ -115,7 +115,7 @@ namespace BonusService.Service.BLL
                     });
 
                     #region log Step3
-                    _logger.LogInformation(@$"Step3 promotions Result：{JsonConvert.SerializeObject(promotions)},logKey:{logKey}");
+                    _logger.LogInformation($"Step3 promotions Result：{JsonConvert.SerializeObject(promotions)},logKey:{logKey}");
                     #endregion
 
                     // 判斷是否指定 BonusCode 重跑
