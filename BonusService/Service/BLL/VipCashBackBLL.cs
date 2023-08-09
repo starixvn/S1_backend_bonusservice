@@ -433,8 +433,8 @@ namespace BonusService.Service.BLL
         private CashBackDateRange GetDateRangeByDaily(TimeSpan offset)
         {
             var currentTime = DateTimeOffset.UtcNow.ToOffset(offset);
-            var startDate = currentTime.AddDays(-1).ToString("yyyy-MM-dd");
-            var endDate = currentTime.ToString("yyyy-MM-dd");
+            var startDate = currentTime.AddDays(-2).ToString("yyyy-MM-dd");
+            var endDate = currentTime.AddDays(-1).ToString("yyyy-MM-dd");
 
             return new CashBackDateRange(TpBetRecordStartDate: startDate,
                 DepositStartDate: startDate,
