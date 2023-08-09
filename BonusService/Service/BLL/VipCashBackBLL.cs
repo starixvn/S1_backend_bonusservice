@@ -421,13 +421,13 @@ namespace BonusService.Service.BLL
 
             // 兩個不同 EndDate for SP 日期克制
             var startDate = startTime.ToString("yyyy-MM-dd");
-            var tpBetRecordEndDate = startTime.AddDays(7).AddTicks(-1).ToString("yyyy-MM-dd");
-            var depositEndEndDate = startTime.AddDays(7).ToString("yyyy-MM-dd");
+            var endDate = startTime.AddDays(7).AddTicks(-1).ToString("yyyy-MM-dd");
+            var depositStartDate = startTime.AddDays(-1).ToString("yyyy-MM-dd");
 
             return new CashBackDateRange(TpBetRecordStartDate: startDate,
-                DepositStartDate: startDate,
-                TpBetRecordEndDate: tpBetRecordEndDate,
-                DepositEndDate: depositEndEndDate);
+                DepositStartDate: depositStartDate,
+                TpBetRecordEndDate: endDate,
+                DepositEndDate: endDate);
         }
 
         private CashBackDateRange GetDateRangeByDaily(TimeSpan offset)
