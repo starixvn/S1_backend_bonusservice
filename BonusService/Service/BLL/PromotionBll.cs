@@ -1272,7 +1272,7 @@ namespace BonusService.Service.BLL
                     var lastSunday = lastMonday.AddDays(6);
                     return new CashBackInfoDateRange(lastMonday, lastSunday);
                 case VipPeriodType.Daily:
-                    return new CashBackInfoDateRange(currentTime.AddDays(-1), currentTime);
+                    return new CashBackInfoDateRange(currentTime.AddDays(-2), currentTime.AddDays(-1));
                 default:
                     throw new NotImplementedException("GetCashBackInfoDateRange VipPeriodType Implemented");
             }
