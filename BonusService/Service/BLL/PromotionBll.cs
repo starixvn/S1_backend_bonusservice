@@ -1229,12 +1229,17 @@ namespace BonusService.Service.BLL
 
             var dateRange = GetCashBackInfoDateRange(promotion.PeriodType, currentTime);
 
-            // 用 BonusCode 取得該名玩家(上周 or 昨日) CashBackInfo 的第三方遊戲輸贏明細，輸贏值 0 不填入
+            // 用 BonusCode 取得該名玩家(上周 or 昨日) CashBackInfo 的第三方遊戲輸贏明細
             var cashBackDetails = _promotionService
                 .GetCustCashBackDetails(custId, promotion, dateRange.StartDate, dateRange.EndDate)
-                .Where(r => r.LossAmount != 0)
                 .ToList();
-                
+
+            // 如果 CustCashBack 沒有資料表示沒辦法領，可能因為輸贏值不夠，也可能是存款金額不足，故把 CashBackInfo 的 BonusAmount 都歸 0
+            if (!result.Any())
+            {
+                cashBackDetails.ForEach(r => r.BonusAmount = 0);
+            }
+
             if (cashBackDetails.Any())
             {
                 // 取得該 Promotion 的設定
