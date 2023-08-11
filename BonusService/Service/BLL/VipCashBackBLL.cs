@@ -183,7 +183,9 @@ namespace BonusService.Service.BLL
                                     Percentage = percentage,
                                     WinlostAmount = customer.WinlostAmount,
                                     WinlostAmountWithBonus = customer.WinlostAmountWithBonus,
-                                    BonusAmount = percentage / 100 * Math.Abs(customer.WinlostAmount)
+                                    BonusAmount = customer.WinlostAmount > 0 
+                                        ? 0   // 贏錢紀錄表的 Bonus 填 0
+                                        :percentage / 100 * Math.Abs(customer.WinlostAmount)
                                 });
                             }
 
