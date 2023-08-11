@@ -208,7 +208,7 @@ namespace BonusService.Service.BLL
 
             // 推薦人領取獎勵
 
-            if (result > 0 && caculateResult.ReferredDetail.Any())
+            if (caculateResult.ReferredDetail.Any())
             {
                 _mainDbClient.Execute("Common_ReferralMLog_Ins_V2", trans,
                      new
