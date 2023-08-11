@@ -812,7 +812,7 @@ namespace BonusService.Service.BLL
             p.Add("TransId", dbType: DbType.String, direction: ParameterDirection.Output);
             var result = _mainDbClient.Execute("Member_BonusInfo_Ins_V3", trans, p);
             var transId = p.Get<string>("TransId");
-            
+
             if (result > 0 && bonusRewardInput.IsSpecial)
             {
                 var specialCodeInput = new DynamicParameters(new
