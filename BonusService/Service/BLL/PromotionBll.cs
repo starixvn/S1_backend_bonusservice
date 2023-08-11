@@ -1221,12 +1221,6 @@ namespace BonusService.Service.BLL
                 .GetCustCashBackDetails(custId, promotion, dateRange.StartDate, dateRange.EndDate)
                 .ToList();
 
-            // 如果 CustCashBack 沒有資料表示沒辦法領，可能因為輸贏值不夠，也可能是存款金額不足，故把 CashBackInfo 的 BonusAmount 都歸 0
-            if (!result.Any())
-            {
-                cashBackDetails.ForEach(r => r.BonusAmount = 0);
-            }
-
             if (cashBackDetails.Any())
             {
                 // 取得該 Promotion 的設定
