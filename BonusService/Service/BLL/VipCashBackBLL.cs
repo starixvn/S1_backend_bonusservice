@@ -183,9 +183,9 @@ namespace BonusService.Service.BLL
                                     Percentage = percentage,
                                     WinlostAmount = customer.WinlostAmount,
                                     WinlostAmountWithBonus = customer.WinlostAmountWithBonus,
-                                    BonusAmount = customer.WinlostAmount > 0 
+                                    BonusAmount = customer.WinlostAmount > 0
                                         ? 0   // 贏錢紀錄表的 Bonus 填 0
-                                        :percentage / 100 * Math.Abs(customer.WinlostAmount)
+                                        : percentage / 100 * Math.Abs(customer.WinlostAmount)
                                 });
                             }
 
@@ -380,7 +380,7 @@ namespace BonusService.Service.BLL
 
             #region log Step8
 
-            _logger.LogInformation($"Step8 CashBack VerifyCustDepositAmount CustId：{custId},DepositList：{JsonConvert.SerializeObject(custDepositList)},custDepositAmountSummary：{custDepositAmountSummary},logKey:{logKey}");
+            _logger.LogInformation($"Step8 CashBack VerifyCustDepositAmount CustId：{custId},BonusCode：{promotion.BonusCode},DepositList：{JsonConvert.SerializeObject(custDepositList)},custDepositAmountSummary：{custDepositAmountSummary},logKey:{logKey}");
 
             #endregion
 
