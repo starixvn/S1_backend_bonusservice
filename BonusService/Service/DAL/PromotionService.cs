@@ -183,7 +183,6 @@ namespace BonusService.Service.DAL
             {
                 realNameCheckResult.AddRange(compareNameInfo.Where(r => r.RealName.Equals(name, StringComparison.CurrentCultureIgnoreCase)).ToList());
             }
-
             if (!realNameCheckResult.Any() ||
                 realNameCheckResult.Count < claimPromotion.SameRealNameRestrictAvailableCount) return result;
 
@@ -304,15 +303,15 @@ namespace BonusService.Service.DAL
                 }));
         }
 
-        public IEnumerable<CashBackDetail> GetCustCashBackDetails(int custId, CustPromotion promotion, DateTime lastMonday, DateTime lastSunday)
+        public IEnumerable<CashBackDetail> GetCustCashBackDetails(int custId, CustPromotion promotion, DateTime PeriodFrom, DateTime PeriodTo)
         {
             return _reportDbClient.Query<CashBackDetail>("Service_CashBackInfo_Get",
                 new DynamicParameters(new
                 {
                     CustId = custId,
                     promotion.BonusCode,
-                    PeriodFrom = lastMonday.ToString("yyyy-MM-dd"),
-                    PeriodTo = lastSunday.ToString("yyyy-MM-dd"),
+                    PeriodFrom = PeriodFrom.ToString("yyyy-MM-dd"),
+                    PeriodTo = PeriodTo.ToString("yyyy-MM-dd"),
                     PromoCategoryId = promotion.CategoryId
                 }));
         }
@@ -453,13 +452,11 @@ namespace BonusService.Service.DAL
         {
             return _reportDbClient.QueryFirst<VipLevelWithBlockTagsDto>("Service_PromotionSpecialCodeCondition_Get ", new DynamicParameters(new { _SiteId = siteId, _SpecialCode = specialCode }));
         }
-
         public IEnumerable<RebateExcludeGameDetail> GetRebateExcludeGameList(GetRebateExcludeGameListRequest request)
         {
-            return _reportDbClient.Query<RebateExcludeGameDetail>("Service_RebateExcludeGameList_Get",
+            return  _reportDbClient.Query<RebateExcludeGameDetail>("Service_RebateExcludeGameList_Get",
                 new DynamicParameters(new { _SiteId = request.SiteId, _CurrencyId = request.CurrencyId, _VipLevel = request.VipLevel, _Lang = request.LangId }));
         }
-
         public IEnumerable<CashBackDetail> GetCashBackSetting(int custId, CustPromotion promotion)
         {
             return _reportDbClient.Query<CashBackDetail>("Service_PromotionCashBackSetting_Get_V2",
