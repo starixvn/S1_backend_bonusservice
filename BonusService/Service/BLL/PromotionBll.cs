@@ -1376,6 +1376,42 @@ namespace BonusService.Service.BLL
             };
         }
 
+        public PopUpPromotion GetPopUpPromotion(CustPromotionRequest request)
+        {
+            PopUpPromotion result = new PopUpPromotion();
+            Customer custInfo = _custInfoService.GetCustInfo(request.CustId);
+            List<TempPopUpPromotion> tempPopUpPromotions = new List<TempPopUpPromotion>();
+            var promotionList = _promotionService.GetPromotionList(request).Where(x => x.IsPopUp);
+
+            foreach (var promotion in promotionList)
+            {
+                if(promotion.PromotionType == PromotionType.RetentionFreeBet)
+                {
+                    if (GetBonusUsingUsable(request.SiteId, request.CustId, promotion))
+                    {
+                        tempPopUpPromotions.Add(new TempPopUpPromotion()
+                        {
+                            BonusCode = promotion.BonusCode,
+                            Bonus = promotion.Bonus,
+                            MaxBonus = promotion.MaxBonus,
+                            BlockTags = promotion.BlockTags
+                        });
+                    }
+                }
+            }
+
+            //檢核BlockTag
+            tempPopUpPromotions = tempPopUpPromotions.Where(x => !BlockTagIgnorePromotion(custInfo.Tags, x.BlockTags)).ToList();
+
+            if (tempPopUpPromotions.Any())
+            {
+                //取金額最高的
+                result.BonusCode = tempPopUpPromotions.FirstOrDefault(x => x.Bonus == tempPopUpPromotions.Max(y => y.Bonus)).BonusCode;
+            }
+
+            return result;
+        }
+
         #region PrivateMethod
 
         private CheckPromotionBlockIp CheckBlockIp(Customer custInfo, ClaimPromotion claimPromotion, CustPromotionWhiteListSettingDto whiteListSetting)

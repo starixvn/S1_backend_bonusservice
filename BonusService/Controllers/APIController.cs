@@ -393,5 +393,22 @@ namespace BonusService.Controllers
                 };
             }
         }
+
+        [HttpPost]
+        public ApiResult<PopUpPromotion> GetPopUpPromotion(CustPromotionRequest request)
+        {
+            var result = new ApiResult<PopUpPromotion>();
+            try
+            {
+                result.Data = _promotionBll.GetPopUpPromotion(request);
+                result.ErrorCode = 0;
+            }
+            catch(Exception e)
+            {
+                result.Message = e.Message;
+            }
+
+            return result;
+        }
     }
 }
