@@ -257,6 +257,8 @@ namespace BonusService.Service.Model
                 return tags;
             }
         }
+
+        public bool IsPopUp { get; set; }
     }
 
     public class SpecialCodeRequest
@@ -439,11 +441,44 @@ namespace BonusService.Service.Model
         public string TpGameTypeName { get; set; }
         public string GameName { get; set; }
     }
-    
+
     public class BonusCustUsingList
     {
         public int CustId { get; set; }
         public string Currency { get; set; }
         public string UserName { get; set; }
+    }
+    public class PopUpPromotion
+    {
+        public string BonusCode { get; set; }
+    }
+
+    public class BonusCustUsingInfo
+    {
+        public int Id { get; set; }
+        public int SiteId { get; set; }
+        public string BonusCode { get; set; }
+        public decimal Bonus { get; set; }
+        public decimal MaxBonus { get; set; }
+        public int CurrencyId { get; set; }
+        public string BlockTagList { get; set; }
+        public List<int> BlockTags
+        {
+            get
+            {
+                var tags = string.IsNullOrEmpty(this.BlockTagList)
+                    ? new List<int>()
+                    : System.Text.Json.JsonSerializer.Deserialize<List<int>>(this.BlockTagList);
+
+                return tags;
+            }
+        }
+    }
+    public class TempPopUpPromotion
+    {
+        public string BonusCode { get; set; }
+        public decimal Bonus { get; set; }
+        public decimal MaxBonus { get; set; }
+        public List<int> BlockTags { get; set; }
     }
 }
