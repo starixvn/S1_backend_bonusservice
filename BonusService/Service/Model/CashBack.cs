@@ -1,17 +1,27 @@
-﻿namespace BonusService.Service.Model
+﻿using BonusService.Service.Model.enums;
+
+namespace BonusService.Service.Model
 {
     public class CashBackSettingInput
     {
         public int SiteId { get; set; }
+
+        public VipPeriodType PeriodType { get; set; }
+
+        public int CurrencyId {get; set; }
+
         public DateTime SettleTime { get; set; }
     }
+
     public class CashBackSettingOutput
     {
         public int SiteId { get; set; }
-        public int PeriodType { get; set; }
+        public VipPeriodType PeriodType { get; set; }
         public int PeriodInterval { get; set; }
         public DateTime SettleTime { get; set; }
-        public DateTime LastUpdateTime { get; set; }
+        public int CurrencyId { get; set; }
+
+        public string BonusCode {get; set; }
     }
 
     public class TpGameTypeOutput
@@ -53,6 +63,8 @@
     {
         public int SiteId { get; set; }
         public int PromotionType { get; set; }
+        public VipPeriodType PeriodType { get; set; }
+        public int CurrencyId { get; set; }
     }
     
     public class CashBackPromotionOutput
@@ -73,6 +85,7 @@
         public decimal Bonus { get; set; }
         public decimal MaxBonus { get; set; }
         public decimal MinPayout { get; set; }
+        public decimal RequiredAmount { get; set; }
     }
 
     public class PromotionCashBackSettingInput
@@ -100,6 +113,8 @@
         public string TpIds { get; set; }
         public int SiteId { get; set; }
         public int CurrencyId { get; set; }
+
+        public VipPeriodType PeriodType { get; set; }
     }
 
     public class CashBackTpBetRecordOutput
@@ -164,5 +179,12 @@
     public class CustCashBackCheckOutput
     {
         public bool Claimed { get; set; }
+    }
+
+    public class DepositNotUseBonusDto
+    {
+        public string DepositId { get; set; }
+
+        public decimal ActualDepositAmount { get; set; }
     }
 }
