@@ -3,6 +3,7 @@ using Dapper;
 using BonusService.Service.DAL.Interface;
 using BonusService.Service.Library;
 using BonusService.Service.Model.enums;
+using Microsoft.Extensions.Logging;
 
 namespace BonusService.Service.DAL
 {
@@ -25,6 +26,16 @@ namespace BonusService.Service.DAL
             p.Add("_SiteId", siteId);
             p.Add("_CurrencyId", currencyId);
             return _reportDbClient.QueryFirst<int>("Service_ReferralRemainingCount_Get", p);
+        }
+
+        public IEnumerable<DepositReferralCustInfo> GetDepositReferralCustList(int siteId, int currencyId, DateTime specificDate, string currencyTimeZone)
+        {
+            var p = new DynamicParameters();
+            p.Add("_SiteId", siteId);
+            p.Add("_CurrencyId", currencyId);
+            p.Add("_SpecificDate", specificDate);
+            p.Add("_CurrencyTimeZone", currencyTimeZone);
+            return _reportDbClient.Query<DepositReferralCustInfo>("Service_DepositReferralCustList_Get", p);
         }
     }
 }

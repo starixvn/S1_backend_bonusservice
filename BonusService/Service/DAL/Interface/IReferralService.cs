@@ -6,5 +6,7 @@ namespace BonusService.Service.DAL.Interface
     {
         IEnumerable<ReferralInfo> GetReferralSettlement();
         int GetRemainingCount(int agentId, int siteId, int currencyId);
+
+        IEnumerable<DepositReferralCustInfo> GetDepositReferralCustList(int siteId, int currencyId, DateTime specificDate, string currencyTimeZone);
     }
 }
