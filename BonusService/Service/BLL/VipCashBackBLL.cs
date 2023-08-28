@@ -82,7 +82,7 @@ namespace BonusService.Service.BLL
 
                 // 取得時間設定
                 var cashBackSettings = GetCashBackSettings(periodType);
-                
+
                 foreach (var cashBackSetting in cashBackSettings)
                 {
                     // 依據幣別偏移時區，判斷是否要執行計算 CashBack
@@ -379,7 +379,7 @@ namespace BonusService.Service.BLL
         /// 檢查玩家存款金額是否符合資格
         /// </summary>
         /// <returns></returns>
-        private bool VerifyCustDepositAmountCondition(int custId, CashBackDateRange dateRange, CashBackPromotionOutput promotion,string logKey)
+        private bool VerifyCustDepositAmountCondition(int custId, CashBackDateRange dateRange, CashBackPromotionOutput promotion, string logKey)
         {
             // 玩家符合資格存款單List
             var custDepositList = GetDepositNotUseBonus(promotion.CurrencyId, custId, dateRange.DepositStartDate, dateRange.DepositEndDate).ToList();
@@ -447,8 +447,8 @@ namespace BonusService.Service.BLL
         private CashBackDateRange GetDateRangeByDaily(TimeSpan offset)
         {
             var currentTime = DateTimeOffset.UtcNow.ToOffset(offset);
-            var startDate = currentTime.AddDays(-2).ToString("yyyy-MM-dd");
-            var endDate = currentTime.AddDays(-1).ToString("yyyy-MM-dd");
+            var startDate = currentTime.AddDays(-1).ToString("yyyy-MM-dd");
+            var endDate = currentTime.ToString("yyyy-MM-dd");
 
             return new CashBackDateRange(TpBetRecordStartDate: startDate,
                 DepositStartDate: startDate,
@@ -506,11 +506,9 @@ namespace BonusService.Service.BLL
         private DateTime GetNextMonday(TimeSpan offset)
         {
             var currentDate = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day);
-            var currentDayOfWeek = currentDate.DayOfWeek;
-            var daysUntilNextMonday = ((int)DayOfWeek.Monday - (int)currentDayOfWeek + 7) % 7;
-            var nextMonday = currentDate.AddDays(daysUntilNextMonday);
-            var nextMonDay = new DateTimeOffset(nextMonday, offset);
-            return nextMonDay.UtcDateTime;
+            var nextMonDayDateTime = currentDate.AddDays(1 - Convert.ToInt32(currentDate.DayOfWeek.ToString("d")) + 7);
+            var nextMonDayDateTimeOffset = new DateTimeOffset(nextMonDayDateTime, offset);
+            return nextMonDayDateTimeOffset.UtcDateTime;
         }
 
         /// <summary>
