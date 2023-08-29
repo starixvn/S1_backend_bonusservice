@@ -16,29 +16,34 @@ namespace BonusService.Service.DAL
             _reportDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Report);
         }
         
-        public IEnumerable<CashBackSettingOutput> GetCashBackSettings()
+        public IEnumerable<CashBackSettingOutput> GetCashBackSettings(VipPeriodType periodType)
         {
-            return _reportDbClient.Query<CashBackSettingOutput>("Service_CashBackSetting_Get", null);
+            return _reportDbClient.Query<CashBackSettingOutput>("Service_CashBackSetting_Get_V2", new { _PeriodType = (byte)periodType });
         }
         
         public bool SetCashBackSettings(CashBackSettingInput cashBackSettingInput)
         {
             var parameter = new DynamicParameters(new
             {
-                cashBackSettingInput.SiteId,
-                cashBackSettingInput.SettleTime
+                _SiteId = cashBackSettingInput.SiteId,
+                _SettleTime = cashBackSettingInput.SettleTime,
+                _PeriodType = (int)cashBackSettingInput.PeriodType,
+                _CurrencyId = cashBackSettingInput.CurrencyId,
             });
-            return _mainDbClient.Execute("Service_CashBackSetting_Set", parameter) >= 0;
+            return _mainDbClient.Execute("Service_CashBackSetting_Set_V2", parameter) >= 0;
         }
         
         public IEnumerable<CashBackPromotionOutput> GetVipCashBackPromotion(CashBackPromotionInput cashBackPromotionInput)
         {
             var parameter = new DynamicParameters(new
             {
-                cashBackPromotionInput.SiteId,
-                cashBackPromotionInput.PromotionType
+                _SiteId =  cashBackPromotionInput.SiteId,
+                _PromotionType = cashBackPromotionInput.PromotionType,
+                _PeriodType = (int)cashBackPromotionInput.PeriodType,
+                _CurrencyId = cashBackPromotionInput.CurrencyId,
+
             });
-            return _reportDbClient.Query<CashBackPromotionOutput>("Service_VipCashBackPromotion_Get", parameter);
+            return _reportDbClient.Query<CashBackPromotionOutput>("Service_VipCashBackPromotion_Get_V2", parameter);
         }
 
         public IEnumerable<PromotionCashBackSettingOutput> GetPromotionCashBackSetting(PromotionCashBackSettingInput promotionCashBackSettingInput)
@@ -54,14 +59,19 @@ namespace BonusService.Service.DAL
         {
             var parameter = new DynamicParameters(new
             {
-                cashBackTpBetRecordInput.StartDate,
-                cashBackTpBetRecordInput.EndDate,
-                cashBackTpBetRecordInput.TpIds,
-                cashBackTpBetRecordInput.CategoryIds,
-                cashBackTpBetRecordInput.SiteId,
-                cashBackTpBetRecordInput.CurrencyId
+                StartDate = cashBackTpBetRecordInput.StartDate,
+                EndDate = cashBackTpBetRecordInput.EndDate,
+                TpIds = cashBackTpBetRecordInput.TpIds,
+                CategoryIds = cashBackTpBetRecordInput.CategoryIds,
+                SiteId = cashBackTpBetRecordInput.SiteId,
+                CurrencyId = cashBackTpBetRecordInput.CurrencyId,
             });
-            return _reportDbClient.Query<CashBackTpBetRecordOutput>("Service_VipCashBackTpBetRecord_Get_V2", parameter, 180);
+
+            var spName = cashBackTpBetRecordInput.PeriodType == VipPeriodType.Weekly
+                ? "Service_VipCashBackTpBetRecord_Get_V2"
+                : "Service_VipCashBackTpBetRecordByDaily_Get";
+
+            return _reportDbClient.Query<CashBackTpBetRecordOutput>(spName, parameter, 180);
         }
         
         public IEnumerable<CustomerVIPInfoOutput> GetCustomerVipInfo(string custIds)
@@ -102,7 +112,19 @@ namespace BonusService.Service.DAL
                 custCashBackInput.CalculateDate,
                 custCashBackInput.BonusAmount
             });
-            return _mainDbClient.Execute("Service_CustCashBack_Set", parameter) >= 0;
+            return _mainDbClient.Execute("Service_CustCashBack_Set_V2", parameter) >= 0;
+        }
+
+        public IEnumerable<DepositNotUseBonusDto> GetDepositNotUseBonusList(int currencyId, int custId,
+            string startDate, string endDate)
+        {
+            var parameter = new DynamicParameters();
+            parameter.Add("_CurrencyId", currencyId);
+            parameter.Add("_CustId", custId);
+            parameter.Add("_StartDate", startDate);
+            parameter.Add("_EndDate", endDate);
+
+            return _reportDbClient.Query<DepositNotUseBonusDto>("Service_DepositNotUseBonus_Get", parameter);
         }
     }
 }
