@@ -31,7 +31,7 @@ namespace BonusService.Service.Workers
                     
             try
             {
-                success = _vipCashBackBLL.CalculateCashBack();
+                //success = _vipCashBackBLL.CalculateCashBack();
             }
             catch (Exception ex)
             {
