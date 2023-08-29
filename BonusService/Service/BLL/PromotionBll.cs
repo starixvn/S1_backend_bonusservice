@@ -1257,7 +1257,6 @@ namespace BonusService.Service.BLL
                 return;
             }
 
-            // 設定回傳結果，輸贏值是 0 的過濾
             custCashBack.CashBackDetail = cashBackDetails;
             promotion.CashBackDetails = custCashBack;
         }
