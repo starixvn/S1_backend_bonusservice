@@ -1387,7 +1387,7 @@ namespace BonusService.Service.BLL
             {
                 if(promotion.PromotionType == PromotionType.RetentionFreeBet)
                 {
-                    var bonusCustUsingDetail = GetBonusCustUsingDetail(request.SiteId, request.CustId, promotion);
+                    var bonusCustUsingDetail = GetBonusCustUsingDetail(request.SiteId, promotion);
 
                     //Status為0代表還沒申請過
                     if (bonusCustUsingDetail.Any(x => x.CustId == request.CustId && x.Status == 0))
@@ -1566,7 +1566,7 @@ namespace BonusService.Service.BLL
             );
         }
 
-        private IEnumerable<BonusCustUsingList> GetBonusCustUsingDetail(int siteId, int custId, Promotion promo)
+        private IEnumerable<BonusCustUsingList> GetBonusCustUsingDetail(int siteId, Promotion promo)
         {
             return _promotionService.GetBonusCustUsingDetail(siteId, promo.BonusCode);
         }
