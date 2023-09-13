@@ -1051,6 +1051,12 @@ namespace BonusService.Service.BLL
                 }
             }
 
+            if (promo.PromotionType == PromotionType.RetentionFreeBet)
+            {
+                var isUsed = GetCustBonusUsing(siteId, custId , promo);
+                if (!isUsed) return;
+            }
+            
             var custBonusInfo = _promotionService.GetBonusInfoByCust(custId, promo);
             if (custBonusInfo != null)
             {
@@ -1068,6 +1074,14 @@ namespace BonusService.Service.BLL
             }
         }
 
+        private bool GetCustBonusUsing(int siteId, int custId, Promotion promo)
+        {
+            var isUsed = _promotionService.GetBonusCustUsingDetail(siteId, promo.BonusCode)
+                .Any(x=>x.Status == (int)BonusUsingStatusEnum.Used && x.CustId == custId);
+           
+            return isUsed;
+        }
+        
         private bool GetBonusUsingUsable(int siteId, int custId, Promotion promo)
         {
             var usingList = _promotionService.GetBonusCustUsingDetail(siteId, promo.BonusCode);
