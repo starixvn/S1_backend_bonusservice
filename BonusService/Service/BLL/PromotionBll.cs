@@ -171,7 +171,7 @@ namespace BonusService.Service.BLL
                         apiResult1.ErrorCode = (int)BonusErrorCode.UnknownError;
                         apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible", input.CustInfo.SiteId, input.CustInfo.SiteName, showLangId);
 
-                        if (input.CustInfo.SiteId is (int)SiteId.Goal123 or (int)SiteId.Bwing)
+                        if (input.CustInfo.SiteId is 2 or 3)
                         {
                             if (input.ClaimPromotion.PromotionType == PromotionType.FreeBet)
                             {
@@ -1324,7 +1324,7 @@ namespace BonusService.Service.BLL
         private int GetOffset(int siteId)
         {
             var offset = 8;
-            if (siteId is (int)SiteId.Goal123 or (int)SiteId.Bwing)
+            if (siteId is 2 or 3)
             {
                 offset = 7;
             }
