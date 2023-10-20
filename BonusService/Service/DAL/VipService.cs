@@ -1,6 +1,7 @@
 ﻿using BonusService.Service.Library;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
+
 using Dapper;
 
 namespace BonusService.Service.DAL
@@ -15,7 +16,7 @@ namespace BonusService.Service.DAL
             _mainDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);
             _reportDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Report);
         }
-        
+
         public IEnumerable<VipSetting> GetVipSettings(int vipType)
         {
             var parameter = new DynamicParameters();

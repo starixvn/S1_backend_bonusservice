@@ -1,7 +1,10 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
+
 using MemberSite.Service.Model;
+
 using Newtonsoft.Json;
+
 using Serilog.Context;
 
 namespace BonusService.Service.Library
@@ -17,7 +20,7 @@ namespace BonusService.Service.Library
 
         private HttpClient client => lazy.Value;
         private readonly ILogger<CourierAdapter> _logger;
-        
+
         public CourierAdapter(IServiceProvider provider)
         {
             _logger = provider.GetRequiredService<ILogger<CourierAdapter>>();

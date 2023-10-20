@@ -1,4 +1,5 @@
 ﻿using BonusService.Service.Model.enums;
+
 using Newtonsoft.Json;
 
 namespace BonusService.Service.Model
@@ -91,16 +92,16 @@ namespace BonusService.Service.Model
         /// 啟用未登入隱藏
         /// </summary>
         public bool HideForUnlogin { get; set; }
-        
+
         /// 判斷PromotionType是否要檢查 IP、Device、RealName 次數
         /// </summary>
         /// <returns></returns>
         public bool CheckIPDeviceRealName()
         {
-            return 
+            return
             PromotionType is PromotionType.FreeBet ||
             PromotionType is PromotionType.FstDeposit ||
-            PromotionType is PromotionType.DeviceBonus;    
+            PromotionType is PromotionType.DeviceBonus;
         }
     }
 
@@ -152,7 +153,8 @@ namespace BonusService.Service.Model
 
         public string BlockTagList { get; set; }
 
-        public List<int> BlockTags {
+        public List<int> BlockTags
+        {
             get
             {
                 var tags = string.IsNullOrEmpty(this.BlockTagList)
@@ -229,7 +231,7 @@ namespace BonusService.Service.Model
     public class CustPromotion : Promotion
     {
         public string Banner { get; set; }
-        
+
         public decimal CustRollOver { get; set; }
         public decimal CustTurnOver { get; set; }
         public int Status { get; set; }
@@ -307,7 +309,7 @@ namespace BonusService.Service.Model
         public int CategoryId { get; set; }
         public int TpId { get; set; }
         public string TpName { get; set; }
-        public decimal LossAmount{ get; set; }
+        public decimal LossAmount { get; set; }
         public decimal LossAmountWithBonus { get; set; }
         public decimal Percentage { get; set; }
         public string PercentageName => $"{Percentage:G29}%";

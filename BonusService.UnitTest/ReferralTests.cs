@@ -3,10 +3,15 @@ using BonusService.Service.DAL.Interface;
 using BonusService.Service.Library;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
+
 using FluentAssertions;
+
 using Microsoft.Extensions.Logging;
+
 using MySql.Data.MySqlClient;
+
 using NSubstitute;
+
 using NUnit.Framework;
 
 namespace BonusService.UnitTest;
@@ -36,7 +41,7 @@ public class ReferralTests
     public void ListToLookUpTest()
     {
         var origin = new Dictionary<int, List<ReferralInfo>>();
-        foreach(var referralInfo in referralInfos)
+        foreach (var referralInfo in referralInfos)
         {
             if (!origin.ContainsKey(referralInfo.AgentId))
             {
@@ -48,7 +53,7 @@ public class ReferralTests
 
         var actual = referralInfos.ToLookup(a => a.AgentId);
         var isContainKey = actual.Aggregate(true, (current, settlement) => current & origin.ContainsKey(settlement.Key));
-        
+
         var isSameElement = actual.Aggregate(true, (current, settlement) => current & origin[settlement.Key].Count == settlement.Count());
         Assert.IsTrue(isContainKey);
         Assert.IsTrue(isSameElement);
@@ -91,7 +96,7 @@ public class ReferralTests
             new() { CustId = 1, UserName = "test1", AgentId = 250032, AgentName = "hulkchou", CurrencyId = 2, SiteId = 1, BonusAmount = 50, ReferralFreeCredit = 10},
             new() { CustId = 2, UserName = "test2", AgentId = 250032, AgentName = "hulkchou", CurrencyId = 2, SiteId = 1, BonusAmount = 50, ReferralFreeCredit = 10},
         };
-        
+
         var result = referralReward.Payout(referrals, out var payAmount, out var paidReferralList);
 
         result.Should().Be(1);
@@ -115,19 +120,19 @@ public class ReferralTests
             return 1;
         }
     }
-    
+
     public class FakeWithdrawalLimitService : IWithdrawalLimitAdapter
     {
         public readonly List<TestCustomer> _Customers = new();
         public decimal WithdrawalLimit { get; set; }
-        public int SetWithdrawalLimit(int custId, string userName, int siteId, decimal withdrawalLimit, string memo, string refTransId,  int createFrom, string creator, out decimal afterWithdrawalLimit, MySqlTransaction trans)
+        public int SetWithdrawalLimit(int custId, string userName, int siteId, decimal withdrawalLimit, string memo, string refTransId, int createFrom, string creator, out decimal afterWithdrawalLimit, MySqlTransaction trans)
         {
             afterWithdrawalLimit = withdrawalLimit;
             WithdrawalLimit = withdrawalLimit;
             return 1;
         }
     }
-    
+
     public class TestCustomer
     {
         public int CustId { get; set; }

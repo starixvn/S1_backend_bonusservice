@@ -1,16 +1,22 @@
-﻿using BonusService.Service.DAL;
+﻿using System.Data;
+using System.Text.RegularExpressions;
+
+using BonusService.Service.DAL;
+using BonusService.Service.Library;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
-using MemberSite.Service.Model;
-using System.Data;
-using System.Text.RegularExpressions;
-using BonusService.Service.Library;
+
 using Dapper;
-using MySql.Data.MySqlClient;
-using Newtonsoft.Json;
-using Enum = System.Enum;
-using MySqlX.XDevAPI.Common;
+
+using MemberSite.Service.Model;
+
 using Microsoft.Extensions.Caching.Memory;
+
+using MySql.Data.MySqlClient;
+
+using Newtonsoft.Json;
+
+using Enum = System.Enum;
 
 namespace BonusService.Service.BLL
 {
@@ -165,7 +171,7 @@ namespace BonusService.Service.BLL
                         apiResult1.ErrorCode = (int)BonusErrorCode.UnknownError;
                         apiResult1.Message = _selLangBll.GetMsg("msg_Ineligible", input.CustInfo.SiteId, input.CustInfo.SiteName, showLangId);
 
-                        if (input.CustInfo.SiteId is (int)SiteId.Goal123 or (int)SiteId.Bwing)
+                        if (input.CustInfo.SiteId is 2 or 3)
                         {
                             if (input.ClaimPromotion.PromotionType == PromotionType.FreeBet)
                             {
@@ -341,14 +347,15 @@ namespace BonusService.Service.BLL
             {
                 if (bonusRewardInput.PromotionType == PromotionType.RetentionFreeBet)
                 {
-                    var bonusCustUsingPara = new DynamicParameters(new { 
-                        _CustId = bonusRewardInput.CustId, 
-                        _SiteId = bonusRewardInput.SiteId,  
-                        _BonusCode = bonusRewardInput.BonusCode 
+                    var bonusCustUsingPara = new DynamicParameters(new
+                    {
+                        _CustId = bonusRewardInput.CustId,
+                        _SiteId = bonusRewardInput.SiteId,
+                        _BonusCode = bonusRewardInput.BonusCode
                     });
                     result = _mainDbClient.Execute("Service_BonusCustUsingDetail_Set", trans, bonusCustUsingPara);
                 }
-                
+
                 if (result > 0)
                 {
                     result = _promotionService.AfterReward(claimPromotion, custInfo.SiteId, bonusCode, custInfo.CurrencyId,
@@ -1052,10 +1059,10 @@ namespace BonusService.Service.BLL
 
             if (promo.PromotionType == PromotionType.RetentionFreeBet)
             {
-                var isUsed = GetCustBonusUsing(siteId, custId , promo);
+                var isUsed = GetCustBonusUsing(siteId, custId, promo);
                 if (!isUsed) return;
             }
-            
+
             var custBonusInfo = _promotionService.GetBonusInfoByCust(custId, promo);
             if (custBonusInfo != null)
             {
@@ -1076,11 +1083,11 @@ namespace BonusService.Service.BLL
         private bool GetCustBonusUsing(int siteId, int custId, Promotion promo)
         {
             var isUsed = _promotionService.GetBonusCustUsingDetail(siteId, promo.BonusCode)
-                .Any(x=>x.Status == (int)BonusUsingStatusEnum.Used && x.CustId == custId);
-           
+                .Any(x => x.Status == (int)BonusUsingStatusEnum.Used && x.CustId == custId);
+
             return isUsed;
         }
-        
+
         private bool GetBonusUsingUsable(int siteId, int custId, Promotion promo)
         {
             var usingList = _promotionService.GetBonusCustUsingDetail(siteId, promo.BonusCode);
@@ -1316,7 +1323,7 @@ namespace BonusService.Service.BLL
         private int GetOffset(int siteId)
         {
             var offset = 8;
-            if (siteId is (int)SiteId.Goal123 or (int)SiteId.Bwing)
+            if (siteId is 2 or 3)
             {
                 offset = 7;
             }
@@ -1398,7 +1405,7 @@ namespace BonusService.Service.BLL
 
             foreach (var promotion in promotionList)
             {
-                if(promotion.PromotionType == PromotionType.RetentionFreeBet)
+                if (promotion.PromotionType == PromotionType.RetentionFreeBet)
                 {
                     var bonusCustUsingDetail = GetBonusCustUsingDetail(request.SiteId, promotion);
 

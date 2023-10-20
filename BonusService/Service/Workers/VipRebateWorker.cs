@@ -1,6 +1,8 @@
-﻿using BonusService.Service.BLL;
+﻿using System.Diagnostics;
+
+using BonusService.Service.BLL;
 using BonusService.Service.Extensions;
-using System.Diagnostics;
+
 using Serilog.Context;
 
 namespace BonusService.Service.Workers
@@ -58,7 +60,7 @@ namespace BonusService.Service.Workers
                                 _rebateBll.PayoutVipRebate(rebateTask.SiteId, rebateInfo, rebateTpBetRecordList, rebatePayoutLimit, RelId);
                             }
                         }
-                        
+
                         _rebateBll.SetVipRebateTaskDone(rebateTask.SiteId, rebateTask.CurrencyId);
 
                         _logger.LogInformation($"VipRebate Wroker：Do Task End. SiteId:{rebateTask.SiteId} CurrencyId:{rebateTask.CurrencyId} SpecificDate:{rebateTask.SpecificDate}. \n"

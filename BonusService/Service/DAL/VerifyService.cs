@@ -1,11 +1,11 @@
-﻿using BonusService.Service.Model.enums;
-using BonusService.Service.Model;
-using Dapper;
-using MySqlX.XDevAPI.Common;
-using Newtonsoft.Json;
+﻿using BonusService.Service.DAL.Interface;
 using BonusService.Service.Library;
-using BonusService.Service.DAL.Interface;
-using Microsoft.Extensions.FileSystemGlobbing.Internal;
+using BonusService.Service.Model;
+using BonusService.Service.Model.enums;
+
+using Dapper;
+
+using Newtonsoft.Json;
 
 namespace BonusService.Service.DAL
 {

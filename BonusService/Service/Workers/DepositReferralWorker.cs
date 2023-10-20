@@ -1,10 +1,12 @@
-﻿using BonusService.Service.BLL;
-using BonusService.Service.DAL;
+﻿using System.Diagnostics;
+
+using BonusService.Service.BLL;
 using BonusService.Service.Extensions;
 using BonusService.Service.Model;
+
 using Newtonsoft.Json;
+
 using Serilog.Context;
-using System.Diagnostics;
 
 namespace BonusService.Service.Workers
 {

@@ -1,7 +1,9 @@
-﻿using BonusService.Service.BLL;
+﻿using System.Diagnostics;
+
+using BonusService.Service.BLL;
 using BonusService.Service.Extensions;
+
 using Serilog.Context;
-using System.Diagnostics;
 
 namespace BonusService.Service.Workers;
 

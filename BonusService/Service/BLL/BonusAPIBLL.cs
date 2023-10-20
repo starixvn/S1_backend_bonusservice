@@ -2,6 +2,7 @@
 using BonusService.Service.Library;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
+
 using MemberSite.Service.Model;
 
 namespace BonusService.Service.BLL
@@ -15,7 +16,7 @@ namespace BonusService.Service.BLL
         private readonly Currency _currency;
         private readonly ICacheHelper _redisHelper;
 
-        public  BonusAPIBLL(IServiceProvider provider)
+        public BonusAPIBLL(IServiceProvider provider)
         {
             _custInfoService = provider.GetRequiredService<CustInfoService>();
             _bonusAPIService = provider.GetRequiredService<BonusAPIService>();
@@ -30,12 +31,12 @@ namespace BonusService.Service.BLL
             var customer = _custInfoService.GetCustInfoProfile(custId, custInfo.SiteId);
             return customer;
         }
-        public ApiResult CheckRewardCondination(int custId, OTPTypeEnum inputType, Customer custInfo = null, VerificationRewardData verInfo = null, CustVerificationRewardData custRewardInfo = null )
+        public ApiResult CheckRewardCondination(int custId, OTPTypeEnum inputType, Customer custInfo = null, VerificationRewardData verInfo = null, CustVerificationRewardData custRewardInfo = null)
         {
             var result = new ApiResult();
-            if(custInfo == null)
+            if (custInfo == null)
                 custInfo = _custInfoService.GetCustInfo(custId);
-            if(verInfo == null)
+            if (verInfo == null)
                 verInfo = _bonusAPIService.GetVerificationReward(custInfo.SiteId, custInfo.CurrencyId);
             if (custRewardInfo == null)
                 custRewardInfo = _bonusAPIService.GetCustVerificationReward(custId, true);
@@ -62,7 +63,7 @@ namespace BonusService.Service.BLL
                 result.Message = "Condition not fulfilled.";
                 return result;
             }
-            
+
             if (verInfo.VerificationType == 1) //email & phone both
             {
                 if (custRewardInfo.EmailReward != null || custRewardInfo.PhoneReward != null)
@@ -131,15 +132,15 @@ namespace BonusService.Service.BLL
             }
             return result;
         }
-        public ApiResult SetVerificationReward(int custId, OTPTypeEnum inputType , bool isWorker)
+        public ApiResult SetVerificationReward(int custId, OTPTypeEnum inputType, bool isWorker)
         {
             var result = new ApiResult();
             var custInfo = _custInfoService.GetCustInfo(custId);
             var verInfo = _bonusAPIService.GetVerificationReward(custInfo.SiteId, custInfo.CurrencyId);
             var custRewardInfo = _bonusAPIService.GetCustVerificationReward(custId, true);
-            
+
             result = CheckRewardCondination(custId, inputType, custInfo, verInfo, custRewardInfo);//領獎條件規則
-            
+
             if (result.ErrorCode != 0)
             {
                 if (result.ErrorCode == 104 && !isWorker)
@@ -149,12 +150,12 @@ namespace BonusService.Service.BLL
                     var leftAmountLimit = verInfo.MinDeposit - custRewardInfo.SumDepositAmount;
                     var title = string.Format(_selLangBll.GetResourceValue("lbl_VerificationRewardLimitTitle", custInfo.UserLang));
                     var content = string.Format(_selLangBll.GetResourceValue("lbl_VerificationRewardLimit", custInfo.UserLang),
-                        currencyName,leftAmountLimit.ToString("#,##0.##"));
+                        currencyName, leftAmountLimit.ToString("#,##0.##"));
                     _messageService.SendMessage(new Message("System", custInfo.CustId, custInfo.UserLang, title, content));
 
                 }
                 return result;
-            } 
+            }
             var reward = 0m;
             if (verInfo.VerificationType == 1) //email & phone both
             {
@@ -185,7 +186,7 @@ namespace BonusService.Service.BLL
                     reward.ToString("#,##0.##"));
                 _messageService.SendMessage(new Message("System", custInfo.CustId, custInfo.UserLang, title, content));
             }
-            
+
             return result;
         }
     }

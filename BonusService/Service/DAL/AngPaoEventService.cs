@@ -1,8 +1,8 @@
 ﻿using BonusService.Service.Library;
-using BonusService.Service.Model.enums;
 using BonusService.Service.Model;
+using BonusService.Service.Model.enums;
+
 using Dapper;
-using System.Data;
 
 namespace BonusService.Service.DAL;
 
@@ -38,7 +38,7 @@ public class AngPaoEventService
         return _reportDbClient.QueryFirst<DrawEventTpBetRecord>("Service_TpBetRecord_CaculateTurnover_Get", new DynamicParameters(p));
     }
 
-    public bool GenTicket(WorkerCustInfo custInfo, DrawEventTpBetRecord record,int ticketQuantity)
+    public bool GenTicket(WorkerCustInfo custInfo, DrawEventTpBetRecord record, int ticketQuantity)
     {
         try
         {

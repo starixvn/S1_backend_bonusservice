@@ -1,6 +1,8 @@
 ﻿using BonusService.Service.BLL;
 using BonusService.Service.Extensions;
+
 using Newtonsoft.Json;
+
 using Serilog.Context;
 
 namespace BonusService.Service.Workers
@@ -45,7 +47,7 @@ namespace BonusService.Service.Workers
                             var result = _promotionAutoExtendBll.SetPromotionExtend(item);
                             var status = result > 0 ? "Success" : "Fail";
                             _logger.LogInformation($"Promotion Auto Extend Status = {status}, Value = {JsonConvert.SerializeObject(item)}");
-                            
+
                             if (result > 0)
                             {
                                 success++;

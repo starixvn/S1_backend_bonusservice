@@ -1,5 +1,4 @@
-﻿using BonusService.Service.DAL.Interface;
-using BonusService.Service.DAL;
+﻿using BonusService.Service.DAL;
 using BonusService.Service.Model;
 
 namespace BonusService.Service.BLL;

@@ -1,4 +1,5 @@
 ﻿using BonusService.Service.Model.enums;
+
 using StackExchange.Redis;
 
 namespace BonusService.Service.Library

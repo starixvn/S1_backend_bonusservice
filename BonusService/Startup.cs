@@ -5,6 +5,7 @@ using BonusService.Service.DAL.Interface;
 using BonusService.Service.Extensions;
 using BonusService.Service.Library;
 using BonusService.Service.Model;
+
 using StackExchange.Redis;
 
 namespace BonusService
@@ -24,8 +25,7 @@ namespace BonusService
             services.AddMemoryCache();
             services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(_configuration.GetValue<string>("RedisConnection")));
             services.AddSingleton<ICacheHelper, RedisCacheHelper>();
-            services.AddDatabaseConnection(_configuration);
-            services.AddMessageQueueConnection(_configuration);
+            services.AddDatabaseConnection(_configuration);           
             services.AddSingleton<Common>();
             services.AddSingleton<Currency>();
             services.AddSingleton<CourierAdapter>();
@@ -75,8 +75,16 @@ namespace BonusService
 
             services.AddControllers();
             services.AddOptionListByDB<AllowIp>("Service_MemberAllowIP_Get");
+
+            /*SiteConfig*/
+            services.AddOptionListByDB<ServerInfo>("ServerInfoList_Get");
+            services.AddOptionListByDB<ConfigObject>("SiteConfig_Get", new { ConfigGroup = "BonusService" });
+            services.AddSiteConfig();
+            services.AddSingleton<ConfigBLL>();
+
+            services.AddMessageQueueConnection();
         }
-       
+
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())

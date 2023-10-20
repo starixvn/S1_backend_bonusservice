@@ -1,6 +1,7 @@
 ﻿using BonusService.Service.BLL;
 using BonusService.Service.Extensions;
 using BonusService.Service.Model.enums;
+
 using Serilog.Context;
 
 namespace BonusService.Service.Workers

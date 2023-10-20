@@ -1,5 +1,6 @@
 ﻿using BonusService.Service.Library;
 using BonusService.Service.Model.enums;
+
 using MemberSite.Service.Model;
 
 namespace BonusService.Service.DAL
@@ -14,7 +15,7 @@ namespace BonusService.Service.DAL
             _mainDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);
             _reportDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Report);
         }
-        
+
         public IEnumerable<ClaimVerificationRewardData> GetVerificationRewardData()
         {
             return _reportDbClient.Query<ClaimVerificationRewardData>("Service_ClaimVerificationReward_Get");

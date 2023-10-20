@@ -1,10 +1,9 @@
 ﻿using BonusService.Service.DAL;
 using BonusService.Service.DAL.Interface;
 using BonusService.Service.Extensions;
-using BonusService.Service.Library;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
-using System.Linq;
+
 using Newtonsoft.Json;
 
 namespace BonusService.Service.BLL

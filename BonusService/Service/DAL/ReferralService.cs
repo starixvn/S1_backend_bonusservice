@@ -1,9 +1,9 @@
-﻿using BonusService.Service.Model;
-using Dapper;
-using BonusService.Service.DAL.Interface;
+﻿using BonusService.Service.DAL.Interface;
 using BonusService.Service.Library;
+using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
-using Microsoft.Extensions.Logging;
+
+using Dapper;
 
 namespace BonusService.Service.DAL
 {

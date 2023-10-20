@@ -1,6 +1,8 @@
 ﻿using BonusService.Service.BLL;
 using BonusService.Service.Model;
+
 using Newtonsoft.Json;
+
 using Serilog.Context;
 
 namespace BonusService.Service.Workers
@@ -30,9 +32,9 @@ namespace BonusService.Service.Workers
             try
             {
                 var settlementList = referralBLL.GetReferralSettlement().ToLookup(a => a.AgentId);
-                foreach(var referralInfos in settlementList)
+                foreach (var referralInfos in settlementList)
                 {
-                    if(referralBLL.PayoutReferral(referralInfos.Key, referralInfos, out decimal payAmount, out List<ReferralInfo> paidReferralList) > 0)
+                    if (referralBLL.PayoutReferral(referralInfos.Key, referralInfos, out decimal payAmount, out List<ReferralInfo> paidReferralList) > 0)
                     {
                         _logger.LogInformation($"Referral:{JsonConvert.SerializeObject(paidReferralList)}");
                     }

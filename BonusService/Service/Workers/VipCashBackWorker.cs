@@ -1,18 +1,19 @@
 ﻿using BonusService.Service.BLL;
 using BonusService.Service.Extensions;
 using BonusService.Service.Model.enums;
+
 using Serilog.Context;
 
 namespace BonusService.Service.Workers
 {
-    public class VipCashBackWorker: BackgroundService
+    public class VipCashBackWorker : BackgroundService
     {
         private Timer _cashBackWeekTimer;
         private Timer _cashBackDailyTimer;
         private readonly IHostEnvironment _environment;
         private readonly VipCashBackBLL _vipCashBackBLL;
         private readonly ILogger<VipCashBackWorker> _logger;
-        
+
         public VipCashBackWorker(ILogger<VipCashBackWorker> logger, IHostEnvironment environment, VipCashBackBLL vipCashBackBll)
         {
             _environment = environment;
@@ -31,7 +32,7 @@ namespace BonusService.Service.Workers
         {
             LogContext.PushProperty("RequestId", Guid.NewGuid().ToString());
             var success = false;
-                    
+
             try
             {
                 success = _vipCashBackBLL.CalculateCashBack(VipPeriodType.Weekly);

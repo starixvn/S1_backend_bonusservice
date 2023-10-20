@@ -21,7 +21,7 @@ namespace BonusService.Service.Library
                     entry.SetOptions(options);
                 }
                 entry.SetValue(result);
-                
+
                 //need to manually call dispose instead of having a using in case the factory passed in throws,
                 //in which case we do not want to add the entry to the cache
                 entry.Dispose();
