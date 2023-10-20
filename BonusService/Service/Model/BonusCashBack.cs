@@ -11,7 +11,7 @@
         public DateTime SpecificDate { set; get; }
         public string TimeZone { set; get; }
         public DateTime CurrencyNowTime { set; get; }
-        public DateTime LastCurrencySettledTime { get;set; }
+        public DateTime LastCurrencySettledTime { get; set; }
 
         //===================已下未使用，可能是舊版rebate=======================
         public string BonusCode { set; get; }
@@ -24,7 +24,7 @@
     }
 
     public class RebateExcludeGame
-    {              
+    {
         public int GameType { set; get; }
         public string GameId { set; get; }
         public string AppId { set; get; }

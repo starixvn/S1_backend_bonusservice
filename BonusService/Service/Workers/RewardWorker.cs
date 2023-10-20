@@ -1,5 +1,6 @@
 ﻿using BonusService.Service.BLL;
 using BonusService.Service.Extensions;
+
 using Serilog.Context;
 
 namespace BonusService.Service.Workers
@@ -17,7 +18,7 @@ namespace BonusService.Service.Workers
             _bonusApiBll = provider.GetRequiredService<BonusAPIBLL>();
             _rewardBll = provider.GetRequiredService<RewardBLL>();
         }
-        
+
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _timerClaimReward = new Timer(DoClaimVerificationRewardTaskAsync, null, TimeSpan.Zero, TimeSpan.Zero);
@@ -30,14 +31,14 @@ namespace BonusService.Service.Workers
             try
             {
                 _logger.LogInformation("Claim Verification Reward Task Start");
-                
+
                 var list = _rewardBll.GetVerificationRewardData();
 
                 foreach (var data in list)
                 {
                     if (data.Reward == null)
                     {
-                        _bonusApiBll.SetVerificationReward(data.CustId, data.Type , true);
+                        _bonusApiBll.SetVerificationReward(data.CustId, data.Type, true);
                     }
                 }
             }
@@ -51,6 +52,6 @@ namespace BonusService.Service.Workers
                 _logger.LogInformation("Claim Verification Reward Task End");
             }
         }
-        
+
     }
 }

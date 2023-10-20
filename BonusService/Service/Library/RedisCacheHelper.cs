@@ -1,5 +1,7 @@
 ﻿using BonusService.Service.Model.enums;
+
 using Newtonsoft.Json;
+
 using StackExchange.Redis;
 
 namespace BonusService.Service.Library
@@ -9,7 +11,7 @@ namespace BonusService.Service.Library
         private readonly ILogger<ICacheHelper> _logger;
         private readonly IConnectionMultiplexer _multiplexer;
         private readonly string[] _charsToRemove = { "[", "]", "/", " ", "," };
-        
+
         public RedisCacheHelper(IServiceProvider provider)
         {
             _logger = provider.GetRequiredService<ILogger<ICacheHelper>>();
@@ -89,7 +91,7 @@ namespace BonusService.Service.Library
                 return false;
             }
         }
-        
+
         public bool StringSet(string key, RedisValue value, TimeSpan? timeSpan,
             RedisDataBase redisDataBase = RedisDataBase.Bonus)
         {
@@ -120,7 +122,7 @@ namespace BonusService.Service.Library
                 return false;
             }
         }
-        
+
         public async Task<TItem> StringGetAsync<TItem>(string key, RedisDataBase redisDataBase = RedisDataBase.Bonus)
         {
             key = $"{redisDataBase}:{RemoveSpecialChars(key)}";
@@ -138,7 +140,7 @@ namespace BonusService.Service.Library
         }
 
         public List<TItem> GetCacheList<TItem>(IEnumerable<string> keys, RedisDataBase redisDataBase = RedisDataBase.Bonus)
-        {            
+        {
             try
             {
                 var taskList = new List<Task<RedisValue>>();
@@ -261,7 +263,7 @@ namespace BonusService.Service.Library
         public long GetListLength(string key, RedisDataBase redisDataBase = RedisDataBase.Bonus)
         {
             try
-            {           
+            {
                 key = $"{redisDataBase}:{RemoveSpecialChars(key)}";
                 var db = _multiplexer.GetDatabase((int)redisDataBase);
                 return db.ListLength(key);

@@ -1,12 +1,17 @@
-﻿using BonusService.Service.Library;
+﻿using System.Data;
+
+using BonusService.Service.BLL;
+using BonusService.Service.Library;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
+
 using Dapper;
+
 using MemberSite.Service.Model;
+
 using MySql.Data.MySqlClient;
+
 using Newtonsoft.Json;
-using System.Data;
-using Ubiety.Dns.Core.Records;
 
 namespace BonusService.Service.DAL
 {
@@ -14,21 +19,22 @@ namespace BonusService.Service.DAL
     {
         private readonly MySqlClient _mainDbClient;
         private readonly MySqlClient _reportDbClient;
-        private readonly string _apiUrl;
+        private readonly string _tpServiceUrl;
         private readonly CourierAdapter _courierAdapter;
         private readonly IEnumerable<AllowIp> _allowIp;
         private readonly CustInfoService _custInfoService;
 
 
-        public PromotionService(IServiceProvider serviceProvider)
+        public PromotionService(IServiceProvider provider)
         {
-            _mainDbClient = serviceProvider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);
-            _reportDbClient = serviceProvider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Report);
-            _apiUrl = serviceProvider.GetRequiredService<IConfiguration>().GetValue<string>("TpService");
-            _courierAdapter = serviceProvider.GetRequiredService<CourierAdapter>();
-            _allowIp = serviceProvider.GetRequiredService<IEnumerable<AllowIp>>();
-            _custInfoService = serviceProvider.GetRequiredService<CustInfoService>();
+            _mainDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);
+            _reportDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Report);
+            _tpServiceUrl = provider.GetRequiredService<ConfigBLL>().GetConfigValueByEnvironment<ServiceHostConfig>("ServiceHost").TpService;
+            _courierAdapter = provider.GetRequiredService<CourierAdapter>();
+            _allowIp = provider.GetRequiredService<IEnumerable<AllowIp>>();
+            _custInfoService = provider.GetRequiredService<CustInfoService>();
         }
+
         public T GetPromotion<T>(int custId, int currencyId, int siteId, string bonusCode, int deviceType, bool getDetail)
         {
             return _reportDbClient.QueryFirst<T>("Member_Promotion_Get_V5", new DynamicParameters(new
@@ -319,7 +325,7 @@ namespace BonusService.Service.DAL
 
         public async Task<ApiResult<TransferResult>> TransferTpBonus(TpBonusTransfer tpBonusTransfer)
         {
-            var myUrl = $"{_apiUrl}BonusTransfer";
+            var myUrl = $"{_tpServiceUrl}BonusTransfer";
             var Data = await _courierAdapter.MyPostAsync<TransferResult, TpBonusTransfer>(myUrl, tpBonusTransfer);
             return Data;
         }
@@ -469,7 +475,7 @@ namespace BonusService.Service.DAL
                     promotion.BonusCode
                 }));
         }
-        
+
         /// <summary>
         /// 取得 bonus允許名單
         /// </summary>
@@ -480,8 +486,8 @@ namespace BonusService.Service.DAL
             p.Add("_SiteId", siteId);
             p.Add("_BonusCode", bonusCode);
             var result = _reportDbClient.Query<BonusCustUsingList>("Service_BonusCustUsingDetail_Get", p);
-            
-            return result ;
+
+            return result;
         }
     }
 }

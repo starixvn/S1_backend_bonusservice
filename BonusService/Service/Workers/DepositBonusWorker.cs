@@ -1,9 +1,9 @@
 ﻿using BonusService.Service.BLL;
 using BonusService.Service.Extensions;
 using BonusService.Service.Model.enums;
-using MemberSite.Service.Model;
-using MySqlX.XDevAPI.Common;
+
 using Newtonsoft.Json;
+
 using Serilog.Context;
 
 namespace BonusService.Service.Workers

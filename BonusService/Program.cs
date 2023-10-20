@@ -1,8 +1,9 @@
-using BonusService.Service.Workers;
-using Serilog;
-using Serilog.Exceptions;
 using BonusService;
 using BonusService.Extensions;
+using BonusService.Service.Workers;
+
+using Serilog;
+using Serilog.Exceptions;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddRemoteJsonConfig(builder.Configuration.GetSection("ConfigService").Get<string[]>());

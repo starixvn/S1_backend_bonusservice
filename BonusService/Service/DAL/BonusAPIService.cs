@@ -1,7 +1,10 @@
 ﻿using BonusService.Service.Library;
 using BonusService.Service.Model.enums;
+
 using Dapper;
+
 using MemberSite.Service.Model;
+
 using MySql.Data.MySqlClient;
 
 namespace BonusService.Service.DAL
@@ -26,10 +29,10 @@ namespace BonusService.Service.DAL
             var p = new DynamicParameters(new { _SiteId = siteId, _CurrencyId = currencyId });
             return _reportDbClient.QueryFirst<VerificationRewardData>("Service_VerificationReward_Get", p);
         }
-        
+
         public VerificationRewardLimit GetVerificationRewardLimit(int siteId, int currencyId, OTPTypeEnum type)
         {
-            var p = new DynamicParameters(new { _SiteId = siteId, _CurrencyId = currencyId , _Type = type});
+            var p = new DynamicParameters(new { _SiteId = siteId, _CurrencyId = currencyId, _Type = type });
             return _reportDbClient.QueryFirst<VerificationRewardLimit>("Service_VerificationRewardLimit_Get", p);
         }
 
@@ -40,10 +43,10 @@ namespace BonusService.Service.DAL
             return _mainDbClient.QueryFirst<DateTime?>("Service_CustVerifyTime_Get", p);
         }
 
-        public CustVerificationRewardData GetCustVerificationReward(int custId,bool usedMainDb = false)
+        public CustVerificationRewardData GetCustVerificationReward(int custId, bool usedMainDb = false)
         {
             var p = new DynamicParameters(new { _CustId = custId });
-            if(usedMainDb)
+            if (usedMainDb)
                 return _mainDbClient.QueryFirst<CustVerificationRewardData>("Service_CustVerificationReward_Get_V2", p);
             else
                 return _reportDbClient.QueryFirst<CustVerificationRewardData>("Service_CustVerificationReward_Get_V2", p);
@@ -53,7 +56,7 @@ namespace BonusService.Service.DAL
         private int SetCustVerifiedReward(int custId, int siteId, int currencyId, int verifyItem, MySqlTransaction trans)
         {
             var p = new DynamicParameters(new { _CustId = custId, _SiteId = siteId, _CurrencyId = currencyId, _VerificationItem = verifyItem });
-            return _mainDbClient.Execute("Service_CustVerificationReward_Set", trans ,p);
+            return _mainDbClient.Execute("Service_CustVerificationReward_Set", trans, p);
         }
 
         public ApiResult PayoutVerificationReward(int custId, int siteId, int currencyId, string userName, OTPVerificationType OTPVerificationtype, decimal reward)
@@ -89,7 +92,7 @@ namespace BonusService.Service.DAL
                     apiResult.Message = "SetBalance fail";
                     return apiResult;
                 }
-                result = _withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, reward, 0 , comment, transId, (int) WithdrawalLimitLogCreateFromEnum.VerificationReward, "System" ,out _, trans);
+                result = _withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, reward, 0, comment, transId, (int)WithdrawalLimitLogCreateFromEnum.VerificationReward, "System", out _, trans);
                 if (result <= 0)
                 {
                     apiResult.Message = "SetWithdrawalLimit fail";
@@ -104,8 +107,8 @@ namespace BonusService.Service.DAL
                 }
 
                 _mainDbClient.CommitAndDisposeConnection(conn, trans);
-                
-                if(result>0)
+
+                if (result > 0)
                 {
                     apiResult.ErrorCode = 0;
                     apiResult.Message = comment;
@@ -120,7 +123,7 @@ namespace BonusService.Service.DAL
                 apiResult.ErrorCode = 999;
                 apiResult.RawMessage = ex.ToString();
             }
-            
+
             return apiResult;
         }
     }

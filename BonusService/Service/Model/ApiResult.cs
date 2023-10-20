@@ -51,7 +51,7 @@
     }
     public class ApiResult<TData> : ApiResult
     {
-        public ApiResult() : this(9000, "",  default) { }
+        public ApiResult() : this(9000, "", default) { }
         public ApiResult(ISelLang selLang) : this(9000, "", default) { SelLang = selLang; }
         public ApiResult(int ErrorCode, string Message, TData data) : base(ErrorCode, Message) { Data = data; }
         public TData Data { get; set; }

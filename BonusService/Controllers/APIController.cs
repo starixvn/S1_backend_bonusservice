@@ -1,11 +1,15 @@
 ﻿using BonusService.Service.BLL;
 using BonusService.Service.Extensions;
-using BonusService.Service.Model.enums;
-using MemberSite.Service.Model;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using BonusService.Service.Model;
+using BonusService.Service.Model.enums;
+
+using MemberSite.Service.Model;
+
+using Microsoft.AspNetCore.Mvc;
+
 using MySql.Data.MySqlClient;
+
+using Newtonsoft.Json;
 
 namespace BonusService.Controllers
 {
@@ -403,7 +407,7 @@ namespace BonusService.Controllers
                 result.Data = _promotionBll.GetPopUpPromotion(request);
                 result.ErrorCode = 0;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 result.Message = e.Message;
             }

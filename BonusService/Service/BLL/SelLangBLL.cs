@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
 using System.Resources;
+
 using BonusService.Service.Model.enums;
 
 namespace BonusService.Service.BLL

@@ -1,6 +1,4 @@
-﻿using Google.Protobuf.WellKnownTypes;
-
-namespace BonusService.Service.Model
+﻿namespace BonusService.Service.Model
 {
     public class ReferralInfo
     {

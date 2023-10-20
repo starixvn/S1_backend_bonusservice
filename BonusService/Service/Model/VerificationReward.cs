@@ -17,13 +17,13 @@ namespace MemberSite.Service.Model
     {
         public int SiteId { get; set; }
         public int CurrencyId { get; set; }
-        public string CurrencyName { get; set; }        
+        public string CurrencyName { get; set; }
         public int VerificationType { get; set; }
         public decimal PhoneReward { get; set; }
         public decimal EmailReward { get; set; }
         public decimal MinDeposit { get; set; }
     }
-    
+
     public class CustVerificationRewardData
     {
         public int CustId { get; set; }
@@ -38,12 +38,12 @@ namespace MemberSite.Service.Model
         public DateTime? EmailRewardTime { get; set; }
         public decimal SumDepositAmount { get; set; }
     }
-    
+
     public class VerificationRewardLimit
     {
         public decimal MinDeposit { get; set; }
     }
-    
+
     public class ClaimVerificationRewardData
     {
         public int CustId { get; set; }

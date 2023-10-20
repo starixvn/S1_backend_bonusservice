@@ -1,6 +1,7 @@
 ﻿using BonusService.Service.Library;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
+
 using Dapper;
 
 namespace BonusService.Service.DAL
@@ -15,12 +16,12 @@ namespace BonusService.Service.DAL
             _mainDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);
             _reportDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Report);
         }
-        
+
         public IEnumerable<CashBackSettingOutput> GetCashBackSettings(VipPeriodType periodType)
         {
             return _reportDbClient.Query<CashBackSettingOutput>("Service_CashBackSetting_Get_V2", new { _PeriodType = (byte)periodType });
         }
-        
+
         public bool SetCashBackSettings(CashBackSettingInput cashBackSettingInput)
         {
             var parameter = new DynamicParameters(new
@@ -32,12 +33,12 @@ namespace BonusService.Service.DAL
             });
             return _mainDbClient.Execute("Service_CashBackSetting_Set_V2", parameter) >= 0;
         }
-        
+
         public IEnumerable<CashBackPromotionOutput> GetVipCashBackPromotion(CashBackPromotionInput cashBackPromotionInput)
         {
             var parameter = new DynamicParameters(new
             {
-                _SiteId =  cashBackPromotionInput.SiteId,
+                _SiteId = cashBackPromotionInput.SiteId,
                 _PromotionType = cashBackPromotionInput.PromotionType,
                 _PeriodType = (int)cashBackPromotionInput.PeriodType,
                 _CurrencyId = cashBackPromotionInput.CurrencyId,
@@ -54,7 +55,7 @@ namespace BonusService.Service.DAL
             parameter.Add("CurrencyId", promotionCashBackSettingInput.CurrencyId);
             return _reportDbClient.Query<PromotionCashBackSettingOutput>("Service_PromotionCashBackSetting_Get", parameter);
         }
-        
+
         public IEnumerable<CashBackTpBetRecordOutput> GetVipCashBackTpBetRecord(CashBackTpBetRecordInput cashBackTpBetRecordInput)
         {
             var parameter = new DynamicParameters(new
@@ -73,7 +74,7 @@ namespace BonusService.Service.DAL
 
             return _reportDbClient.Query<CashBackTpBetRecordOutput>(spName, parameter, 180);
         }
-        
+
         public IEnumerable<CustomerVIPInfoOutput> GetCustomerVipInfo(string custIds)
         {
             var parameter = new DynamicParameters();

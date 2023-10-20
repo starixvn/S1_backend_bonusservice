@@ -8,7 +8,7 @@ namespace BonusService.Service.Model
 
         public VipPeriodType PeriodType { get; set; }
 
-        public int CurrencyId {get; set; }
+        public int CurrencyId { get; set; }
 
         public DateTime SettleTime { get; set; }
     }
@@ -21,7 +21,7 @@ namespace BonusService.Service.Model
         public DateTime SettleTime { get; set; }
         public int CurrencyId { get; set; }
 
-        public string BonusCode {get; set; }
+        public string BonusCode { get; set; }
     }
 
     public class TpGameTypeOutput
@@ -31,7 +31,7 @@ namespace BonusService.Service.Model
         public int PromoCategoryId { get; set; }
         public int CurrencyId { get; set; }
     }
-    
+
     public class PromotionCashBackSettingInputInsert
     {
         public PromotionCashBackSettingInputInsert(string bonusCode, int currencyId, int siteId, int tpId,
@@ -58,7 +58,7 @@ namespace BonusService.Service.Model
         public int Status { get; }
         public string LastUpdateUser { get; }
     }
-    
+
     public class CashBackPromotionInput
     {
         public int SiteId { get; set; }
@@ -66,7 +66,7 @@ namespace BonusService.Service.Model
         public VipPeriodType PeriodType { get; set; }
         public int CurrencyId { get; set; }
     }
-    
+
     public class CashBackPromotionOutput
     {
         public string BonusCode { get; set; }
@@ -104,7 +104,7 @@ namespace BonusService.Service.Model
 
         public decimal Percentage { get; set; }
     }
-    
+
     public class CashBackTpBetRecordInput
     {
         public string StartDate { get; set; }

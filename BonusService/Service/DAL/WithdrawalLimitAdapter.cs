@@ -1,4 +1,5 @@
 ﻿using BonusService.Service.DAL.Interface;
+
 using MySql.Data.MySqlClient;
 
 namespace BonusService.Service.DAL
@@ -12,9 +13,9 @@ namespace BonusService.Service.DAL
             _withdrawalLimitService = withdrawalLimitService;
         }
 
-        public int SetWithdrawalLimit(int custId, string userName, int siteId, decimal withdrawalLimit, string memo, string refTransId , int createFrom, string creator ,out decimal afterWithdrawalLimit, MySqlTransaction trans)
+        public int SetWithdrawalLimit(int custId, string userName, int siteId, decimal withdrawalLimit, string memo, string refTransId, int createFrom, string creator, out decimal afterWithdrawalLimit, MySqlTransaction trans)
         {
-            return _withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, withdrawalLimit, 0, memo, refTransId, createFrom , creator , out afterWithdrawalLimit, trans);
+            return _withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, withdrawalLimit, 0, memo, refTransId, createFrom, creator, out afterWithdrawalLimit, trans);
         }
     }
 }

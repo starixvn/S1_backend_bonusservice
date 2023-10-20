@@ -1,6 +1,7 @@
-﻿using BonusService.Service.Model;
-using BonusService.Service.Library;
+﻿using BonusService.Service.Library;
+using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
+
 using Newtonsoft.Json;
 
 namespace BonusService.Service.DAL
@@ -42,7 +43,7 @@ namespace BonusService.Service.DAL
 
         public IEnumerable<CustDeviceDto> GetCustDeviceId(IEnumerable<int> custIds, int siteId)
         {
-            var result = _reportDbClient.Query<CustDeviceDto>("Service_CustDeviceId_Get", new { _CustIds = JsonConvert.SerializeObject(custIds) , _SiteId = siteId });
+            var result = _reportDbClient.Query<CustDeviceDto>("Service_CustDeviceId_Get", new { _CustIds = JsonConvert.SerializeObject(custIds), _SiteId = siteId });
             return result;
         }
     }

@@ -2,6 +2,7 @@
 using BonusService.Service.Extensions;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
+
 using Serilog.Context;
 
 namespace BonusService.Service.Workers

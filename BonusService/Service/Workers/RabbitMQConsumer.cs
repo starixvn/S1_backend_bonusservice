@@ -1,7 +1,9 @@
-﻿using BonusService.Service.BLL;
+﻿using System.Text;
+
+using BonusService.Service.BLL;
+
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using System.Text;
 
 namespace BonusService.Service.Workers
 {
@@ -10,7 +12,7 @@ namespace BonusService.Service.Workers
         private readonly IMessageHandler _messageHandler;
         private readonly IConnection _connection;
         private readonly IModel _channel;
-        private readonly List<string> _queueNames = new(){ "VerificationReward" };
+        private readonly List<string> _queueNames = new() { "VerificationReward" };
         public RabbitMQConsumer(IConnectionFactory connectionFactory, IMessageHandler messageHandler)
         {
             _messageHandler = messageHandler;
@@ -18,7 +20,7 @@ namespace BonusService.Service.Workers
             _channel = _connection.CreateModel();
         }
 
-        
+
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             foreach (var queueName in _queueNames)
