@@ -49,14 +49,13 @@ namespace BonusService.Service.DAL
          public int SetBalance(int custId, int siteId, string userName, decimal Amount, int tpId, TransType transType, string Memo, string RefTransId, out decimal afterAmount, MySqlConnection conn, MySqlTransaction trans, AllowNegative allowNegative = AllowNegative.NotAllow)
         {
             var type = typePosition + ((int)transType * 1000) + tpId;
-            Enum.TryParse(tpId.ToString(), out Tp tp);
 
             if (tpId == 0 && transType == TransType.Prize)
             {
                 type = (int)FinancialType.Bonusreward;
             }
 
-            var p = new DynamicParameters(new { CustId = custId, SiteId = siteId, UserName = userName, Amount = Amount, Type = type, Memo = $"{tp} {Memo}", RefTransId = RefTransId });
+            var p = new DynamicParameters(new { CustId = custId, SiteId = siteId, UserName = userName, Amount = Amount, Type = type, Memo = $"{tpId} {Memo}", RefTransId = RefTransId });
             p.Add("Is1stDepoist", dbType: DbType.Boolean, direction: ParameterDirection.Output);
             p.Add("AfterAmount", dbType: DbType.Decimal, direction: ParameterDirection.Output);
             if (allowNegative == AllowNegative.Allow)
