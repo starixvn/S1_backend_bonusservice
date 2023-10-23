@@ -86,7 +86,7 @@ namespace BonusService.Service.Workers
             }
             finally
             {
-                timerDepositBonus.Change(TimeSpan.FromMinutes(1), TimeSpan.Zero);
+                timerDepositBonus.Change(TimeSpan.FromSeconds(15), TimeSpan.Zero);
             }
 
         }
