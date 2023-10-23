@@ -4,7 +4,6 @@ using System.Data;
 using BonusService.Service.Library;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
-using Newtonsoft.Json;
 
 namespace BonusService.Service.DAL
 {
@@ -123,6 +122,8 @@ namespace BonusService.Service.DAL
                             break;
                         case 0:
                             // 轉帳除了SBSW之外就無需退回主錢包
+                            // 直接給予Success，要不然到時候會rollback爆炸
+                            result = 1;
                             break;
                     }
                     if (result > 0)
