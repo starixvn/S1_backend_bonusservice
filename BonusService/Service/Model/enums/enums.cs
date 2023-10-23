@@ -1,4 +1,6 @@
-﻿namespace BonusService.Service.Model.enums
+﻿using System.ComponentModel;
+
+namespace BonusService.Service.Model.enums
 {
     public enum ErrorCode
     {
@@ -235,5 +237,24 @@
         NotUsed = 0,
         Used = 1,
     }
+    
+    [Description("是否允許餘額變負值")]
+    public enum AllowNegative
+    {
+        Allow = 1,
+        NotAllow = 0
+    }
+    
+    public enum TransType/*Finical Type*/
+    {
+        Wagers = 1,
+        Refunds = 2,
+        Payout = 3,
+        Prize = 4,
+        Undo = 5,
+        Tip = 6
+    }
+    
+    
     
 }

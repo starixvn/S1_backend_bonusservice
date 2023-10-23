@@ -37,7 +37,8 @@ if (!string.IsNullOrEmpty(serviceType) && serviceType.Equals("worker", StringCom
         .AddHostedService<PromotionAutoExtendWorker>()
         .AddHostedService<DepositBonusWorker>()
         .AddHostedService<RabbitMQConsumer>()
-        .AddHostedService<DepositReferralWorker>();
+        .AddHostedService<DepositReferralWorker>()
+        .AddHostedService<BonusSettledWorker>();                                                
     //.AddHostedService<RewardWorker>();
     //.AddHostedService<AngPaoEventWorker>(); //活動結束，關閉排程
 }
