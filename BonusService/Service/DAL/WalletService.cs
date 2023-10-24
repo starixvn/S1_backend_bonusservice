@@ -28,22 +28,32 @@ namespace BonusService.Service.DAL
         public int SetBalance(int custId, int siteId, string userName, decimal amount, int type, string memo,
             string refTransId, out decimal afterAmount, out byte is1StDeposit, MySqlTransaction trans)
         {
-            var p = new DynamicParameters(new
+            try
             {
-                CustId = custId,
-                SiteId = siteId,
-                UserName = userName,
-                Amount = amount,
-                Type = type,
-                Memo = memo,
-                RefTransId = refTransId
-            });
-            p.Add("Is1stDepoist", dbType: DbType.Boolean, direction: ParameterDirection.Output);
-            p.Add("AfterAmount", dbType: DbType.Decimal, direction: ParameterDirection.Output);
-            _mainDbClient.Execute("Wallet_Set_V2", trans, p);
-            is1StDeposit = p.Get<byte?>("Is1stDepoist") ?? 0;
-            afterAmount = p.Get<decimal?>("AfterAmount") ?? 0;
-            return afterAmount >= 0 ? 1 : 0;
+                var p = new DynamicParameters(new
+                {
+                    CustId = custId,
+                    SiteId = siteId,
+                    UserName = userName,
+                    Amount = amount,
+                    Type = type,
+                    Memo = memo,
+                    RefTransId = refTransId
+                });
+                p.Add("Is1stDepoist", dbType: DbType.Boolean, direction: ParameterDirection.Output);
+                p.Add("AfterAmount", dbType: DbType.Decimal, direction: ParameterDirection.Output);
+                _logger.LogCritical($"SetBalance Input {JsonConvert.SerializeObject(p)}");
+                var result = _mainDbClient.Execute("Wallet_Set_V2", trans, p);
+                is1StDeposit = p.Get<byte?>("Is1stDepoist") ?? 0;
+                afterAmount = p.Get<decimal?>("AfterAmount") ?? 0;
+                _logger.LogCritical($"SetBalance Result AfterAmount:{afterAmount}, Result : {result} , Memo : {memo}");
+                return afterAmount >= 0 ? 1 : 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"SetBalance Error : {ex.Message}");
+                throw;
+            }
         }
 
         public int SetBalance(int custId, int siteId, string userName, decimal Amount, int tpId, TransType transType, string Memo, string RefTransId, out decimal afterAmount, MySqlConnection conn, MySqlTransaction trans, AllowNegative allowNegative = AllowNegative.NotAllow)
@@ -107,6 +117,7 @@ namespace BonusService.Service.DAL
                     p.Add("TpId", dbType: DbType.Int32, direction: ParameterDirection.Output);
                 }
                 var result = _mainDbClient.Execute(checkWalletType.SP, p, conn, trans);
+                
             
                 if (result > 0) 
                 {
@@ -118,6 +129,7 @@ namespace BonusService.Service.DAL
                         case 1:
                             if (bonus > 0)
                             {
+                                _logger.LogCritical($"BonusSettledWorker Set Balance : {bonusFulfill.BonusId} , Amount : {bonus},Name : {bonusFulfill.UserName} , DateTime : {DateTime.Now.AddHours(8)}");
                                 result = SetBalance(bonusFulfill.CustId, bonusFulfill.SiteId,
                                     bonusFulfill.UserName, bonus, (int)FinancialType.Bonusreward,
                                     $"Bonus Transfer to Cash: {Math.Abs(bonus):#,##0.##}",
