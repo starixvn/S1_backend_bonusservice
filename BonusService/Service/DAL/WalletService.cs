@@ -96,7 +96,11 @@ namespace BonusService.Service.DAL
         
         public IEnumerable<BonusFulfill> GetBonusFulfill()
         {
-            return _mainDbClient.Query<BonusFulfill>("Service_BonusFulfill_Get_V2", commandType: CommandType.StoredProcedure);
+            
+            var result = _mainDbClient.Query<BonusFulfill>("Service_BonusFulfill_Get_V2", commandType: CommandType.StoredProcedure);
+            _logger.LogInformation($"BonusSettledWorker GetBonusFulfill Count : {result.Count()}");
+            return result;
+            //return _mainDbClient.Query<BonusFulfill>("Service_BonusFulfill_Get_V2", commandType: CommandType.StoredProcedure);
         }
         public int BonusSettle(BonusFulfill bonusFulfill)
         {
@@ -127,7 +131,7 @@ namespace BonusService.Service.DAL
                         case 1:
                             if (bonus > 0)
                             {
-                                _logger.LogCritical($"BonusSettledWorker Set Balance : {bonusFulfill.BonusId} , Amount : {bonus},Name : {bonusFulfill.UserName} , DateTime : {DateTime.Now.AddHours(8)}");
+                                _logger.LogInformation($"BonusSettledWorker Set Balance : {bonusFulfill.BonusId} , Amount : {bonus},Name : {bonusFulfill.UserName} , DateTime : {DateTime.Now.AddHours(8)}");
                                 result = SetBalance(bonusFulfill.CustId, bonusFulfill.SiteId,
                                     bonusFulfill.UserName, bonus, (int)FinancialType.Bonusreward,
                                     $"Bonus Transfer to Cash: {Math.Abs(bonus):#,##0.##}",

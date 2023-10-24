@@ -25,9 +25,10 @@ public class BonusSettledWorker : BackgroundService
     {
         try
         {
+            _logger.LogInformation($"BonusSettledWorker Start");
             foreach (var bonus in _walletService.GetBonusFulfill())
             { 
-                _logger.LogCritical($"BonusSettledWorker: {bonus.BonusId} , Name : {bonus.UserName} , DateTime : {DateTime.Now.AddHours(8)}");
+                _logger.LogInformation($"BonusSettledWorker: {bonus.BonusId} , Name : {bonus.UserName} , DateTime : {DateTime.Now.AddHours(8)}");
                 _walletService.BonusSettle(bonus);
             }
         }
