@@ -40,11 +40,11 @@ namespace BonusService.Service.DAL
                 });
                 p.Add("Is1stDepoist", dbType: DbType.Boolean, direction: ParameterDirection.Output);
                 p.Add("AfterAmount", dbType: DbType.Decimal, direction: ParameterDirection.Output);
-                _logger.LogCritical($"SetBalance Input {JsonConvert.SerializeObject(p)}");
+                _logger.LogInformation($"SetBalance Input {JsonConvert.SerializeObject(p)}");
                 var result = _mainDbClient.Execute("Wallet_Set_V2", trans, p);
                 is1StDeposit = p.Get<byte?>("Is1stDepoist") ?? 0;
                 afterAmount = p.Get<decimal?>("AfterAmount") ?? 0;
-                _logger.LogCritical($"SetBalance Result AfterAmount:{afterAmount}, Result : {result} , Memo : {memo}");
+                _logger.LogInformation($"SetBalance Result AfterAmount:{afterAmount}, Result : {result} , Memo : {memo}");
                 return afterAmount >= 0 ? 1 : 0;
             }
             catch (Exception ex)
@@ -118,7 +118,7 @@ namespace BonusService.Service.DAL
                 {
                     p.Add("TpId", dbType: DbType.Int32, direction: ParameterDirection.Output);
                 }
-                var result = _mainDbClient.Execute(checkWalletType.SP, p, conn, trans);
+                var result = _mainDbClient.Execute(checkWalletType.SP, trans,p);
                 
             
                 if (result > 0) 
