@@ -1,5 +1,4 @@
-﻿using BonusService.Service.BLL;
-using BonusService.Service.DAL;
+﻿using BonusService.Service.DAL;
 
 namespace BonusService.Service.Workers;
 
@@ -25,8 +24,9 @@ public class BonusSettledWorker : BackgroundService
     {
         try
         {
-            _logger.LogInformation($"BonusSettledWorker Start");
-            foreach (var bonus in _walletService.GetBonusFulfill())
+            var bonusFulfillList = _walletService.GetBonusFulfill();
+            _logger.LogInformation($"BonusSettledWorker GetBonusFulfill Count : {bonusFulfillList.Count()}");
+            foreach (var bonus in bonusFulfillList)
             { 
                 _logger.LogInformation($"BonusSettledWorker: {bonus.BonusId} , Name : {bonus.UserName} , DateTime : {DateTime.Now.AddHours(8)}");
                 _walletService.BonusSettle(bonus);
@@ -34,7 +34,7 @@ public class BonusSettledWorker : BackgroundService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, ex.Message);
+            _logger.LogError(ex, $"BonusSettledWorker: {ex.Message}");
         }
         finally
         {
@@ -45,7 +45,6 @@ public class BonusSettledWorker : BackgroundService
     
     public override Task StopAsync(CancellationToken cancellationToken)
     {
-        //WriteToFile("WriteToFileHostedService: Process Stopped");
         _timer?.Change(Timeout.Infinite, 0);
         return Task.CompletedTask;
     }
