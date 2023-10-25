@@ -1,5 +1,4 @@
 ﻿using BonusService.Service.Model;
-using Dapper;
 
 namespace BonusService.Service.DAL.Interface
 {

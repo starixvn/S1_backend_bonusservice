@@ -5,7 +5,7 @@ namespace BonusService.Service.Model
     public class BonusApi
     {
     }
-    
+
     public class CustRunningBonus
     {
         public int BonusId { set; get; }

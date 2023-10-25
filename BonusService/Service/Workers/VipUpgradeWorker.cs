@@ -1,6 +1,7 @@
 ﻿using BonusService.Service.BLL;
 using BonusService.Service.Extensions;
 using BonusService.Service.Model.enums;
+
 using Serilog.Context;
 
 namespace BonusService.Service.Workers
@@ -24,19 +25,19 @@ namespace BonusService.Service.Workers
             _timer = new Timer(VipDoWork, null, TimeSpan.Zero, TimeSpan.Zero);
             return Task.CompletedTask;
         }
-        
+
         private void VipDoWork(object state)
         {
             LogContext.PushProperty("RequestId", Guid.NewGuid().ToString());
             var success = true;
-                    
+
             try
             {
                 var vipSettings = _vipBll.GetVipSettings(VipTypeEnum.Upgrade);
                 var currentTime = DateTime.UtcNow.AddHours(8);
                 _vipBll.UpgradeReview(vipSettings, currentTime, out var upgradeReviewSuccess);
                 _vipBll.UpgradeCustomer(vipSettings, currentTime, out var upgradeCustomerSuccess);
-                
+
                 if (!upgradeReviewSuccess || !upgradeCustomerSuccess)
                 {
                     success = false;

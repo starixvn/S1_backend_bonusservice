@@ -1,8 +1,12 @@
 ﻿using System.Data;
 using System.Diagnostics;
+
 using BonusService.Service.Model.enums;
+
 using Dapper;
+
 using MySql.Data.MySqlClient;
+
 using Serilog.Context;
 
 namespace BonusService.Service.Library
@@ -19,7 +23,7 @@ namespace BonusService.Service.Library
             _connectionString = connectionString;
             _logger = logger;
         }
-        
+
         public MySqlConnection GetMySqlConnection()
         {
             return new MySqlConnection(_connectionString);
@@ -94,7 +98,7 @@ namespace BonusService.Service.Library
                 _logger.LogError(e, name);
                 throw;
             }
-            
+
             LogContext.PushProperty("elapsed", sw.Elapsed.TotalMilliseconds);
             _logger.LogDebug(name);
             return result.ToList();
@@ -156,7 +160,7 @@ namespace BonusService.Service.Library
             _logger.LogDebug($"{name} {sw.Elapsed:c}");
             return result.ToList();
         }
-        
+
         public IEnumerable<T> Query<T>(string sql, object parameters, CommandType commandType = CommandType.StoredProcedure)
         {
             IEnumerable<T> result;
@@ -299,7 +303,7 @@ namespace BonusService.Service.Library
                 _logger.LogError(e, name);
                 throw;
             }
-           
+
             LogContext.PushProperty("elapsed", sw.Elapsed.TotalMilliseconds);
             _logger.LogDebug($"{name} {sw.Elapsed:c}");
             return result;
@@ -384,7 +388,7 @@ namespace BonusService.Service.Library
             _logger.LogDebug($"{name} {sw.Elapsed:c}");
             return true;
         }
-        
+
         public T ExecuteScalar<T>(string name, object parameters)
         {
             T result;
@@ -427,7 +431,7 @@ namespace BonusService.Service.Library
         }
         
         #endregion
-        
+
         public void CommitAndDisposeConnection(MySqlConnection conn, IDbTransaction trans)
         {
             trans.Commit();
@@ -435,7 +439,7 @@ namespace BonusService.Service.Library
             conn.Close();
             conn.Dispose();
         }
-        
+
         public void RollbackAndDisposeConnection(MySqlConnection conn, IDbTransaction trans)
         {
             trans.Rollback();
@@ -451,7 +455,7 @@ namespace BonusService.Service.Library
             await conn.CloseAsync();
             await conn.DisposeAsync();
         }
-        
+
         public async Task RollbackAndDisposeConnectionAsync(MySqlConnection conn, MySqlTransaction trans)
         {
             await trans.RollbackAsync();

@@ -1,17 +1,21 @@
 ﻿using System.Data;
+
 using BonusService.Extensions;
 using BonusService.Service.BLL;
 using BonusService.Service.Library;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
 using BonusService.UnitTest.Models;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+
 using NSubstitute;
+
 using NUnit.Framework;
 
 namespace BonusService.UnitTest

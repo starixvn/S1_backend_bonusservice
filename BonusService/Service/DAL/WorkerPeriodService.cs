@@ -2,6 +2,7 @@
 using BonusService.Service.Library;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
+
 using Dapper;
 
 namespace BonusService.Service.DAL;

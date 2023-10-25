@@ -1,8 +1,8 @@
 ﻿using BonusService.Service.DAL;
-using BonusService.Service.Model;
 using BonusService.Service.Extensions;
-using BonusService.Service.Model.enums;
 using BonusService.Service.Library;
+using BonusService.Service.Model;
+using BonusService.Service.Model.enums;
 
 namespace BonusService.Service.BLL
 {
@@ -40,7 +40,7 @@ namespace BonusService.Service.BLL
         /// <returns></returns>
         public IEnumerable<VipSetting> GetVipSettings(VipTypeEnum vipType)
         {
-            return _vipService.GetVipSettings((int) vipType);
+            return _vipService.GetVipSettings((int)vipType);
         }
 
         public void UpgradeReview(IEnumerable<VipSetting> vipSettings, DateTime currentTime, out bool success)
@@ -57,9 +57,9 @@ namespace BonusService.Service.BLL
                         continue;
                     }
 
-                    if (!CalculateUpgradeTime(vipSetting, 
-                        currentTime, 
-                        out var startTime, 
+                    if (!CalculateUpgradeTime(vipSetting,
+                        currentTime,
+                        out var startTime,
                         out var endTime,
                         out var reviewTime,
                         out var settledTime,
@@ -69,7 +69,7 @@ namespace BonusService.Service.BLL
                     }
 
                     var vipList = GetVipSystem(vipSetting.SiteId).ToList();
-                    
+
                     foreach (var vipSystem in vipList.OrderByDescending(x => x.Level))
                     {
                         _logger.LogInformation(
@@ -83,7 +83,7 @@ namespace BonusService.Service.BLL
                             success = SetVipUpgradeReview(new VipUpgradeInfo(custVip.CustId,
                                 calculateMonth, custVip.UserName, vipSystem.SiteId, custVip.VipLevel, vipSystem.Level,
                                 vipSystem.CurrencyId, custVip.DepositAmount, upgradeAmount,
-                                (int) VipReviewStatus.Pending));
+                                (int)VipReviewStatus.Pending));
                         }
                     }
 
@@ -132,7 +132,7 @@ namespace BonusService.Service.BLL
 
                     var customers =
                         GetVipUpgradeReview(new VipUpgradeInfo(calculateMonth, vipSetting.SiteId,
-                            (int) VipReviewStatus.Approved));
+                            (int)VipReviewStatus.Approved));
 
                     foreach (var customer in customers)
                     {
@@ -239,7 +239,7 @@ namespace BonusService.Service.BLL
                                 downgradeDepositAmount,
                                 custVip.TurnoverAmount,
                                 downgradeTurnoverAmount,
-                                (int) status));
+                                (int)status));
                         }
                     }
 
@@ -291,7 +291,7 @@ namespace BonusService.Service.BLL
 
                     var customers = GetVipDowngradeReview(new VipDowngradeInfo(calculateMonth,
                         vipSetting.SiteId,
-                        (int) VipReviewStatus.Approved));
+                        (int)VipReviewStatus.Approved));
 
                     foreach (var customer in customers)
                     {
@@ -343,7 +343,7 @@ namespace BonusService.Service.BLL
         {
             return _vipService.GetVipSystem(siteId);
         }
-        
+
         private IEnumerable<CustVip> GetCustUpgrade(CustomerUpgradeInfo customerUpgradeInfo)
         {
             return _vipService.GetCustUpgrade(customerUpgradeInfo);
@@ -397,16 +397,16 @@ namespace BonusService.Service.BLL
         {
             switch (vipSetting.PeriodType)
             {
-                case (int) VipPeriodType.Monthly:
-                    
+                case (int)VipPeriodType.Monthly:
+
                     var taskTime = new DateTime(currentTime.Year, currentTime.Month, vipSetting.PeriodInterval).Date;
-                    
+
                     if (taskType == TaskType.UpgradeReview)
                     {
                         return taskTime > vipSetting.LastReviewedTime;
                     }
 
-                    var reviewDayOfMonth = new DateTime(currentTime.Year, currentTime.Month,vipSetting.AssignReviewDate);
+                    var reviewDayOfMonth = new DateTime(currentTime.Year, currentTime.Month, vipSetting.AssignReviewDate);
                     var settledDayOfMonth = new DateTime(currentTime.Year, currentTime.Month, vipSetting.AssignSettleDate);
                     // return vipSetting.LastUpdateTime > reviewDayOfMonth && 
                     //        taskTime > vipSetting.SettleTime &&
@@ -415,8 +415,8 @@ namespace BonusService.Service.BLL
                            taskTime > vipSetting.LastSettledTime && // 這個月1號 > 上一次執行級別異動的時間 : 這個月還未執行過級別異動
                            currentTime > settledDayOfMonth; // 目前時間(GMT+8) > 當月應執行級別異動日期時間 : 目前時間可否執行級別異動 
 
-                case (int) VipPeriodType.Daily:
-                case (int) VipPeriodType.Weekly:
+                case (int)VipPeriodType.Daily:
+                case (int)VipPeriodType.Weekly:
                 default:
                     return false;
             }
@@ -443,7 +443,7 @@ namespace BonusService.Service.BLL
         {
             switch (vipSetting.PreviousDateRangeType)
             {
-                case (int) VipPreviousDateRangeType.LastMonth:
+                case (int)VipPreviousDateRangeType.LastMonth:
                     var previousDateTime = currentTime.AddMonths(-1);
                     startTime = new DateTime(previousDateTime.Year, previousDateTime.Month, vipSetting.PeriodInterval)
                         .Date;
@@ -453,12 +453,12 @@ namespace BonusService.Service.BLL
                     calculateMonth = startTime.ToString("yyyyMM");
                     break;
 
-                case (int) VipPreviousDateRangeType.LastThreeMonth:
+                case (int)VipPreviousDateRangeType.LastThreeMonth:
                     //暫無使用，return false;
                     startTime = endTime = reviewTime = settleTime = new DateTime();
                     calculateMonth = string.Empty;
                     return false;
-                
+
                 default:
                     startTime = endTime = reviewTime = settleTime = new DateTime();
                     calculateMonth = string.Empty;
@@ -503,7 +503,7 @@ namespace BonusService.Service.BLL
         {
             switch (vipSetting.PeriodType)
             {
-                case (int) VipPeriodType.Monthly:
+                case (int)VipPeriodType.Monthly:
                     //當月指定第N天 YYYY/MM/N
                     var taskTime = new DateTime(currentTime.Year,
                         currentTime.Month,
@@ -522,8 +522,8 @@ namespace BonusService.Service.BLL
                            && taskTime > vipSetting.LastSettledTime //這個月1號 > 上一次執行級別異動的時間 : 這個月還未執行過級別異動
                            && currentTime > settledDayOfMonth; //目前時間(GMT+8) > 當月應執行級別異動日期時間 : 目前時間可否執行級別異動 
 
-                case (int) VipPeriodType.Daily:
-                case (int) VipPeriodType.Weekly:
+                case (int)VipPeriodType.Daily:
+                case (int)VipPeriodType.Weekly:
                 default:
                     return false;
             }
@@ -552,7 +552,7 @@ namespace BonusService.Service.BLL
         {
             switch (vipSetting.PreviousDateRangeType)
             {
-                case (int) VipPreviousDateRangeType.LastMonth:
+                case (int)VipPreviousDateRangeType.LastMonth:
                     // var previousDateTime = currentTime.AddMonths(-1);
                     // startTime = new DateTime(previousDateTime.Year, previousDateTime.Month, vipSetting.PeriodInterval)
                     //     .Date;
@@ -564,7 +564,7 @@ namespace BonusService.Service.BLL
                     calculateMonth = string.Empty;
                     return false;
 
-                case (int) VipPreviousDateRangeType.LastThreeMonth:
+                case (int)VipPreviousDateRangeType.LastThreeMonth:
 
                     #region Description
 
@@ -578,7 +578,7 @@ namespace BonusService.Service.BLL
                     #endregion
 
                     var previousThreeMonthDateTime = currentTime.AddMonths(-3);
-                    startTime = new DateTime(previousThreeMonthDateTime.Year,previousThreeMonthDateTime.Month, vipSetting.PeriodInterval).Date;
+                    startTime = new DateTime(previousThreeMonthDateTime.Year, previousThreeMonthDateTime.Month, vipSetting.PeriodInterval).Date;
                     endTime = startTime.AddMonths(3).AddTicks(-1);
                     reviewTime = new DateTime(currentTime.Year, currentTime.Month, vipSetting.AssignReviewDate);
                     settleTime = new DateTime(currentTime.Year, currentTime.Month, vipSetting.AssignSettleDate);

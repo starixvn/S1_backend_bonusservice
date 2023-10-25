@@ -1,9 +1,10 @@
-﻿using BonusService.Service.DAL;
-using BonusService.Service.DAL.Interface;
+﻿using BonusService.Service.DAL.Interface;
 using BonusService.Service.Library;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
+
 using MySql.Data.MySqlClient;
+
 using Newtonsoft.Json;
 
 namespace BonusService.Service.BLL

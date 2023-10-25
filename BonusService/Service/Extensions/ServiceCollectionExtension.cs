@@ -1,6 +1,9 @@
-﻿using BonusService.Service.DAL;
+﻿using BonusService.Service.BLL;
+using BonusService.Service.DAL;
 using BonusService.Service.Library;
+using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
+
 using RabbitMQ.Client;
 
 namespace BonusService.Service.Extensions
@@ -31,19 +34,20 @@ namespace BonusService.Service.Extensions
             });
         }
 
-        public static void AddMessageQueueConnection(this IServiceCollection services, IConfiguration config) 
+        public static void AddMessageQueueConnection(this IServiceCollection services)
         {
-            var hostName = config.GetSection("RabbitMQ:HostName");
-            var userName = config.GetSection("RabbitMQ:UserName");
-            var password = config.GetSection("RabbitMQ:Password");
+            var provider = services.BuildServiceProvider();
+            var configBll = provider.GetRequiredService<ConfigBLL>();
+            var config = configBll.GetConfigValueByEnvironment<RabbitMqConfig>("RabbitMQ");
+
             services.AddSingleton<IConnectionFactory>(_ => new ConnectionFactory()
             {
-                HostName = hostName.Value,
-                UserName = userName.Value,
-                Password = password.Value
+                HostName = config.HostName,
+                UserName = config.UserName,
+                Password = config.Password
             });
         }
-        
+
         public static IServiceCollection AddOptionListByDB<T>(this IServiceCollection services, string sql, object parameters = null)
         {
             var provider = services.BuildServiceProvider();
@@ -53,12 +57,25 @@ namespace BonusService.Service.Extensions
             return services;
         }
 
-        public static IServiceCollection AddOptionByDB<T>(this IServiceCollection services, string sql, object parameters = null)
+        public static IServiceCollection AddSiteConfig(this IServiceCollection services)
         {
             var provider = services.BuildServiceProvider();
-            var configService = provider.GetRequiredService<ConfigService>();
-            var option = configService.Query<T>(sql, parameters).FirstOrDefault();
-            services.AddSingleton(typeof(T), p => option);
+            // 準備ServerInfo
+            var serverInfoList = new List<ServerInfo>() { new() { SiteId = 0, SiteName = "default" } };
+            serverInfoList.AddRange(provider.GetRequiredService<IEnumerable<ServerInfo>>());
+
+            // 準備Config
+            var siteConfigGroup = provider.GetRequiredService<IEnumerable<ConfigObject>>().GroupBy(i => i.SiteId);
+
+            foreach (var serverInfo in serverInfoList)
+            {
+                //設定SiteConfig
+                var siteConfig = siteConfigGroup.FirstOrDefault(i => i.Key == serverInfo.SiteId)
+                                 ?? siteConfigGroup.First(i => i.Key == 0);
+                var config = siteConfig.ToDictionary(i => i.ConfigKey, i => i.ConfigValue);
+                services.AddSingleton(new SiteConfig(serverInfo, config));
+            }
+
             return services;
         }
     }

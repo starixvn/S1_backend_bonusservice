@@ -1,9 +1,9 @@
 ﻿using BonusService.Service.BLL;
 using BonusService.Service.Extensions;
 using BonusService.Service.Model.enums;
-using MemberSite.Service.Model;
-using MySqlX.XDevAPI.Common;
+
 using Newtonsoft.Json;
+
 using Serilog.Context;
 
 namespace BonusService.Service.Workers
@@ -86,7 +86,7 @@ namespace BonusService.Service.Workers
             }
             finally
             {
-                timerDepositBonus.Change(TimeSpan.FromMinutes(1), TimeSpan.Zero);
+                timerDepositBonus.Change(TimeSpan.FromSeconds(15), TimeSpan.Zero);
             }
 
         }

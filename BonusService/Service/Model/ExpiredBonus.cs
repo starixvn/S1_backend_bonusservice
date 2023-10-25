@@ -18,7 +18,7 @@ namespace BonusService.Service.Model
         public decimal LockedAmount { set; get; }
         public int TpId { set; get; }
     }
-    
+
     public class TpBonusCancelTransfer
     {
         public int TpId { set; get; }

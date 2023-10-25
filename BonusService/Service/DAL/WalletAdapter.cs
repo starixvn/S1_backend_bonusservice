@@ -1,4 +1,5 @@
 ﻿using BonusService.Service.DAL.Interface;
+
 using MySql.Data.MySqlClient;
 
 namespace BonusService.Service.DAL

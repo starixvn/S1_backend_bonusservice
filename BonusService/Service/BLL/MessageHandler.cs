@@ -1,6 +1,9 @@
 ﻿using BonusService.Service.Model.enums;
+
 using MemberSite.Service.Model;
+
 using Newtonsoft.Json;
+
 using Serilog.Context;
 
 namespace BonusService.Service.BLL
@@ -27,22 +30,22 @@ namespace BonusService.Service.BLL
             LogContext.PushProperty("Handler", "VerificationReward");
             _logger.LogInformation($"key:{key} message:{message}");
             var result = new ApiResult();
-            switch (key) 
+            switch (key)
             {
                 case "verify.phone":
                 case "verify.email":
                     var verify = JsonConvert.DeserializeObject<SetVerificationRewardReq>(message);
-                    if (verify != null) 
+                    if (verify != null)
                     {
                         result = _bonusAPIBLL.SetVerificationReward(verify.CustId, verify.OTPType, true);
                         _logger.LogInformation($"SetVerificationReward {verify.OTPType} result:{result.ErrorCode}, {result.Message}");
                     }
-                    
+
                     break;
                 case "deposit.payment":
                 case "deposit.local":
                     var deposit = JsonConvert.DeserializeObject<SetVerificationRewardByDeposit>(message);
-                    if (deposit != null) 
+                    if (deposit != null)
                     {
                         result = _bonusAPIBLL.SetVerificationReward(deposit.CustId, OTPTypeEnum.SMS, true);
                         _logger.LogInformation($"SetVerificationReward SMS result:{result.ErrorCode}, {result.Message}");
