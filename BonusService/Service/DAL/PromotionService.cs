@@ -183,6 +183,8 @@ namespace BonusService.Service.DAL
                 realName.Replace(" ", string.Empty)
             };
 
+            patterns = patterns.Distinct().ToList(); //移除空白如果一樣，而realNameCheckResult又有符合的資料，Count會被重複計算
+
             // 檢查是否有相同
             var realNameCheckResult = new List<CompareRealNameDto>();
             foreach (var name in patterns)
