@@ -5,7 +5,7 @@ using BonusService.Service.DAL.Interface;
 using BonusService.Service.Extensions;
 using BonusService.Service.Library;
 using BonusService.Service.Model;
-
+using Prometheus;
 using StackExchange.Redis;
 
 namespace BonusService
@@ -93,11 +93,18 @@ namespace BonusService
             }
 
             app.UseRouting();
+            app.UseHttpMetrics();
             app.UseRequestLogMiddleware();
             app.UseResponseLogMiddleware();
+            app.UseHttpMetrics(options =>
+            {
+                options.AddCustomLabel("host", context => context.Request.Host.Host);
+            });
+
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapMetrics();
                 endpoints.MapGet("/health", async context =>
                 {
                     await context.Response.WriteAsync($"{env.EnvironmentName}-{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}");
