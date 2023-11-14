@@ -44,8 +44,13 @@ pipeline {
                         sh "yq -i '.spec.template.spec.containers[0].image = \"harbor.ailabpte.co/bonusservice/bonusservice:${imageversion}\"' bonusworker-deploy.yaml"
                         sh 'git add bonusservice-deploy.yaml'
                         sh 'git add bonusworker-deploy.yaml'
-                        sh "git commit -m 'update dev bonusservice ver:${imageversion}'"
-                        sh 'git push'
+                        script {
+                          status = sh (script: 'git status --short', returnStdout: true).trim()
+                          if(!status.startsWith("??")){
+                              sh "git commit -m 'update dev bonusservice ver:${imageversion}'"
+                              sh 'git push'
+                          }
+                        }
                     }
                 }
         }
