@@ -2,6 +2,7 @@
   "profiles": {
     "BonusService": {
       "commandName": "Project",
+      "commandLineArgs": "Nova", // Nova or Leobet
       "applicationUrl": "http://localhost:50997",
       "launchBrowser": false,
       "environmentVariables": {

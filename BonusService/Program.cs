@@ -6,7 +6,10 @@ using Serilog;
 using Serilog.Exceptions;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Configuration.AddRemoteJsonConfig(builder.Configuration.GetSection("ConfigService").Get<string[]>());
+
+var remoteUrls = builder.Configuration.GetSection("ConfigService").Get<string[]>();
+remoteUrls = builder.Configuration.CheckLocalConfig(builder.Environment, args, remoteUrls);
+builder.Configuration.AddRemoteJsonConfig(remoteUrls);
 
 var excludesMessage = builder.Configuration.GetSection("ExcludesMessage").Get<string[]>();
 var excludesApiEndpoints = builder.Configuration.GetSection("ExcludesApiEndpoint").Get<string[]>();
@@ -39,10 +42,9 @@ if (!string.IsNullOrEmpty(serviceType) && serviceType.Equals("worker", StringCom
         .AddHostedService<DepositBonusWorker>()
         .AddHostedService<RabbitMQConsumer>()
         .AddHostedService<DepositReferralWorker>()
-        .AddHostedService<BonusSettledWorker>();                                                
-    //.AddHostedService<RewardWorker>();
-    //.AddHostedService<AngPaoEventWorker>(); //活動結束，關閉排程
+        .AddHostedService<BonusCancelResetWorker>();
 }
+
 var app = builder.Build();
 startup.Configure(app, builder.Environment);
 
