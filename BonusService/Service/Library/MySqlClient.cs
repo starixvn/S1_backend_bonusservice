@@ -257,6 +257,31 @@ namespace BonusService.Service.Library
             _logger.LogDebug($"{name} {sw.Elapsed:c}");
             return result;
         }
+        
+        public IEnumerable<T> Query<T>(string spName, CommandType commandType = CommandType.StoredProcedure, object parameters = null, int? commandTimeout = null)
+        {
+            IEnumerable<T> result;
+            var sw = Stopwatch.StartNew();
+            try
+            {
+                using var connection = new MySqlConnection(_connectionString);
+                var command = new CommandDefinition(spName, parameters,
+                    commandTimeout: commandTimeout,
+                    commandType: commandType);
+                result = connection.Query<T>(command);
+                connection.Close();
+                connection.Dispose();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, spName);
+                throw;
+            }
+
+            LogContext.PushProperty("elapsed", sw.Elapsed.TotalMilliseconds);
+            _logger.LogDebug($"{spName} {sw.Elapsed:c}");
+            return result.ToList();
+        }
 
         #endregion
 
@@ -299,6 +324,25 @@ namespace BonusService.Service.Library
             }
 
             LogContext.PushProperty("elapsed", sw.Elapsed.TotalMilliseconds);
+            _logger.LogDebug($"{name} {sw.Elapsed:c}");
+            return result;
+        }
+        
+        public int Execute(string name, DynamicParameters parameters, IDbTransaction transaction)
+        {
+            int result;
+            var sw = Stopwatch.StartNew();
+            try
+            {
+                result = transaction.Connection.Execute(name, parameters, commandType: CommandType.StoredProcedure);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, name);
+                throw;
+            }
+
+            LogContext.PushProperty("ElapsedMilliseconds", sw.Elapsed.TotalMilliseconds);
             _logger.LogDebug($"{name} {sw.Elapsed:c}");
             return result;
         }
@@ -366,7 +410,26 @@ namespace BonusService.Service.Library
             _logger.LogDebug($"{name} {sw.Elapsed:c}");
             return result;
         }
+        
+        public int Execute(string name, object parameters, MySqlConnection connection, MySqlTransaction trans)
+        {
+            int result;
+            var sw = Stopwatch.StartNew();
+            try
+            {
+                result = connection.Execute(name, parameters, commandType: CommandType.StoredProcedure, transaction: trans);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, name);
+                throw;
+            }
 
+            LogContext.PushProperty("elapsed", sw.Elapsed.TotalMilliseconds);
+            _logger.LogDebug($"{name} {sw.Elapsed:c}");
+            return result;
+        }
+        
         #endregion
 
         public void CommitAndDisposeConnection(MySqlConnection conn, IDbTransaction trans)
