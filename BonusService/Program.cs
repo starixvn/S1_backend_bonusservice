@@ -42,10 +42,11 @@ if (!string.IsNullOrEmpty(serviceType) && serviceType.Equals("worker", StringCom
         .AddHostedService<DepositBonusWorker>()
         .AddHostedService<RabbitMQConsumer>()
         .AddHostedService<DepositReferralWorker>()
-        .AddHostedService<BonusSettledWorker>();                                                
-    //.AddHostedService<RewardWorker>();
-    //.AddHostedService<AngPaoEventWorker>(); //活動結束，關閉排程
+        .AddHostedService<BonusCancelResetWorker>()
+        .AddHostedService<BonusSettledWorker>()
+        .AddHostedService<RewardWorker>();
 }
+
 var app = builder.Build();
 startup.Configure(app, builder.Environment);
 

@@ -72,6 +72,8 @@ namespace BonusService
             services.AddSingleton<PromotionBll>();
             services.AddSingleton<AngPaoEventBLL>();
             services.AddSingleton<AngPaoEventService>();
+            services.AddSingleton<QueueJobBLL>();
+            services.AddSingleton<QueueJobService>();
 
             services.AddControllers();
             services.AddOptionListByDB<AllowIp>("Service_MemberAllowIP_Get");
