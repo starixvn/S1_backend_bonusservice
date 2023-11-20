@@ -47,12 +47,6 @@ namespace MemberSite.Service.Model
     public class ClaimVerificationRewardData
     {
         public int CustId { get; set; }
-        public int SiteId { get; set; }
-        public int CurrencyId { get; set; }
-        public OTPTypeEnum Type { get; set; }
-        public bool Verified { get; set; }
-        public decimal? Reward { get; set; }
-        public decimal MinDeposit { get; set; }
-        public decimal SumDepositAmount { get; set; }
+        public string Data { get; set; }
     }
 }
