@@ -24,11 +24,12 @@ namespace BonusService.Service.DAL
             return _reportDbClient.Query<T>("Service_QueueJob_Get", new DynamicParameters(p));
         }
         
-        public int DeleteQueueJobByCustId(int custId)
+        public int DeleteQueueJobByCustId(int custId, QueueJob type)
         {
             var p = new
             {
-                _CustId = custId
+                _CustId = custId,
+                _Type = (int)type
             };
             return _mainDbClient.Execute("Service_QueueJobByCustId_Del", new DynamicParameters(p));
         }

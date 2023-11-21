@@ -17,9 +17,9 @@ namespace BonusService.Service.BLL
             return _queueJobService.GetQueueJob<T>(type);
         }
         
-        public int DeleteQueueJobByCustId(int custId)
+        public int DeleteQueueJobByCustId(int custId , QueueJob type)
         {
-            return _queueJobService.DeleteQueueJobByCustId(custId);
+            return _queueJobService.DeleteQueueJobByCustId(custId ,type);
         }
     }
 }

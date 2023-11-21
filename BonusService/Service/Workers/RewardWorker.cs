@@ -45,7 +45,7 @@ namespace BonusService.Service.Workers
                     var resultEmail = _bonusApiBll.SetVerificationReward(data.CustId, OTPTypeEnum.Email, true);
                     _logger.LogInformation($"SetVerificationReward Email ,CustId:{data.CustId} ,result:{resultEmail.ErrorCode}, {resultEmail.Message}");
 
-                    _queueJobBll.DeleteQueueJobByCustId(data.CustId);
+                    _queueJobBll.DeleteQueueJobByCustId(data.CustId ,QueueJob.Verification);
                 }
             }
             catch (Exception ex)
