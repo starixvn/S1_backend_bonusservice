@@ -1,6 +1,7 @@
 ﻿using BonusService.Service.BLL;
 using BonusService.Service.Extensions;
-
+using BonusService.Service.Model.enums;
+using MemberSite.Service.Model;
 using Serilog.Context;
 
 namespace BonusService.Service.Workers
@@ -9,14 +10,14 @@ namespace BonusService.Service.Workers
     {
         private readonly ILogger<RewardWorker> _logger;
         private readonly BonusAPIBLL _bonusApiBll;
-        private readonly RewardBLL _rewardBll;
+        private readonly QueueJobBLL _queueJobBll;
         private Timer _timerClaimReward;
 
         public RewardWorker(IServiceProvider provider)
         {
             _logger = provider.GetRequiredService<ILogger<RewardWorker>>();
             _bonusApiBll = provider.GetRequiredService<BonusAPIBLL>();
-            _rewardBll = provider.GetRequiredService<RewardBLL>();
+            _queueJobBll = provider.GetRequiredService<QueueJobBLL>();
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -32,14 +33,19 @@ namespace BonusService.Service.Workers
             {
                 _logger.LogInformation("Claim Verification Reward Task Start");
 
-                var list = _rewardBll.GetVerificationRewardData();
+                var list = _queueJobBll.GetQueueJob<ClaimVerificationRewardData>(QueueJob.Verification);
 
                 foreach (var data in list)
                 {
-                    if (data.Reward == null)
-                    {
-                        _bonusApiBll.SetVerificationReward(data.CustId, data.Type, true);
-                    }
+                    _logger.LogInformation($"Do SetVerificationReward ,CustId:{data.CustId}");
+                    
+                    var resultSms = _bonusApiBll.SetVerificationReward(data.CustId, OTPTypeEnum.SMS, true);
+                    _logger.LogInformation($"SetVerificationReward SMS ,CustId:{data.CustId} ,result:{resultSms.ErrorCode}, {resultSms.Message}");
+                    
+                    var resultEmail = _bonusApiBll.SetVerificationReward(data.CustId, OTPTypeEnum.Email, true);
+                    _logger.LogInformation($"SetVerificationReward Email ,CustId:{data.CustId} ,result:{resultEmail.ErrorCode}, {resultEmail.Message}");
+
+                    _queueJobBll.DeleteQueueJobByCustId(data.CustId ,QueueJob.Verification);
                 }
             }
             catch (Exception ex)
