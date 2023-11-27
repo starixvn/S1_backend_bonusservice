@@ -82,7 +82,7 @@ namespace BonusService.Controllers
         [HttpPost]
         public ApiResult SetVerificationReward(SetVerificationRewardReq verificationRewardReq)
         {
-            return _bonusAPIBLL.SetVerificationReward(verificationRewardReq.CustId, verificationRewardReq.OTPType, false);
+            return _bonusAPIBLL.SetVerificationReward(verificationRewardReq, false);
         }
 
         [HttpPost]

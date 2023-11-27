@@ -1,0 +1,11 @@
+﻿@BonusService_HostAddress = http://localhost:50997
+
+POST {{BonusService_HostAddress}}/api/SetVerificationReward
+Content-Type: application/json
+
+{
+  "CustId":3,
+  "OTPType":0
+}
+
+###

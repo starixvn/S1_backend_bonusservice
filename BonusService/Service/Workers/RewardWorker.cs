@@ -66,10 +66,7 @@ namespace BonusService.Service.Workers
                 {
                     var resultFail = _bonusApiBll.SetVerificationReward(fail, true);
                     _logger.LogInformation($"SetVerificationReward SMS ,CustId:{fail.CustId} ,result:{resultFail.ErrorCode}, {resultFail.Message}");
-                    if (resultFail.ErrorCode == 0)
-                    {
-                      await _redisHelper.ListLeftPopAsync("SetVerificationReward:ExceptionList");
-                    }                 
+                    await _redisHelper.ListLeftPopAsync("SetVerificationReward:ExceptionList");                     
                 }
             }
             catch (Exception ex)
