@@ -40,7 +40,6 @@ if (!string.IsNullOrEmpty(serviceType) && serviceType.Equals("worker", StringCom
         .AddHostedService<VipCashBackWorker>()
         .AddHostedService<PromotionAutoExtendWorker>()
         .AddHostedService<DepositBonusWorker>()
-        .AddHostedService<RabbitMQConsumer>()
         .AddHostedService<DepositReferralWorker>()
         .AddHostedService<BonusCancelResetWorker>()
         .AddHostedService<BonusSettledWorker>()

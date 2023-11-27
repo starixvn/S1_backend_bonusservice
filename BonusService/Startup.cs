@@ -63,7 +63,6 @@ namespace BonusService
             services.AddSingleton<PromotionAutoExtendBLL>();
             services.AddSingleton<DepositBonusBLL>();
             services.AddSingleton<CustInfoBLL>();
-            services.AddSingleton<IMessageHandler, MessageHandler>();
 
             services.AddSingleton<BonusAPIBLL>();
             services.AddSingleton<BonusAPIService>();
@@ -83,8 +82,6 @@ namespace BonusService
             services.AddOptionListByDB<ConfigObject>("SiteConfig_Get", new { ConfigGroup = "BonusService" });
             services.AddSiteConfig();
             services.AddSingleton<ConfigBLL>();
-
-            services.AddMessageQueueConnection();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

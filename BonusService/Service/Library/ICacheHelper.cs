@@ -21,17 +21,13 @@ namespace BonusService.Service.Library
         bool KeyExists(string key, RedisDataBase redisDataBase = RedisDataBase.Bonus);
 
         Task<TItem> StringGetAsync<TItem>(string key, RedisDataBase redisDataBase = RedisDataBase.Bonus);
-        List<TItem> GetCacheList<TItem>(IEnumerable<string> keys, RedisDataBase redisDataBase = RedisDataBase.Bonus);
 
-        bool SetCacheList<TItem>(Dictionary<string, TItem> dataList, TimeSpan? timeSpan,
-            RedisDataBase redisDataBase = RedisDataBase.Bonus);
+        bool InsertList<TItem>(string key, TimeSpan? timeSpan, IEnumerable<TItem> list, RedisDataBase redisDataBase = RedisDataBase.Bonus);
 
-        bool InsertList<TItem>(string key, TimeSpan? timeSpan, IEnumerable<TItem> list,
-            RedisDataBase redisDataBase = RedisDataBase.Bonus);
-
-        List<TItem> GetListByRange<TItem>(string key, long startIndex, long endIndex,
-            RedisDataBase redisDataBase = RedisDataBase.Bonus);
+        List<TItem> GetListByRange<TItem>(string key, long startIndex, long endIndex, RedisDataBase redisDataBase = RedisDataBase.Bonus);
 
         long GetListLength(string key, RedisDataBase redisDataBase = RedisDataBase.Bonus);
+
+        Task<bool> ListLeftPopAsync(string key, RedisDataBase redisDataBase = RedisDataBase.Bonus);
     }
 }

@@ -5,6 +5,8 @@ using BonusService.Service.Model.enums;
 
 using MemberSite.Service.Model;
 
+using Newtonsoft.Json;
+
 namespace BonusService.Service.BLL
 {
     public class BonusAPIBLL
@@ -15,6 +17,7 @@ namespace BonusService.Service.BLL
         private readonly MessageService _messageService;
         private readonly Currency _currency;
         private readonly ICacheHelper _redisHelper;
+        private readonly ILogger<BonusAPIBLL> _logger;
 
         public BonusAPIBLL(IServiceProvider provider)
         {
@@ -24,6 +27,7 @@ namespace BonusService.Service.BLL
             _messageService = provider.GetRequiredService<MessageService>();
             _currency = provider.GetRequiredService<Currency>();
             _redisHelper = provider.GetRequiredService<ICacheHelper>();
+            _logger = provider.GetRequiredService<ILogger<BonusAPIBLL>>();
         }
         public CustInfoProfile GetCustInfoProfile(int custId)
         {
@@ -34,13 +38,21 @@ namespace BonusService.Service.BLL
         public ApiResult CheckRewardCondition(int custId, OTPTypeEnum inputType, Customer custInfo = null, VerificationRewardData verInfo = null, CustVerificationRewardData custRewardInfo = null)
         {
             var result = new ApiResult();
+
             if (custInfo == null)
+            {
                 custInfo = _custInfoService.GetCustInfo(custId);
+            }
+
             if (verInfo == null)
+            {
                 verInfo = _bonusAPIService.GetVerificationReward(custInfo.SiteId, custInfo.CurrencyId);
+            }
+
             if (custRewardInfo == null)
-                custRewardInfo = _bonusAPIService.GetCustVerificationReward(custId, true);
-            //var rewardLimit = _bonusAPIService.GetVerificationRewardLimit(custInfo.SiteId, custInfo.CurrencyId, inputType);
+            {
+                custRewardInfo = _bonusAPIService.GetCustVerificationReward(custId);
+            }                       
 
             var verifyTime = _bonusAPIService.GetVerifyTime(custInfo.CustId, inputType);
             if (verInfo == null)
@@ -132,61 +144,78 @@ namespace BonusService.Service.BLL
             }
             return result;
         }
-        public ApiResult SetVerificationReward(int custId, OTPTypeEnum inputType, bool isWorker)
+
+        public ApiResult SetVerificationReward(SetVerificationRewardReq verificationReward, bool isWorker)
         {
-            var custInfo = _custInfoService.GetCustInfo(custId);
-            var verInfo = _bonusAPIService.GetVerificationReward(custInfo.SiteId, custInfo.CurrencyId);
-            var custRewardInfo = _bonusAPIService.GetCustVerificationReward(custId, true);
+            try
+            {  
+                var custInfo = _custInfoService.GetCustInfo(verificationReward.CustId);
+                var verInfo = _bonusAPIService.GetVerificationReward(custInfo.SiteId, custInfo.CurrencyId);
+                var custRewardInfo = _bonusAPIService.GetCustVerificationReward(verificationReward.CustId);
 
-            var result = CheckRewardCondition(custId, inputType, custInfo, verInfo, custRewardInfo); //領獎條件規則
+                var result = CheckRewardCondition(verificationReward.CustId, verificationReward.OTPType, custInfo, verInfo, custRewardInfo); //領獎條件規則
 
-            if (result.ErrorCode != 0)
-            {
-                if (result.ErrorCode == 104 && !isWorker)
+                if (result.ErrorCode != 0)
                 {
-                    //Personal Msg - Failed
-                    _currency.GetCurrency().TryGetValue(custInfo.CurrencyId, out var currencyName);
-                    var leftAmountLimit = verInfo.MinDeposit - custRewardInfo.SumDepositAmount;
-                    var title = string.Format(_selLangBll.GetResourceValue("lbl_VerificationRewardLimitTitle", custInfo.UserLang));
-                    var content = string.Format(_selLangBll.GetResourceValue("lbl_VerificationRewardLimit", custInfo.UserLang),
-                        currencyName, leftAmountLimit.ToString("#,##0.##"));
-                    _messageService.SendMessage(new Message("System", custInfo.CustId, custInfo.UserLang, title, content));
+                    if (result.ErrorCode == 104 && !isWorker)
+                    {
+                        //Personal Msg - Failed
+                        _currency.GetCurrency().TryGetValue(custInfo.CurrencyId, out var currencyName);
+                        var leftAmountLimit = verInfo.MinDeposit - custRewardInfo.SumDepositAmount;
+                        var title = string.Format(_selLangBll.GetResourceValue("lbl_VerificationRewardLimitTitle", custInfo.UserLang));
+                        var content = string.Format(_selLangBll.GetResourceValue("lbl_VerificationRewardLimit", custInfo.UserLang),
+                            currencyName, leftAmountLimit.ToString("#,##0.##"));
+                        _messageService.SendMessage(new Message("System", custInfo.CustId, custInfo.UserLang, title, content));
 
+                    }
+                    return result;
                 }
+                var reward = 0m;
+                if (verInfo.VerificationType == 1) //email & phone both
+                {
+                    reward = verInfo.PhoneReward + verInfo.EmailReward;
+                    result = _bonusAPIService.PayoutVerificationReward(custInfo.CustId, custInfo.SiteId, custInfo.CurrencyId, custInfo.UserName, OTPVerificationType.All, reward);
+                }
+                else if (verInfo.VerificationType == 0)//email & phone each
+                {
+                    if (verificationReward.OTPType == OTPTypeEnum.SMS)
+                    {
+                        reward = verInfo.PhoneReward;
+                        result = _bonusAPIService.PayoutVerificationReward(custInfo.CustId, custInfo.SiteId, custInfo.CurrencyId, custInfo.UserName, OTPVerificationType.SMS, reward);
+                    }
+                    else
+                    {
+                        reward = verInfo.EmailReward;
+                        result = _bonusAPIService.PayoutVerificationReward(custInfo.CustId, custInfo.SiteId, custInfo.CurrencyId, custInfo.UserName, OTPVerificationType.Email, reward);
+                    }
+                }
+
+                if (result.ErrorCode == 0)
+                {
+                    //Personal Msg - Success
+                    _currency.GetCurrency().TryGetValue(custInfo.CurrencyId, out var currencyName);
+                    var title = string.Format(_selLangBll.GetResourceValue("lbl_VerificationRewardLimitTitle", custInfo.UserLang));
+                    var content = string.Format(_selLangBll.GetResourceValue("lbl_VerificationRewardContent", custInfo.UserLang),
+                        currencyName,
+                        reward.ToString("#,##0.##"));
+                    _messageService.SendMessage(new Message("System", custInfo.CustId, custInfo.UserLang, title, content));
+                }
+
                 return result;
             }
-            var reward = 0m;
-            if (verInfo.VerificationType == 1) //email & phone both
+            catch (Exception ex)
             {
-                reward = verInfo.PhoneReward + verInfo.EmailReward;
-                result = _bonusAPIService.PayoutVerificationReward(custInfo.CustId, custInfo.SiteId, custInfo.CurrencyId, custInfo.UserName, OTPVerificationType.All, reward);
-            }
-            else if (verInfo.VerificationType == 0)//email & phone each
-            {
-                if (inputType == OTPTypeEnum.SMS)
-                {
-                    reward = verInfo.PhoneReward;
-                    result = _bonusAPIService.PayoutVerificationReward(custInfo.CustId, custInfo.SiteId, custInfo.CurrencyId, custInfo.UserName, OTPVerificationType.SMS, reward);
-                }
-                else
-                {
-                    reward = verInfo.EmailReward;
-                    result = _bonusAPIService.PayoutVerificationReward(custInfo.CustId, custInfo.SiteId, custInfo.CurrencyId, custInfo.UserName, OTPVerificationType.Email, reward);
-                }
-            }
+                _logger.LogError(ex,$"SetVerificationReward Exception {ex.Message} || {JsonConvert.SerializeObject(verificationReward)}");
+                
+                //將Fail的放入Redis，讓Worker處理
+                var fail = new List<SetVerificationRewardReq>() { verificationReward };
+                _redisHelper.InsertList("SetVerificationReward:ExceptionList",null,fail);
 
-            if (result.ErrorCode == 0)
-            {
-                //Personal Msg - Success
-                _currency.GetCurrency().TryGetValue(custInfo.CurrencyId, out var currencyName);
-                var title = string.Format(_selLangBll.GetResourceValue("lbl_VerificationRewardLimitTitle", custInfo.UserLang));
-                var content = string.Format(_selLangBll.GetResourceValue("lbl_VerificationRewardContent", custInfo.UserLang),
-                    currencyName,
-                    reward.ToString("#,##0.##"));
-                _messageService.SendMessage(new Message("System", custInfo.CustId, custInfo.UserLang, title, content));
+                return new ApiResult()
+                {
+                    RawMessage = ex.Message
+                };
             }
-
-            return result;
         }
     }
 }

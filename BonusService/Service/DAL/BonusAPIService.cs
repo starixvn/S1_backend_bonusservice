@@ -30,27 +30,20 @@ namespace BonusService.Service.DAL
             return _reportDbClient.QueryFirst<VerificationRewardData>("Service_VerificationReward_Get", p);
         }
 
-        public VerificationRewardLimit GetVerificationRewardLimit(int siteId, int currencyId, OTPTypeEnum type)
-        {
-            var p = new DynamicParameters(new { _SiteId = siteId, _CurrencyId = currencyId, _Type = type });
-            return _reportDbClient.QueryFirst<VerificationRewardLimit>("Service_VerificationRewardLimit_Get", p);
-        }
-
         public DateTime? GetVerifyTime(int custId, OTPTypeEnum type)
         {
-            var taskId = (int)type + 3;
+            var taskId = type switch
+            {
+                OTPTypeEnum.SMS => 3,
+                OTPTypeEnum.Email => 4
+            };
             var p = new DynamicParameters(new { _CustId = custId, _TaskId = taskId });
             return _mainDbClient.QueryFirst<DateTime?>("Service_CustVerifyTime_Get", p);
         }
 
-        public CustVerificationRewardData GetCustVerificationReward(int custId, bool usedMainDb = false)
+        public CustVerificationRewardData GetCustVerificationReward(int custId)
         {
-            var p = new DynamicParameters(new { _CustId = custId });
-            if (usedMainDb)
-                return _mainDbClient.QueryFirst<CustVerificationRewardData>("Service_CustVerificationReward_Get_V2", p);
-            else
-                return _reportDbClient.QueryFirst<CustVerificationRewardData>("Service_CustVerificationReward_Get_V2", p);
-
+            return _mainDbClient.QueryFirst<CustVerificationRewardData>("Service_CustVerificationReward_Get_V2", new { _CustId = custId });
         }
 
         private int SetCustVerifiedReward(int custId, int siteId, int currencyId, int verifyItem, MySqlTransaction trans)
