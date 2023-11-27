@@ -139,66 +139,7 @@ namespace BonusService.Service.Library
             }
         }
 
-        public List<TItem> GetCacheList<TItem>(IEnumerable<string> keys, RedisDataBase redisDataBase = RedisDataBase.Bonus)
-        {
-            try
-            {
-                var taskList = new List<Task<RedisValue>>();
-                var db = _multiplexer.GetDatabase((int)redisDataBase);
-                var trans = db.CreateTransaction();
-                foreach (var key in keys)
-                {
-                    var rediskey = $"{redisDataBase}:{RemoveSpecialChars(key)}";
-                    var task = db.StringGetAsync(rediskey);
-                    taskList.Add(task);
-                }
-
-                trans.Execute();
-
-                var reslstList = new List<TItem>();
-                foreach (var task in taskList)
-                {
-                    if (task.Result.HasValue)
-                    {
-                        var data = JsonConvert.DeserializeObject<TItem>(task.Result);
-                        reslstList.Add(data);
-                    }
-                }
-                return reslstList;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"{keys} | {ex.Message}");
-                return default;
-            }
-        }
-
-        public bool SetCacheList<TItem>(Dictionary<string, TItem> dataList, TimeSpan? timeSpan,
-            RedisDataBase redisDataBase = RedisDataBase.Bonus)
-        {
-            try
-            {
-                var taskList = new List<Task<bool>>();
-                var db = _multiplexer.GetDatabase((int)redisDataBase);
-                var trans = db.CreateTransaction();
-                foreach (var data in dataList)
-                {
-                    var key = $"{redisDataBase}:{RemoveSpecialChars(data.Key)}";
-                    var task = db.StringSetAsync(key, JsonConvert.SerializeObject(data.Value), timeSpan);
-                    taskList.Add(task);
-                }
-
-                return trans.Execute();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"{dataList.Keys} | {ex.Message}");
-                return default;
-            }
-        }
-
-        public bool InsertList<TItem>(string key, TimeSpan? timeSpan, IEnumerable<TItem> list,
-            RedisDataBase redisDataBase = RedisDataBase.Bonus)
+        public bool InsertList<TItem>(string key, TimeSpan? timeSpan, IEnumerable<TItem> list, RedisDataBase redisDataBase = RedisDataBase.Bonus)
         {
             try
             {
@@ -228,8 +169,7 @@ namespace BonusService.Service.Library
             }
         }
 
-        public List<TItem> GetListByRange<TItem>(string key, long startIndex, long endIndex,
-            RedisDataBase redisDataBase = RedisDataBase.Bonus)
+        public List<TItem> GetListByRange<TItem>(string key, long startIndex, long endIndex, RedisDataBase redisDataBase = RedisDataBase.Bonus)
         {
             try
             {
@@ -256,7 +196,7 @@ namespace BonusService.Service.Library
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"{key} | {ex.Message}");
-                return default;
+                return new List<TItem>();
             }
         }
 
@@ -272,6 +212,27 @@ namespace BonusService.Service.Library
             {
                 _logger.LogError(ex, $"{key} | {ex.Message}");
                 return default;
+            }
+        }
+
+        public async Task<bool> ListLeftPopAsync(string key, RedisDataBase redisDataBase = RedisDataBase.Bonus)
+        {
+            try
+            {
+                key = $"{redisDataBase}:{RemoveSpecialChars(key)}";
+                var db = _multiplexer.GetDatabase((int)redisDataBase);
+                if (!db.KeyExists(key))
+                {
+                    return false;
+                }
+
+                var item = await db.ListLeftPopAsync(key);
+                return item.HasValue;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"{key} | {ex.Message}");
+                return false;
             }
         }
 

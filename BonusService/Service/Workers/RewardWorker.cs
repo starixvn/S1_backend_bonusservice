@@ -1,5 +1,6 @@
 ﻿using BonusService.Service.BLL;
 using BonusService.Service.Extensions;
+using BonusService.Service.Library;
 using BonusService.Service.Model.enums;
 using MemberSite.Service.Model;
 using Serilog.Context;
@@ -12,12 +13,14 @@ namespace BonusService.Service.Workers
         private readonly BonusAPIBLL _bonusApiBll;
         private readonly QueueJobBLL _queueJobBll;
         private Timer _timerClaimReward;
+        private readonly ICacheHelper _redisHelper;
 
         public RewardWorker(IServiceProvider provider)
         {
             _logger = provider.GetRequiredService<ILogger<RewardWorker>>();
             _bonusApiBll = provider.GetRequiredService<BonusAPIBLL>();
             _queueJobBll = provider.GetRequiredService<QueueJobBLL>();
+            _redisHelper = provider.GetRequiredService<ICacheHelper>();
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -26,7 +29,7 @@ namespace BonusService.Service.Workers
             return Task.CompletedTask;
         }
 
-        private void DoClaimVerificationRewardTaskAsync(object state)
+        private async void DoClaimVerificationRewardTaskAsync(object state)
         {
             LogContext.PushProperty("RequestId", Guid.NewGuid().ToString());
             try
@@ -38,14 +41,32 @@ namespace BonusService.Service.Workers
                 foreach (var data in list)
                 {
                     _logger.LogInformation($"Do SetVerificationReward ,CustId:{data.CustId}");
-                    
-                    var resultSms = _bonusApiBll.SetVerificationReward(data.CustId, OTPTypeEnum.SMS, true);
+
+                    var sms = new SetVerificationRewardReq()
+                    {
+                        CustId = data.CustId,
+                        OTPType = OTPTypeEnum.SMS
+                    };
+                    var resultSms = _bonusApiBll.SetVerificationReward(sms, true);
                     _logger.LogInformation($"SetVerificationReward SMS ,CustId:{data.CustId} ,result:{resultSms.ErrorCode}, {resultSms.Message}");
-                    
-                    var resultEmail = _bonusApiBll.SetVerificationReward(data.CustId, OTPTypeEnum.Email, true);
+
+                    var email = new SetVerificationRewardReq()
+                    {
+                        CustId = data.CustId,
+                        OTPType = OTPTypeEnum.Email
+                    };
+                    var resultEmail = _bonusApiBll.SetVerificationReward(email, true);
                     _logger.LogInformation($"SetVerificationReward Email ,CustId:{data.CustId} ,result:{resultEmail.ErrorCode}, {resultEmail.Message}");
 
                     _queueJobBll.DeleteQueueJobByCustId(data.CustId ,QueueJob.Verification);
+                }
+
+                var failList = _redisHelper.GetListByRange<SetVerificationRewardReq>("SetVerificationReward:ExceptionList", 0, -1);
+                foreach (var fail in failList) 
+                {
+                    var resultFail = _bonusApiBll.SetVerificationReward(fail, true);
+                    _logger.LogInformation($"SetVerificationReward SMS ,CustId:{fail.CustId} ,result:{resultFail.ErrorCode}, {resultFail.Message}");
+                    await _redisHelper.ListLeftPopAsync("SetVerificationReward:ExceptionList");                     
                 }
             }
             catch (Exception ex)

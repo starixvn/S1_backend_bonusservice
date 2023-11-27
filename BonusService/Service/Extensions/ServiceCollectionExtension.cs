@@ -1,10 +1,8 @@
-﻿using BonusService.Service.BLL;
-using BonusService.Service.DAL;
+﻿using BonusService.Service.DAL;
 using BonusService.Service.Library;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
 
-using RabbitMQ.Client;
 
 namespace BonusService.Service.Extensions
 {
@@ -31,20 +29,6 @@ namespace BonusService.Service.Extensions
             services.AddSingleton(factory => new MySqlClient(config.GetConnectionString($"{serviceType}_LogDB"), logger)
             {
                 DataBase = DataBase.Log
-            });
-        }
-
-        public static void AddMessageQueueConnection(this IServiceCollection services)
-        {
-            var provider = services.BuildServiceProvider();
-            var configBll = provider.GetRequiredService<ConfigBLL>();
-            var config = configBll.GetConfigValueByEnvironment<RabbitMqConfig>("RabbitMQ");
-
-            services.AddSingleton<IConnectionFactory>(_ => new ConnectionFactory()
-            {
-                HostName = config.HostName,
-                UserName = config.UserName,
-                Password = config.Password
             });
         }
 
