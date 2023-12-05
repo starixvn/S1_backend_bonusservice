@@ -33,5 +33,14 @@ namespace BonusService.Service.DAL
             };
             return _mainDbClient.Execute("Service_QueueJobByCustId_Del", new DynamicParameters(p));
         }
+        
+        public int DeleteQueueJobBySq(int sq)
+        {
+            var p = new
+            {
+                _Sq = sq
+            };
+            return _mainDbClient.Execute("Service_QueueJobBySQ_Del", new DynamicParameters(p));
+        }
     }
 }

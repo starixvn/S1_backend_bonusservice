@@ -16,9 +16,9 @@ namespace BonusService.Service.DAL
             _reportDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Report);
         }
 
-        public IEnumerable<ClaimVerificationRewardData> GetVerificationRewardData()
+        public IEnumerable<QueueJobData> GetVerificationRewardData()
         {
-            return _reportDbClient.Query<ClaimVerificationRewardData>("Service_ClaimVerificationReward_Get");
+            return _reportDbClient.Query<QueueJobData>("Service_ClaimVerificationReward_Get");
         }
     }
 }

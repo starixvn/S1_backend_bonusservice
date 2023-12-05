@@ -21,5 +21,10 @@ namespace BonusService.Service.BLL
         {
             return _queueJobService.DeleteQueueJobByCustId(custId ,type);
         }
+        
+        public int DeleteQueueJobBySq(int sq)
+        {
+            return _queueJobService.DeleteQueueJobBySq(sq);
+        }
     }
 }
