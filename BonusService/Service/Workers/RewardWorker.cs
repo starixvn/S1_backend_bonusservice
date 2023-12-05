@@ -36,7 +36,7 @@ namespace BonusService.Service.Workers
             {
                 _logger.LogInformation("Claim Verification Reward Task Start");
 
-                var list = _queueJobBll.GetQueueJob<ClaimVerificationRewardData>(QueueJob.Verification);
+                var list = _queueJobBll.GetQueueJob<QueueJobData>(QueueJob.Verification);
 
                 foreach (var data in list)
                 {

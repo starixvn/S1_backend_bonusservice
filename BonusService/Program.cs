@@ -1,7 +1,6 @@
 using BonusService;
 using BonusService.Extensions;
 using BonusService.Service.Workers;
-
 using Serilog;
 using Serilog.Exceptions;
 
@@ -43,7 +42,8 @@ if (!string.IsNullOrEmpty(serviceType) && serviceType.Equals("worker", StringCom
         .AddHostedService<DepositReferralWorker>()
         .AddHostedService<BonusCancelResetWorker>()
         .AddHostedService<BonusSettledWorker>()
-        .AddHostedService<RewardWorker>();
+        .AddHostedService<RewardWorker>()
+        .AddHostedService<NewYear2024Worker>();
 }
 
 var app = builder.Build();

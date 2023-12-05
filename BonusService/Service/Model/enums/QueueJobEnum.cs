@@ -3,6 +3,7 @@
     public enum QueueJob
     {
         Init = 0 ,
-        Verification = 1
+        Verification = 1,
+        DrawPrize = 2
     }
 }

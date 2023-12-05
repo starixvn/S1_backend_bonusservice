@@ -13,7 +13,7 @@ namespace BonusService.Service.BLL
             _rewardService = provider.GetRequiredService<RewardService>();
         }
 
-        public IEnumerable<ClaimVerificationRewardData> GetVerificationRewardData()
+        public IEnumerable<QueueJobData> GetVerificationRewardData()
         {
             return _rewardService.GetVerificationRewardData();
         }
