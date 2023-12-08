@@ -18,10 +18,6 @@ namespace BonusService.Service.Extensions
             {
                 DataBase = DataBase.Main
             });
-            services.AddSingleton(factory => new MySqlClient(config.GetConnectionString($"{serviceType}_ReportDB"), logger)
-            {
-                DataBase = DataBase.Report
-            });
             services.AddSingleton(factory => new MySqlClient(config.GetConnectionString($"{serviceType}_WagerDB"), logger)
             {
                 DataBase = DataBase.Wager
@@ -30,6 +26,22 @@ namespace BonusService.Service.Extensions
             {
                 DataBase = DataBase.Log
             });
+
+            var reportDB34Conn = config.GetConnectionString($"{serviceType}_ReportDB_34");
+            if (!string.IsNullOrEmpty(reportDB34Conn))
+            {
+                services.AddSingleton(factory => new MySqlClient(reportDB34Conn, logger)
+                {
+                    DataBase = DataBase.Report
+                });
+            }
+            else
+            {
+                services.AddSingleton(factory => new MySqlClient(config.GetConnectionString($"{serviceType}_ReportDB"), logger)
+                {
+                    DataBase = DataBase.Report
+                });
+            }
         }
 
         public static IServiceCollection AddOptionListByDB<T>(this IServiceCollection services, string sql, object parameters = null)
