@@ -488,5 +488,30 @@ namespace BonusService.Service.DAL
 
             return result;
         }
+        
+        /// <summary>
+        /// 取得 PromotionMission 的進度金額
+        /// </summary>
+        /// <returns></returns>
+        public PromotionMissionProgress GetCustPromotionMissionProgress(int custId, int currencyId, string gameTypes, int periodType)
+        {
+            var p = new DynamicParameters(new
+            {
+                _CustId = custId,
+                _CurrencyId = currencyId,
+                _GameTypes = gameTypes,
+                _PeriodType = periodType
+            });
+            p.Add("_TurnoverSum", dbType: DbType.Decimal, direction: ParameterDirection.Output);
+            _reportDbClient.Query<PromotionMissionProgress>("Service_MissionBonusProgressCheck_Get", p);
+            
+            var turnoverSum = p.Get<decimal>("_TurnoverSum");
+
+            var resultModel = new PromotionMissionProgress
+            {
+                TurnoverSum = turnoverSum,
+            };
+            return resultModel;
+        }
     }
 }
