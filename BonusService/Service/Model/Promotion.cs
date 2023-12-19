@@ -28,6 +28,7 @@ namespace BonusService.Service.Model
         public string Details { get; set; }
         public int PromotionAction { get; set; }
         public string TierAmount { get; set; }
+        public string TurnoverTpGameTypes { get; set; }
         public WalletType WalletType { get; set; }
 
         public VipPeriodType PeriodType { get; set; }
@@ -49,32 +50,45 @@ namespace BonusService.Service.Model
         /// 使用金額找到符合的級距紅利
         /// </summary>
         /// <param name="depositAmount"></param>
+        /// <param name="turnoverAmount"></param>
+        /// <param name="bonus"></param>
         /// <returns></returns>
-        public TierAmount FindTierAmountLevel(decimal depositAmount)
+        public TierAmount FindTierAmountLevel(decimal depositAmount , decimal turnoverAmount , decimal bonus)
         {
             if (!TierAmountList.Any())
             {
                 return null;
             }
 
-            var tierAmountList = TierAmountList.OrderByDescending(i => i.RequiredAmount);
-            foreach (var item in tierAmountList)
+            if (PromotionType == PromotionType.MissionBonus)
             {
-                if (depositAmount >= item.RequiredAmount)
-                {
-                    return item;
-                }
+                return TierAmountList.FirstOrDefault(item => depositAmount >= item.RequiredAmount && turnoverAmount >= item.RequiredTurnover && bonus == item.Bonus);
             }
-            return null;
+            else
+            {
+                var tierAmountList = TierAmountList.OrderByDescending(i => i.RequiredAmount);
+                return tierAmountList.FirstOrDefault(item => depositAmount >= item.RequiredAmount);
+            }
         }
 
         /// <summary>
         /// 計算符合資格的級距紅利
         /// </summary>
         /// <param name="depositAmount"></param>
-        public void CalculateCanJoinTierAmount(decimal depositAmount)
+        /// <param name="turnoverAmount"></param>
+        public void CalculateCanJoinTierAmount(decimal depositAmount , decimal turnoverAmount)
         {
-            var canJoinTierAmount = TierAmountList.Where(i => depositAmount >= i.RequiredAmount);
+            List<TierAmount> canJoinTierAmount;
+            
+            if (PromotionType == PromotionType.MissionBonus)
+            {
+                canJoinTierAmount = TierAmountList.Where(i => depositAmount >= i.RequiredAmount && turnoverAmount >= i.RequiredTurnover).ToList();
+            }
+            else
+            {
+                canJoinTierAmount = TierAmountList.Where(i => depositAmount >= i.RequiredAmount).ToList();
+            }
+            
             _canJoinTierAmountList = canJoinTierAmount.Select(i => i.CalculateTierAmount(BonusType, depositAmount));
         }
 
@@ -171,6 +185,8 @@ namespace BonusService.Service.Model
         public decimal Bonus { get; set; }
         public decimal MaxBonus { get; set; }
         public decimal RequiredAmount { get; set; }
+        public decimal RequiredTurnover { get; set; }
+        public int TpCategoryId { get; set; }
         public int RollOver { get; set; }
         public int WinOver { get; set; }
         public CanJoinTierAmount CalculateTierAmount(BonusType bonusType, decimal depositAmount)
@@ -196,6 +212,8 @@ namespace BonusService.Service.Model
             return new CanJoinTierAmount()
             {
                 RequiredAmount = RequiredAmount,
+                RequiredTurnover = RequiredAmount,
+                TpCategoryId = TpCategoryId,
                 Bonus = Bonus,
                 BonusAmount = bonusAmount,
                 LockedAmount = lockAmount,
@@ -206,6 +224,8 @@ namespace BonusService.Service.Model
     public class CanJoinTierAmount
     {
         public decimal RequiredAmount { get; set; }
+        public decimal RequiredTurnover { get; set; }
+        public int TpCategoryId { get; set; }
         public decimal Bonus { get; set; }
         public decimal BonusAmount { get; set; }
         public decimal LockedAmount { get; set; }
@@ -485,5 +505,10 @@ namespace BonusService.Service.Model
         public decimal Bonus { get; set; }
         public decimal MaxBonus { get; set; }
         public List<int> BlockTags { get; set; }
+    }
+    
+    public class PromotionMissionProgress
+    {
+        public decimal TurnoverSum { get; set; }
     }
 }
