@@ -283,6 +283,13 @@ namespace BonusService.Service.Model
         }
 
         public bool IsPopUp { get; set; }
+        public MissionBonusProgress MissionBonusProgress { get; set; }
+    }
+
+    public class MissionBonusProgress
+    {
+        public decimal DepositAmountSum { get; set; }
+        public decimal TurnoverSum { get; set; }
     }
 
     public class SpecialCodeRequest

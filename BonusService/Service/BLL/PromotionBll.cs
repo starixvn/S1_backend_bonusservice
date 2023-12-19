@@ -274,8 +274,7 @@ namespace BonusService.Service.BLL
                 errorInfo.CustomizeErrorMsg = verifyResult.ErrorMsg;
                 return MakeErrorMessage(errorInfo);
             }
-
-
+            
             var custConditionInfo = _promotionService.GetCustConditionInfo(custId, custInfo.CurrencyId, custInfo.SiteId, bonusCode, deviceType);
             if (!custConditionInfo.CanJoin)
             {
@@ -887,8 +886,7 @@ namespace BonusService.Service.BLL
 
             Customer custInfo = null;
             if (request.IsLogin) custInfo = _custInfoService.GetCustInfo(request.CustId);
-
-            promotionList = promotionList.Where(x => x.BonusCode == "TESTMission1");
+            
             foreach (var promo in promotionList)
             {
                 if (promo.PromotionType == PromotionType.RetentionFreeBet)
@@ -1062,22 +1060,26 @@ namespace BonusService.Service.BLL
                 }
             }
 
-            if (promo.PromotionType == PromotionType.MissionBonus && promo.canJoin)
+            if (promo.PromotionType == PromotionType.MissionBonus)
             {
-                promo.DepositId = custCondition.RefId;
-                promo.DepositAmount = custCondition.Amount;
-                promo.RefList = custCondition.reference;
-
-                if (promo.TierAmountList.Any())
+                var progressData = _promotionService.GetCustPromotionMissionProgress(custId, currencyId, promo.TurnoverTpGameTypes, (int)promo.PeriodType );
+                promo.MissionBonusProgress = new MissionBonusProgress
                 {
-                    var progressData = _promotionService.GetCustPromotionMissionProgress(custId, currencyId, promo.TurnoverTpGameTypes, (int)promo.PeriodType );
-                    promo.CalculateCanJoinTierAmount(promo.DepositAmount,progressData.TurnoverSum);
-                    promo.canJoin = promo.CanJoinTierAmountList.Any();
-                }
+                    DepositAmountSum = custCondition.Amount,
+                    TurnoverSum = progressData.TurnoverSum
+                };
                 
-                if (promo.RequiredAmount > 0 && promo.RequiredAmount > promo.DepositAmount)
+                if (promo.canJoin)
                 {
-                    promo.canJoin = false;
+                    promo.DepositId = custCondition.RefId;
+                    promo.DepositAmount = custCondition.Amount;
+                    promo.RefList = custCondition.reference;
+
+                    if (promo.TierAmountList.Any())
+                    {
+                        promo.CalculateCanJoinTierAmount(promo.DepositAmount,progressData.TurnoverSum);
+                        promo.canJoin = promo.CanJoinTierAmountList.Any();
+                    }
                 }
             }
             

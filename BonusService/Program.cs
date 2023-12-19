@@ -31,19 +31,19 @@ startup.ConfigureServices(builder.Services);
 var serviceType = Environment.GetEnvironmentVariable("ServiceType");
 if (!string.IsNullOrEmpty(serviceType) && serviceType.Equals("worker", StringComparison.OrdinalIgnoreCase))
 {
-    builder.Services
-        .AddHostedService<ExpiredBonusWorker>()
-        .AddHostedService<ReferralWorker>()
-        .AddHostedService<VipUpgradeWorker>()
-        .AddHostedService<VipDowngradeWorker>()
-        .AddHostedService<VipRebateWorker>()
-        .AddHostedService<VipCashBackWorker>()
-        .AddHostedService<PromotionAutoExtendWorker>()
-        .AddHostedService<DepositBonusWorker>()
-        .AddHostedService<DepositReferralWorker>()
-        .AddHostedService<BonusCancelResetWorker>()
-        .AddHostedService<BonusSettledWorker>()
-        .AddHostedService<RewardWorker>();
+//     builder.Services
+//         .AddHostedService<ExpiredBonusWorker>()
+//         .AddHostedService<ReferralWorker>()
+//         .AddHostedService<VipUpgradeWorker>()
+//         .AddHostedService<VipDowngradeWorker>()
+//         .AddHostedService<VipRebateWorker>()
+//         .AddHostedService<VipCashBackWorker>()
+//         .AddHostedService<PromotionAutoExtendWorker>()
+//         .AddHostedService<DepositBonusWorker>()
+//         .AddHostedService<DepositReferralWorker>()
+//         .AddHostedService<BonusCancelResetWorker>()
+//         .AddHostedService<BonusSettledWorker>()
+//         .AddHostedService<RewardWorker>();
 }
 
 var app = builder.Build();
