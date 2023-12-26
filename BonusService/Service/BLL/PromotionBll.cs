@@ -1406,7 +1406,7 @@ namespace BonusService.Service.BLL
             claimPromotion.RollOver = tierAmount.RollOver;
             claimPromotion.WinOver = tierAmount.WinOver;
 
-            var canJoinTierAmount = tierAmount.CalculateTierAmount(claimPromotion.BonusType, depositAmount);
+            var canJoinTierAmount = tierAmount.CalculateTierAmount(claimPromotion.PromotionType, claimPromotion.BonusType, depositAmount);
             var bonusAmount = canJoinTierAmount.BonusAmount;
             var lockAmount = canJoinTierAmount.LockedAmount;
 
