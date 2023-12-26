@@ -89,7 +89,7 @@ namespace BonusService.Service.Model
                 canJoinTierAmount = TierAmountList.Where(i => depositAmount >= i.RequiredAmount).ToList();
             }
             
-            _canJoinTierAmountList = canJoinTierAmount.Select(i => i.CalculateTierAmount(BonusType, depositAmount));
+            _canJoinTierAmountList = canJoinTierAmount.Select(i => i.CalculateTierAmount(PromotionType, BonusType, depositAmount));
         }
 
         private IEnumerable<CanJoinTierAmount> _canJoinTierAmountList { get; set; }
@@ -189,26 +189,34 @@ namespace BonusService.Service.Model
         public int TpCategoryId { get; set; }
         public int RollOver { get; set; }
         public int WinOver { get; set; }
-        public CanJoinTierAmount CalculateTierAmount(BonusType bonusType, decimal depositAmount)
+        public CanJoinTierAmount CalculateTierAmount(PromotionType promotionType ,BonusType bonusType, decimal depositAmount)
         {
             decimal bonusAmount;
             decimal lockAmount;
-            if (bonusType == BonusType.Amount)
+            if (promotionType == PromotionType.MissionBonus)
             {
+                lockAmount = 0;
                 bonusAmount = Bonus;
-                lockAmount = RequiredAmount;
             }
             else
             {
-                bonusAmount = Math.Ceiling(Bonus * depositAmount / 100);
-                lockAmount = depositAmount;
-                if (MaxBonus != 0 && bonusAmount > MaxBonus)
+                if (bonusType == BonusType.Amount)
                 {
-                    bonusAmount = MaxBonus;
-                    lockAmount = MaxBonus * 100 / Bonus;
+                    bonusAmount = Bonus;
+                    lockAmount = RequiredAmount;
+                }
+                else
+                {
+                    bonusAmount = Math.Ceiling(Bonus * depositAmount / 100);
+                    lockAmount = depositAmount;
+                    if (MaxBonus != 0 && bonusAmount > MaxBonus)
+                    {
+                        bonusAmount = MaxBonus;
+                        lockAmount = MaxBonus * 100 / Bonus;
+                    }
                 }
             }
-
+            
             return new CanJoinTierAmount()
             {
                 RequiredAmount = RequiredAmount,
