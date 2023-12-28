@@ -1,6 +1,4 @@
-﻿using BonusService.Service.Model.enums;
-
-namespace BonusService.Service.Model
+﻿namespace BonusService.Service.Model
 {
     public class CreateManualRewardPointInfoRequest
     {

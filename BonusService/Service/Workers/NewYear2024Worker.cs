@@ -50,7 +50,7 @@ namespace BonusService.Service.Workers
                     switch (jobData.PrizeName)
                     {
                         case "PPFreeSpin38":
-                            
+                            result = _newYear2024Bll.AddFreeSpinToPlayer(custInfo);
                             break;
 
                         case "88Reward200pts":
