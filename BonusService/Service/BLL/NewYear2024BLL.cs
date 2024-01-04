@@ -40,7 +40,9 @@ namespace BonusService.Service.BLL
         {
             var inputs = new Dictionary<string, string>
             {
-                {"bonusCode", "NewYear2024"}
+                //TODO 上PRD前要改回 "NewYear2024"
+                {"bonusCode", "NewYear2024Test0104"}
+                //{"bonusCode", "NewYear2024"}
             };
             
             var request = new AddFreeSpin
