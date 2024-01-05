@@ -294,6 +294,12 @@ namespace BonusService.Service.BLL
                 return MakeErrorMessage(errorInfo);
             }
 
+            // 計算要join的存款單
+            if (claimPromotion.PromotionType == PromotionType.MissionBonus)
+            { 
+                CalculateRefList(custConditionInfo, claimPromotion.RequiredAmount);
+            }
+            
             if (atPage == BonusInfoAtPage.Deposit) //由Deposit頁面進來的 reference紀錄指定TransId、Amount
             {
                 if (claimPromotion.PromotionType == PromotionType.FstDeposit &&
@@ -884,6 +890,7 @@ namespace BonusService.Service.BLL
             var promotionList = _promotionService.GetPromotionList(request);
             var promotion = new List<CustPromotion>();
 
+            promotionList = promotionList.Where(x => x.BonusCode == "dotestmission");
             Customer custInfo = null;
             if (request.IsLogin) custInfo = _custInfoService.GetCustInfo(request.CustId);
             
@@ -1456,7 +1463,7 @@ namespace BonusService.Service.BLL
             claimPromotion.Bonus = tierAmount.Bonus;
             claimPromotion.RollOver = tierAmount.RollOver;
             claimPromotion.WinOver = tierAmount.WinOver;
-            
+            claimPromotion.RequiredAmount = tierAmount.RequiredAmount;
             return new CalculateBonusOutput
             {
                 result = (int)BonusErrorCode.Success,
@@ -1662,6 +1669,29 @@ namespace BonusService.Service.BLL
             return _promotionService.GetBonusCustUsingDetail(siteId, promo.BonusCode);
         }
 
+        private void CalculateRefList(CustCondition custCondition, decimal requiredAmount)
+        {
+            var refList = new List<Ref>();
+            var amount = (decimal) 0;
+            foreach (var refModel in custCondition.reference)
+            {
+                amount += refModel.Amount;
+                refList.Add(new Ref
+                {
+                    DepositId = refModel.DepositId,
+                    Amount = refModel.Amount
+                });
+                
+                if (amount >= requiredAmount)
+                {
+                    break;
+                }
+            }
+
+            custCondition.reference = refList;
+            custCondition.RefList = JsonConvert.SerializeObject(refList);
+        }
+        
         #endregion
     }
 }
