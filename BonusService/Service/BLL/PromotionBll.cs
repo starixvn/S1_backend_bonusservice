@@ -889,8 +889,7 @@ namespace BonusService.Service.BLL
         {
             var promotionList = _promotionService.GetPromotionList(request);
             var promotion = new List<CustPromotion>();
-
-            promotionList = promotionList.Where(x => x.BonusCode == "dotestmission");
+            
             Customer custInfo = null;
             if (request.IsLogin) custInfo = _custInfoService.GetCustInfo(request.CustId);
             
