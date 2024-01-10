@@ -53,6 +53,7 @@
   <data name="msg_SpCustomerWithdrawalBefore"><value>একটি প্রত্যাহার রেকর্ড পাওয়া গেছে, এই প্রচারে যোগ দিতে অক্ষম৷</value></data>
   <data name="msg_DepositAmountNotEnough"><value>এই প্রচারে অংশগ্রহণের জন্য জমার পরিমাণ অবশ্যই {0} বা তার বেশি হতে হবে</value></data>
   <data name="msg_DuplicateClaimBonus"><value>ডুপ্লিকেট অফার অনুমোদিত নয়</value></data>
+  <data name="msg_TierAmountNoFound"><value>প্রয়োজনীয়তা পূরণ না</value></data>
   <data name="msg_SpUndefinedPromotionType"><value>প্রচার খুঁজে পাওয়া যাবে না</value></data>
   <data name="msg_BlockTag"><value>প্রচারের জন্য যোগ্য নয়, অনুগ্রহ করে গ্রাহক সহায়তার সাথে যোগাযোগ করুন।</value></data>
   </root>

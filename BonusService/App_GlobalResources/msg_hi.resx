@@ -53,6 +53,7 @@
   <data name="msg_SpCustomerWithdrawalBefore"><value>एक निकासी रिकॉर्ड पाया गया है, इस प्रचार में शामिल होने में असमर्थ</value></data>
   <data name="msg_DepositAmountNotEnough"><value>इस प्रचार में भाग लेने के लिए जमा राशि {0} या अधिक होनी चाहिए</value></data>
   <data name="msg_DuplicateClaimBonus"><value>रिडीम प्रमोशन की नकल न करें</value></data>
+  <data name="msg_TierAmountNoFound"><value>आवश्यकताओं को पूरा नहीं करते</value></data>
   <data name="msg_SpUndefinedPromotionType"><value>प्रचार नहीं मिल सका</value></data>
   <data name="msg_BlockTag"><value>पदोन्नति के योग्य नहीं है, कृपया ग्राहक सहायता से संपर्क करें।</value></data>
   <data name="msg_ClaimCashBackBonus"><value>बधाई हो, आपका कैशबैक {0} आपके खाते में क्रेडिट कर दिया गया है!.</value></data>

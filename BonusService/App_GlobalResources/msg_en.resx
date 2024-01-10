@@ -53,6 +53,7 @@
   <data name="msg_SpCustomerWithdrawalBefore"><value>A withdrawal record has been found, unable to join this promotion</value></data>
   <data name="msg_DepositAmountNotEnough"><value>The deposit amount to participate in this promotion must be {0} or above</value></data>
   <data name="msg_DuplicateClaimBonus"><value>Do not duplicate redeem promotion</value></data>
+  <data name="msg_TierAmountNoFound"><value>Not meet the requirements</value></data>
   <data name="msg_SpUndefinedPromotionType"><value>The Promotion can't be found</value></data>
   <data name="msg_BlockTag"><value>Not eligible for promotion, please contact Customer Support</value></data>
   <data name="msg_ClaimCashBackBonus"><value>Congratulations, your CASHBACK {0} has been credited to your account!</value></data>
