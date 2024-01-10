@@ -53,6 +53,7 @@
   <data name="msg_SpCustomerWithdrawalBefore"><value>พบรายการถอนของท่าน ไม่สามารถเข้าร่วมโปรโมชั่นนี้ได้</value></data>
   <data name="msg_DepositAmountNotEnough"><value>จำนวนเงินฝากต้องเป็น {0} ขึ้นไปหรือมากกว่าเพื่อเข้าร่วมในโปรโมชั่นนี้</value></data>
   <data name="msg_DuplicateClaimBonus"><value>ห้ามใช้โปรโมชั่นซ้ำ</value></data>
+  <data name="msg_TierAmountNoFound"><value>ไม่เป็นไปตามข้อกำหนด</value></data>
   <data name="msg_SpUndefinedPromotionType"><value>ไม่พบโปรโมชั่นดังกล่าว</value></data>
   <data name="msg_BlockTag"><value>ไม่มีสิทธิ์รับโปรโมชั่น กรุณาติดต่อฝ่ายบริการลูกค้า</value></data>
   <data name="msg_ClaimCashBackBonus"><value>ขอแสดงความยินดีเครดิตเงินคืน {0} ของคุณเข้าบัญชีของคุณแล้ว!</value></data>

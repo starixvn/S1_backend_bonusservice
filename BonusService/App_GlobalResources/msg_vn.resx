@@ -53,6 +53,7 @@
   <data name="msg_SpCustomerWithdrawalBefore"><value>Đã rút tiền , không thể tham gia khuyến mãi này</value></data>
   <data name="msg_DepositAmountNotEnough"><value>Bạn cần nạp tối thiểu {0} để tham gia khuyến mãi này</value></data>
   <data name="msg_DuplicateClaimBonus"><value>Không trùng lặp khuyến mãi</value></data>
+  <data name="msg_TierAmountNoFound"><value>Không đáp ứng yêu cầu</value></data>
   <data name="msg_SpUndefinedPromotionType"><value>Không thể tìm thấy Khuyến mãi</value></data>
   <data name="msg_BlockTag"><value>Không đủ điều kiện nhận khuyến mãi, vui lòng liên hệ bộ phận Hỗ trợ khách hàng</value></data>
   <data name="msg_ClaimCashBackBonus"><value>Xin chúc mừng, khoản tiền hoàn lại {0} của bạn đã được ghi có vào tài khoản của bạn!</value></data>

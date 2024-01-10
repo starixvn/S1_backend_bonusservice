@@ -53,6 +53,7 @@
   <data name="msg_SpCustomerWithdrawalBefore"><value>已有提款记录，无法参与此优惠</value></data>
   <data name="msg_DepositAmountNotEnough"><value>参与此优惠存款金额需为{0}或以上</value></data>
   <data name="msg_DuplicateClaimBonus"><value>请勿重复领取优惠</value></data>
+  <data name="msg_TierAmountNoFound"><value>未满足领取条件</value></data>
   <data name="msg_SpUndefinedPromotionType"><value>暂无此优惠</value></data>
   <data name="msg_BlockTag"><value>无法领取此优惠，请联系客服咨询</value></data>
   <data name="msg_ClaimCashBackBonus"><value>恭喜，您的现金返还 {0} 已汇入您的户口！</value></data>
