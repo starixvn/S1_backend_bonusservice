@@ -1,6 +1,6 @@
 ﻿namespace BonusService.Service.Model
 {
-    public class AddFreeSpin
+    public class AddPrize
     {
         public int TpId { set; get; }
         public int CustId { set; get; }

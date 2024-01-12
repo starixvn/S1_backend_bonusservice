@@ -17,10 +17,10 @@ public class TpService
         _courierAdapter = provider.GetRequiredService<CourierAdapter>();
     }
     
-    public async Task<ApiResult> AddFreeSpinToPlayer(AddFreeSpin request)
+    public async Task<ApiResult> AddPrizeToPlayer(AddPrize request)
     {
-        var url = _tpServiceUrl + "AddFreeSpinToPlayer";
-        var result = await _courierAdapter.MyPostAsync<ApiResult, AddFreeSpin>(url, request);
+        var url = _tpServiceUrl + "AddPrizeToPlayer";
+        var result = await _courierAdapter.MyPostAsync<ApiResult, AddPrize>(url, request);
 
         return result;
     }
