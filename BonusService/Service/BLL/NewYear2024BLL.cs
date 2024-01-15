@@ -2,6 +2,7 @@
 using BonusService.Service.Model;
 using BonusService.Service.Library;
 using BonusService.Service.Model.enums;
+using MemberSite.Service.Model;
 using Newtonsoft.Json;
 
 namespace BonusService.Service.BLL
@@ -64,21 +65,9 @@ namespace BonusService.Service.BLL
                         inputs = inputs
                     };
                     break;
-                case 39:
-                    inputs.Add("CampaignId", CheckAPCampaignId(customer.SiteId,customer.CustId,(CurrencyEnum)customer.CurrencyId));
-                    inputs.Add("operatorUser", "NewYear2024Job");
-                    request = new AddPrize
-                    {
-                        // AP
-                        TpId = 39,
-                        CustId = customer.CustId,
-                        SiteId = customer.SiteId,
-                        inputs = inputs
-                    };
-                    break;
             }
-            
-            var result = _tpService.AddPrizeToPlayer(request).Result;
+
+            var result = tpId != 39 ? _tpService.AddPrizeToPlayer(request).Result : MultipleAPRequest(customer);
 
             if (result is not null)
             {
@@ -87,36 +76,73 @@ namespace BonusService.Service.BLL
             
             return -1;
         }
-
-        private string CheckAPCampaignId(int siteId,int custId,CurrencyEnum currencyId)
+        
+        private ApiResult MultipleAPRequest(Customer customer)
         {
             try
             {
-                var getCustPrizeList = _memberService.GetCustDrawPrizeList(siteId,custId,0);
-                var custAPCount = getCustPrizeList.Where(x => x.PrizeName == "Advant Play Free Bet");
-                var thisAPCount = custAPCount.Count() + 1;
-                if (thisAPCount > 30)
+                var currencyId = (CurrencyEnum)customer.CurrencyId;
+            
+            var getCustPrizeList = _memberService.GetCustDrawPrizeList(customer.SiteId,customer.CustId,0);
+            var custAPCount = getCustPrizeList.Where(x => x.PrizeName == "Advant Play Free Bet");
+            if (custAPCount.Count() + 1 >= 31)
+            {
+                //超過30次了 88
+                return new ApiResult(){ ErrorCode = -1 , Message = "Exceeded the number of times allowed for collection."};
+            }
+            
+            var champaignList = _redisHelper.StringGetAsync<APCampaign>("NewYear2024:AP").Result;
+            var campaignList = champaignList.Sites
+                .FirstOrDefault(s => s.SiteId == customer.SiteId)?
+                .Currency.FirstOrDefault(c => c.CurrencyId == currencyId.ToString())?
+                .CampaignList;
+
+            for (var i = 1; i <= custAPCount.Count(); i++)
+            {
+                var cpId = campaignList[i - 1];
+                var inputs = new Dictionary<string, string>
                 {
-                    //超過30次了 88
-                    return "-1";
-                }
-                //TODO 上PRD要更新Campaign
-                var champaignList = _redisHelper.StringGetAsync<APCampaign>("NewYear2024:AP").Result;
-                var campaignList = champaignList.Sites
-                    .FirstOrDefault(s => s.SiteId == siteId)?
-                    .Currency.FirstOrDefault(c => c.CurrencyId == currencyId.ToString())?
-                    .CampaignList;
+                    { "CampaignId", cpId },
+                    { "operatorUser", "NewYear2024Job" }
+                };
+                var request = new AddPrize
+                {
+                    // AP
+                    TpId = 39,
+                    CustId = customer.CustId,
+                    SiteId = customer.SiteId,
+                    inputs = inputs
+                };
                 
-                var result = campaignList != null ? campaignList[thisAPCount] : "-1";
-                _logger.LogInformation($"CustId : {custId} , This AP Prize Count : {thisAPCount} , This CampaignId : {result}");
-                return result;
+                var result = _tpService.AddPrizeToPlayer(request).Result;
+                if (result.ErrorCode == 0)
+                {
+                    break;
+                }
+                
+                if (result.RawMessage != "there is no valid new player in the PlayerList")
+                {
+                    return new ApiResult()
+                    {
+                        ErrorCode = -1,
+                        Message = result.Message,
+                        RawMessage = result.RawMessage
+                    };
+                }
+            }
+            
+            return new ApiResult()
+            {
+                ErrorCode = 0
+            };
+
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,$"CheckAPCampaignId Error : {ex.Message}");
+                _logger.LogError(ex, $"MultipleAPRequest Error : {ex.Message}");
                 throw;
             }
-        }
+        }   
 
 
         #region Model
