@@ -220,7 +220,7 @@ namespace BonusService.Service.Model
             return new CanJoinTierAmount()
             {
                 RequiredAmount = RequiredAmount,
-                RequiredTurnover = RequiredAmount,
+                RequiredTurnover = RequiredTurnover,
                 TpCategoryId = TpCategoryId,
                 Bonus = Bonus,
                 BonusAmount = bonusAmount,
