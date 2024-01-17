@@ -147,13 +147,21 @@ namespace BonusService.Service.BLL
 
         public ApiResult SetVerificationReward(SetVerificationRewardReq verificationReward, bool isWorker)
         {
+            var result = new ApiResult();
             try
             {  
                 var custInfo = _custInfoService.GetCustInfo(verificationReward.CustId);
                 var verInfo = _bonusAPIService.GetVerificationReward(custInfo.SiteId, custInfo.CurrencyId);
                 var custRewardInfo = _bonusAPIService.GetCustVerificationReward(verificationReward.CustId);
 
-                var result = CheckRewardCondition(verificationReward.CustId, verificationReward.OTPType, custInfo, verInfo, custRewardInfo); //領獎條件規則
+                // setting = 0 , means no payout reward
+                if (verInfo.EmailReward == 0 || verInfo.PhoneReward == 0)
+                {
+                    result.ErrorCode = 0;
+                    return result;
+                } 
+                
+                result = CheckRewardCondition(verificationReward.CustId, verificationReward.OTPType, custInfo, verInfo, custRewardInfo); //領獎條件規則
 
                 if (result.ErrorCode != 0)
                 {
