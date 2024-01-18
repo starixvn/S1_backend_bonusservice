@@ -96,6 +96,11 @@ namespace BonusService.Service.BLL
                 .FirstOrDefault(s => s.SiteId == customer.SiteId)?
                 .Currency.FirstOrDefault(c => c.CurrencyId == currencyId.ToString())?
                 .CampaignList;
+            
+            if(campaignList == null)
+            {
+                return new ApiResult(){ ErrorCode = -1 , Message = "ChampaignList is null"}; 
+            }
 
             for (var i = 1; i <= custAPCount.Count(); i++)
             {
@@ -140,7 +145,7 @@ namespace BonusService.Service.BLL
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"MultipleAPRequest Error : {ex.Message}");
-                throw;
+                return new ApiResult(){ ErrorCode = -1 , Message = "MultipleAPRequest Exception"};
             }
         }   
 
