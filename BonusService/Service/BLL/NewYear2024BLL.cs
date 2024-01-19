@@ -86,7 +86,7 @@ namespace BonusService.Service.BLL
                 var getCustAPCount = new CustGetCount();
             
                 var getCustPrizeList = _memberService.GetCustDrawPrizeList(customer.SiteId,customer.CustId,0);
-                var custAPCount = getCustPrizeList.Where(x => x.PrizeName == "Advant Play Free Bet");
+                var custAPCount = getCustPrizeList.Where(x => x.PrizeName.Contains("Advant Play Free Bet"));
                 if (custAPCount.Count() + 1 >= 31)
                 {
                     //超過30次了 88
