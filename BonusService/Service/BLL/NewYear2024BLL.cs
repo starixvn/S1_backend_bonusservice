@@ -1,4 +1,4 @@
-﻿using BonusService.Service.DAL;
+using BonusService.Service.DAL;
 using BonusService.Service.Model;
 using BonusService.Service.Library;
 using BonusService.Service.Model.enums;
@@ -67,7 +67,7 @@ namespace BonusService.Service.BLL
                     break;
             }
 
-            var result = tpId != 39 ? _tpService.AddPrizeToPlayer(request).Result : MultipleAPRequest(customer);
+            var result = tpId != 39 ? _tpService.AddPrizeToPlayer(request).Result : APRequest(customer);
 
             if (result is not null)
             {
@@ -77,39 +77,54 @@ namespace BonusService.Service.BLL
             return -1;
         }
         
-        private ApiResult MultipleAPRequest(Customer customer)
+        private ApiResult APRequest(Customer customer)
         {
             try
             {
+                var key = $"NewYear2024:AP:CustId:{customer.CustId}";
                 var currencyId = (CurrencyEnum)customer.CurrencyId;
+                var getCustAPCount = new CustGetCount();
             
-            var getCustPrizeList = _memberService.GetCustDrawPrizeList(customer.SiteId,customer.CustId,0);
-            var custAPCount = getCustPrizeList.Where(x => x.PrizeName == "Advant Play Free Bet");
-            if (custAPCount.Count() + 1 >= 31)
-            {
-                //超過30次了 88
-                return new ApiResult(){ ErrorCode = -1 , Message = "Exceeded the number of times allowed for collection."};
-            }
-            
-            var champaignList = _redisHelper.StringGetAsync<APCampaign>("NewYear2024:AP").Result;
-            var campaignList = champaignList.Sites
-                .FirstOrDefault(s => s.SiteId == customer.SiteId)?
-                .Currency.FirstOrDefault(c => c.CurrencyId == currencyId.ToString())?
-                .CampaignList;
-            
-            if(campaignList == null)
-            {
-                return new ApiResult(){ ErrorCode = -1 , Message = "ChampaignList is null"}; 
-            }
+                var getCustPrizeList = _memberService.GetCustDrawPrizeList(customer.SiteId,customer.CustId,0);
+                var custAPCount = getCustPrizeList.Where(x => x.PrizeName == "Advant Play Free Bet");
+                if (custAPCount.Count() + 1 >= 31)
+                {
+                    //超過30次了 88
+                    return new ApiResult(){ ErrorCode = -1 , Message = "Exceeded the number of times allowed for collection."};
+                }
 
-            for (var i = 1; i <= custAPCount.Count(); i++)
-            {
-                var cpId = campaignList[i - 1];
+                var checkCustGetAPCount = _redisHelper.KeyExists(key);
+                if (checkCustGetAPCount == false)
+                {
+                    getCustAPCount = new CustGetCount()
+                    {
+                        count = 1
+                    };
+                    _redisHelper.StringSet(key,JsonConvert.SerializeObject(getCustAPCount) , TimeSpan.FromDays(30));
+                }
+                else
+                {
+                    getCustAPCount = _redisHelper.StringGetAsync<CustGetCount>(key).Result;
+                }
+            
+                var champaignList = _redisHelper.StringGetAsync<APCampaign>("NewYear2024:AP").Result;
+                var campaignList = champaignList.Sites
+                    .FirstOrDefault(s => s.SiteId == customer.SiteId)?
+                    .Currency.FirstOrDefault(c => c.CurrencyId == currencyId.ToString())?
+                    .CampaignList;
+            
+                if(campaignList == null)
+                {
+                    return new ApiResult(){ ErrorCode = -1 , Message = "ChampaignList is null"}; 
+                }
+
+                var cpId = campaignList[getCustAPCount.count - 1];
                 var inputs = new Dictionary<string, string>
                 {
                     { "CampaignId", cpId },
                     { "operatorUser", "NewYear2024Job" }
                 };
+                
                 var request = new AddPrize
                 {
                     // AP
@@ -120,26 +135,41 @@ namespace BonusService.Service.BLL
                 };
                 
                 var result = _tpService.AddPrizeToPlayer(request).Result;
+                
                 if (result.ErrorCode == 0)
                 {
-                    break;
+                    var insert = new CustGetCount()
+                    {
+                        count = getCustAPCount.count + 1
+                    };
+                    _redisHelper.StringSet(key,JsonConvert.SerializeObject(insert) , TimeSpan.FromDays(30));
+                    
+                    return new ApiResult()
+                    {
+                        ErrorCode = 0
+                    };
+                    
                 }
-                
+
                 if (result.RawMessage != "there is no valid new player in the PlayerList")
-                {
                     return new ApiResult()
                     {
                         ErrorCode = -1,
                         Message = result.Message,
                         RawMessage = result.RawMessage
                     };
+                {
+                    var insert = new CustGetCount()
+                    {
+                        count = getCustAPCount.count + 1
+                    };
+                    _redisHelper.StringSet(key,JsonConvert.SerializeObject(insert) , TimeSpan.FromDays(30));
+                    
+                    return new ApiResult()
+                    {
+                        ErrorCode = 0
+                    };
                 }
-            }
-            
-            return new ApiResult()
-            {
-                ErrorCode = 0
-            };
 
             }
             catch (Exception ex)
@@ -147,10 +177,14 @@ namespace BonusService.Service.BLL
                 _logger.LogError(ex, $"MultipleAPRequest Error : {ex.Message}");
                 return new ApiResult(){ ErrorCode = -1 , Message = "MultipleAPRequest Exception"};
             }
-        }   
-
+        }
 
         #region Model
+
+        private class CustGetCount
+        {
+            public int count { get; set; }
+        }
         
         private class APCampaign
         {
