@@ -47,13 +47,19 @@ namespace BonusService.Service.Workers
                     var jobData = JsonConvert.DeserializeObject<DrawPrizeQueueJob>(listData.Data);
                     var custInfo = _custInfoBll.GetCustInfo(listData.CustId);
                     
+                    //轉AP的Name
+                    if(jobData.PrizeName.Contains("Advant Play Free Bet"))
+                    {
+                        jobData.PrizeName = "Advant Play Free Bet";
+                    }
+                    
                     switch (jobData.PrizeName)
                     {
-                        case "PPFreeSpin38":
+                        case "Pragmatic Play FreeSpin x 38":
                             result = _newYear2024Bll.AddPrizeToPlayer(custInfo,5);
                             break;
 
-                        case "88Reward200pts":
+                        case "88Reward x 200pts":
                             result = _newYear2024Bll.DrawPrizeRewardPoints(custInfo);
                             break;
     
