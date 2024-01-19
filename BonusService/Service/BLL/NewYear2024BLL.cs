@@ -167,7 +167,7 @@ namespace BonusService.Service.BLL
                     
                     return new ApiResult()
                     {
-                        ErrorCode = 0
+                        ErrorCode = -1
                     };
                 }
 
