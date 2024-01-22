@@ -155,7 +155,7 @@ namespace BonusService.Service.BLL
                 var custRewardInfo = _bonusAPIService.GetCustVerificationReward(verificationReward.CustId);
 
                 // setting = 0 , means no payout reward
-                if (verInfo.EmailReward == 0 || verInfo.PhoneReward == 0)
+                if (verInfo is not null && (verInfo.EmailReward == 0 || verInfo.PhoneReward == 0))
                 {
                     result.ErrorCode = 0;
                     return result;
