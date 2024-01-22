@@ -54,8 +54,7 @@ namespace BonusService.Service.BLL
             switch (tpId)
             {
                 case 5: 
-                    //TODO 上PRD要改
-                   inputs.Add("bonusCode", "NewYear2024Test0104");
+                   inputs.Add("bonusCode", "PPNYFreeSpin16012024");
                     request = new AddPrize
                     {
                         // PP
@@ -174,8 +173,8 @@ namespace BonusService.Service.BLL
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"MultipleAPRequest Error : {ex.Message}");
-                return new ApiResult(){ ErrorCode = -1 , Message = "MultipleAPRequest Exception"};
+                _logger.LogError(ex, $"APRequest Error : {ex.Message}");
+                return new ApiResult(){ ErrorCode = -1 , Message = "APRequest Exception"};
             }
         }
 
