@@ -153,13 +153,6 @@ namespace BonusService.Service.BLL
                 var custInfo = _custInfoService.GetCustInfo(verificationReward.CustId);
                 var verInfo = _bonusAPIService.GetVerificationReward(custInfo.SiteId, custInfo.CurrencyId);
                 var custRewardInfo = _bonusAPIService.GetCustVerificationReward(verificationReward.CustId);
-
-                // setting = 0 , means no payout reward
-                if (verInfo is not null && (verInfo.EmailReward == 0 || verInfo.PhoneReward == 0))
-                {
-                    result.ErrorCode = 0;
-                    return result;
-                } 
                 
                 result = CheckRewardCondition(verificationReward.CustId, verificationReward.OTPType, custInfo, verInfo, custRewardInfo); //領獎條件規則
 
@@ -181,6 +174,13 @@ namespace BonusService.Service.BLL
                 var reward = 0m;
                 if (verInfo.VerificationType == 1) //email & phone both
                 {
+                    // setting = 0 , means no payout reward
+                    if (verInfo.EmailReward == 0 && verInfo.PhoneReward == 0)
+                    {
+                        result.ErrorCode = 0;
+                        return result;
+                    }
+                    
                     reward = verInfo.PhoneReward + verInfo.EmailReward;
                     result = _bonusAPIService.PayoutVerificationReward(custInfo.CustId, custInfo.SiteId, custInfo.CurrencyId, custInfo.UserName, OTPVerificationType.All, reward);
                 }
@@ -188,11 +188,25 @@ namespace BonusService.Service.BLL
                 {
                     if (verificationReward.OTPType == OTPTypeEnum.SMS)
                     {
+                        // setting = 0 , means no payout reward
+                        if (verInfo.PhoneReward == 0)
+                        {
+                            result.ErrorCode = 0;
+                            return result;
+                        }
+                        
                         reward = verInfo.PhoneReward;
                         result = _bonusAPIService.PayoutVerificationReward(custInfo.CustId, custInfo.SiteId, custInfo.CurrencyId, custInfo.UserName, OTPVerificationType.SMS, reward);
                     }
                     else
                     {
+                        // setting = 0 , means no payout reward
+                        if (verInfo.EmailReward == 0)
+                        {
+                            result.ErrorCode = 0;
+                            return result;
+                        }
+                        
                         reward = verInfo.EmailReward;
                         result = _bonusAPIService.PayoutVerificationReward(custInfo.CustId, custInfo.SiteId, custInfo.CurrencyId, custInfo.UserName, OTPVerificationType.Email, reward);
                     }
