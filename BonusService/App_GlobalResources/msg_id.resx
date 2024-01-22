@@ -53,6 +53,7 @@
   <data name="msg_SpCustomerWithdrawalBefore"><value>Catatan penarikan telah ditemukan, tidak dapat bergabung dengan promosi ini</value></data>
   <data name="msg_DepositAmountNotEnough"><value>Jumlah deposit untuk berpartisipasi dalam promosi ini harus {0} atau lebih</value></data>
   <data name="msg_DuplicateClaimBonus"><value>Jangan menduplikat penukaran promosi</value></data>
+  <data name="msg_TierAmountNoFound"><value>Tidak memenuhi persyaratan</value></data>
   <data name="msg_SpUndefinedPromotionType"><value>Promosi tidak dapat ditemukan</value></data>
   <data name="msg_BlockTag"><value>Tidak memenuhi syarat untuk promosi, harap hubungi Dukungan Pelanggan</value></data>
   <data name="msg_ClaimCashBackBonus"><value>Selamat, Bonus CASHBACK Anda {0} telah dikreditkan ke akun Anda!</value></data>

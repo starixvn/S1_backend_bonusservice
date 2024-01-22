@@ -274,8 +274,7 @@ namespace BonusService.Service.BLL
                 errorInfo.CustomizeErrorMsg = verifyResult.ErrorMsg;
                 return MakeErrorMessage(errorInfo);
             }
-
-
+            
             var custConditionInfo = _promotionService.GetCustConditionInfo(custId, custInfo.CurrencyId, custInfo.SiteId, bonusCode, deviceType);
             if (!custConditionInfo.CanJoin)
             {
@@ -295,6 +294,12 @@ namespace BonusService.Service.BLL
                 return MakeErrorMessage(errorInfo);
             }
 
+            // 計算要join的存款單
+            if (claimPromotion.PromotionType == PromotionType.MissionBonus)
+            { 
+                CalculateRefList(custConditionInfo, claimPromotion.RequiredAmount);
+            }
+            
             if (atPage == BonusInfoAtPage.Deposit) //由Deposit頁面進來的 reference紀錄指定TransId、Amount
             {
                 if (claimPromotion.PromotionType == PromotionType.FstDeposit &&
@@ -767,6 +772,9 @@ namespace BonusService.Service.BLL
                     rollover = amount * claimPromotion.RollOver;
                     break;
 
+                case PromotionType.MissionBonus:
+                    return CalculateTierMissionBonus(claimPromotion, custId, siteId, currencyId, amount, lockedAmount, depositId);
+                
                 default:
                     output.result = (int)BonusErrorCode.CalculateUnknownPromotionType;
                     return output;
@@ -881,10 +889,10 @@ namespace BonusService.Service.BLL
         {
             var promotionList = _promotionService.GetPromotionList(request);
             var promotion = new List<CustPromotion>();
-
+            
             Customer custInfo = null;
             if (request.IsLogin) custInfo = _custInfoService.GetCustInfo(request.CustId);
-
+            
             foreach (var promo in promotionList)
             {
                 if (promo.PromotionType == PromotionType.RetentionFreeBet)
@@ -1053,11 +1061,34 @@ namespace BonusService.Service.BLL
 
                 if (promo.PromotionType == PromotionType.ReDeposit && promo.TierAmountList.Any())
                 {
-                    promo.CalculateCanJoinTierAmount(promo.DepositAmount);
+                    promo.CalculateCanJoinTierAmount(promo.DepositAmount ,0);
                     promo.canJoin = promo.CanJoinTierAmountList.Any();
                 }
             }
 
+            if (promo.PromotionType == PromotionType.MissionBonus)
+            {
+                var progressData = _promotionService.GetCustPromotionMissionProgress(custId, currencyId, promo.TurnoverTpGameTypes, (int)promo.PeriodType );
+                promo.MissionBonusProgress = new MissionBonusProgress
+                {
+                    DepositAmountSum = custCondition.Amount,
+                    TurnoverSum = progressData.TurnoverSum
+                };
+                
+                if (promo.canJoin)
+                {
+                    promo.DepositId = custCondition.RefId;
+                    promo.DepositAmount = custCondition.Amount;
+                    promo.RefList = custCondition.reference;
+
+                    if (promo.TierAmountList.Any())
+                    {
+                        promo.CalculateCanJoinTierAmount(promo.DepositAmount,progressData.TurnoverSum);
+                        promo.canJoin = promo.CanJoinTierAmountList.Any();
+                    }
+                }
+            }
+            
             if (promo.PromotionType == PromotionType.RetentionFreeBet)
             {
                 var isUsed = GetCustBonusUsing(siteId, custId, promo);
@@ -1366,7 +1397,7 @@ namespace BonusService.Service.BLL
                 depositAmount = checkResult.ActualDeposit;
             }
 
-            var tierAmount = claimPromotion.FindTierAmountLevel(depositAmount);
+            var tierAmount = claimPromotion.FindTierAmountLevel(depositAmount, 0 ,0);
             if (tierAmount == null)
             {
                 return new CalculateBonusOutput
@@ -1381,7 +1412,7 @@ namespace BonusService.Service.BLL
             claimPromotion.RollOver = tierAmount.RollOver;
             claimPromotion.WinOver = tierAmount.WinOver;
 
-            var canJoinTierAmount = tierAmount.CalculateTierAmount(claimPromotion.BonusType, depositAmount);
+            var canJoinTierAmount = tierAmount.CalculateTierAmount(claimPromotion.PromotionType, claimPromotion.BonusType, depositAmount);
             var bonusAmount = canJoinTierAmount.BonusAmount;
             var lockAmount = canJoinTierAmount.LockedAmount;
 
@@ -1397,6 +1428,51 @@ namespace BonusService.Service.BLL
             };
         }
 
+        private CalculateBonusOutput CalculateTierMissionBonus(ClaimPromotion claimPromotion, int custId, int siteId, int currencyId, decimal depositAmountSum ,decimal bonus, string depositId = null)
+        {
+            //帶DepositId使用存款金額計算TierAmount
+            if (depositId != null)
+            {
+                var checkResult = CheckTierRedepositBonus(new CheckTierRedepositBonusReq
+                {
+                    CustId = custId,
+                    BonusCode = claimPromotion.BonusCode,
+                    PromotionType = (int)claimPromotion.PromotionType,
+                    SiteId = siteId,
+                    CurrencyId = currencyId,
+                    DepositId = depositId
+                });
+                if (!checkResult.IsSuccess)
+                {
+                    throw new Exception("TierAmount check fail.");
+                }
+            }
+ 
+            var progressData = _promotionService.GetCustPromotionMissionProgress(custId, currencyId, claimPromotion.TurnoverTpGameTypes, (int)claimPromotion.PeriodType );
+
+            var tierAmount = claimPromotion.FindTierAmountLevel(depositAmountSum, progressData.TurnoverSum ,bonus);
+            if (tierAmount == null)
+            {
+                return new CalculateBonusOutput
+                {
+                    result = (int)BonusErrorCode.TierAmountNoFound
+                };
+            }
+            
+            claimPromotion.Bonus = tierAmount.Bonus;
+            claimPromotion.RollOver = tierAmount.RollOver;
+            claimPromotion.WinOver = tierAmount.WinOver;
+            claimPromotion.RequiredAmount = tierAmount.RequiredAmount;
+            return new CalculateBonusOutput
+            {
+                result = (int)BonusErrorCode.Success,
+                BonusInfo = JsonConvert.SerializeObject(claimPromotion, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }),
+                ExpiryTime = DateTimeOffset.Now.AddDays(claimPromotion.ExpiryDays).ToUnixTimeSeconds(),
+                BonusAmount = tierAmount.Bonus,
+                RollOver =  tierAmount.Bonus * (claimPromotion.FullFillType == (int)FullFillType.RollOver ? claimPromotion.RollOver : claimPromotion.WinOver)
+            };
+        }
+        
         public PopUpPromotion GetPopUpPromotion(CustPromotionRequest request)
         {
             PopUpPromotion result = new PopUpPromotion();
@@ -1592,6 +1668,29 @@ namespace BonusService.Service.BLL
             return _promotionService.GetBonusCustUsingDetail(siteId, promo.BonusCode);
         }
 
+        private void CalculateRefList(CustCondition custCondition, decimal requiredAmount)
+        {
+            var refList = new List<Ref>();
+            var amount = (decimal) 0;
+            foreach (var refModel in custCondition.reference)
+            {
+                amount += refModel.Amount;
+                refList.Add(new Ref
+                {
+                    DepositId = refModel.DepositId,
+                    Amount = refModel.Amount
+                });
+                
+                if (amount >= requiredAmount)
+                {
+                    break;
+                }
+            }
+
+            custCondition.reference = refList;
+            custCondition.RefList = JsonConvert.SerializeObject(refList);
+        }
+        
         #endregion
     }
 }

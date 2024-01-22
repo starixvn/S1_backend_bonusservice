@@ -53,6 +53,7 @@
   <data name="msg_SpCustomerWithdrawalBefore"><value>Rekod pengeluaran telah ditemui, tidak dapat menyertai promosi ini</value></data>
   <data name="msg_DepositAmountNotEnough"><value>deposit untuk menyertai promosi ini mestilah {0} atau ke atas</value></data>
   <data name="msg_DuplicateClaimBonus"><value>Tawaran pendua tidak dibenarkan</value></data>
+  <data name="msg_TierAmountNoFound"><value>Tidak memenuhi syarat</value></data>
   <data name="msg_SpUndefinedPromotionType"><value>Promosi tidak ditemui</value></data>
   <data name="msg_BlockTag"><value>Tidak layak untuk promosi berikut, sila hubungi Sokongan Pelanggan kami</value></data>
   <data name="msg_ClaimCashBackBonus"><value>Tahniah, PULANGAN TUNAI {0} anda telah dikreditkan ke akaun anda!</value></data>
