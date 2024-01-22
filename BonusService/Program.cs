@@ -39,7 +39,7 @@ void OverrideLoggerWriteToLFile(LoggerConfiguration configuration)
         .WriteTo.File(new JsonFormatter(),
             logFilePath,
             rollingInterval: RollingInterval.Day,
-            retainedFileCountLimit: 10,
+            retainedFileCountLimit: 60,
             fileSizeLimitBytes: 10485760,
             rollOnFileSizeLimit: true);
 }
