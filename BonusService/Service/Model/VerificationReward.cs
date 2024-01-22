@@ -43,10 +43,5 @@ namespace MemberSite.Service.Model
     {
         public decimal MinDeposit { get; set; }
     }
-
-    public class ClaimVerificationRewardData
-    {
-        public int CustId { get; set; }
-        public string Data { get; set; }
-    }
+    
 }
