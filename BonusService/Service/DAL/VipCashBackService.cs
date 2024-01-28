@@ -72,7 +72,7 @@ namespace BonusService.Service.DAL
                 ? "Service_VipCashBackTpBetRecord_Get_V2"
                 : "Service_VipCashBackTpBetRecordByDaily_Get";
 
-            return _reportDbClient.Query<CashBackTpBetRecordOutput>(spName, parameter, 360);
+            return _reportDbClient.Query<CashBackTpBetRecordOutput>(spName, parameter);
         }
 
         public IEnumerable<CustomerVIPInfoOutput> GetCustomerVipInfo(string custIds)

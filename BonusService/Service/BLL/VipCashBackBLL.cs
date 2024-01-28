@@ -90,7 +90,7 @@ namespace BonusService.Service.BLL
 
                     #region log Step1
 
-                    logKey = $"CashBackLogKey_{cashBackSetting.SiteId}_{cashBackSetting.CurrencyId}_{periodType}";
+                    logKey = $"CashBackLogKey | SiteId = {cashBackSetting.SiteId} | CurrencyId = {cashBackSetting.CurrencyId} | PeriodType = {periodType}";
                     _logger.LogInformation($"Step1 CashBackLog SiteId：{cashBackSetting.SiteId}, CurrencyId：{cashBackSetting.CurrencyId},PeriodType:{periodType}, SettleTime：{cashBackSetting.SettleTime}, UtcNow：{DateTime.UtcNow}, logKey:{logKey}");
 
                     #endregion
