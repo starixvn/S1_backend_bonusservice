@@ -34,7 +34,7 @@ namespace BonusService.Service.Workers
 
             try
             {
-                var bonusCancelResetList =  _reportDbClient.QueryUseCommandDefinition<BonusCancelResetDto>("Service_CancelBonus_AmountCheck_Get", new { Limit = _random.Next(50, 100) });
+                var bonusCancelResetList =  _reportDbClient.Query<BonusCancelResetDto>("Service_CancelBonus_AmountCheck_Get", new { Limit = _random.Next(50, 100) });
                 foreach (var cancelBonus in bonusCancelResetList)
                 {
                     _mainDbClient.Execute("Service_SeamlessBonus_CancelReset", cancelBonus);
