@@ -6,6 +6,8 @@ using BonusService.Service.Model.enums;
 
 using Newtonsoft.Json;
 
+using Serilog.Context;
+
 namespace BonusService.Service.BLL
 {
     public class VipCashBackBLL
@@ -74,6 +76,7 @@ namespace BonusService.Service.BLL
 
         public bool CalculateCashBack(VipPeriodType periodType)
         {
+            LogContext.PushProperty("RequestId", Guid.NewGuid().ToString());
             try
             {
                 //使用 logKey 組出來後可以用 logKey 看整個執行過程
@@ -84,13 +87,17 @@ namespace BonusService.Service.BLL
 
                 foreach (var cashBackSetting in cashBackSettings)
                 {
+                    LogContext.PushProperty("SiteId", cashBackSetting.SiteId.ToString());
+                    LogContext.PushProperty("CurrencyId", cashBackSetting.CurrencyId.ToString());
+                    LogContext.PushProperty("PeriodType", periodType.ToString());
+
                     // 依據幣別偏移時區，判斷是否要執行計算 CashBack
                     var checkTimeResult = CheckSettleTime(cashBackSetting);
                     if (!checkTimeResult) { continue; }
 
                     #region log Step1
 
-                    logKey = $"CashBackLogKey | SiteId = {cashBackSetting.SiteId} | CurrencyId = {cashBackSetting.CurrencyId} | PeriodType = {periodType}";
+                    logKey = $"CashBackLogKey_{cashBackSetting.SiteId}_{cashBackSetting.CurrencyId}_{periodType}";
                     _logger.LogInformation($"Step1 CashBackLog SiteId：{cashBackSetting.SiteId}, CurrencyId：{cashBackSetting.CurrencyId},PeriodType:{periodType}, SettleTime：{cashBackSetting.SettleTime}, UtcNow：{DateTime.UtcNow}, logKey:{logKey}");
 
                     #endregion
@@ -125,6 +132,8 @@ namespace BonusService.Service.BLL
 
                     foreach (var promotion in promotions)
                     {
+                        LogContext.PushProperty("BonusCode", promotion.BonusCode);
+
                         var settings = GetPromotionCashBackSetting(new PromotionCashBackSettingInput
                         {
                             BonusCode = promotion.BonusCode,
@@ -159,6 +168,7 @@ namespace BonusService.Service.BLL
 
                         foreach (var customerGroupByCustId in customersTpBetRecord.GroupBy(output => output.CustId))
                         {
+                            LogContext.PushProperty("CustId", customerGroupByCustId.First().CustId);
                             var custVipLevel = GetCustVipLevel(vipInfos, customerGroupByCustId);
                             var setting = FilterPromotionCashBackSetting(settings, custVipLevel, customerGroupByCustId);
                             var percentage = setting?.Percentage ?? 0;

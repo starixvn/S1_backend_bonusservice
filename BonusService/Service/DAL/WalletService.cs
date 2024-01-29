@@ -64,7 +64,7 @@ namespace BonusService.Service.DAL
         
         public IEnumerable<BonusFulfill> GetBonusFulfill()
         {            
-            return _reportDbClient.Query<BonusFulfill>("Service_BonusFulfill_Get_V2", commandType: CommandType.StoredProcedure);
+            return _reportDbClient.Query<BonusFulfill>("Service_BonusFulfill_Get_V2");
         }
 
         public int BonusSettle(BonusFulfill bonusFulfill)

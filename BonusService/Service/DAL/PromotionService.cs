@@ -282,7 +282,7 @@ namespace BonusService.Service.DAL
 
         public IEnumerable<DepositBonus> GetDepositBonusQueueByCustId(int custId, int limit)
         {
-            return _mainDbClient.QueryUseCommandDefinition<DepositBonus>("Service_DepositBonusQueueByCustId_Get_V2", new { CustId = custId, Limit = limit });
+            return _mainDbClient.Query<DepositBonus>("Service_DepositBonusQueueByCustId_Get_V2", new { CustId = custId, Limit = limit });
         }
 
         public CashBackDetails GetCustCashBack(int custId, int siteId, int currencyId, CustPromotion promotion, string calculateDate)
