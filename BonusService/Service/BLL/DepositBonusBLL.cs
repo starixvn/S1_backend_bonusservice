@@ -33,7 +33,6 @@ namespace BonusService.Service.BLL
         {
             depositBonusService.CheckDepositBonusExpired();
         }
-
         public string GetDepositBonusQueueStatusComment(int status)
         {
             var Comment = "UnKnowStatus";

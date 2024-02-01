@@ -10,13 +10,11 @@ namespace BonusService.Service.DAL
     {
         private readonly MySqlClient _mainDbClient;
         private readonly MySqlClient _reportDbClient;
-        private readonly MySqlClient _reportbackupDbClient;
 
         public VipCashBackService(IServiceProvider provider)
         {
             _mainDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);
             _reportDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Report);
-            _reportbackupDbClient = provider.GetServices<MySqlClient>().FirstOrDefault(p => p.DataBase == DataBase.ReportBackupDB);         
         }
 
         public IEnumerable<CashBackSettingOutput> GetCashBackSettings(VipPeriodType periodType)
@@ -55,33 +53,26 @@ namespace BonusService.Service.DAL
             parameter.Add("BonusCode", promotionCashBackSettingInput.BonusCode);
             parameter.Add("SiteId", promotionCashBackSettingInput.SiteId);
             parameter.Add("CurrencyId", promotionCashBackSettingInput.CurrencyId);
-
-            var result = _reportbackupDbClient != null
-            ? _reportbackupDbClient.RetryQuery<PromotionCashBackSettingOutput>("Service_PromotionCashBackSetting_Get", parameter)
-            : _reportDbClient.Query<PromotionCashBackSettingOutput>("Service_PromotionCashBackSetting_Get", parameter);
-            return result;
+            return _reportDbClient.Query<PromotionCashBackSettingOutput>("Service_PromotionCashBackSetting_Get", parameter);
         }
 
         public IEnumerable<CashBackTpBetRecordOutput> GetVipCashBackTpBetRecord(CashBackTpBetRecordInput cashBackTpBetRecordInput)
         {
             var parameter = new DynamicParameters(new
             {
-                cashBackTpBetRecordInput.StartDate,
-                cashBackTpBetRecordInput.EndDate,
-                cashBackTpBetRecordInput.TpIds,
-                cashBackTpBetRecordInput.CategoryIds,
-                cashBackTpBetRecordInput.SiteId,
-                cashBackTpBetRecordInput.CurrencyId,
+                StartDate = cashBackTpBetRecordInput.StartDate,
+                EndDate = cashBackTpBetRecordInput.EndDate,
+                TpIds = cashBackTpBetRecordInput.TpIds,
+                CategoryIds = cashBackTpBetRecordInput.CategoryIds,
+                SiteId = cashBackTpBetRecordInput.SiteId,
+                CurrencyId = cashBackTpBetRecordInput.CurrencyId,
             });
 
             var spName = cashBackTpBetRecordInput.PeriodType == VipPeriodType.Weekly
                 ? "Service_VipCashBackTpBetRecord_Get_V2"
                 : "Service_VipCashBackTpBetRecordByDaily_Get";
 
-            var result = _reportbackupDbClient != null
-            ? _reportbackupDbClient.RetryQuery<CashBackTpBetRecordOutput>(spName, parameter)
-            : _reportDbClient.Query<CashBackTpBetRecordOutput>(spName, parameter);
-            return result;
+            return _reportDbClient.Query<CashBackTpBetRecordOutput>(spName, parameter);
         }
 
         public IEnumerable<CustomerVIPInfoOutput> GetCustomerVipInfo(string custIds)
