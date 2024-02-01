@@ -2,9 +2,10 @@
 {
     public enum DataBase
     {
-        Main, 
-        Report,
-        ReportBackupDB,
+        Main, //ConnectionString
+        Report,//ConnectionStringReport
+        Wager,//ConnectionStringWager
+        Log,//ConnectionStringLog
     }
 
 }

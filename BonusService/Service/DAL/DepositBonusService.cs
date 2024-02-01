@@ -17,14 +17,13 @@ namespace BonusService.Service.DAL
 
         public IEnumerable<DepositBonusCustList> GetDepositBonusQueueCustList(int limit)
         {
-            return _reportDbClient.Query<DepositBonusCustList>("Service_DepositBonusQueueCustList_Get_V2", new { Limit = limit });
+            return _reportDbClient.QueryUseCommandDefinition<DepositBonusCustList>("Service_DepositBonusQueueCustList_Get_V2", new { Limit = limit });
         }
 
         public void CheckDepositBonusExpired()
         {
             _mainDbClient.Execute("Service_DepositBonusRemoveExpired_Set");
         }
-
         public int SetDepositBonusStatus(string transId, int status)
         {
             return _mainDbClient.Execute("Service_DepositBonusStatus_Set", new { TransId = transId, Status = status });
