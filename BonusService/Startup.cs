@@ -110,7 +110,7 @@ namespace BonusService
                 endpoints.MapMetrics();
                 endpoints.MapGet("/health", async context =>
                 {
-                    await context.Response.WriteAsync($"{env.EnvironmentName}-{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}");
+                    await context.Response.WriteAsync($"{env.EnvironmentName}-{DateTime.Now:yyyy/MM/dd HH:mm:ss}");
                 });
                 endpoints.MapControllers();
             });

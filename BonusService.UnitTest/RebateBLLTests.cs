@@ -106,7 +106,7 @@ namespace BonusService.UnitTest
         public decimal GetRebateAmount()
         {
             var sqlScript = @$"SELECT RedeemAmount FROM Siebog.RebateMLog WHERE CustId = 250713 ORDER BY Id Desc limit 1;";
-            var rebateAmount = _mySqlClient.Query<decimal>(sqlScript, parameters: new { }, commandType: CommandType.Text).First();
+            var rebateAmount = _mySqlClient.Query<decimal>(sqlScript, parameters: new { }).First();
             return rebateAmount;
         }
     }

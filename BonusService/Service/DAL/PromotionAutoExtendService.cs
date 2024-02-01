@@ -17,7 +17,7 @@ namespace BonusService.Service.DAL
 
         public IEnumerable<PromotionAutoExtend> GetAutoExtendPromotionExpiredList(string specificDate, int limit)
         {
-            return _reportDbClient.QueryUseCommandDefinition<PromotionAutoExtend>("Service_PromotionAutoExtend_Get_V2",
+            return _reportDbClient.Query<PromotionAutoExtend>("Service_PromotionAutoExtend_Get_V2",
                 new { SpecificDate = specificDate, Limit = limit });
         }
 
