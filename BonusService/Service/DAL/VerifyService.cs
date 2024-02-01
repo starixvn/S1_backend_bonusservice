@@ -31,8 +31,13 @@ namespace BonusService.Service.DAL
         {
             #region Sub-需要比較的客戶清單：包含現在使用的AccountName和以前修改過的AccountName
             _logger.LogInformation($"mainCustInfo={mainCustInfo}, compareCustIds={JsonConvert.SerializeObject(compareCustIds.Select(x => x.CustId))}");
+            realNameCheckResult = new List<CompareRealNameDto>();
             try
             {
+                if (string.IsNullOrWhiteSpace(mainCustInfo.AccountName))
+                {
+                    return false; //mainCust沒有AccountName=> 沒有相同的清單
+                }
                 var compareNameInfo = new List<CompareRealNameDto>();
                 compareNameInfo.AddRange(compareCustIds); //現在使用AccountName的清單
                 var p = new DynamicParameters(new
@@ -65,7 +70,6 @@ namespace BonusService.Service.DAL
                 #endregion
 
                 #region 檢查邏輯：MainCust所有使用(過)的AccountName(patterns)，與SubCust紀錄比較是否有相同
-                realNameCheckResult = new List<CompareRealNameDto>();
                 foreach (var name in patterns)
                 {
                     realNameCheckResult.AddRange(compareNameInfo.Where(r => r.RealName.Equals(name, StringComparison.CurrentCultureIgnoreCase)).ToList());
