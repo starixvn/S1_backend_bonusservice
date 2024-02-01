@@ -139,6 +139,7 @@ namespace BonusService.Controllers
             catch (Exception e)
             {
                 _logger.LogError(e, MethodExtension.GetCurrentMethod());
+                result.Data = new List<CustPromotion>();
             }
 
             return result;
