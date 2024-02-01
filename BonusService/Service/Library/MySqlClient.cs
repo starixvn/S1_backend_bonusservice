@@ -66,6 +66,7 @@ namespace BonusService.Service.Library
             {
                 var conn = HealthCheck();
                 using var connection = new MySqlConnection(conn);
+                if (connection.State != ConnectionState.Open) connection.Open();// 自己 Control connection open close，不要讓 ORM 自己做
                 var command = new CommandDefinition(name, parameters,
                     commandType: CommandType.StoredProcedure,
                     flags: CommandFlags.NoCache);
@@ -90,7 +91,8 @@ namespace BonusService.Service.Library
             {
                 var conn = HealthCheck();
                 using var connection = new MySqlConnection(conn);
-                
+                if (connection.State != ConnectionState.Open) connection.Open();// 自己 Control connection open close，不要讓 ORM 自己做
+
                 var command = new CommandDefinition(
                     commandText: name,
                     parameters: parameters,
@@ -119,6 +121,7 @@ namespace BonusService.Service.Library
             {
                 var conn = HealthCheck();                                
                 using var connection = new MySqlConnection(conn);
+                if (connection.State != ConnectionState.Open) connection.Open();// 自己 Control connection open close，不要讓 ORM 自己做
                 var command = new CommandDefinition(
                    commandText: name,
                    parameters: parameters,
