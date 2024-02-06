@@ -10,11 +10,13 @@ namespace BonusService.Service.DAL
     {
         private readonly MySqlClient _mainDbClient;
         private readonly MySqlClient _reportDbClient;
+        private readonly MySqlClient _reportbackupDbClient;
 
         public VipCashBackService(IServiceProvider provider)
         {
             _mainDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);
             _reportDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Report);
+            _reportbackupDbClient = provider.GetServices<MySqlClient>().FirstOrDefault(p => p.DataBase == DataBase.ReportBackupDB);
         }
 
         public IEnumerable<CashBackSettingOutput> GetCashBackSettings(VipPeriodType periodType)
@@ -53,7 +55,9 @@ namespace BonusService.Service.DAL
             parameter.Add("BonusCode", promotionCashBackSettingInput.BonusCode);
             parameter.Add("SiteId", promotionCashBackSettingInput.SiteId);
             parameter.Add("CurrencyId", promotionCashBackSettingInput.CurrencyId);
-            return _reportDbClient.Query<PromotionCashBackSettingOutput>("Service_PromotionCashBackSetting_Get", parameter);
+            return _reportbackupDbClient != null
+                ? _reportbackupDbClient.Query<PromotionCashBackSettingOutput>("Service_PromotionCashBackSetting_Get", parameter)
+                : _reportDbClient.Query<PromotionCashBackSettingOutput>("Service_PromotionCashBackSetting_Get", parameter);
         }
 
         public IEnumerable<CashBackTpBetRecordOutput> GetVipCashBackTpBetRecord(CashBackTpBetRecordInput cashBackTpBetRecordInput)
@@ -72,7 +76,9 @@ namespace BonusService.Service.DAL
                 ? "Service_VipCashBackTpBetRecord_Get_V2"
                 : "Service_VipCashBackTpBetRecordByDaily_Get";
 
-            return _reportDbClient.Query<CashBackTpBetRecordOutput>(spName, parameter, commandTimeout: 600);
+            return _reportbackupDbClient != null
+                ? _reportbackupDbClient.Query<CashBackTpBetRecordOutput>(spName, parameter, commandTimeout: 600)
+                : _reportDbClient.Query<CashBackTpBetRecordOutput>(spName, parameter, commandTimeout: 600);
         }
 
         public IEnumerable<CustomerVIPInfoOutput> GetCustomerVipInfo(string custIds)

@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using System.Diagnostics;
 
+using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
 
 using Dapper;
@@ -13,20 +14,66 @@ namespace BonusService.Service.Library
 {
     public sealed class MySqlClient
     {
-        public DataBase DataBase { get; set; }
+        public readonly DataBase DataBase;
+
         private readonly string _connectionString;
+
+        private readonly IEnumerable<string> _backupConnectionStringList;
 
         private readonly ILogger<MySqlClient> _logger;
 
-        public MySqlClient(string connectionString, ILogger<MySqlClient> logger)
+        public MySqlClient(IServiceProvider provider, DataBase dataBase, string connectionString)
         {
+            DataBase = dataBase;
+            _logger = provider.GetRequiredService<ILogger<MySqlClient>>();
             _connectionString = connectionString;
-            _logger = logger;
+            _backupConnectionStringList = null;
+        }
+
+        public MySqlClient(IServiceProvider provider, DataBase dataBase, string connectionString, IEnumerable<string> backupConnectionStringList)
+        {
+            DataBase = dataBase;
+            _logger = provider.GetRequiredService<ILogger<MySqlClient>>();
+            _connectionString = connectionString;
+            _backupConnectionStringList = backupConnectionStringList;
+        }
+
+        private string HealthCheck()
+        {
+            if (_backupConnectionStringList == null)
+            {
+                return _connectionString;
+            }
+
+            foreach (var backupConn in _backupConnectionStringList)
+            {
+                try
+                {
+                    using var connection = new MySqlConnection(backupConn);
+                    var dbSlaveStatus = connection.QueryFirstOrDefault<DBSlaveStatus>("Service_HealthCheck_V2", commandType: CommandType.StoredProcedure);
+
+                    // 拿不到Status或延遲太久都換下一個連線
+                    if (dbSlaveStatus == null || dbSlaveStatus.Seconds_Behind_Master > 180)
+                    {
+                        continue;
+                    }
+
+                    return backupConn;
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, $"{ReplaceDBString(backupConn)} HealthCheck Exception");
+                }
+            }
+
+            // 前面連線檢查都有問題，用最後一個連線
+            return _backupConnectionStringList.Last();
         }
 
         public MySqlConnection GetMySqlConnection()
         {
-            return new MySqlConnection(_connectionString);
+            var conn = HealthCheck();
+            return new MySqlConnection(conn);
         }
 
         #region Query
@@ -462,6 +509,11 @@ namespace BonusService.Service.Library
             await trans.DisposeAsync();
             await conn.CloseAsync();
             await conn.DisposeAsync();
+        }
+
+        private string ReplaceDBString(string conn)
+        {
+            return conn.Substring(0, 28);
         }
     }
 }
