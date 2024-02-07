@@ -74,7 +74,7 @@ namespace BonusService.Service.Workers
                 }
                 finally
                 {
-                    var dueTimeSpan = isError ? TimeSpan.FromMinutes(10) : TimeSpan.FromMinutes(30);
+                    var dueTimeSpan = isError ? TimeSpan.FromMinutes(5) : TimeSpan.FromMinutes(10);
 
                     _logger.LogInformation($"VipRebate Task End. isError = {isError}.\n" +
                       $"Next Task Will Start At {DateTime.Now.Add(dueTimeSpan).AddHours(8).ToString("yyyy-MM-ddTHH:mm:ss")}");
