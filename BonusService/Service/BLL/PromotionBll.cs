@@ -1224,7 +1224,7 @@ namespace BonusService.Service.BLL
         {
             if (string.IsNullOrEmpty(specialCode) || specialCode.Length != 12)
             {
-                _logger.LogInformation($"{specialCode} is empty or length longer than 12.");
+                _logger.LogInformation($"{specialCode} is empty or length is not match (length=12).");
                 return false;
             }
 
