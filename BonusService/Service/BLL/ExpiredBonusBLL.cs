@@ -4,7 +4,6 @@ using BonusService.Service.DAL;
 using BonusService.Service.Library;
 using BonusService.Service.Model;
 
-using MemberSite.Service.Model;
 
 namespace BonusService.Service.BLL
 {
@@ -14,8 +13,6 @@ namespace BonusService.Service.BLL
         private readonly CustInfoService _custInfoService;
         private readonly SelLangBLL _selLangBll;
         private readonly MessageService _messageService;
-        private readonly CourierAdapter _courierAdapter;
-        private readonly string _tpServiceUrl;
 
         public ExpiredBonusBLL(IServiceProvider provider)
         {
@@ -23,23 +20,11 @@ namespace BonusService.Service.BLL
             _custInfoService = provider.GetRequiredService<CustInfoService>();
             _selLangBll = provider.GetRequiredService<SelLangBLL>();
             _messageService = provider.GetRequiredService<MessageService>();
-            _tpServiceUrl = provider.GetRequiredService<ConfigBLL>().GetConfigValueByEnvironment<ServiceHostConfig>("ServiceHost").TpService;
-            _courierAdapter = provider.GetRequiredService<CourierAdapter>();
         }
 
         public IEnumerable<ExpiredBonus> GetBonusExpired(int limit)
         {
             return _expiredBonusService.GetBonusExpired(limit);
-        }
-
-        public IEnumerable<ExpiredBonus> GetTransferBonusExpired(int limit)
-        {
-            return _expiredBonusService.GetTransferBonusExpired(limit);
-        }
-
-        public IEnumerable<decimal> GetBonusWinLoss(int bonusId)
-        {
-            return _expiredBonusService.GetBonusWinLoss(bonusId);
         }
 
         public int RefundExpiredBonus(ExpiredBonus expiredBonus, string memo)
@@ -70,11 +55,5 @@ namespace BonusService.Service.BLL
 
         }
 
-        public ApiResult<TransferResult> BonusCancelTransfer(TpBonusCancelTransfer tpBonusCancelTransfer)
-        {
-            var myUrl = $"{_tpServiceUrl}BonusCancelTransfer";
-            var data = _courierAdapter.MyPostAsync<TransferResult, TpBonusCancelTransfer>(myUrl, tpBonusCancelTransfer).Result;
-            return data;
-        }
     }
 }
