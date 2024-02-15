@@ -1183,33 +1183,62 @@ namespace BonusService.Service.BLL
         public int SetScratchCardCode(SpecialCodeRequest request)
         {
             request.SpecialCode = request.SpecialCode.ToUpper();
-            return _promotionService.SetScratchCardCode(request);
+            
+            var resultCode = _promotionService.SetScratchCardCode(request);
+            _logger.LogInformation("SetScratchCardCode result=" + resultCode);
+
+            return resultCode;
         }
 
         public bool SetSpecialCode(SpecialCodeRequest request)
         {
-            return _promotionService.SetSpecialCode(request);
+            var result = _promotionService.SetSpecialCode(request);
+
+            if (!result)
+            {
+                _logger.LogInformation("SetSpecialCode failed.");
+            }
+
+            return result;
         }
 
         public bool CheckSpecialCode(string specialCode)
         {
             if (string.IsNullOrEmpty(specialCode) || specialCode.Length > 20)
+            {
+                _logger.LogInformation($"{specialCode} is empty or length longer than 20.");
                 return false;
+            }
             var regex = new Regex("^[- !@#$%^&*a-zA-Z0-9]{1,20}$", RegexOptions.Singleline);
             var mPwd = regex.Match(specialCode);
+            var result = mPwd.Success;
 
-            return mPwd.Success;
+            if (!result)
+            {
+                _logger.LogInformation($"{specialCode} is not match Regex:^[- !@#$%^&*a-zA-Z0-9]{1,20}$");
+            }
+            
+            return result;
         }
 
         public bool CheckScratchCardCode(string specialCode)
         {
             if (string.IsNullOrEmpty(specialCode) || specialCode.Length != 12)
+            {
+                _logger.LogInformation($"{specialCode} is empty or length longer than 12.");
                 return false;
+            }
 
             var regex = new Regex("^[a-zA-Z]{5}-[a-zA-Z0-9]{6}$", RegexOptions.Singleline);
             var mPwd = regex.Match(specialCode);
+            var result = mPwd.Success;
 
-            return mPwd.Success;
+            if (!result)
+            {
+                _logger.LogInformation($"{specialCode} is not match Regex:^[a-zA-Z]{5}-[a-zA-Z0-9]{6}$");
+            }
+            
+            return result;
         }
 
         public bool CheckVipLevelWithBlockTags(int custId, string specialCode)
@@ -1217,19 +1246,30 @@ namespace BonusService.Service.BLL
             var custInfo = _custInfoService.GetCustInfo(custId);
             var vipLevelWithBlockTagsSetting = _promotionService.GetVipLevelWithBlockTags(custInfo.SiteId, specialCode);
 
-
             if (vipLevelWithBlockTagsSetting is { BlockTags: { } } && vipLevelWithBlockTagsSetting.BlockTags.Any())
             {
                 // 取交集
                 var intersectTagResult = custInfo.Tags.Intersect(vipLevelWithBlockTagsSetting.BlockTags).ToList();
                 // 如果有相同 tag 表示玩家不能領取
-                if (intersectTagResult.Any()) return false;
+                if (intersectTagResult.Any())
+                {
+                    _logger.LogInformation($"custId={custId} has block tags: {JsonConvert.SerializeObject(intersectTagResult)}");
+                    return false;
+                }
             }
 
             if (vipLevelWithBlockTagsSetting is { VipLevels: { } } && vipLevelWithBlockTagsSetting.VipLevels.Any())
             {
                 // 如果 Vip Level 命中就可以領
-                return vipLevelWithBlockTagsSetting.VipLevels.Any(x => x.Equals(custInfo.UserLevel));
+                var checkVip = vipLevelWithBlockTagsSetting.VipLevels.Any(x => x.Equals(custInfo.UserLevel));
+                
+                if (!checkVip)
+                {
+                    _logger.LogInformation(
+                        $"custId={custId}, vipLevel={custInfo.UserLevel} not match vip setting: {JsonConvert.SerializeObject(vipLevelWithBlockTagsSetting.VipLevels)}");
+                }
+                
+                return checkVip;
             }
 
             return true;
