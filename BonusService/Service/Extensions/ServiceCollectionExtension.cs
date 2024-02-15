@@ -8,28 +8,38 @@ namespace BonusService.Service.Extensions
 {
     public static class ServiceCollectionExtension
     {
-        public static void AddDatabaseConnection(this IServiceCollection services, IConfiguration config)
+        public static IServiceCollection AddDatabaseConnection(this IServiceCollection services, IConfiguration config)
         {
-            var provider = services.BuildServiceProvider();
-            var logger = provider.GetRequiredService<ILogger<MySqlClient>>();
             var serviceType = config.GetValue<string>("ServiceType");
+            var reportDBConn = config.GetConnectionString($"{serviceType}_ReportDB");
+            var reportBackupDB1 = config.GetConnectionString($"{serviceType}_ReportBackupDB1");
+            var reportBackupDB2 = config.GetConnectionString($"{serviceType}_ReportBackupDB2");
 
-            services.AddSingleton(factory => new MySqlClient(config.GetConnectionString($"{serviceType}_MainDB"), logger)
+            //檢查是否有BackupDB連線字串
+            if (!string.IsNullOrEmpty(reportBackupDB1) && !string.IsNullOrEmpty(reportBackupDB2))
             {
-                DataBase = DataBase.Main
-            });
-            services.AddSingleton(factory => new MySqlClient(config.GetConnectionString($"{serviceType}_ReportDB"), logger)
+                // 設定ReportDB連線順序
+                services.AddSingleton(provider => new MySqlClient(provider, DataBase.Report, reportDBConn, new List<string>()
+                {
+                    reportDBConn,
+                    reportBackupDB1,
+                    reportBackupDB2,
+                }));
+
+                // 設定ReportBackupDB連線順序
+                services.AddSingleton(provider => new MySqlClient(provider, DataBase.ReportBackupDB, reportBackupDB1, new List<string>()
+                {
+                    reportBackupDB1,
+                    reportBackupDB2,
+                }));
+            }
+            else
             {
-                DataBase = DataBase.Report
-            });
-            services.AddSingleton(factory => new MySqlClient(config.GetConnectionString($"{serviceType}_WagerDB"), logger)
-            {
-                DataBase = DataBase.Wager
-            });
-            services.AddSingleton(factory => new MySqlClient(config.GetConnectionString($"{serviceType}_LogDB"), logger)
-            {
-                DataBase = DataBase.Log
-            });
+                services.AddSingleton(provider => new MySqlClient(provider, DataBase.Report, reportDBConn));
+            }
+
+            services.AddSingleton(provider => new MySqlClient(provider, DataBase.Main, config.GetConnectionString($"{serviceType}_MainDB")));
+            return services;
         }
 
         public static IServiceCollection AddOptionListByDB<T>(this IServiceCollection services, string sql, object parameters = null)
