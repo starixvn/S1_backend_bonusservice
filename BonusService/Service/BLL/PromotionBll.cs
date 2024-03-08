@@ -599,7 +599,10 @@ namespace BonusService.Service.BLL
                 var checkIpResult = CheckBlockIp(custInfo, claimPromotion, custPromotionWhiteListListSetting);
                 if (checkIpResult.IsBlockIp)
                 {
-                    return checkIpResult;
+                    if (custInfo.CustIp != "18.139.199.197") // 上雲 cloudfront 標頭會誤判IP，先暫時把 PRD Nginx ip 忽略
+                    {
+                        return checkIpResult;
+                    }
                 }
 
                 var checkDeviceIdResult = CheckBlockDeviceId(custInfo, claimPromotion, custPromotionWhiteListListSetting);
