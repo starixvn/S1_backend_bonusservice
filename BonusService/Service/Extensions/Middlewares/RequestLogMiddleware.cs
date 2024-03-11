@@ -43,8 +43,10 @@ namespace BonusService.Extensions.Middlewares
                     ? await requestBody.ReadToEndAsync()
                     : content;
 
-                _logger.LogInformation(
-                    $"REQUEST METHOD: {context.Request.Method}, CodePage: {codePage}, REQUEST BODY: {content}, REQUEST URL: {url}");
+                var log = new StringBuilder();
+                log.AppendLine($"REQUEST URL: {url}, Method: {context.Request.Method}, CodePage: {codePage},");
+                log.AppendLine($"REQUEST BODY: {content}");
+                _logger.LogInformation(log.ToString());
             }
 
             requestBodyStream.Seek(0, SeekOrigin.Begin);
