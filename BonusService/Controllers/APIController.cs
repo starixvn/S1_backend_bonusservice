@@ -216,13 +216,20 @@ namespace BonusService.Controllers
             {
                 if (!_promotionBll.CheckSpecialCode(request.SpecialCode))
                 {
-                    result.ErrorCode = (int)SpecialCode.SpecialCodeError;
+                    result.ErrorCode = (int)SpecialCode.SpecialCodeErrorForCheck;
+                    return result;
                 }
-                else if (!_promotionBll.CheckVipLevelWithBlockTags(request.CustId, request.SpecialCode))
+                
+                if (!_promotionBll.CheckVipLevelWithBlockTags(request.CustId, request.SpecialCode))
                 {
                     result.ErrorCode = (int)SpecialCode.SpecialCodeVipLevelsOrBlockTagInvalid;
+                    return result;
                 }
-                else if (_promotionBll.CheckScratchCardCode(request.SpecialCode.ToUpper()))
+                
+                // 240215考古:
+                // * 如果符合ScratchCard格式走SetScratchCardCode，其餘走SetSpecialCode
+                // * SetSpecialCode這段是輸入後台設定的ScratchCode(也就是DB的Promotion.SpecialCode)會過，詢問市場說這個ScratchCode不會對外開放所以實際上沒用，但PM說可先保留
+                if (_promotionBll.CheckScratchCardCode(request.SpecialCode.ToUpper()))
                 {
                     result.ErrorCode = _promotionBll.SetScratchCardCode(request);
                 }

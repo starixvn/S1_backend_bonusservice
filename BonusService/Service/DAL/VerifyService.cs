@@ -1,4 +1,6 @@
-﻿using BonusService.Service.DAL.Interface;
+﻿using BonusService.Service.BLL;
+using BonusService.Service.DAL.Interface;
+using BonusService.Service.Extensions;
 using BonusService.Service.Library;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
@@ -12,9 +14,11 @@ namespace BonusService.Service.DAL
     public class VerifyService : IVerifyService
     {
         private readonly MySqlClient _reportDbClient;
-        public VerifyService(IServiceProvider provider)
+        private readonly ILogger<VerifyService> _logger;
+        public VerifyService(IServiceProvider provider, ILogger<VerifyService> logger)
         {
             _reportDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Report);
+            _logger = logger;
         }
 
         /// <summary>
@@ -26,49 +30,61 @@ namespace BonusService.Service.DAL
         public bool IsRealNameVaild(Customer mainCustInfo, IEnumerable<CompareRealNameDto> compareCustIds, out List<CompareRealNameDto> realNameCheckResult)
         {
             #region Sub-需要比較的客戶清單：包含現在使用的AccountName和以前修改過的AccountName
-
-            var compareNameInfo = new List<CompareRealNameDto>();
-            compareNameInfo.AddRange(compareCustIds); //現在使用AccountName的清單
-            var p = new DynamicParameters(new
+            _logger.LogInformation($"mainCustInfo={mainCustInfo}, compareCustIds={JsonConvert.SerializeObject(compareCustIds.Select(x => x.CustId))}");
+            realNameCheckResult = new List<CompareRealNameDto>();
+            try
             {
-                _CustIds = JsonConvert.SerializeObject(compareCustIds.Select(x => x.CustId)),
-            });
-            var setRealNameLog = _reportDbClient.Query<CustSetRealNameLogDto>("Service_SetRealNameLog_Get", p).ToList();
-            AddBeforeNameWithAfterNameToCompareList(compareNameInfo, setRealNameLog); //過去有改過名的清單
-            compareNameInfo = compareNameInfo.Distinct().ToList();
+                if (string.IsNullOrWhiteSpace(mainCustInfo.AccountName))
+                {
+                    return false; //mainCust沒有AccountName=> 沒有相同的清單
+                }
+                var compareNameInfo = new List<CompareRealNameDto>();
+                compareNameInfo.AddRange(compareCustIds); //現在使用AccountName的清單
+                var p = new DynamicParameters(new
+                {
+                    _CustIds = JsonConvert.SerializeObject(compareCustIds.Select(x => x.CustId)),
+                });
+                var setRealNameLog = _reportDbClient.Query<CustSetRealNameLogDto>("Service_SetRealNameLog_Get", p).ToList();
+                AddBeforeNameWithAfterNameToCompareList(compareNameInfo, setRealNameLog); //過去有改過名的清單
+                compareNameInfo = compareNameInfo.Distinct().ToList();
 
-            #endregion
+                #endregion
 
-            #region Main-需要比較的客戶清單：包含現在使用的AccountName和以前修改過的AccountName
+                #region Main-需要比較的客戶清單：包含現在使用的AccountName和以前修改過的AccountName
 
-            var patterns = new List<string> //現在使用AccountName的清單
+                var patterns = new List<string> //現在使用AccountName的清單
             {
                 mainCustInfo.AccountName,
                 mainCustInfo.AccountName.Replace(" ", string.Empty)
             };
 
-            var p2 = new DynamicParameters(new
-            {
-                _CustIds = JsonConvert.SerializeObject(new List<int>() { mainCustInfo.CustId }),
-            });
+                var p2 = new DynamicParameters(new
+                {
+                    _CustIds = JsonConvert.SerializeObject(new List<int>() { mainCustInfo.CustId }),
+                });
 
-            var mainCustIdSetRealNameLog = _reportDbClient.Query<CustSetRealNameLogDto>("Service_SetRealNameLog_Get", p2).ToList();
-            AddBeforeNameWithAfterNameToPatternList(patterns, mainCustIdSetRealNameLog); //過去有改過名的清單
-            patterns = patterns.Distinct().ToList();
+                var mainCustIdSetRealNameLog = _reportDbClient.Query<CustSetRealNameLogDto>("Service_SetRealNameLog_Get", p2).ToList();
+                AddBeforeNameWithAfterNameToPatternList(patterns, mainCustIdSetRealNameLog); //過去有改過名的清單
+                patterns = patterns.Distinct().ToList();
 
-            #endregion
+                #endregion
 
-            #region 檢查邏輯：MainCust所有使用(過)的AccountName(patterns)，與SubCust紀錄比較是否有相同
-            realNameCheckResult = new List<CompareRealNameDto>();
-            foreach (var name in patterns)
-            {
-                realNameCheckResult.AddRange(compareNameInfo.Where(r => r.RealName.Equals(name, StringComparison.CurrentCultureIgnoreCase)).ToList());
+                #region 檢查邏輯：MainCust所有使用(過)的AccountName(patterns)，與SubCust紀錄比較是否有相同
+                foreach (var name in patterns)
+                {
+                    realNameCheckResult.AddRange(compareNameInfo.Where(r => r.RealName.Equals(name, StringComparison.CurrentCultureIgnoreCase)).ToList());
+                }
+
+                #endregion
+
+                //true=有相同的清單，false=沒有相同的清單
+                return realNameCheckResult.Any() ? true : false;
             }
-
-            #endregion
-
-            //true=有相同的清單，false=沒有相同的清單
-            return realNameCheckResult.Any() ? true : false;
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, MethodExtension.GetCurrentMethod());
+                throw ex;
+            }
         }
 
         /// <summary>

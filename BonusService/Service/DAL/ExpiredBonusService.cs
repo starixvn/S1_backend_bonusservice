@@ -26,16 +26,6 @@ namespace BonusService.Service.DAL
             return _reportDbClient.QueryUseCommandDefinition<ExpiredBonus>("Service_BonusExpired_Get_V3", new DynamicParameters(new { Limit = limit }));
         }
 
-        public IEnumerable<ExpiredBonus> GetTransferBonusExpired(int limit)
-        {
-            return _reportDbClient.QueryUseCommandDefinition<ExpiredBonus>("Service_TransferBonusExpired_Get_V3", new DynamicParameters(new { Limit = limit }));
-        }
-
-        public IEnumerable<decimal> GetBonusWinLoss(int bonusId)
-        {
-            return _reportDbClient.Query<decimal>("Service_BonusWinLoss_Get", new DynamicParameters(new { BonusId = bonusId }));
-        }
-
         public int RefundExpiredBonus(ExpiredBonus expiredBonus, string memo)
         {
             using var conn = _mainDbClient.GetMySqlConnection();
