@@ -29,5 +29,8 @@ namespace BonusService.Service.Library
         long GetListLength(string key, RedisDataBase redisDataBase = RedisDataBase.Bonus);
 
         Task<bool> ListLeftPopAsync(string key, RedisDataBase redisDataBase = RedisDataBase.Bonus);
+        
+        Task<bool> TryCreateLockAsync(RedisKey lockKey, RedisValue lockValue, TimeSpan? expiry, RedisDataBase redisDataBase = RedisDataBase.Bonus);
+        Task<bool> UnLockAsync(RedisKey lockKey, RedisValue lockValue, RedisDataBase redisDataBase = RedisDataBase.Bonus);
     }
 }
