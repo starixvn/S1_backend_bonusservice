@@ -1,5 +1,6 @@
 ﻿using BonusService.Service.BLL;
 using BonusService.Service.Extensions;
+using BonusService.Service.Library;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
 
@@ -20,12 +21,14 @@ namespace BonusService.Controllers
         private readonly BonusAPIBLL _bonusAPIBLL;
         private readonly PromotionBll _promotionBll;
         private readonly ILogger<APIController> _logger;
+        private readonly ICacheHelper _redisHelper;
 
         public APIController(IServiceProvider provider)
         {
             _bonusAPIBLL = provider.GetRequiredService<BonusAPIBLL>();
             _promotionBll = provider.GetRequiredService<PromotionBll>();
             _logger = provider.GetRequiredService<ILogger<APIController>>();
+            _redisHelper = provider.GetRequiredService<ICacheHelper>();
         }
 
         public class SpecialCodeResponse
@@ -47,24 +50,38 @@ namespace BonusService.Controllers
         public async Task<ApiResult> SetAdjustBonusAsync(SetAdjustBonusAsyncReq setAdjustBonusReq)
         {
             var result = new ApiResult();
-            try
-            {
-                //檢核PhoneVerified,AccountName,Birth
-                var custInfoProfile = _bonusAPIBLL.GetCustInfoProfile(setAdjustBonusReq.CustId);
-                if (!custInfoProfile.PhoneVerified
+            
+            //檢核PhoneVerified,AccountName,Birth
+            var custInfoProfile = _bonusAPIBLL.GetCustInfoProfile(setAdjustBonusReq.CustId);
+            if (!custInfoProfile.PhoneVerified
                 || string.IsNullOrEmpty(custInfoProfile.AccountName)
                 || string.IsNullOrEmpty(custInfoProfile.Birth_y)
                 || string.IsNullOrEmpty(custInfoProfile.Birth_m)
                 || string.IsNullOrEmpty(custInfoProfile.Birth_d))
+            {
+                result.ErrorCode = 999;
+                result.Message = "Please complete your profile and verify your phone number to enjoy our promotions.";
+                return result;
+            }
+            
+            try
+            {
+                var lockKey = $"SetAdjustBonusLock:{setAdjustBonusReq.CustId}:{setAdjustBonusReq.BonusCode}";
+                var lockValue = Guid.NewGuid().ToString(); // 每次取鎖使用唯一值，確保為同一個執行序所執行
+                var lockExpiry = TimeSpan.FromSeconds(30); //lock 30 sec        
+                        
+                if (await _redisHelper.TryCreateLockAsync(lockKey, lockValue, lockExpiry))
+                {
+                    var memo = JsonConvert.SerializeObject(new { setAdjustBonusReq.Operator });
+                    result = await _promotionBll.SetAdjustmentBonusV2Async(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode, memo, setAdjustBonusReq.Amount, setAdjustBonusReq.PromotionType, setAdjustBonusReq.DepositId);
+
+                    await _redisHelper.UnLockAsync(lockKey, lockValue);
+                }
+                else
                 {
                     result.ErrorCode = 999;
-                    result.Message = "Please complete your profile and verify your phone number to enjoy our promotions.";
-                    return result;
+                    result.RawMessage = " Bonus Adjustment is currently being processed.";
                 }
-                var Memo = JsonConvert.SerializeObject(new { setAdjustBonusReq.Operator });
-
-                result = await _promotionBll.SetAdjustmentBonusV2Async(setAdjustBonusReq.CustId, setAdjustBonusReq.BonusCode, Memo, setAdjustBonusReq.Amount, setAdjustBonusReq.PromotionType, setAdjustBonusReq.DepositId);
-
             }
             catch (Exception ex)
             {
