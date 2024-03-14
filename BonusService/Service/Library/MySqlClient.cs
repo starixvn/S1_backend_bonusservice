@@ -76,8 +76,6 @@ namespace BonusService.Service.Library
             return new MySqlConnection(conn);
         }
 
-        #region Query
-
         public T QueryFirst<T>(string name, object parameters)
         {
             T result;
@@ -160,10 +158,6 @@ namespace BonusService.Service.Library
             _logger.LogDebug($"{spName} {sw.Elapsed:c}");
             return result.ToList();
         }
-
-        #endregion
-
-        #region Execute
 
         public int Execute(string name, object parameters = null)
         {
@@ -249,8 +243,6 @@ namespace BonusService.Service.Library
             return result;
         }
         
-        #endregion
-
         public void CommitAndDisposeConnection(MySqlConnection conn, IDbTransaction trans)
         {
             trans.Commit();
