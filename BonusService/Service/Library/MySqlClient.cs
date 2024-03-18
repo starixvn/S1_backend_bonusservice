@@ -109,7 +109,6 @@ namespace BonusService.Service.Library
             try
             {
                 var conn = HealthCheck();
-                conn = $"{conn}ProcedureCacheSize=0;";
                 using var connection = new MySqlConnection(conn);
                 if (connection.State != ConnectionState.Open) connection.Open();// 自己 Control connection open close，不要讓 ORM 自己做
 
