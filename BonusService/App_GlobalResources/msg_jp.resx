@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+<resheader name="resmimetype"><value>text/microsoft-resx</value></resheader><resheader name="version"><value>1.3</value></resheader><resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader><resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader><data name="msg_SameRealName"><value>キャンペーン対象外の場合は、カスタマーサポートまでお問い合わせください。</value></data>
+  <data name="msg_SpCustomerFirstDepositRuleDontMatch"><value>プロモーション対象外</value></data>
+  <data name="msg_PromotionNotFound"><value>プロモーションが見つかりません</value></data>
+  <data name="msg_SpCustomerNotJoinSpecialCode"><value>プロモーションコードを入力してください</value></data>
+  <data name="msg_SpCustomerBonusStillRunning"><value>まだ実行中のボーナスがあります、後でもう一度試してください</value></data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusWhichPromotionTypeIn135"><value>まだ継続中のボーナスがある場合、または本オファーの参加人数が上限に達している場合。</value></data>
+  <data name="msg_ProfileOrPhoneNotFinish"><value>アカウント情報が入力されていません。</value></data>
+  <data name="msg_IpIsBlocked"><value>アカウント情報が重複しています。</value></data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusInPeriodTime"><value>まだ実行中のボーナスがあります、後でもう一度試してください</value></data>
+  <data name="msg_SpCustomerJoinThisPromotionBefore"><value>参加制限に達しました</value></data>
+  <data name="msg_MainWalletAmountNotEnough"><value>メインウォレットの残高が{0}より少なくなってはいけません。</value></data>
+  <data name="msg_CalculateUnknownPromotionType"><value>プロモーションが見つかりません</value></data>
+  <data name="msg_SpCustomerDepositNotExceedRequiredAmount"><value>入金額は本キャンペーンの対象外となります。</value></data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddThisBonusBefore"><value>まだ継続中のボーナスがある場合、または本オファーの参加人数が上限に達している場合。</value></data>
+  <data name="msg_SpBonusNotFound"><value>プロモーションが見つかりません</value></data>
+  <data name="msg_SameDeviceId"><value>キャンペーン対象外の場合は、カスタマーサポートまでお問い合わせください。</value></data>
+  <data name="msg_CalculateAmountIsNegative"><value>プロモーション参加資格なし</value></data>
+  <data name="msg_CalculateCashbackTotalBonusLessThenMinPay"><value>最低キャッシュバック額に達しない場合</value></data>
+  <data name="msg_SameIp"><value>キャンペーン対象外の場合は、カスタマーサポートまでお問い合わせください。</value></data>
+  <data name="msg_SpCustomerHaveRunningBonusOrJoinThisBonusInPeriodTime"><value>まだ継続中のボーナスがある場合、または本オファーの参加人数が上限に達している場合。</value></data>
+  <data name="msg_SpCustomerDepositApproveBefore"><value>このプロモーションに参加できない入金記録が見つかりました</value></data>
+  <data name="msg_SpCustomerJoinThisRebateBefore"><value>このプロモーションは請求済みです</value></data>
+  <data name="msg_SpCustomerDontHaveFirstDeposit"><value>初回入金を完了してください</value></data>
+  <data name="msg_SpCustomerWithdrawalBefore"><value>引き出し記録が見つかりました。</value></data>
+  <data name="msg_DepositAmountNotEnough"><value>このプロモーションに参加するには、入金額が{0}以上である必要があります。</value></data>
+  <data name="msg_DuplicateClaimBonus"><value>プロモーションを重複して利用しないでください</value></data>
+  <data name="msg_SpUndefinedPromotionType"><value>プロモーションが見つかりません</value></data>
+  <data name="msg_BlockTag"><value>キャンペーン対象外の場合は、カスタマーサポートまでお問い合わせください。</value></data>
+  <data name="msg_ClaimCashBackBonus"><value>おめでとうございます、キャッシュバック{0}がアカウントに入金されました！</value></data>
+  <data name="msg_Ineligible"><value>このプロモーションの対象外です。詳しくはサポートまでお問い合わせください。</value></data>
+  <data name="msg_AdjustmentBonusPromotionNotActive"><value>このオファーは開始されていません。ボーナスコード:{0｝</value></data>
+  <data name="msg_AdjustmentBonusPromotionAmountOverMaxBonus"><value>金額が上限に達しました。金額:{0}がMaxBonus{1}を超えています、BonusCode:{2}。</value></data>
+  <data name="msg_AdjustmentBonusCustomerHasRunningBonus"><value>お客様はまだ実行中のボーナスをお持ちです。CustId:{0}</value></data>
+  <data name="msg_SpCustomerNotHaveNewScratchCardToJoin"><value>別の新しいプロモーションコードを入力してください</value></data>
+  <data name="msg_AdjustmentBonusPromotionTypeNotMatch"><value>ボーナスコード:{0}は{1}ではありません</value></data>
+  </root>
