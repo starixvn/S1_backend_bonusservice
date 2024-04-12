@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+<resheader name="resmimetype"><value>text/microsoft-resx</value></resheader><resheader name="version"><value>1.3</value></resheader><resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader><resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader><data name="lbl_VipUpgradeTitle"><value>VIP 업그레이드</value></data>
+  <data name="lbl_ReferredBonusCreditedMsg"><value>축하합니다! 추천된 무료 크레딧 {0} 받았습니다!</value></data>
+  <data name="lbl_VipUpgrade"><value>축하합니다! VIP 레벨이 업그레이드되어 {0} {1} 감사합니다!</value></data>
+  <data name="lbl_CancelBonusTitle"><value>프로모션 만료 공지.</value></data>
+  <data name="lbl_ReferralBonusCreditedMsg"><value>축하합니다! 귀하의 추천 보너스 {0}가 귀하의 계정에 적립되었습니다!</value></data>
+  <data name="lbl_RebateMsg"><value>축하합니다, 리베이트 {0}가 귀하의 계정에 적립되었습니다!</value></data>
+  <data name="lbl_CancelBonus2"><value>보너스 프로모션이 취소되었으며 적격 환불 금액이 {0}.</value></data>
+  <data name="lbl_CancelBonus1"><value>보너스 프로모션이 취소되었습니다.</value></data>
+  <data name="lbl_VipDowngradeContent"><value>유감스럽게도 유지 관리 요구 사항을 충족하지 못하여 VIP 등급이 다운그레이드되었음을 알려드립니다. 감사합니다!</value></data>
+  <data name="lbl_VipDowngradeTitle"><value>VIP 멤버십 공지</value></data>
+  <data name="lbl_ReferralBonusCreditedTitle"><value>친구 추천 보상 [Refer &amp; Earn]</value></data>
+  <data name="lbl_VerificationRewardContent"><value>축하합니다! 인증 리워드의 {0} {1} 받았습니다.</value></data>
+  <data name="lbl_VerificationRewardLimitTitle"><value>인증 리워드</value></data>
+  <data name="lbl_VerificationRewardLimit"><value>남은 입금 {0} {1} 모두 결제하여 인증 보상을 받으세요.</value></data>
+  </root>
