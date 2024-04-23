@@ -236,6 +236,43 @@ namespace BonusService.Service.Library
             }
         }
 
+        public async Task<bool> TryCreateLockAsync(RedisKey lockKey, RedisValue lockValue, TimeSpan? expiry, RedisDataBase redisDataBase = RedisDataBase.Bonus)
+        {
+            var key = $"{redisDataBase}:{RemoveSpecialChars(lockKey)}";
+            try
+            {
+                var db = _multiplexer.GetDatabase((int)redisDataBase);
+                return await db.StringSetAsync(key, lockValue, expiry, When.NotExists);// 使用When.NotExists選項，確保操作的原子性
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"{key} | {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task<bool> UnLockAsync(RedisKey lockKey, RedisValue lockValue, RedisDataBase redisDataBase = RedisDataBase.Bonus)
+        {
+            //當鎖的值與預期的值相匹配時才釋放鎖，使用Lua script確保操作的原子性
+            var key = $"{redisDataBase}:{RemoveSpecialChars(lockKey)}";
+            var script = @"if redis.call('GET', KEYS[1]) == ARGV[1] then 
+                           return redis.call('DEL', KEYS[1]) 
+                       else 
+                           return 0 
+                       end";
+            try
+            {
+                var db = _multiplexer.GetDatabase((int)redisDataBase);
+                var result = await db.ScriptEvaluateAsync(script, new RedisKey[] { key }, new RedisValue[] { lockValue });
+                return result.ToString() == "1";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"{key} | {ex.Message}");
+                return false;
+            }
+        }
+        
         private string RemoveSpecialChars(string key)
         {
             foreach (var c in _charsToRemove)

@@ -21,16 +21,17 @@ namespace BonusService.Service.Extensions
                 // 設定ReportDB連線順序
                 services.AddSingleton(provider => new MySqlClient(provider, DataBase.Report, reportDBConn, new List<string>()
                 {
-                    reportDBConn,
-                    reportBackupDB1,
-                    reportBackupDB2,
+                    reportDBConn,   //1b
+                    reportBackupDB1,//1c
+                    reportBackupDB2,//1a
                 }));
 
                 // 設定ReportBackupDB連線順序
                 services.AddSingleton(provider => new MySqlClient(provider, DataBase.ReportBackupDB, reportBackupDB1, new List<string>()
                 {
-                    reportBackupDB1,
-                    reportBackupDB2,
+                    reportBackupDB1,//1c
+                    reportDBConn,   //1b
+                    reportBackupDB2,//1a
                 }));
             }
             else

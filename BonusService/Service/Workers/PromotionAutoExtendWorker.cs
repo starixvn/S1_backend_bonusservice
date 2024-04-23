@@ -37,7 +37,7 @@ namespace BonusService.Service.Workers
             {
                 _logger.LogInformation("Promotion Auto Extend Task Start");
                 var data = _promotionAutoExtendBll.GetAutoExtendPromotionExpiredList(_specificDate, _random.Next(950, 1000));
-                _logger.LogInformation($"GetTransferBonusExpired Data Count：{data.Count()}");
+                _logger.LogInformation($"Promotion Auto Extend  Data Count：{data.Count()}");
                 if (data.Any())
                 {
                     foreach (var item in data)
