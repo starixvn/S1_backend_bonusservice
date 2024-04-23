@@ -486,6 +486,7 @@ namespace BonusService.Service.Model
         {
 
         }
+
         public RebateExcludeGameDetail(string tpName, string tpCategoryName, int tpGameType, string tpGameTypeName, string gameName)
         {
             TpName = tpName;
