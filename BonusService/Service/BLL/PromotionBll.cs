@@ -1325,8 +1325,8 @@ namespace BonusService.Service.BLL
                  return item;
              });
             return result
-                .GroupBy(x => new { x.TpName, x.TpCategoryName, x.TpGameTypeName, x.GameName })
-                .Select(s => new RebateExcludeGameDetail(s.Key.TpName, s.Key.TpCategoryName, s.Key.TpGameTypeName, s.Key.GameName));
+                .GroupBy(x => new { x.TpName, x.TpCategoryName, x.TpGameType, x.TpGameTypeName, x.GameName })
+                .Select(s => new RebateExcludeGameDetail(s.Key.TpName, s.Key.TpCategoryName, s.Key.TpGameType, s.Key.TpGameTypeName, s.Key.GameName));
         }
 
 

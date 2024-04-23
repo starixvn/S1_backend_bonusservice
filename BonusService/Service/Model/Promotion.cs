@@ -484,12 +484,13 @@ namespace BonusService.Service.Model
 
         public RebateExcludeGameDetail()
         {
-            
+
         }
-        public RebateExcludeGameDetail(string tpName, string tpCategoryName, string tpGameTypeName, string gameName)
+        public RebateExcludeGameDetail(string tpName, string tpCategoryName, int tpGameType, string tpGameTypeName, string gameName)
         {
             TpName = tpName;
             TpCategoryName = tpCategoryName;
+            TpGameType = tpGameType;
             TpGameTypeName = tpGameTypeName;
             GameName = gameName;
         }
