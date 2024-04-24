@@ -83,13 +83,13 @@ namespace BonusService.Service.Model
             if (PromotionType == PromotionType.MissionBonus)
             {
                 canJoinTierAmount = TierAmountList.Where(i => depositAmount >= i.RequiredAmount && turnoverAmount >= i.RequiredTurnover).ToList();
-                _canJoinTierAmountList = canJoinTierAmount.Select(i => i.CalculateTierAmount(PromotionType, BonusType, depositAmount));
             }
             else
             {
                 canJoinTierAmount = TierAmountList.Where(i => depositAmount >= i.RequiredAmount).ToList();
-                _canJoinTierAmountList = canJoinTierAmount.Select(i => i.CalculateTierAmount(PromotionType, BonusType, RequiredAmount));
             }
+            
+            _canJoinTierAmountList = canJoinTierAmount.Select(i => i.CalculateTierAmount(PromotionType, BonusType, depositAmount));
         }
 
         private IEnumerable<CanJoinTierAmount> _canJoinTierAmountList { get; set; }
