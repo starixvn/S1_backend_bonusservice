@@ -287,8 +287,7 @@ namespace BonusService.Service.BLL
             await conn.OpenAsync();
             await using var trans = await conn.BeginTransactionAsync();
 
-            var calculateBonus = CalculateBonus(claimPromotion, custConditionInfo.Amount,
-                lockedAmount, custId, custInfo.SiteId, custInfo.CurrencyId);
+            var calculateBonus = CalculateBonus(claimPromotion, custConditionInfo.Amount, lockedAmount, custId, custInfo.SiteId, custInfo.CurrencyId);
             if (calculateBonus.result <= 0)
             {
                 errorInfo.Result = calculateBonus.result;
@@ -671,7 +670,7 @@ namespace BonusService.Service.BLL
                    && !string.IsNullOrEmpty(custInfoProfile.Birth_d);
         }
 
-        private CalculateBonusOutput CalculateBonus(ClaimPromotion claimPromotion, decimal amount, decimal lockedAmount, int custId, int siteId, int currencyId, string depositId = null)
+        private CalculateBonusOutput CalculateBonus(ClaimPromotion claimPromotion, decimal amount, decimal applyLockedAmount, int custId, int siteId, int currencyId, string depositId = null)
         {
             var output = new CalculateBonusOutput
             {
@@ -684,57 +683,41 @@ namespace BonusService.Service.BLL
 
             switch (claimPromotion.PromotionType)
             {
-                case PromotionType.FstDeposit:
-                case PromotionType.ReDeposit:
+                case PromotionType.FstDeposit: 
+                {
+                    if (amount < claimPromotion.RequiredAmount)
                     {
-                        if (claimPromotion.PromotionType == PromotionType.ReDeposit && claimPromotion.TierAmountList.Any())
-                        {
-                            return CalculateTierRedepositBonus(claimPromotion, custId, siteId, currencyId, lockedAmount, depositId);
-                        }
-
-                        if (claimPromotion.PromotionType == PromotionType.ReDeposit ||
-                           (claimPromotion.IsSpecial && claimPromotion.PromotionType == PromotionType.FstDeposit))
-                        {
-                            amount = claimPromotion.BonusType == BonusType.Amount ? claimPromotion.RequiredAmount : lockedAmount;
-
-                            if (amount <= 0)
-                            {
-                                output.result = (int)BonusErrorCode.CalculateAmountIsNegative;
-                                return output;
-                            }
-                            lockAmount = amount;
-                        }
-
-                        if (amount < claimPromotion.RequiredAmount)
-                        {
-                            output.result = (int)BonusErrorCode.DepositAmountNotEnough;
-                            return output;
-                        }
-
-                        if (claimPromotion.BonusType == BonusType.Amount)
-                        {
-                            if (claimPromotion.RequiredAmount == 0)
-                            {
-                                throw new Exception("Required Amount can't be 0");
-                            }
-
-                            lockAmount = claimPromotion.RequiredAmount;
-                            bonusAmount = claimPromotion.Bonus;
-                        }
-                        else
-                        {
-                            bonusAmount = Math.Ceiling(claimPromotion.Bonus * amount / 100);
-                            if (claimPromotion.MaxBonus != 0 && bonusAmount > claimPromotion.MaxBonus)
-                            {
-                                bonusAmount = claimPromotion.MaxBonus;
-                                lockAmount = claimPromotion.MaxBonus * 100 / claimPromotion.Bonus;
-                            }
-                        }
-
-                        rollover = (lockAmount + bonusAmount) * (claimPromotion.FullFillType == (int)FullFillType.RollOver ? claimPromotion.RollOver : claimPromotion.WinOver);
-                        break;
+                        output.result = (int)BonusErrorCode.DepositAmountNotEnough;
+                        return output;
                     }
 
+                    if (claimPromotion.BonusType == BonusType.Amount)
+                    {
+                        if (claimPromotion.RequiredAmount == 0)
+                        {
+                            throw new Exception("Required Amount can't be 0");
+                        }
+                        lockAmount = applyLockedAmount;
+                        bonusAmount = claimPromotion.Bonus;
+                    }
+                    else
+                    {
+                        bonusAmount = Math.Ceiling(claimPromotion.Bonus * applyLockedAmount / 100);
+                        lockAmount = applyLockedAmount;
+                        if (claimPromotion.MaxBonus != 0 && bonusAmount > claimPromotion.MaxBonus)
+                        {
+                            bonusAmount = claimPromotion.MaxBonus;
+                            lockAmount = claimPromotion.MaxBonus * 100 / claimPromotion.Bonus;
+                        }
+                    }
+
+                    rollover = (lockAmount + bonusAmount) * (claimPromotion.FullFillType == (int)FullFillType.RollOver ? claimPromotion.RollOver : claimPromotion.WinOver);
+                    break;
+                }
+
+                case PromotionType.ReDeposit: 
+                    return CalculateTierRedepositBonus(claimPromotion, custId, siteId, currencyId, applyLockedAmount, depositId);
+                    
                 case PromotionType.Cashback:
                     var custPromotion = new CustPromotion
                     {
@@ -777,8 +760,8 @@ namespace BonusService.Service.BLL
                     break;
 
                 case PromotionType.MissionBonus:
-                    return CalculateTierMissionBonus(claimPromotion, custId, siteId, currencyId, amount, lockedAmount, depositId);
-
+                    return CalculateTierMissionBonus(claimPromotion, custId, siteId, currencyId, amount, applyLockedAmount, depositId);
+                
                 default:
                     output.result = (int)BonusErrorCode.CalculateUnknownPromotionType;
                     return output;
