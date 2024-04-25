@@ -189,7 +189,7 @@ namespace BonusService.Service.Model
         public int TpCategoryId { get; set; }
         public int RollOver { get; set; }
         public int WinOver { get; set; }
-        public CanJoinTierAmount CalculateTierAmount(PromotionType promotionType ,BonusType bonusType, decimal depositAmount)
+        public CanJoinTierAmount CalculateTierAmount(PromotionType promotionType ,BonusType bonusType, decimal applyDepositAmount)
         {
             decimal bonusAmount;
             decimal lockAmount;
@@ -207,8 +207,8 @@ namespace BonusService.Service.Model
                 }
                 else
                 {
-                    bonusAmount = Math.Ceiling(Bonus * depositAmount / 100);
-                    lockAmount = depositAmount;
+                    bonusAmount = Math.Ceiling(Bonus * applyDepositAmount / 100);
+                    lockAmount = applyDepositAmount;
                     if (MaxBonus != 0 && bonusAmount > MaxBonus)
                     {
                         bonusAmount = MaxBonus;
