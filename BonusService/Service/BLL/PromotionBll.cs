@@ -691,6 +691,16 @@ namespace BonusService.Service.BLL
                         return output;
                     }
 
+                    if (applyLockedAmount < claimPromotion.RequiredAmount)
+                    {
+                        throw new Exception("LockedAmount can't less than RequiredAmount");
+                    }
+                    
+                    if (applyLockedAmount <= 0)
+                    {
+                        throw new Exception("LockedAmount can't be 0");
+                    }
+                    
                     if (claimPromotion.BonusType == BonusType.Amount)
                     {
                         if (claimPromotion.RequiredAmount == 0)
