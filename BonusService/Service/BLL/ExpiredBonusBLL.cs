@@ -55,5 +55,15 @@ namespace BonusService.Service.BLL
 
         }
 
+
+        public IEnumerable<PromotionExpiredCheck> GetPromotionExpired(int limit)
+        {
+            return _expiredBonusService.GetPromotionExpired(limit);
+        }
+
+        public int SetPromotionStatus(int siteId, string bonusCode)
+        {
+            return _expiredBonusService.SetPromotionStatus(siteId, bonusCode);
+        }
     }
 }
