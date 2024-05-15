@@ -1,11 +1,8 @@
-﻿using System.Diagnostics;
-
-using BonusService.Service.Library;
+﻿using BonusService.Service.Library;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
-using Dapper;
 
-using MySqlX.XDevAPI.Common;
+using Dapper;
 
 namespace BonusService.Service.DAL
 {
@@ -89,9 +86,9 @@ namespace BonusService.Service.DAL
             return result;
         }
 
-        public IEnumerable<PromotionExpiredCheck> GetPromotionExpired(int limit)
+        public IEnumerable<PromotionCheck> GetPromotionExpired(int limit)
         {
-            return _reportDbClient.QueryUseCommandDefinition<PromotionExpiredCheck>("Service_PromotionExpired_Check", new DynamicParameters(new { Limit = limit }));
+            return _reportDbClient.QueryUseCommandDefinition<PromotionCheck>("Service_PromotionExpired_Check", new DynamicParameters(new { Limit = limit }));
         }
 
         public int SetPromotionStatus(int SiteId, string BonusCode)

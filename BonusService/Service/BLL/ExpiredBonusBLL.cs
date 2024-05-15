@@ -56,7 +56,7 @@ namespace BonusService.Service.BLL
         }
 
 
-        public IEnumerable<PromotionExpiredCheck> GetPromotionExpired(int limit)
+        public IEnumerable<PromotionCheck> GetPromotionExpired(int limit)
         {
             return _expiredBonusService.GetPromotionExpired(limit);
         }
