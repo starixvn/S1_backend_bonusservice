@@ -513,5 +513,19 @@ namespace BonusService.Service.DAL
             };
             return resultModel;
         }
+
+        /// <summary>
+        /// 檢查是否有在進行中的Bonus
+        /// </summary>
+        /// <param name="custId"></param>
+        /// <returns></returns>
+        public RunningBonusCheck CheckRunningBonus(int custId)
+        {
+            return _reportDbClient.QueryFirst<RunningBonusCheck>("Service_RunningBonus_Check",
+                new DynamicParameters(new
+                {
+                    CustId = custId
+                }));
+        }
     }
 }

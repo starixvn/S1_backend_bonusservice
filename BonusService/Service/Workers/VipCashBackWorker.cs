@@ -44,7 +44,7 @@ namespace BonusService.Service.Workers
             }
             finally
             {
-                var dueTimeSpan = TimeSpan.FromMinutes(10);
+                var dueTimeSpan = TimeSpan.FromMinutes(5);
                 if (_environment.IsDevelopment())
                 {
                     dueTimeSpan = TimeSpan.FromMinutes(1);
@@ -52,7 +52,7 @@ namespace BonusService.Service.Workers
 
                 if (!success)
                 {
-                    dueTimeSpan = TimeSpan.FromMinutes(10);
+                    dueTimeSpan = TimeSpan.FromMinutes(5);
                 }
 
                 _cashBackWeekTimer.Change(dueTimeSpan, TimeSpan.Zero);
@@ -75,7 +75,7 @@ namespace BonusService.Service.Workers
             }
             finally
             {
-                var dueTimeSpan = TimeSpan.FromMinutes(10);
+                var dueTimeSpan = TimeSpan.FromMinutes(5);
                 if (_environment.IsDevelopment())
                 {
                     dueTimeSpan = TimeSpan.FromMinutes(1);
@@ -83,7 +83,7 @@ namespace BonusService.Service.Workers
 
                 if (!success)
                 {
-                    dueTimeSpan = TimeSpan.FromMinutes(10);
+                    dueTimeSpan = TimeSpan.FromMinutes(5);
                 }
 
                 _cashBackDailyTimer.Change(dueTimeSpan, TimeSpan.Zero);

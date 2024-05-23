@@ -1575,6 +1575,50 @@ namespace BonusService.Service.BLL
             return result;
         }
 
+        public PopUpPromotion GetRetentionPromotion(CustPromotionRequest request)
+        {
+            var result = new PopUpPromotion();
+            // 檢查是否有進行中Bonus
+            var checkRunningBonus = _promotionService.CheckRunningBonus(request.CustId);
+            if (checkRunningBonus != null)
+            {
+                return result;
+            }
+            
+            var tempPromotions = new List<TempPopUpPromotion>();
+            var promotionList = _promotionService.GetPromotionList(request).Where(x => x.PromotionType == PromotionType.RetentionFreeBet);
+
+            foreach (var promotion in promotionList)
+            {
+                var bonusCustUsingDetail = GetBonusCustUsingDetail(request.SiteId, promotion);
+
+                //Status為0代表還沒申請過
+                if (bonusCustUsingDetail.Any(x => x.CustId == request.CustId && x.Status == 0))
+                {
+                    tempPromotions.Add(new TempPopUpPromotion()
+                    {
+                        BonusCode = promotion.BonusCode,
+                        Bonus = promotion.Bonus,
+                        MaxBonus = promotion.MaxBonus,
+                        BlockTags = promotion.BlockTags
+                    });
+                }
+            }
+
+            //檢核BlockTag，並且用Bonus降排
+            var custInfo = _custInfoService.GetCustInfo(request.CustId);
+            tempPromotions = tempPromotions.Where(x => !BlockTagIgnorePromotion(custInfo.Tags, x.BlockTags))
+                .OrderByDescending(i => i.Bonus).ToList();
+
+            if (tempPromotions.Any())
+            {
+                //取Bonus金額最高的
+                result.BonusCode = tempPromotions[0].BonusCode;
+            }
+
+            return result;
+        }
+
         #region PrivateMethod
 
         private CheckPromotionBlockIp CheckBlockIp(Customer custInfo, ClaimPromotion claimPromotion, CustPromotionWhiteListSettingDto whiteListSetting)
