@@ -439,5 +439,22 @@ namespace BonusService.Controllers
 
             return result;
         }
+
+        [HttpPost]
+        public ApiResult<PopUpPromotion> GetRetentionPromotion(CustPromotionRequest request)
+        {
+            var result = new ApiResult<PopUpPromotion>();
+            try
+            {
+                result.Data = _promotionBll.GetRetentionPromotion(request);
+                result.ErrorCode = 0;
+            }
+            catch (Exception e)
+            {
+                result.Message = e.Message;
+            }
+
+            return result;
+        }
     }
 }
