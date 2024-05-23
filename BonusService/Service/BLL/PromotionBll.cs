@@ -1577,17 +1577,19 @@ namespace BonusService.Service.BLL
 
         public PopUpPromotion GetRetentionPromotion(CustPromotionRequest request)
         {
-            var result = new PopUpPromotion();
-            // 檢查是否有進行中Bonus
+            var result = new PopUpPromotion();                       
+            var promotionList = _promotionService.GetPromotionList(request)
+                .Where(x => x.IsPopUp && x.PromotionType == PromotionType.RetentionFreeBet);
+
+            // 檢查是否有進行中RetentionFreeBet Bonus
             var checkRunningBonus = _promotionService.CheckRunningBonus(request.CustId);
-            if (checkRunningBonus != null)
+            if (promotionList.Any(i => i.BonusCode == checkRunningBonus.BonusCode))
             {
+                result.BonusCode = checkRunningBonus.BonusCode;
                 return result;
             }
-            
-            var tempPromotions = new List<TempPopUpPromotion>();
-            var promotionList = _promotionService.GetPromotionList(request).Where(x => x.PromotionType == PromotionType.RetentionFreeBet);
 
+            var tempPromotions = new List<TempPopUpPromotion>();
             foreach (var promotion in promotionList)
             {
                 var bonusCustUsingDetail = GetBonusCustUsingDetail(request.SiteId, promotion);
