@@ -1556,7 +1556,7 @@ namespace BonusService.Service.BLL
 
             // 檢查是否有進行中RetentionFreeBet Bonus
             var checkRunningBonus = _promotionService.CheckRunningBonus(request.CustId);
-            if (promotionList.Any(i => i.BonusCode == checkRunningBonus.BonusCode))
+            if (promotionList.Any(i => i.BonusCode == checkRunningBonus?.BonusCode))
             {
                 result.BonusCode = checkRunningBonus.BonusCode;
                 return result;
