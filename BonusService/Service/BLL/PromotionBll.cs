@@ -1609,13 +1609,13 @@ namespace BonusService.Service.BLL
 
             //檢核BlockTag，並且用Bonus降排
             var custInfo = _custInfoService.GetCustInfo(request.CustId);
-            tempPromotions = tempPromotions.Where(x => !BlockTagIgnorePromotion(custInfo.Tags, x.BlockTags))
-                .OrderByDescending(i => i.Bonus).ToList();
+            //檢核BlockTag
+            tempPromotions = tempPromotions.Where(x => !BlockTagIgnorePromotion(custInfo.Tags, x.BlockTags)).ToList();
 
             if (tempPromotions.Any())
             {
-                //取Bonus金額最高的
-                result.BonusCode = tempPromotions[0].BonusCode;
+                //取金額最高的
+                result.BonusCode = tempPromotions.FirstOrDefault(x => x.Bonus == tempPromotions.Max(y => y.Bonus)).BonusCode;
             }
 
             return result;
