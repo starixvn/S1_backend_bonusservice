@@ -9,6 +9,7 @@ using BonusService.Service.Model.enums;
 using Dapper;
 
 using MemberSite.Service.Model;
+
 using Microsoft.Extensions.Caching.Memory;
 
 using MySql.Data.MySqlClient;
@@ -683,51 +684,51 @@ namespace BonusService.Service.BLL
 
             switch (claimPromotion.PromotionType)
             {
-                case PromotionType.FstDeposit: 
-                {
-                    if (amount < claimPromotion.RequiredAmount)
+                case PromotionType.FstDeposit:
                     {
-                        output.result = (int)BonusErrorCode.DepositAmountNotEnough;
-                        return output;
-                    }
-
-                    if (applyLockedAmount < claimPromotion.RequiredAmount)
-                    {
-                        throw new Exception("LockedAmount can't less than RequiredAmount");
-                    }
-                    
-                    if (applyLockedAmount <= 0)
-                    {
-                        throw new Exception("LockedAmount can't be 0");
-                    }
-                    
-                    if (claimPromotion.BonusType == BonusType.Amount)
-                    {
-                        if (claimPromotion.RequiredAmount == 0)
+                        if (amount < claimPromotion.RequiredAmount)
                         {
-                            throw new Exception("Required Amount can't be 0");
+                            output.result = (int)BonusErrorCode.DepositAmountNotEnough;
+                            return output;
                         }
-                        lockAmount = applyLockedAmount;
-                        bonusAmount = claimPromotion.Bonus;
-                    }
-                    else
-                    {
-                        bonusAmount = Math.Ceiling(claimPromotion.Bonus * applyLockedAmount / 100);
-                        lockAmount = applyLockedAmount;
-                        if (claimPromotion.MaxBonus != 0 && bonusAmount > claimPromotion.MaxBonus)
+
+                        if (applyLockedAmount < claimPromotion.RequiredAmount)
                         {
-                            bonusAmount = claimPromotion.MaxBonus;
-                            lockAmount = claimPromotion.MaxBonus * 100 / claimPromotion.Bonus;
+                            throw new Exception("LockedAmount can't less than RequiredAmount");
                         }
+
+                        if (applyLockedAmount <= 0)
+                        {
+                            throw new Exception("LockedAmount can't be 0");
+                        }
+
+                        if (claimPromotion.BonusType == BonusType.Amount)
+                        {
+                            if (claimPromotion.RequiredAmount == 0)
+                            {
+                                throw new Exception("Required Amount can't be 0");
+                            }
+                            lockAmount = applyLockedAmount;
+                            bonusAmount = claimPromotion.Bonus;
+                        }
+                        else
+                        {
+                            bonusAmount = Math.Ceiling(claimPromotion.Bonus * applyLockedAmount / 100);
+                            lockAmount = applyLockedAmount;
+                            if (claimPromotion.MaxBonus != 0 && bonusAmount > claimPromotion.MaxBonus)
+                            {
+                                bonusAmount = claimPromotion.MaxBonus;
+                                lockAmount = claimPromotion.MaxBonus * 100 / claimPromotion.Bonus;
+                            }
+                        }
+
+                        rollover = (lockAmount + bonusAmount) * (claimPromotion.FullFillType == (int)FullFillType.RollOver ? claimPromotion.RollOver : claimPromotion.WinOver);
+                        break;
                     }
 
-                    rollover = (lockAmount + bonusAmount) * (claimPromotion.FullFillType == (int)FullFillType.RollOver ? claimPromotion.RollOver : claimPromotion.WinOver);
-                    break;
-                }
-
-                case PromotionType.ReDeposit: 
+                case PromotionType.ReDeposit:
                     return CalculateTierRedepositBonus(claimPromotion, custId, siteId, currencyId, applyLockedAmount, depositId);
-                    
+
                 case PromotionType.Cashback:
                     var custPromotion = new CustPromotion
                     {
@@ -771,7 +772,7 @@ namespace BonusService.Service.BLL
 
                 case PromotionType.MissionBonus:
                     return CalculateTierMissionBonus(claimPromotion, custId, siteId, currencyId, amount, applyLockedAmount, depositId);
-                
+
                 default:
                     output.result = (int)BonusErrorCode.CalculateUnknownPromotionType;
                     return output;
@@ -1298,24 +1299,24 @@ namespace BonusService.Service.BLL
         {
             var key = $"GetRebateExcludeGameList_{request.SiteId}_{request.CurrencyId}_{request.VipLevel}_{request.LangId}";
             return _cacheHelper.TryGetOrCreate(key,
-                new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(10)),
-                i => _promotionService.GetRebateExcludeGameList(request));
+               new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(10)),
+               i => _promotionService.GetRebateExcludeGameList(request));
         }
 
         private IEnumerable<RebateExcludeGameDetail> SetLiveCasino(IEnumerable<RebateExcludeGameDetail> data)
         {
             var result = data.Select(item =>
-             {
-                 if (_specialRebateDisplay.ContainsKey(item.TpGameType) && _specialRebateDisplay[item.TpGameType].Contains(item.GameId))
-                     return item;
+            {
+                if (_specialRebateDisplay.ContainsKey(item.TpGameType) && _specialRebateDisplay[item.TpGameType].Contains(item.GameId))
+                    return item;
 
-                 if (item.TpCategoryId is 3)
-                 {
-                     item.GameId = null;
-                     item.GameName = "All Blackjack";
-                 }
-                 return item;
-             });
+                if (item.TpCategoryId is 3)
+                {
+                    item.GameId = null;
+                    item.GameName = "All Blackjack";
+                }
+                return item;
+            });
             return result
                 .GroupBy(x => new { x.TpName, x.TpCategoryName,x.TpGameType ,x.TpGameTypeName, x.GameName })
                 .Select(s => new RebateExcludeGameDetail(s.Key.TpName, s.Key.TpCategoryName,s.Key.TpGameType ,s.Key.TpGameTypeName, s.Key.GameName));

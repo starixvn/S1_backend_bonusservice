@@ -189,6 +189,7 @@ namespace BonusService.Service.Model
         public int TpCategoryId { get; set; }
         public int RollOver { get; set; }
         public int WinOver { get; set; }
+
         public CanJoinTierAmount CalculateTierAmount(PromotionType promotionType ,BonusType bonusType, decimal applyDepositAmount)
         {
             decimal bonusAmount;
@@ -493,7 +494,7 @@ namespace BonusService.Service.Model
             TpCategoryName = tpCategoryName;
             TpGameType = tpGameType;
             TpGameTypeName = tpGameTypeName;
-            GameName = gameName;
+            GameName = string.IsNullOrWhiteSpace(gameName) ? tpGameTypeName : gameName;
         }
     }
 
