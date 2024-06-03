@@ -492,7 +492,7 @@ namespace BonusService.Service.Model
             TpCategoryName = tpCategoryName;
             TpGameType = tpGameType;
             TpGameTypeName = tpGameTypeName;
-            GameName = string.IsNullOrWhiteSpace(gameName) ? tpGameTypeName : gameName;
+            GameName = string.IsNullOrWhiteSpace(gameName) ? "All Game" : gameName;
         }
     }
 
