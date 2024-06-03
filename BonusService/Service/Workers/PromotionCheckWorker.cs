@@ -32,7 +32,7 @@ namespace BonusService.Service.Workers
             {
                 _logger.LogInformation("Expired Promotion Task Async Start");
                 var checkTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-                var checkList = _promotionCheckService.GetPromotionCheckList(_random.Next(50, 100)); // 避免 ORM 或 db execution plan cache
+                var checkList = _promotionCheckService.GetPromotionCheckList(_random.Next(500, 600)); // 避免 ORM 或 db execution plan cache
                 foreach (var promotion in checkList)
                 {
                     try
