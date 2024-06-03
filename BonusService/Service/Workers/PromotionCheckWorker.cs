@@ -46,11 +46,11 @@ namespace BonusService.Service.Workers
                         }
 
                         //　檢查2：有效結束日期跟顯示結束日期不一致的，更新為有效結束日期
-                        if (promotion.PeriodTo != promotion.DisplayTo)
-                        {
-                            _promotionCheckService.SetPromotionEndTime(promotion.SiteId, promotion.BonusCode, promotion.PeriodTo);
-                            _logger.LogInformation($"SiteId={promotion.SiteId} | {promotion.BonusCode} DisplayTo Update to {promotion.PeriodTo}");
-                        }
+                        //if (promotion.PeriodTo != promotion.DisplayTo)
+                        //{
+                        //    _promotionCheckService.SetPromotionEndTime(promotion.SiteId, promotion.BonusCode, promotion.PeriodTo);
+                        //    _logger.LogInformation($"SiteId={promotion.SiteId} | {promotion.BonusCode} DisplayTo Update to {promotion.PeriodTo}");
+                        //}
                     }
                     catch (Exception ex)
                     {
