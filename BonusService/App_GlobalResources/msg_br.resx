@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+<resheader name="resmimetype"><value>text/microsoft-resx</value></resheader><resheader name="version"><value>1.3</value></resheader><resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader><resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader><data name="msg_SameRealName"><value>Não qualificado para a promoção, entre em contato com o Suporte ao Cliente</value></data>
+  <data name="msg_SpCustomerFirstDepositRuleDontMatch"><value>Não qualificado para participar desta promoção</value></data>
+  <data name="msg_PromotionNotFound"><value>A promoção não pode ser encontrada</value></data>
+  <data name="msg_SpCustomerNotJoinSpecialCode"><value>Por favor, digite o código promocional</value></data>
+  <data name="msg_SpCustomerBonusStillRunning"><value>Ainda há bônus em andamento, tente novamente mais tarde</value></data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusWhichPromotionTypeIn135"><value>Ainda há bônus em andamento ou o limite de participação nessa oferta foi atingido</value></data>
+  <data name="msg_ProfileOrPhoneNotFinish"><value>As informações da conta não foram concluídas, verifique as informações da conta</value></data>
+  <data name="msg_IpIsBlocked"><value>Informações de conta duplicadas foram reivindicadas nesta promoção</value></data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddOtherBonusInPeriodTime"><value>Ainda está com o Bônus em andamento, tente novamente mais tarde</value></data>
+  <data name="msg_SpCustomerJoinThisPromotionBefore"><value>Limite de participação atingido</value></data>
+  <data name="msg_MainWalletAmountNotEnough"><value>O saldo da carteira principal não deve ser inferior a {0}</value></data>
+  <data name="msg_CalculateUnknownPromotionType"><value>A promoção não pode ser encontrada</value></data>
+  <data name="msg_SpCustomerDepositNotExceedRequiredAmount"><value>O valor do depósito não é elegível para participar desta promoção</value></data>
+  <data name="msg_SpCustomerBonusStillRunningOrAddThisBonusBefore"><value>Ainda há bônus em andamento ou o limite de participação nesta oferta foi atingido</value></data>
+  <data name="msg_SpBonusNotFound"><value>A promoção não pode ser encontrada</value></data>
+  <data name="msg_SameDeviceId"><value>Não é elegível para a promoção, entre em contato com o Suporte ao Cliente</value></data>
+  <data name="msg_CalculateAmountIsNegative"><value>Não tem direito a participar dessa promoção</value></data>
+  <data name="msg_CalculateCashbackTotalBonusLessThenMinPay"><value>O valor mínimo de reembolso não foi atingido</value></data>
+  <data name="msg_SameIp"><value>Não é elegível para a promoção, entre em contato com o Suporte ao Cliente</value></data>
+  <data name="msg_SpCustomerHaveRunningBonusOrJoinThisBonusInPeriodTime"><value>Ainda tem bônus em andamento ou o limite de participação nesta oferta foi atingido</value></data>
+  <data name="msg_SpCustomerDepositApproveBefore"><value>Um registro de depósito bem-sucedido foi considerado incapaz de participar dessa promoção</value></data>
+  <data name="msg_SpCustomerJoinThisRebateBefore"><value>Esta promoção foi reivindicada</value></data>
+  <data name="msg_SpCustomerDontHaveFirstDeposit"><value>Por favor, complete seu primeiro depósito</value></data>
+  <data name="msg_SpCustomerWithdrawalBefore"><value>Foi encontrado um registro de retirada, não é possível participar dessa promoção</value></data>
+  <data name="msg_DepositAmountNotEnough"><value>O valor do depósito para participar desta promoção deve ser {0} ou superior</value></data>
+  <data name="msg_DuplicateClaimBonus"><value>Não duplique o resgate da promoção</value></data>
+  <data name="msg_SpUndefinedPromotionType"><value>A promoção não pode ser encontrada</value></data>
+  <data name="msg_BlockTag"><value>Não é elegível para a promoção, entre em contato com o Suporte ao Cliente</value></data>
+  <data name="msg_ClaimCashBackBonus"><value>Parabéns, seu REEMBOLSO {0} foi creditado em sua conta!</value></data>
+  <data name="msg_Ineligible"><value>Você não é elegível para essa promoção. Entre em contato com nosso suporte para obter mais detalhes.</value></data>
+  <data name="msg_AdjustmentBonusPromotionNotActive"><value>Esta oferta não foi iniciada. CodigoBônus:{0}</value></data>
+  <data name="msg_AdjustmentBonusPromotionAmountOverMaxBonus"><value>O valor atingiu o limite. Valor:{0} está acima de BônusMáx{1}, CódigoBônus:{2}</value></data>
+  <data name="msg_AdjustmentBonusCustomerHasRunningBonus"><value>O cliente ainda tem bônus em andamento. UsuárioId:{0}</value></data>
+  <data name="msg_SpCustomerNotHaveNewScratchCardToJoin"><value>Favor digitar outro Novo Código Promocional</value></data>
+  <data name="msg_AdjustmentBonusPromotionTypeNotMatch"><value>CódigoBônus:{0} não é {1}</value></data>
+  </root>
