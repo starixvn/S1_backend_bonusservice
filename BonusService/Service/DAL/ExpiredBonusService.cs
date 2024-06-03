@@ -85,5 +85,15 @@ namespace BonusService.Service.DAL
 
             return result;
         }
+
+        public IEnumerable<PromotionCheck> GetPromotionExpired(int limit)
+        {
+            return _reportDbClient.QueryUseCommandDefinition<PromotionCheck>("Service_PromotionExpired_Check", new DynamicParameters(new { Limit = limit }));
+        }
+
+        public int SetPromotionStatus(int SiteId, string BonusCode)
+        {
+            return _mainDbClient.Execute("Service_PromotionExpired_Set", new { SiteId, BonusCode });
+        }
     }
 }
