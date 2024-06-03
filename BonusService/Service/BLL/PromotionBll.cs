@@ -35,6 +35,7 @@ namespace BonusService.Service.BLL
         private readonly ILogger<PromotionBll> _logger;
         private readonly ICacheHelper _redisHelper;
         private readonly CacheHelper _cacheHelper;
+        private readonly Dictionary<int, IEnumerable<string>> _specialRebateDisplay;
 
         public PromotionBll(IServiceProvider provider)
         {
@@ -51,6 +52,8 @@ namespace BonusService.Service.BLL
             _logger = provider.GetRequiredService<ILogger<PromotionBll>>();
             _redisHelper = provider.GetRequiredService<ICacheHelper>();
             _cacheHelper = provider.GetRequiredService<CacheHelper>();
+            var configBll = provider.GetRequiredService<ConfigBLL>();
+            _specialRebateDisplay = configBll.GetConfigValue<Dictionary<int, IEnumerable<string>>>("RebateExcludeGame");
         }
 
         /// <summary>
@@ -274,7 +277,7 @@ namespace BonusService.Service.BLL
                 errorInfo.CustomizeErrorMsg = verifyResult.ErrorMsg;
                 return MakeErrorMessage(errorInfo);
             }
-            
+
             var custConditionInfo = _promotionService.GetCustConditionInfo(custId, custInfo.CurrencyId, custInfo.SiteId, bonusCode, deviceType);
             if (!custConditionInfo.CanJoin)
             {
@@ -295,10 +298,10 @@ namespace BonusService.Service.BLL
 
             // 計算要join的存款單
             if (claimPromotion.PromotionType == PromotionType.MissionBonus)
-            { 
+            {
                 CalculateRefList(custConditionInfo, claimPromotion.RequiredAmount);
             }
-            
+
             if (atPage == BonusInfoAtPage.Deposit) //由Deposit頁面進來的 reference紀錄指定TransId、Amount
             {
                 if (claimPromotion.PromotionType == PromotionType.FstDeposit &&
@@ -682,51 +685,51 @@ namespace BonusService.Service.BLL
 
             switch (claimPromotion.PromotionType)
             {
-                case PromotionType.FstDeposit: 
-                {
-                    if (amount < claimPromotion.RequiredAmount)
+                case PromotionType.FstDeposit:
                     {
-                        output.result = (int)BonusErrorCode.DepositAmountNotEnough;
-                        return output;
-                    }
-
-                    if (applyLockedAmount < claimPromotion.RequiredAmount)
-                    {
-                        throw new Exception("LockedAmount can't less than RequiredAmount");
-                    }
-                    
-                    if (applyLockedAmount <= 0)
-                    {
-                        throw new Exception("LockedAmount can't be 0");
-                    }
-                    
-                    if (claimPromotion.BonusType == BonusType.Amount)
-                    {
-                        if (claimPromotion.RequiredAmount == 0)
+                        if (amount < claimPromotion.RequiredAmount)
                         {
-                            throw new Exception("Required Amount can't be 0");
+                            output.result = (int)BonusErrorCode.DepositAmountNotEnough;
+                            return output;
                         }
-                        lockAmount = applyLockedAmount;
-                        bonusAmount = claimPromotion.Bonus;
-                    }
-                    else
-                    {
-                        bonusAmount = Math.Ceiling(claimPromotion.Bonus * applyLockedAmount / 100);
-                        lockAmount = applyLockedAmount;
-                        if (claimPromotion.MaxBonus != 0 && bonusAmount > claimPromotion.MaxBonus)
+
+                        if (applyLockedAmount < claimPromotion.RequiredAmount)
                         {
-                            bonusAmount = claimPromotion.MaxBonus;
-                            lockAmount = claimPromotion.MaxBonus * 100 / claimPromotion.Bonus;
+                            throw new Exception("LockedAmount can't less than RequiredAmount");
                         }
+
+                        if (applyLockedAmount <= 0)
+                        {
+                            throw new Exception("LockedAmount can't be 0");
+                        }
+
+                        if (claimPromotion.BonusType == BonusType.Amount)
+                        {
+                            if (claimPromotion.RequiredAmount == 0)
+                            {
+                                throw new Exception("Required Amount can't be 0");
+                            }
+                            lockAmount = applyLockedAmount;
+                            bonusAmount = claimPromotion.Bonus;
+                        }
+                        else
+                        {
+                            bonusAmount = Math.Ceiling(claimPromotion.Bonus * applyLockedAmount / 100);
+                            lockAmount = applyLockedAmount;
+                            if (claimPromotion.MaxBonus != 0 && bonusAmount > claimPromotion.MaxBonus)
+                            {
+                                bonusAmount = claimPromotion.MaxBonus;
+                                lockAmount = claimPromotion.MaxBonus * 100 / claimPromotion.Bonus;
+                            }
+                        }
+
+                        rollover = (lockAmount + bonusAmount) * (claimPromotion.FullFillType == (int)FullFillType.RollOver ? claimPromotion.RollOver : claimPromotion.WinOver);
+                        break;
                     }
 
-                    rollover = (lockAmount + bonusAmount) * (claimPromotion.FullFillType == (int)FullFillType.RollOver ? claimPromotion.RollOver : claimPromotion.WinOver);
-                    break;
-                }
-
-                case PromotionType.ReDeposit: 
+                case PromotionType.ReDeposit:
                     return CalculateTierRedepositBonus(claimPromotion, custId, siteId, currencyId, applyLockedAmount, depositId);
-                    
+
                 case PromotionType.Cashback:
                     var custPromotion = new CustPromotion
                     {
@@ -770,7 +773,7 @@ namespace BonusService.Service.BLL
 
                 case PromotionType.MissionBonus:
                     return CalculateTierMissionBonus(claimPromotion, custId, siteId, currencyId, amount, applyLockedAmount, depositId);
-                
+
                 default:
                     output.result = (int)BonusErrorCode.CalculateUnknownPromotionType;
                     return output;
@@ -885,10 +888,10 @@ namespace BonusService.Service.BLL
         {
             var promotionList = _promotionService.GetPromotionList(request);
             var promotion = new List<CustPromotion>();
-            
+
             Customer custInfo = null;
             if (request.IsLogin) custInfo = _custInfoService.GetCustInfo(request.CustId);
-            
+
             foreach (var promo in promotionList)
             {
                 if (promo.PromotionType == PromotionType.RetentionFreeBet)
@@ -1057,20 +1060,20 @@ namespace BonusService.Service.BLL
 
                 if (promo.PromotionType == PromotionType.ReDeposit && promo.TierAmountList.Any())
                 {
-                    promo.CalculateCanJoinTierAmount(promo.DepositAmount ,0);
+                    promo.CalculateCanJoinTierAmount(promo.DepositAmount, 0);
                     promo.canJoin = promo.CanJoinTierAmountList.Any();
                 }
             }
 
             if (promo.PromotionType == PromotionType.MissionBonus)
             {
-                var progressData = _promotionService.GetCustPromotionMissionProgress(custId, currencyId, promo.TurnoverTpGameTypes, (int)promo.PeriodType );
+                var progressData = _promotionService.GetCustPromotionMissionProgress(custId, currencyId, promo.TurnoverTpGameTypes, (int)promo.PeriodType);
                 promo.MissionBonusProgress = new MissionBonusProgress
                 {
                     DepositAmountSum = custCondition.Amount,
                     TurnoverSum = progressData.TurnoverSum
                 };
-                
+
                 if (promo.canJoin)
                 {
                     promo.DepositId = custCondition.RefId;
@@ -1079,12 +1082,12 @@ namespace BonusService.Service.BLL
 
                     if (promo.TierAmountList.Any())
                     {
-                        promo.CalculateCanJoinTierAmount(promo.DepositAmount,progressData.TurnoverSum);
+                        promo.CalculateCanJoinTierAmount(promo.DepositAmount, progressData.TurnoverSum);
                         promo.canJoin = promo.CanJoinTierAmountList.Any();
                     }
                 }
             }
-            
+
             if (promo.PromotionType == PromotionType.RetentionFreeBet)
             {
                 var isUsed = GetCustBonusUsing(siteId, custId, promo);
@@ -1179,7 +1182,7 @@ namespace BonusService.Service.BLL
         public int SetScratchCardCode(SpecialCodeRequest request)
         {
             request.SpecialCode = request.SpecialCode.ToUpper();
-            
+
             var resultCode = _promotionService.SetScratchCardCode(request);
             _logger.LogInformation("SetScratchCardCode result=" + resultCode);
 
@@ -1213,7 +1216,7 @@ namespace BonusService.Service.BLL
             {
                 _logger.LogInformation($"{specialCode} is not match Regex:^[- !@#$%^&*a-zA-Z0-9]{1,20}$");
             }
-            
+
             return result;
         }
 
@@ -1233,7 +1236,7 @@ namespace BonusService.Service.BLL
             {
                 _logger.LogInformation($"{specialCode} is not match Regex:^[a-zA-Z]{5}-[a-zA-Z0-9]{6}$");
             }
-            
+
             return result;
         }
 
@@ -1258,13 +1261,13 @@ namespace BonusService.Service.BLL
             {
                 // 如果 Vip Level 命中就可以領
                 var checkVip = vipLevelWithBlockTagsSetting.VipLevels.Any(x => x.Equals(custInfo.UserLevel));
-                
+
                 if (!checkVip)
                 {
                     _logger.LogInformation(
                         $"custId={custId}, vipLevel={custInfo.UserLevel} not match vip setting: {JsonConvert.SerializeObject(vipLevelWithBlockTagsSetting.VipLevels)}");
                 }
-                
+
                 return checkVip;
             }
 
@@ -1288,10 +1291,36 @@ namespace BonusService.Service.BLL
 
         public IEnumerable<RebateExcludeGameDetail> GetRebateExcludeGameList(GetRebateExcludeGameListRequest request)
         {
+            var source = GetRebateExcludeGameSource(request);
+
+            return SetLiveCasino(source);
+        }
+
+        private IEnumerable<RebateExcludeGameDetail> GetRebateExcludeGameSource(GetRebateExcludeGameListRequest request)
+        {
             var key = $"GetRebateExcludeGameList_{request.SiteId}_{request.CurrencyId}_{request.VipLevel}_{request.LangId}";
             return _cacheHelper.TryGetOrCreate(key,
-                new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(10)),
-                i => _promotionService.GetRebateExcludeGameList(request));
+               new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(10)),
+               i => _promotionService.GetRebateExcludeGameList(request));
+        }
+
+        private IEnumerable<RebateExcludeGameDetail> SetLiveCasino(IEnumerable<RebateExcludeGameDetail> data)
+        {
+            var result = data.Select(item =>
+            {
+                if (_specialRebateDisplay.ContainsKey(item.TpGameType) && _specialRebateDisplay[item.TpGameType].Contains(item.GameId))
+                    return item;
+
+                if (item.TpCategoryId is 3)
+                {
+                    item.GameId = null;
+                    item.GameName = "All Blackjack";
+                }
+                return item;
+            });
+            return result
+                .GroupBy(x => new { x.TpName, x.TpCategoryName, x.TpGameType, x.TpGameTypeName, x.GameName })
+                .Select(s => new RebateExcludeGameDetail(s.Key.TpName, s.Key.TpCategoryName, s.Key.TpGameType, s.Key.TpGameTypeName, s.Key.GameName));
         }
 
 
@@ -1433,7 +1462,7 @@ namespace BonusService.Service.BLL
                 depositAmount = checkResult.ActualDeposit;
             }
 
-            var tierAmount = claimPromotion.FindTierAmountLevel(depositAmount, 0 ,0);
+            var tierAmount = claimPromotion.FindTierAmountLevel(depositAmount, 0, 0);
             if (tierAmount == null)
             {
                 return new CalculateBonusOutput
@@ -1464,7 +1493,7 @@ namespace BonusService.Service.BLL
             };
         }
 
-        private CalculateBonusOutput CalculateTierMissionBonus(ClaimPromotion claimPromotion, int custId, int siteId, int currencyId, decimal depositAmountSum ,decimal bonus, string depositId = null)
+        private CalculateBonusOutput CalculateTierMissionBonus(ClaimPromotion claimPromotion, int custId, int siteId, int currencyId, decimal depositAmountSum, decimal bonus, string depositId = null)
         {
             //帶DepositId使用存款金額計算TierAmount
             if (depositId != null)
@@ -1483,10 +1512,10 @@ namespace BonusService.Service.BLL
                     throw new Exception("TierAmount check fail.");
                 }
             }
- 
-            var progressData = _promotionService.GetCustPromotionMissionProgress(custId, currencyId, claimPromotion.TurnoverTpGameTypes, (int)claimPromotion.PeriodType );
 
-            var tierAmount = claimPromotion.FindTierAmountLevel(depositAmountSum, progressData.TurnoverSum ,bonus);
+            var progressData = _promotionService.GetCustPromotionMissionProgress(custId, currencyId, claimPromotion.TurnoverTpGameTypes, (int)claimPromotion.PeriodType);
+
+            var tierAmount = claimPromotion.FindTierAmountLevel(depositAmountSum, progressData.TurnoverSum, bonus);
             if (tierAmount == null)
             {
                 return new CalculateBonusOutput
@@ -1494,7 +1523,7 @@ namespace BonusService.Service.BLL
                     result = (int)BonusErrorCode.TierAmountNoFound
                 };
             }
-            
+
             claimPromotion.Bonus = tierAmount.Bonus;
             claimPromotion.RollOver = tierAmount.RollOver;
             claimPromotion.WinOver = tierAmount.WinOver;
@@ -1505,10 +1534,10 @@ namespace BonusService.Service.BLL
                 BonusInfo = JsonConvert.SerializeObject(claimPromotion, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }),
                 ExpiryTime = DateTimeOffset.Now.AddDays(claimPromotion.ExpiryDays).ToUnixTimeSeconds(),
                 BonusAmount = tierAmount.Bonus,
-                RollOver =  tierAmount.Bonus * (claimPromotion.FullFillType == (int)FullFillType.RollOver ? claimPromotion.RollOver : claimPromotion.WinOver)
+                RollOver = tierAmount.Bonus * (claimPromotion.FullFillType == (int)FullFillType.RollOver ? claimPromotion.RollOver : claimPromotion.WinOver)
             };
         }
-        
+
         public PopUpPromotion GetPopUpPromotion(CustPromotionRequest request)
         {
             PopUpPromotion result = new PopUpPromotion();
@@ -1707,7 +1736,7 @@ namespace BonusService.Service.BLL
         private void CalculateRefList(CustCondition custCondition, decimal requiredAmount)
         {
             var refList = new List<Ref>();
-            var amount = (decimal) 0;
+            var amount = (decimal)0;
             foreach (var refModel in custCondition.reference)
             {
                 amount += refModel.Amount;
@@ -1716,7 +1745,7 @@ namespace BonusService.Service.BLL
                     DepositId = refModel.DepositId,
                     Amount = refModel.Amount
                 });
-                
+
                 if (amount >= requiredAmount)
                 {
                     break;
@@ -1726,7 +1755,7 @@ namespace BonusService.Service.BLL
             custCondition.reference = refList;
             custCondition.RefList = JsonConvert.SerializeObject(refList);
         }
-        
+
         #endregion
     }
 }

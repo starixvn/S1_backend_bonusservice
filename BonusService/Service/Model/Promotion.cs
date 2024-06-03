@@ -53,7 +53,7 @@ namespace BonusService.Service.Model
         /// <param name="turnoverAmount"></param>
         /// <param name="bonus"></param>
         /// <returns></returns>
-        public TierAmount FindTierAmountLevel(decimal depositAmount , decimal turnoverAmount , decimal bonus)
+        public TierAmount FindTierAmountLevel(decimal depositAmount, decimal turnoverAmount, decimal bonus)
         {
             if (!TierAmountList.Any())
             {
@@ -76,10 +76,10 @@ namespace BonusService.Service.Model
         /// </summary>
         /// <param name="depositAmount"></param>
         /// <param name="turnoverAmount"></param>
-        public void CalculateCanJoinTierAmount(decimal depositAmount , decimal turnoverAmount)
+        public void CalculateCanJoinTierAmount(decimal depositAmount, decimal turnoverAmount)
         {
             List<TierAmount> canJoinTierAmount;
-            
+
             if (PromotionType == PromotionType.MissionBonus)
             {
                 canJoinTierAmount = TierAmountList.Where(i => depositAmount >= i.RequiredAmount && turnoverAmount >= i.RequiredTurnover).ToList();
@@ -88,7 +88,7 @@ namespace BonusService.Service.Model
             {
                 canJoinTierAmount = TierAmountList.Where(i => depositAmount >= i.RequiredAmount).ToList();
             }
-            
+
             _canJoinTierAmountList = canJoinTierAmount.Select(i => i.CalculateTierAmount(PromotionType, BonusType, depositAmount));
         }
 
@@ -189,7 +189,7 @@ namespace BonusService.Service.Model
         public int TpCategoryId { get; set; }
         public int RollOver { get; set; }
         public int WinOver { get; set; }
-        public CanJoinTierAmount CalculateTierAmount(PromotionType promotionType ,BonusType bonusType, decimal applyDepositAmount)
+        public CanJoinTierAmount CalculateTierAmount(PromotionType promotionType, BonusType bonusType, decimal applyDepositAmount)
         {
             decimal bonusAmount;
             decimal lockAmount;
@@ -216,7 +216,7 @@ namespace BonusService.Service.Model
                     }
                 }
             }
-            
+
             return new CanJoinTierAmount()
             {
                 RequiredAmount = RequiredAmount,
@@ -475,10 +475,25 @@ namespace BonusService.Service.Model
     public class RebateExcludeGameDetail
     {
         public string TpName { get; set; }
+        public int TpCategoryId { get; set; }
         public string TpCategoryName { get; set; }
         public int TpGameType { get; set; }
         public string TpGameTypeName { get; set; }
+        public string GameId { get; set; }
         public string GameName { get; set; }
+
+        public RebateExcludeGameDetail()
+        {
+
+        }
+        public RebateExcludeGameDetail(string tpName, string tpCategoryName, int tpGameType, string tpGameTypeName, string gameName)
+        {
+            TpName = tpName;
+            TpCategoryName = tpCategoryName;
+            TpGameType = tpGameType;
+            TpGameTypeName = tpGameTypeName;
+            GameName = string.IsNullOrWhiteSpace(gameName) ? tpGameTypeName : gameName;
+        }
     }
 
     public class BonusCustUsingList
@@ -521,7 +536,7 @@ namespace BonusService.Service.Model
         public decimal MaxBonus { get; set; }
         public List<int> BlockTags { get; set; }
     }
-    
+
     public class PromotionMissionProgress
     {
         public decimal TurnoverSum { get; set; }
