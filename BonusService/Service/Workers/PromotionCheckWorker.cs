@@ -50,7 +50,7 @@ namespace BonusService.Service.Workers
                         //　檢查2
                         //　When: 有設定顯示日期範圍 && 有效結束 != 顯示結束，
                         //　Then: 將兩個結束時間更新為有效結束時間
-                        if (promotion.DisplayFrom != 0 && promotion.DisplayTo !=0 && promotion.PeriodTo != promotion.DisplayTo)
+                        if (promotion.DisplayFrom != 0 && promotion.PeriodTo != promotion.DisplayTo)
                         {
                             _promotionCheckService.SetPromotionEndTime(promotion.SiteId, promotion.BonusCode, promotion.PeriodTo);
                             _logger.LogInformation($"SiteId= {promotion.SiteId} | {promotion.BonusCode} DisplayTo Update to {promotion.PeriodTo}");
