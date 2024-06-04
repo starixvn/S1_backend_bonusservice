@@ -30,9 +30,10 @@ namespace BonusService.Service.Workers
             LogContext.PushProperty("RequestId", Guid.NewGuid().ToString());
             try
             {
-                _logger.LogInformation("Expired Promotion Task Async Start");
+                
                 var checkTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
                 var checkList = _promotionCheckService.GetPromotionCheckList(_random.Next(500, 600)); // 避免 ORM 或 db execution plan cache
+                _logger.LogInformation($"PromotionCheck Count：{checkList.Count()}");
                 foreach (var promotion in checkList)
                 {
                     try
