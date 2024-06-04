@@ -23,7 +23,7 @@ namespace BonusService.Service.DAL
 
         public int SetPromotionExtend(PromotionAutoExtend PromotionExtend)
         {
-            return _mainDbClient.Execute("Service_PromotionAutoExtend_Set", new { PromotionExtend.BonusCode, PromotionExtend.SiteId, PeriodTo = PromotionExtend.ExtendTime, LastUpdateUser = "ServiceAuto" });
+            return _mainDbClient.Execute("Service_PromotionAutoExtend_Set", new { PromotionExtend.BonusCode, PromotionExtend.SiteId, PeriodTo = PromotionExtend.ExtendTime, LastUpdateUser = "ServiceAutoExtend" });
         }
     }
 }
