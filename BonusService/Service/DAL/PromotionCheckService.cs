@@ -25,12 +25,12 @@ namespace BonusService.Service.DAL
 
         public int SetPromotionClose(int SiteId, string BonusCode)
         {
-            return _mainDbClient.Execute("Service_Promotion_Close", new { SiteId, BonusCode, LastUpdateUser = "ServiceAuto" });
+            return _mainDbClient.Execute("Service_Promotion_Close", new { SiteId, BonusCode, LastUpdateUser = "ServiceAutoCheck" });
         }
 
         public int SetPromotionEndTime(int SiteId, string BonusCode, long EndTime)
         {
-            return _mainDbClient.Execute("Service_Promotion_EndTime_Set", new { SiteId, BonusCode, EndTime, LastUpdateUser = "ServiceAuto" });
+            return _mainDbClient.Execute("Service_Promotion_EndTime_Set", new { SiteId, BonusCode, EndTime, LastUpdateUser = "ServiceAutoCheck" });
         }
     }
 }
