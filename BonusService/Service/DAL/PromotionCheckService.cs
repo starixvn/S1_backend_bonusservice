@@ -23,14 +23,14 @@ namespace BonusService.Service.DAL
             return _reportDbClient.QueryUseCommandDefinition<PromotionCheck>("Service_Promotion_Check", new DynamicParameters(new { Limit = limit }));
         }
 
-        public int SetPromotionStatus(int SiteId, string BonusCode)
+        public int SetPromotionClose(int SiteId, string BonusCode)
         {
-            return _mainDbClient.Execute("Service_Promotion_Close", new { SiteId, BonusCode });
+            return _mainDbClient.Execute("Service_Promotion_Close", new { SiteId, BonusCode, LastUpdateUser = "ServiceAuto" });
         }
 
         public int SetPromotionEndTime(int SiteId, string BonusCode, long EndTime)
         {
-            return _mainDbClient.Execute("Service_Promotion_EndTime_Set", new { SiteId, BonusCode, EndTime });
+            return _mainDbClient.Execute("Service_Promotion_EndTime_Set", new { SiteId, BonusCode, EndTime, LastUpdateUser = "ServiceAuto" });
         }
     }
 }
