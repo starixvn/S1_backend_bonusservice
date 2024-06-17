@@ -7,7 +7,7 @@ using BonusService.Service.Library;
 using BonusService.Service.Model;
 using Prometheus;
 using StackExchange.Redis;
-
+ 
 namespace BonusService
 {
 
