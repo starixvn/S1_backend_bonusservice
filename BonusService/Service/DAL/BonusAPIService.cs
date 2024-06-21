@@ -85,7 +85,7 @@ namespace BonusService.Service.DAL
                     apiResult.Message = "SetBalance fail";
                     return apiResult;
                 }
-                result = _withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, reward, 0, comment, transId, (int)WithdrawalLimitLogCreateFromEnum.VerificationReward, "System", out _, trans);
+                result = _withdrawalLimitService.SetWithdrawalLimit(custId, userName, siteId, reward * 3, 0, comment, transId, (int)WithdrawalLimitLogCreateFromEnum.VerificationReward, "System", out _, trans);
                 if (result <= 0)
                 {
                     apiResult.Message = "SetWithdrawalLimit fail";
