@@ -58,8 +58,20 @@ namespace BonusService.Service.DAL
             };
 
             // check db 相同 IP 領取紀錄
-            var p1 = new DynamicParameters(new { _BonusCode = claimPromotion.BonusCode, _SiteId = siteId, _IP = custIP });
-            var sameIpList = _reportDbClient.Query<PromotionBlockIpsDto>("Service_PromotionBlockIp_Get", p1).ToList();
+            var sameIpList = new List<PromotionBlockIpsDto>();
+
+            if (HavePeriodTypeSet(claimPromotion))
+            {
+                var p1 = new DynamicParameters(new { _BonusCode = claimPromotion.BonusCode, _SiteId = siteId, _IP = custIP, _PeriodType = (int)claimPromotion.PeriodType, _CurrencyId = claimPromotion.CurrencyId });
+                var tempSameIpList = _reportDbClient.Query<PromotionBlockIpsDto>("Service_PromotionBlockIpByPeriodType_Get", p1).ToList();
+                sameIpList.AddRange(tempSameIpList);
+            }
+            else
+            {
+                var p1 = new DynamicParameters(new { _BonusCode = claimPromotion.BonusCode, _SiteId = siteId, _IP = custIP });
+                var tempSameIpList = _reportDbClient.Query<PromotionBlockIpsDto>("Service_PromotionBlockIp_Get", p1).ToList();
+                sameIpList.AddRange(tempSameIpList);
+            }
 
             // 判斷相同 IP 是否超過領取上限
             if (sameIpList.Count >= claimPromotion.SameIpRestrictAvailableCount)
@@ -89,10 +101,22 @@ namespace BonusService.Service.DAL
             var compareDeviceIdInfo = new List<CompareDeviceIdDto>();
 
             // 找出領過相同 BonusCode 的 CustId + UserName + DeviceId
-            var p1 = new DynamicParameters(new { _BonusCode = claimPromotion.BonusCode, _SiteId = siteId });
-            var promotionDeviceIds = _reportDbClient.Query<PromotionDeviceIdsDto>("Service_PromotionBlockDeviceId_Get", p1).ToList();
-            AddPromotionDeviceIdToCompareList(compareDeviceIdInfo, promotionDeviceIds);
+            var promotionDeviceIds = new List<PromotionDeviceIdsDto>();
 
+            if (HavePeriodTypeSet(claimPromotion))
+            {
+                var p1 = new DynamicParameters(new { _BonusCode = claimPromotion.BonusCode, _SiteId = siteId, _PeriodType = (int)claimPromotion.PeriodType, _CurrencyId = claimPromotion.CurrencyId });
+                var tempPromotionDeviceIds = _reportDbClient.Query<PromotionDeviceIdsDto>("Service_PromotionBlockDeviceIdByPeriodType_Get", p1).ToList();
+                promotionDeviceIds.AddRange(tempPromotionDeviceIds);
+            }
+            else
+            {
+                var p1 = new DynamicParameters(new { _BonusCode = claimPromotion.BonusCode, _SiteId = siteId });
+                var tempPromotionDeviceIds = _reportDbClient.Query<PromotionDeviceIdsDto>("Service_PromotionBlockDeviceId_Get", p1).ToList();
+                promotionDeviceIds.AddRange(tempPromotionDeviceIds);
+            }
+
+            AddPromotionDeviceIdToCompareList(compareDeviceIdInfo, promotionDeviceIds);
             var custIds = promotionDeviceIds
                 .Select(r => r.CustId)
                 .Distinct()
@@ -119,6 +143,11 @@ namespace BonusService.Service.DAL
             result.UseWhitelist = false;
 
             return result;
+        }
+
+        private static bool HavePeriodTypeSet(ClaimPromotion claimPromotion)
+        {
+            return (claimPromotion.PromotionType == PromotionType.ReDeposit || claimPromotion.PromotionType == PromotionType.Cashback) && (claimPromotion.PeriodType == VipPeriodType.Daily || claimPromotion.PeriodType == VipPeriodType.Weekly || claimPromotion.PeriodType == VipPeriodType.Monthly);
         }
 
         private static void AddPromotionDeviceIdToCompareList(List<CompareDeviceIdDto> compareDeviceIdInfo, List<PromotionDeviceIdsDto> deviceIdInfo)
@@ -161,12 +190,24 @@ namespace BonusService.Service.DAL
 
             var compareNameInfo = new List<CompareRealNameDto>();
 
-            var p1 = new DynamicParameters(new
+            var realNameList = new List<PromotionCustRealNameDto>();
+            if (HavePeriodTypeSet(claimPromotion))
             {
-                _SiteId = siteId,
-                _BonusCode = claimPromotion.BonusCode
-            });
-            var realNameList = _reportDbClient.Query<PromotionCustRealNameDto>("Service_PromotionBlockRealName_Get", p1).ToList();
+                var p1 = new DynamicParameters(new { _BonusCode = claimPromotion.BonusCode, _SiteId = siteId, _PeriodType = (int)claimPromotion.PeriodType, _CurrencyId = claimPromotion.CurrencyId });
+                var tempRealNameList = _reportDbClient.Query<PromotionCustRealNameDto>("Service_PromotionBlockRealNameByPeriodType_Get", p1).ToList();
+                realNameList.AddRange(tempRealNameList);
+            }
+            else
+            {
+                var p1 = new DynamicParameters(new
+                {
+                    _SiteId = siteId,
+                    _BonusCode = claimPromotion.BonusCode
+                });
+                var tempRealNameList = _reportDbClient.Query<PromotionCustRealNameDto>("Service_PromotionBlockRealName_Get", p1).ToList();
+                realNameList.AddRange(tempRealNameList);
+            }
+
             AddPromotionRealNameToCompareList(compareNameInfo, realNameList); // 領過相同 BonusCode 的 CustId + RealName 清單
 
 
