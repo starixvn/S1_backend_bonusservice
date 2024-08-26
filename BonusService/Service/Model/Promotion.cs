@@ -115,7 +115,9 @@ namespace BonusService.Service.Model
             return
             PromotionType is PromotionType.FreeBet ||
             PromotionType is PromotionType.FstDeposit ||
-            PromotionType is PromotionType.DeviceBonus;
+            PromotionType is PromotionType.DeviceBonus ||
+            PromotionType is PromotionType.ReDeposit ||
+            PromotionType is PromotionType.Cashback;
         }
     }
 
