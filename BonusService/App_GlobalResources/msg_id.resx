@@ -58,4 +58,7 @@
   <data name="msg_BlockTag"><value>Tidak memenuhi syarat untuk promosi, harap hubungi Dukungan Pelanggan</value></data>
   <data name="msg_ClaimCashBackBonus"><value>Selamat, Bonus CASHBACK Anda {0} telah dikreditkan ke akun Anda!</value></data>
   <data name="msg_Ineligible"><value>Anda tidak memenuhi syarat untuk promosi ini. Silakan hubungi Layanan Bantuan kami untuk lebih jelasnya.</value></data>
-  </root>
+  <data name="msg_SpCustomerAddOtherBonusInPeriodTime" xml:space="preserve">
+    <value>Batas partisipasi telah tercapai. Silahkan coba lagi besok.</value>
+  </data>
+</root>

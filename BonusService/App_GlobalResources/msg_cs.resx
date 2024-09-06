@@ -41,6 +41,7 @@
   <data name="msg_CalculateUnknownPromotionType"><value>暂无此优惠</value></data>
   <data name="msg_SpCustomerDepositNotExceedRequiredAmount"><value>存款金额不符合参与此优惠</value></data>
   <data name="msg_SpCustomerBonusStillRunningOrAddThisBonusBefore"><value>尚有未完成优惠或参与此优惠次数已达限</value></data>
+  <data name="msg_SpCustomerAddOtherBonusInPeriodTime"><value>参与次数已达限，请次日再尝试</value></data>
   <data name="msg_SpBonusNotFound"><value>无此优惠</value></data>
   <data name="msg_SameDeviceId"><value>无法领取此优惠，请联系客服咨询</value></data>
   <data name="msg_CalculateAmountIsNegative"><value>优惠金额为负值，暂时无法领取此优惠</value></data>

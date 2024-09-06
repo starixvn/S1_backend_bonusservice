@@ -63,4 +63,7 @@
   <data name="msg_AdjustmentBonusCustomerHasRunningBonus"><value>Customer still have in Running Bonus. CustId:{0}</value></data>
   <data name="msg_SpCustomerNotHaveNewScratchCardToJoin"><value>Please enter another New Promo Code</value></data>
   <data name="msg_AdjustmentBonusPromotionTypeNotMatch"><value>BonusCode:{0} is not {1}</value></data>
-  </root>
+  <data name="msg_SpCustomerAddOtherBonusInPeriodTime" xml:space="preserve">
+    <value>Participation limit reached. Please try again tomorrow.</value>
+  </data>
+</root>

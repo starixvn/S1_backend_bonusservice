@@ -58,4 +58,7 @@
   <data name="msg_BlockTag"><value>Tidak layak untuk promosi berikut, sila hubungi Sokongan Pelanggan kami</value></data>
   <data name="msg_ClaimCashBackBonus"><value>Tahniah, PULANGAN TUNAI {0} anda telah dikreditkan ke akaun anda!</value></data>
   <data name="msg_Ineligible"><value>Anda tidak layak untuk guna promosi ini. Sila hubungi sokongan pelanggan kami untuk maklumat yang lebih lanjut.</value></data>
-  </root>
+  <data name="msg_SpCustomerAddOtherBonusInPeriodTime" xml:space="preserve">
+    <value>Had penyertaan telah mencapai hadnya. Sila cuba lagi esok.</value>
+  </data>
+</root>

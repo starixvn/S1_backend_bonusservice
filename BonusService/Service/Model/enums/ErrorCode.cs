@@ -30,7 +30,7 @@
         SpCustomerDontHaveFirstDeposit = -1106,
         SpCustomerFirstDepositRuleDontMatch = -1107,
         SpCustomerWithdrawalBefore = -1108,
-        SpCustomerBonusStillRunningOrAddOtherBonusInPeriodTime = -1109,
+        SpCustomerAddOtherBonusInPeriodTime = -1109,
         SpCustomerBonusStillRunningOrAddOtherBonusWhichPromotionTypeIn135 = -1110,
         SpCustomerDepositApproveBefore = -1111,
         SpCustomerBonusStillRunningOrAddThisBonusBefore = -1112,

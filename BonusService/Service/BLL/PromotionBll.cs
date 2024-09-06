@@ -98,7 +98,7 @@ namespace BonusService.Service.BLL
                 case (int)BonusErrorCode.SpCustomerDontHaveFirstDeposit:
                 case (int)BonusErrorCode.SpCustomerFirstDepositRuleDontMatch:
                 case (int)BonusErrorCode.SpCustomerWithdrawalBefore:
-                case (int)BonusErrorCode.SpCustomerBonusStillRunningOrAddOtherBonusInPeriodTime:
+                case (int)BonusErrorCode.SpCustomerAddOtherBonusInPeriodTime:
                 case (int)BonusErrorCode.SpCustomerBonusStillRunningOrAddOtherBonusWhichPromotionTypeIn135:
                 case (int)BonusErrorCode.SpCustomerDepositApproveBefore:
                 case (int)BonusErrorCode.SpCustomerBonusStillRunningOrAddThisBonusBefore:
