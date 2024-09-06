@@ -62,4 +62,7 @@
   <data name="msg_AdjustmentBonusCustomerHasRunningBonus"><value>お客様はまだ実行中のボーナスをお持ちです。CustId:{0}</value></data>
   <data name="msg_SpCustomerNotHaveNewScratchCardToJoin"><value>別の新しいプロモーションコードを入力してください</value></data>
   <data name="msg_AdjustmentBonusPromotionTypeNotMatch"><value>ボーナスコード:{0}は{1}ではありません</value></data>
-  </root>
+  <data name="msg_SpCustomerAddOtherBonusInPeriodTime" xml:space="preserve">
+    <value>参加回数が制限に達しました。明日またお試しください。</value>
+  </data>
+</root>

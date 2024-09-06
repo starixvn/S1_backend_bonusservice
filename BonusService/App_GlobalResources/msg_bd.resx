@@ -56,4 +56,7 @@
   <data name="msg_TierAmountNoFound"><value>প্রয়োজনীয়তা পূরণ না</value></data>
   <data name="msg_SpUndefinedPromotionType"><value>প্রচার খুঁজে পাওয়া যাবে না</value></data>
   <data name="msg_BlockTag"><value>প্রচারের জন্য যোগ্য নয়, অনুগ্রহ করে গ্রাহক সহায়তার সাথে যোগাযোগ করুন।</value></data>
-  </root>
+  <data name="msg_SpCustomerAddOtherBonusInPeriodTime" xml:space="preserve">
+    <value>অংশগ্রহণের সীমা পূরণ হয়েছে। অনুগ্রহ করে আগামীকাল আবার চেষ্টা করুন।</value>
+  </data>
+</root>

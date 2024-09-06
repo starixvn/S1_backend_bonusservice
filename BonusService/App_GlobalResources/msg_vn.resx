@@ -58,4 +58,7 @@
   <data name="msg_BlockTag"><value>Không đủ điều kiện nhận khuyến mãi, vui lòng liên hệ bộ phận Hỗ trợ khách hàng</value></data>
   <data name="msg_ClaimCashBackBonus"><value>Xin chúc mừng, khoản tiền hoàn lại {0} của bạn đã được ghi có vào tài khoản của bạn!</value></data>
   <data name="msg_Ineligible"><value>Tài khoản của bạn chưa may mắn trong ngày hôm nay, xin vui lòng thử lại vào ngày hôm sau.</value></data>
-  </root>
+  <data name="msg_SpCustomerAddOtherBonusInPeriodTime" xml:space="preserve">
+    <value>Đã đạt đến giới hạn tham gia. Vui lòng thử lại vào ngày mai.</value>
+  </data>
+</root>

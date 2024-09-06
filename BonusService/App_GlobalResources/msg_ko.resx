@@ -62,4 +62,7 @@
   <data name="msg_AdjustmentBonusCustomerHasRunningBonus"><value>고객은 여전히 보너스를 실행하고 있습니다. CustId:{0}</value></data>
   <data name="msg_SpCustomerNotHaveNewScratchCardToJoin"><value>다른 새 프로모션 코드를 입력하시기 바랍니다.</value></data>
   <data name="msg_AdjustmentBonusPromotionTypeNotMatch"><value>보너스 코드 :{0} 않습니다 {1}</value></data>
-  </root>
+  <data name="msg_SpCustomerAddOtherBonusInPeriodTime" xml:space="preserve">
+    <value>참여 횟수가 제한에 도달했습니다. 내일 다시 시도해 주세요.</value>
+  </data>
+</root>
