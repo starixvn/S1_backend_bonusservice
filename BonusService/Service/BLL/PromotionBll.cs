@@ -684,50 +684,51 @@ namespace BonusService.Service.BLL
 
             switch (claimPromotion.PromotionType)
             {
-                case PromotionType.FstDeposit:
-                    {
-                        if (amount < claimPromotion.RequiredAmount)
-                        {
-                            output.result = (int)BonusErrorCode.DepositAmountNotEnough;
-                            return output;
-                        }
+                // case PromotionType.FstDeposit:
+                //     {
+                //         if (amount < claimPromotion.RequiredAmount)
+                //         {
+                //             output.result = (int)BonusErrorCode.DepositAmountNotEnough;
+                //             return output;
+                //         }
+                //
+                //         if (applyLockedAmount < claimPromotion.RequiredAmount)
+                //         {
+                //             throw new Exception("LockedAmount can't less than RequiredAmount");
+                //         }
+                //
+                //         if (applyLockedAmount <= 0)
+                //         {
+                //             throw new Exception("LockedAmount can't be 0");
+                //         }
+                //
+                //         if (claimPromotion.BonusType == BonusType.Amount)
+                //         {
+                //             if (claimPromotion.RequiredAmount == 0)
+                //             {
+                //                 throw new Exception("Required Amount can't be 0");
+                //             }
+                //             lockAmount = applyLockedAmount;
+                //             bonusAmount = claimPromotion.Bonus;
+                //         }
+                //         else
+                //         {
+                //             bonusAmount = Math.Ceiling(claimPromotion.Bonus * applyLockedAmount / 100);
+                //             lockAmount = applyLockedAmount;
+                //             if (claimPromotion.MaxBonus != 0 && bonusAmount > claimPromotion.MaxBonus)
+                //             {
+                //                 bonusAmount = claimPromotion.MaxBonus;
+                //                 lockAmount = claimPromotion.MaxBonus * 100 / claimPromotion.Bonus;
+                //             }
+                //         }
+                //
+                //         rollover = (lockAmount + bonusAmount) * (claimPromotion.FullFillType == (int)FullFillType.RollOver ? claimPromotion.RollOver : claimPromotion.WinOver);
+                //         break;
+                //     }
 
-                        if (applyLockedAmount < claimPromotion.RequiredAmount)
-                        {
-                            throw new Exception("LockedAmount can't less than RequiredAmount");
-                        }
-
-                        if (applyLockedAmount <= 0)
-                        {
-                            throw new Exception("LockedAmount can't be 0");
-                        }
-
-                        if (claimPromotion.BonusType == BonusType.Amount)
-                        {
-                            if (claimPromotion.RequiredAmount == 0)
-                            {
-                                throw new Exception("Required Amount can't be 0");
-                            }
-                            lockAmount = applyLockedAmount;
-                            bonusAmount = claimPromotion.Bonus;
-                        }
-                        else
-                        {
-                            bonusAmount = Math.Ceiling(claimPromotion.Bonus * applyLockedAmount / 100);
-                            lockAmount = applyLockedAmount;
-                            if (claimPromotion.MaxBonus != 0 && bonusAmount > claimPromotion.MaxBonus)
-                            {
-                                bonusAmount = claimPromotion.MaxBonus;
-                                lockAmount = claimPromotion.MaxBonus * 100 / claimPromotion.Bonus;
-                            }
-                        }
-
-                        rollover = (lockAmount + bonusAmount) * (claimPromotion.FullFillType == (int)FullFillType.RollOver ? claimPromotion.RollOver : claimPromotion.WinOver);
-                        break;
-                    }
-
-                case PromotionType.ReDeposit:
-                    return CalculateTierRedepositBonus(claimPromotion, custId, siteId, currencyId, applyLockedAmount, depositId);
+                case PromotionType.ReDeposit or PromotionType.FstDeposit:
+                    
+                    return CalculateTierDepositBonus(claimPromotion, custId, siteId, currencyId, applyLockedAmount, depositId);
 
                 case PromotionType.Cashback:
                     var custPromotion = new CustPromotion
@@ -1057,7 +1058,7 @@ namespace BonusService.Service.BLL
                     promo.canJoin = false;
                 }
 
-                if (promo.PromotionType == PromotionType.ReDeposit && promo.TierAmountList.Any())
+                if (promo.PromotionType is PromotionType.FstDeposit or PromotionType.ReDeposit && promo.TierAmountList.Any())
                 {
                     promo.CalculateCanJoinTierAmount(promo.DepositAmount, 0);
                     promo.canJoin = promo.CanJoinTierAmountList.Any();
@@ -1438,7 +1439,7 @@ namespace BonusService.Service.BLL
             return _mainDbClient.QueryFirst<CheckTierRedepositBonusRep>("Admin_CheckTierRedepositBonus_Get", new DynamicParameters(request));
         }
 
-        private CalculateBonusOutput CalculateTierRedepositBonus(ClaimPromotion claimPromotion, int custId, int siteId, int currencyId, decimal amount, string depositId = null)
+        private CalculateBonusOutput CalculateTierDepositBonus(ClaimPromotion claimPromotion, int custId, int siteId, int currencyId, decimal amount, string depositId = null)
         {
             var depositAmount = amount;
 
