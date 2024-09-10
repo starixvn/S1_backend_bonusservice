@@ -58,4 +58,7 @@
   <data name="msg_BlockTag"><value>पदोन्नति के योग्य नहीं है, कृपया ग्राहक सहायता से संपर्क करें।</value></data>
   <data name="msg_ClaimCashBackBonus"><value>बधाई हो, आपका कैशबैक {0} आपके खाते में क्रेडिट कर दिया गया है!.</value></data>
   <data name="msg_Ineligible"><value>आप इस पदोन्नति के योग्य नहीं हैं। अधिक जानकारी के लिए कृपया हमारे समर्थन से संपर्क करें।</value></data>
-  </root>
+  <data name="msg_SpCustomerAddOtherBonusInPeriodTime" xml:space="preserve">
+    <value>भागीदारी की सीमा पूरी हो गई है। कृपया कल पुनः प्रयास करें।</value>
+  </data>
+</root>

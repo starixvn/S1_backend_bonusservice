@@ -58,4 +58,7 @@
   <data name="msg_BlockTag"><value>ไม่มีสิทธิ์รับโปรโมชั่น กรุณาติดต่อฝ่ายบริการลูกค้า</value></data>
   <data name="msg_ClaimCashBackBonus"><value>ขอแสดงความยินดีเครดิตเงินคืน {0} ของคุณเข้าบัญชีของคุณแล้ว!</value></data>
   <data name="msg_Ineligible"><value>สมาชิกไม่มีสิทธิ์รับโปรโมชั่นนี้ สามารถติดต่อแชทสดสำหรับรายละเอียดเพิ่มเติมค่ะ</value></data>
-  </root>
+  <data name="msg_SpCustomerAddOtherBonusInPeriodTime" xml:space="preserve">
+    <value>จำนวนผู้เข้าร่วมถึงขีดจำกัดแล้ว โปรดลองอีกครั้งในวันพรุ่งนี้</value>
+  </data>
+</root>

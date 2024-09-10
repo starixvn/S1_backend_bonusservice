@@ -62,4 +62,7 @@
   <data name="msg_AdjustmentBonusCustomerHasRunningBonus"><value>O cliente ainda tem bônus em andamento. UsuárioId:{0}</value></data>
   <data name="msg_SpCustomerNotHaveNewScratchCardToJoin"><value>Favor digitar outro Novo Código Promocional</value></data>
   <data name="msg_AdjustmentBonusPromotionTypeNotMatch"><value>CódigoBônus:{0} não é {1}</value></data>
-  </root>
+  <data name="msg_SpCustomerAddOtherBonusInPeriodTime" xml:space="preserve">
+    <value>Limite de participação alcançado. Por favor, tente novamente amanhã.</value>
+  </data>
+</root>
