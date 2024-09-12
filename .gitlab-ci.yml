@@ -1,0 +1,7 @@
+include:
+  - project: "sre/gitlab-ci-configs"
+    ref: "main"
+    file: "/bonusservice/.gitlab-ci.yaml"
+  - project: "sre/gitlab-ci-configs"
+    ref: "main"
+    file: "/bonusworker/.gitlab-ci.yaml"
