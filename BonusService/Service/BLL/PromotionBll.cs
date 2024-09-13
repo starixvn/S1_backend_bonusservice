@@ -664,11 +664,17 @@ namespace BonusService.Service.BLL
         private bool CheckProfileFinish(int custId, int siteId) //Profile Finish & Phone Verified
         {
             var custInfoProfile = _custInfoService.GetCustInfoProfile(custId, siteId);
-            return custInfoProfile.PhoneVerified
-                   && !string.IsNullOrEmpty(custInfoProfile.AccountName)
-                   && !string.IsNullOrEmpty(custInfoProfile.Birth_y)
-                   && !string.IsNullOrEmpty(custInfoProfile.Birth_m)
-                   && !string.IsNullOrEmpty(custInfoProfile.Birth_d);
+
+            return siteId switch
+            {
+                7 => !string.IsNullOrEmpty(custInfoProfile.AccountName),
+                
+                _ => custInfoProfile.PhoneVerified 
+                     && !string.IsNullOrEmpty(custInfoProfile.AccountName) 
+                     && !string.IsNullOrEmpty(custInfoProfile.Birth_y) 
+                     && !string.IsNullOrEmpty(custInfoProfile.Birth_m) 
+                     && !string.IsNullOrEmpty(custInfoProfile.Birth_d)
+            };
         }
 
         private CalculateBonusOutput CalculateBonus(ClaimPromotion claimPromotion, decimal amount, decimal applyLockedAmount, int custId, int siteId, int currencyId, string depositId = null)
