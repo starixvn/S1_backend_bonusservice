@@ -6,7 +6,7 @@ using Serilog.Exceptions;
 using Serilog.Formatting.Json;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.WebHost.UseSentry();
 var remoteUrls = GetRemoteUrls();
 remoteUrls = builder.Configuration.CheckLocalConfig(builder.Environment, args, remoteUrls);
 builder.Configuration.AddRemoteJsonConfig(remoteUrls);
@@ -51,7 +51,7 @@ if (!string.IsNullOrEmpty(serviceType) && serviceType.Equals("worker", StringCom
 
 var app = builder.Build();
 startup.Configure(app, builder.Environment);
-
+SentrySdk.CaptureMessage("Member_site_api started");
 app.Run();
 return;
 
