@@ -7,7 +7,6 @@ using Serilog.Formatting.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseSentry();
-builder.Environment.EnvironmentName = builder.Configuration.GetValue<string>("Environment");
 var remoteUrls = GetRemoteUrls();
 remoteUrls = builder.Configuration.CheckLocalConfig(builder.Environment, args, remoteUrls);
 builder.Configuration.AddRemoteJsonConfig(remoteUrls);
@@ -30,7 +29,7 @@ builder.Host.UseSerilog((context, Configuration) =>
 var startup = new Startup(builder.Configuration);
 startup.ConfigureServices(builder.Services);
 
-var serviceType = Environment.GetEnvironmentVariable("ServiceType");
+var serviceType = builder.Configuration.GetValue<string>("ServiceType");
 if (!string.IsNullOrEmpty(serviceType) && serviceType.Equals("worker", StringComparison.OrdinalIgnoreCase))
 {
     builder.Services

@@ -8,15 +8,15 @@ namespace BonusService.Service.BLL
     {
         private readonly Dictionary<string, string> _defaultSiteConfig;
         private readonly Dictionary<int, SiteConfig> _siteIdConfigs;
-        private readonly IWebHostEnvironment _environment;
+        private readonly string _environment;
 
-        public ConfigBLL(IServiceProvider provider)
+        public ConfigBLL(IServiceProvider provider, IConfiguration config)
         {
             var siteConfigList = provider.GetServices<SiteConfig>();
             _defaultSiteConfig = siteConfigList.First(i => i.SiteId == 0).Config;
 
             _siteIdConfigs = siteConfigList.ToDictionary(i => i.SiteId, i => i);
-            _environment = provider.GetRequiredService<IWebHostEnvironment>();
+            _environment = config.GetValue<string>("Environment");
         }
 
         public string GetConfigValue(string configKey, int siteId = 0)
@@ -44,7 +44,7 @@ namespace BonusService.Service.BLL
 
         public TItem GetConfigValueByEnvironment<TItem>(string configKey, int siteId = 0)
         {
-            var json = GetConfigValue($"{configKey}.{_environment.EnvironmentName}.json", siteId);
+            var json = GetConfigValue($"{configKey}.{_environment}.json", siteId);
             return !string.IsNullOrEmpty(json) ? JsonConvert.DeserializeObject<TItem>(json) : default;
         }        
     }
