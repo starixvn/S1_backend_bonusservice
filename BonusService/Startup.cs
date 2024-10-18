@@ -39,7 +39,6 @@ namespace BonusService
             services.AddSingleton<VipRebateService>();
             services.AddSingleton<ExpiredBonusService>();
             services.AddSingleton<ReferralService>();
-            services.AddSingleton<RewardService>();
             services.AddSingleton<VipService>();
             services.AddSingleton<VipCashBackService>();
             services.AddSingleton<PromotionAutoExtendService>();
@@ -58,7 +57,6 @@ namespace BonusService
 
             services.AddSingleton<RebateBLL>();
             services.AddSingleton<ReferralBLL>();
-            services.AddSingleton<RewardBLL>();
             services.AddSingleton<ReferralReward>();
             services.AddSingleton<SelLangBLL>();
             services.AddSingleton<ExpiredBonusBLL>();
