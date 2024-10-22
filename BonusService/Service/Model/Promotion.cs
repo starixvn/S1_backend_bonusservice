@@ -545,4 +545,19 @@ namespace BonusService.Service.Model
     {
         public decimal TurnoverSum { get; set; }
     }
+
+    public class CustPrivatePromotionRequest
+    {
+        public int SiteId { set; get; }
+        public int CustId { set; get; }
+        public int CurrencyId { set; get; }
+        public int DeviceType { set; get; }
+        public bool IsLogin { set; get; }
+        public string LangId { set; get; }
+        public string DefLang { set; get; }
+    }
+    public class CustPrivatePromotion
+    {
+        public string BonusCode { get; set; }
+    }
 }
