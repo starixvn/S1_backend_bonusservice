@@ -532,7 +532,7 @@ namespace BonusService.Service.DAL
 
             return result;
         }
-        
+
         /// <summary>
         /// 取得 PromotionMission 的進度金額
         /// </summary>
@@ -548,7 +548,7 @@ namespace BonusService.Service.DAL
             });
             p.Add("_TurnoverSum", dbType: DbType.Decimal, direction: ParameterDirection.Output);
             _reportDbClient.Query<PromotionMissionProgress>("Service_MissionBonusProgressCheck_Get", p);
-            
+
             var turnoverSum = p.Get<decimal>("_TurnoverSum");
 
             var resultModel = new PromotionMissionProgress
@@ -570,6 +570,12 @@ namespace BonusService.Service.DAL
                 {
                     CustId = custId
                 }));
+        }
+
+        public IEnumerable<CustPrivatePromotion> GetCustPrivatePromotionList(CustPrivatePromotionRequest request)
+        {
+            return _reportDbClient.Query<CustPrivatePromotion>("Service_CustPromotion_Get",
+                new { CustId = request.CustId });
         }
     }
 }

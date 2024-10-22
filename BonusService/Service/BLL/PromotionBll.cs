@@ -1630,6 +1630,32 @@ namespace BonusService.Service.BLL
             return result;
         }
 
+        public List<CustPromotion> GetCustPrivatePromotionList(CustPrivatePromotionRequest request)
+        {
+            var custPrivatePromotionList = _promotionService.GetCustPrivatePromotionList(request).ToList();
+            var custInfo = _custInfoService.GetCustInfo(request.CustId);
+            var promotion = new List<CustPromotion>();
+
+            foreach (var privatePromotion in custPrivatePromotionList)
+            {
+                var promo = _promotionService.GetPromotion<CustPromotion>(request.CustId, request.CurrencyId, request.SiteId, privatePromotion.BonusCode, request.DeviceType, false);
+                var custCondition = _promotionService.GetCustConditionInfo(request.CustId, request.CurrencyId,
+                        request.SiteId, promo.BonusCode, request.DeviceType);
+                SetPromotion(request.SiteId, request.CustId, request.CurrencyId, false, promo, custCondition);
+
+                // 調整Cashback時間
+                if (promo.PromotionType == PromotionType.Cashback)
+                {
+                    var offset = GetOffset(request.SiteId);
+                    ProcessPeriodTime(promo, DateTime.UtcNow.AddHours(offset), offset);
+                }
+
+                promotion.Add(promo);
+            }
+
+            return promotion;
+        }
+
         #region PrivateMethod
 
         private CheckPromotionBlockIp CheckBlockIp(Customer custInfo, ClaimPromotion claimPromotion, CustPromotionWhiteListSettingDto whiteListSetting)
