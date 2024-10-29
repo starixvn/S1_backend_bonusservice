@@ -691,50 +691,7 @@ namespace BonusService.Service.BLL
 
             switch (claimPromotion.PromotionType)
             {
-                // case PromotionType.FstDeposit:
-                //     {
-                //         if (amount < claimPromotion.RequiredAmount)
-                //         {
-                //             output.result = (int)BonusErrorCode.DepositAmountNotEnough;
-                //             return output;
-                //         }
-                //
-                //         if (applyLockedAmount < claimPromotion.RequiredAmount)
-                //         {
-                //             throw new Exception("LockedAmount can't less than RequiredAmount");
-                //         }
-                //
-                //         if (applyLockedAmount <= 0)
-                //         {
-                //             throw new Exception("LockedAmount can't be 0");
-                //         }
-                //
-                //         if (claimPromotion.BonusType == BonusType.Amount)
-                //         {
-                //             if (claimPromotion.RequiredAmount == 0)
-                //             {
-                //                 throw new Exception("Required Amount can't be 0");
-                //             }
-                //             lockAmount = applyLockedAmount;
-                //             bonusAmount = claimPromotion.Bonus;
-                //         }
-                //         else
-                //         {
-                //             bonusAmount = Math.Ceiling(claimPromotion.Bonus * applyLockedAmount / 100);
-                //             lockAmount = applyLockedAmount;
-                //             if (claimPromotion.MaxBonus != 0 && bonusAmount > claimPromotion.MaxBonus)
-                //             {
-                //                 bonusAmount = claimPromotion.MaxBonus;
-                //                 lockAmount = claimPromotion.MaxBonus * 100 / claimPromotion.Bonus;
-                //             }
-                //         }
-                //
-                //         rollover = (lockAmount + bonusAmount) * (claimPromotion.FullFillType == (int)FullFillType.RollOver ? claimPromotion.RollOver : claimPromotion.WinOver);
-                //         break;
-                //     }
-
                 case PromotionType.ReDeposit or PromotionType.FstDeposit:
-                    
                     return CalculateTierDepositBonus(claimPromotion, custId, siteId, currencyId, applyLockedAmount, depositId);
 
                 case PromotionType.Cashback:
@@ -764,6 +721,7 @@ namespace BonusService.Service.BLL
                 case PromotionType.FreeBet:
                 case PromotionType.RetentionFreeBet:
                 case PromotionType.DeviceBonus:
+                case PromotionType.PredictionEvent:
                     bonusAmount = claimPromotion.Bonus;
                     rollover = bonusAmount * claimPromotion.RollOver;
                     lockAmount = 0;
