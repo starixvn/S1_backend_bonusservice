@@ -54,7 +54,7 @@ namespace BonusService.Service.DAL
             parameter.Add("StartTime", customerUpgradeInfo.StartTime);
             parameter.Add("EndTime", customerUpgradeInfo.EndTime);
             parameter.Add("CalculateMonth", customerUpgradeInfo.CalculateMonth);
-            return _reportDbClient.Query<CustVip>("Service_CustUpgrade_GetV2", parameter);
+            return _reportDbClient.Query<CustVip>("Service_CustUpgrade_GetV2", parameter, 600);
         }
 
         public IEnumerable<VipUpgradeReview> GetVipUpgradeReview(VipUpgradeInfo vipUpgradeInfo)
