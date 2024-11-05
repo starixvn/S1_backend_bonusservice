@@ -48,7 +48,8 @@ namespace BonusService.Service.Workers
 
                         var sw = Stopwatch.StartNew();
 
-                        var depositReferralCustList = _referralBLL.GetDepositReferralCustList(task.SiteId, task.CurrencyId, task.SpecificDate, task.TimeZone);
+                        //todo: repalce DateTime.Now.AddDays(1) to task.SpecificDate
+                        var depositReferralCustList = _referralBLL.GetDepositReferralCustList(task.SiteId, task.CurrencyId, DateTime.Now.AddDays(1), task.TimeZone);
 
                         var referrerCustList = depositReferralCustList.Select(x => x.Referrer_CustId).Distinct();
 
