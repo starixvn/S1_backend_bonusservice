@@ -1638,9 +1638,8 @@ namespace BonusService.Service.BLL
 
             foreach (var privatePromotion in custPrivatePromotionList)
             {
-                var promo = _promotionService.GetPromotion<CustPromotion>(request.CustId, request.CurrencyId, request.SiteId, privatePromotion.BonusCode, request.DeviceType, false);
-                var custCondition = _promotionService.GetCustConditionInfo(request.CustId, request.CurrencyId,
-                        request.SiteId, promo.BonusCode, request.DeviceType);
+                var promo = _promotionService.GetPromotion<CustPromotion>(custInfo.CustId, custInfo.CurrencyId, custInfo.SiteId, privatePromotion.BonusCode, request.DeviceType, false);
+                var custCondition = _promotionService.GetCustConditionInfo(custInfo.CustId, custInfo.CurrencyId, custInfo.SiteId, promo.BonusCode, request.DeviceType);
                 SetPromotion(request.SiteId, request.CustId, request.CurrencyId, false, promo, custCondition);
 
                 // 調整Cashback時間
