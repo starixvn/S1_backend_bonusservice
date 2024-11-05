@@ -47,7 +47,7 @@ namespace BonusService.Service.Workers
             }
             finally
             {
-                TimeSpan dueTimeSpan = TimeSpan.FromMinutes(30);
+                TimeSpan dueTimeSpan = TimeSpan.FromMinutes(1); //Todo: should revert to 30
                 if (environment.IsDevelopment())
                 {
                     dueTimeSpan = TimeSpan.FromMinutes(1);
