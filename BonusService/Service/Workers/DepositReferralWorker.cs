@@ -112,21 +112,19 @@ namespace BonusService.Service.Workers
         /// <returns></returns>
         private bool VerifyExecute(int mins)
         {
-            //TODO: Should revert after testing
-            //if (mins > 0 && mins < 20)
-            //    return false;
+            if (mins > 0 && mins < 20)
+                return false;
             return true;
         }
 
         private int CaculateNextExecuteTime(int mins)
-        { //TODO: Should revert after testing
-            //if (mins > 0 && mins < 10)
-            //    return 20;
-            //else if (mins > 10 && mins < 20)
-            //    return 10;
-            //else
-            //    return 30;
-            return 1;
+        {
+            if (mins > 0 && mins < 10)
+                return 20;
+            else if (mins > 10 && mins < 20)
+                return 10;
+            else
+                return 30;
         }
     }
 }
