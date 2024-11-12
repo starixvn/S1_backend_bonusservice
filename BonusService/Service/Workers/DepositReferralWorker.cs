@@ -48,8 +48,7 @@ namespace BonusService.Service.Workers
 
                         var sw = Stopwatch.StartNew();
 
-                        //todo: repalce DateTime.Now.AddDays(1) to task.SpecificDate
-                        var depositReferralCustList = _referralBLL.GetDepositReferralCustList(task.SiteId, task.CurrencyId, DateTime.Now.AddDays(1), task.TimeZone);
+                        var depositReferralCustList = _referralBLL.GetDepositReferralCustList(task.SiteId, task.CurrencyId, task.SpecificDate, task.TimeZone);
 
                         var referrerCustList = depositReferralCustList.Select(x => x.Referrer_CustId).Distinct();
 
@@ -113,21 +112,19 @@ namespace BonusService.Service.Workers
         /// <returns></returns>
         private bool VerifyExecute(int mins)
         {
-            //TODO: Should revert after testing
-            //if (mins > 0 && mins < 20)
-            //    return false;
+            if (mins > 0 && mins < 20)
+                return false;
             return true;
         }
 
         private int CaculateNextExecuteTime(int mins)
-        { //TODO: Should revert after testing
-            //if (mins > 0 && mins < 10)
-            //    return 20;
-            //else if (mins > 10 && mins < 20)
-            //    return 10;
-            //else
-            //    return 30;
-            return 1;
+        {
+            if (mins > 0 && mins < 10)
+                return 20;
+            else if (mins > 10 && mins < 20)
+                return 10;
+            else
+                return 30;
         }
     }
 }
