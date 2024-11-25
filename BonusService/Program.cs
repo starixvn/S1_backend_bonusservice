@@ -2,6 +2,7 @@ using BonusService;
 using BonusService.Extensions;
 using BonusService.Service.Workers;
 using Serilog;
+using Serilog.Events;
 using Serilog.Exceptions;
 using Serilog.Formatting.Json;
 
@@ -51,17 +52,12 @@ if (!string.IsNullOrEmpty(serviceType) && serviceType.Equals("worker", StringCom
 
 var app = builder.Build();
 startup.Configure(app, builder.Environment);
-SentrySdk.CaptureMessage("Member_site_api started");
+SentrySdk.CaptureMessage("Bonus Service started");
 app.Run();
 return;
 
 void OverrideLoggerWriteToLFile(LoggerConfiguration configuration)
 {
-    const string cashSiteBrand = "Nova";
-
-    var brand = Environment.GetEnvironmentVariable("Brand") ?? string.Empty;
-    if (brand != cashSiteBrand) return;
-
     var logFilePath = $"/bonus/bonus-{DateTime.Now:yyyyMMddHHmmssfff}.log";
     configuration
         .WriteTo.File(new JsonFormatter(),
@@ -69,7 +65,14 @@ void OverrideLoggerWriteToLFile(LoggerConfiguration configuration)
             rollingInterval: RollingInterval.Day,
             retainedFileCountLimit: 60,
             fileSizeLimitBytes: 10485760,
-            rollOnFileSizeLimit: true);
+            rollOnFileSizeLimit: true)
+        .WriteTo.Sentry(o =>
+        {
+            o.MinimumBreadcrumbLevel = LogEventLevel.Debug;
+            o.MinimumEventLevel = LogEventLevel.Error;
+            o.Dsn = builder.Configuration.GetValue<string>("Sentry:Dsn");
+            o.Environment = builder.Configuration.GetValue<string>("Sentry:Environment");
+        });
 }
 
 string[] GetRemoteUrls()
