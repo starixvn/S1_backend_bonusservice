@@ -4,7 +4,7 @@ using BonusService.Service.Workers;
 using Serilog;
 using Serilog.Events;
 using Serilog.Exceptions;
-using Serilog.Formatting.Json;
+using Serilog.Sinks.Network;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseSentry();
@@ -58,14 +58,20 @@ return;
 
 void OverrideLoggerWriteToLFile(LoggerConfiguration configuration)
 {
-    var logFilePath = $"/bonus/bonus-{DateTime.Now:yyyyMMddHHmmssfff}.log";
     configuration
-        .WriteTo.File(new JsonFormatter(),
-            logFilePath,
-            rollingInterval: RollingInterval.Day,
-            retainedFileCountLimit: 60,
-            fileSizeLimitBytes: 10485760,
-            rollOnFileSizeLimit: true)
+        .ReadFrom.Configuration(builder.Configuration)
+        .Enrich.FromLogContext()
+        .Filter.ByExcluding(c =>
+            c.Properties.Any(p =>
+                excludesApiEndpoints.Any(item => p.Value.ToString().Contains(item))
+                || excludesMessage.Any(item => c.MessageTemplate.ToString().Contains(item))))
+        .Enrich.WithExceptionDetails()
+        .Enrich.WithProperty("ApplicationName", builder.Configuration.GetValue<string>("ServiceName"))
+        .Enrich.WithProperty("envName", builder.Configuration.GetValue<string>("Environment"))
+        .WriteTo.UDPSink(
+            builder.Configuration.GetValue<string>("OpenSearch:Uri"),
+            builder.Configuration.GetValue<int>("OpenSearch:Port"),
+            new Serilog.Formatting.Json.JsonFormatter())
         .WriteTo.Sentry(o =>
         {
             o.MinimumBreadcrumbLevel = LogEventLevel.Debug;
