@@ -67,7 +67,7 @@ void OverrideLoggerWriteToLFile(LoggerConfiguration configuration)
                 || excludesMessage.Any(item => c.MessageTemplate.ToString().Contains(item))))
         .Enrich.WithExceptionDetails()
         .Enrich.WithProperty("ApplicationName", builder.Configuration.GetValue<string>("ServiceName"))
-        .Enrich.WithProperty("envName", builder.Configuration.GetValue<string>("Environment"))
+        .Enrich.WithProperty("Env", builder.Configuration.GetValue<string>("Environment"))
         .WriteTo.UDPSink(
             builder.Configuration.GetValue<string>("OpenSearch:Uri"),
             builder.Configuration.GetValue<int>("OpenSearch:Port"),
