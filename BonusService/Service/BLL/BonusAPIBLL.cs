@@ -158,16 +158,17 @@ namespace BonusService.Service.BLL
 
                 if (result.ErrorCode != 0)
                 {
-                    //if (result.ErrorCode == 104 && !isWorker)
-                    //{
-                    //    //Personal Msg - Failed
-                    //    _currency.GetCurrency().TryGetValue(custInfo.CurrencyId, out var currencyName);
-                    //    var leftAmountLimit = verInfo.MinDeposit - custRewardInfo.SumDepositAmount;
-                    //    var title = string.Format(_selLangBll.GetResourceValue("lbl_VerificationRewardLimitTitle", custInfo.UserLang));
-                    //    var content = string.Format(_selLangBll.GetResourceValue("lbl_VerificationRewardLimit", custInfo.UserLang),
-                    //        currencyName, leftAmountLimit.ToString("#,##0.##"));
-                    //    _messageService.SendMessage(new Message("System", custInfo.CustId, custInfo.UserLang, title, content));
-                    //}
+                    if (result.ErrorCode == 104 && !isWorker)
+                    {
+                        //Personal Msg - Failed
+                        _currency.GetCurrency().TryGetValue(custInfo.CurrencyId, out var currencyName);
+                        var leftAmountLimit = verInfo.MinDeposit - custRewardInfo.SumDepositAmount;
+                        var title = string.Format(_selLangBll.GetResourceValue("lbl_VerificationRewardLimitTitle", custInfo.UserLang));
+                        var content = string.Format(_selLangBll.GetResourceValue("lbl_VerificationRewardLimit", custInfo.UserLang),
+                            currencyName, leftAmountLimit.ToString("#,##0.##"));
+                        _messageService.SendMessage(new Message("System", custInfo.CustId, custInfo.UserLang, title, content));
+
+                    }
                     return result;
                 }
                 var reward = 0m;
