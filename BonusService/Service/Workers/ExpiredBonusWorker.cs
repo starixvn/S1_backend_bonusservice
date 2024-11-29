@@ -23,7 +23,7 @@ namespace BonusService.Service.Workers
         {
             _timerExpiredBonus = new Timer(DoExpiredBonusTaskAsync, null, TimeSpan.Zero, TimeSpan.Zero);
             return Task.CompletedTask;
-        }    
+        }
 
         private void DoExpiredBonusTaskAsync(object state)
         {
@@ -53,7 +53,7 @@ namespace BonusService.Service.Workers
             }
             finally
             {
-                _timerExpiredBonus?.Change(TimeSpan.FromMinutes(30), TimeSpan.Zero);
+                _timerExpiredBonus?.Change(TimeSpan.FromMinutes(5), TimeSpan.Zero);
             }
 
         }
