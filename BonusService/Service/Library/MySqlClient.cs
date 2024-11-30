@@ -110,6 +110,9 @@ namespace BonusService.Service.Library
             {
                 var conn = HealthCheck();
                 using var connection = new MySqlConnection(conn);
+
+                _logger.LogInformation($"SP: {name}, connection.State: {connection.State}");
+
                 if (connection.State != ConnectionState.Open) connection.Open();// 自己 Control connection open close，不要讓 ORM 自己做
 
                 var command = new CommandDefinition(name, parameters, // 使用 CommandDefinition 不讓
@@ -118,6 +121,10 @@ namespace BonusService.Service.Library
                     flags: CommandFlags.NoCache);
 
                 result = connection.Query<T>(command);
+
+                var result2 = connection.Query<T>(command);
+                _logger.LogInformation($"SP: {name}, connection.State: {connection.State}, result: {System.Text.Json.JsonSerializer.Serialize(result2)}");
+
                 connection.Close();
                 connection.Dispose();
             }
@@ -131,7 +138,7 @@ namespace BonusService.Service.Library
             _logger.LogDebug($"{name} {sw.Elapsed:c}");
             return result.ToList();
         }
-        
+
         public IEnumerable<T> Query<T>(string spName, object parameters = null, int? commandTimeout = null)
         {
             IEnumerable<T> result;
@@ -197,7 +204,7 @@ namespace BonusService.Service.Library
             LogContext.PushProperty("elapsed", sw.Elapsed.TotalMilliseconds);
             _logger.LogDebug($"{name} {sw.Elapsed:c}");
             return result;
-        }   
+        }
 
         public async Task<bool> ExecuteAsync(string name, SqlMapper.IDynamicParameters parameters)
         {
@@ -241,7 +248,7 @@ namespace BonusService.Service.Library
             _logger.LogDebug($"{name} {sw.Elapsed:c}");
             return result;
         }
-        
+
         public void CommitAndDisposeConnection(MySqlConnection conn, IDbTransaction trans)
         {
             trans.Commit();

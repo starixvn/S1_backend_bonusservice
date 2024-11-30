@@ -12,6 +12,7 @@ namespace BonusService.Service.DAL
         private readonly WithdrawalLimitService _withdrawalLimitService;
         private readonly MySqlClient _mainDbClient;
         private readonly MySqlClient _reportDbClient;
+        private readonly ILogger<ExpiredBonusService> _logger;
 
         public ExpiredBonusService(IServiceProvider provider)
         {
@@ -19,6 +20,7 @@ namespace BonusService.Service.DAL
             _withdrawalLimitService = provider.GetRequiredService<WithdrawalLimitService>();
             _mainDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);
             _reportDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Report);
+            _logger = _logger = provider.GetRequiredService<ILogger<ExpiredBonusService>>();
         }
 
         public IEnumerable<ExpiredBonus> GetBonusExpired(int limit)
