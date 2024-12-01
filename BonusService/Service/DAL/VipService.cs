@@ -111,7 +111,7 @@ namespace BonusService.Service.DAL
             parameter.Add("_EndTime", customerDowngradeInfo.EndTime);
             parameter.Add("_QualifiedTime", customerDowngradeInfo.QualifiedTime);
             parameter.Add("_CalculateMonth", customerDowngradeInfo.CalculateMonth);
-            return _reportDbClient.Query<CustVipForDowngrade>("Service_VIP_CustDowngrade_Get_V4", parameter, commandTimeout: 180);
+            return _reportDbClient.Query<CustVipForDowngrade>("Service_VIP_CustDowngrade_Get_V4", parameter, commandTimeout: 600);
         }
 
         public bool SetVipDowngradeReview(VipDowngradeInfo vipDowngradeInfo)
