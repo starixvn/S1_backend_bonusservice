@@ -53,7 +53,7 @@ namespace BonusService.Service.Workers
             }
             finally
             {
-                _timerExpiredBonus?.Change(TimeSpan.FromMinutes(5), TimeSpan.Zero);
+                _timerExpiredBonus?.Change(TimeSpan.FromMinutes(2), TimeSpan.Zero);
             }
 
         }
