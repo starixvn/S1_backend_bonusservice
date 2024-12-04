@@ -37,7 +37,6 @@ namespace BonusService.UnitTest
             });
 
             var remoteUrls = builder.Configuration.GetSection("ConfigService").Get<string[]>();
-            remoteUrls = builder.Configuration.CheckLocalConfig(builder.Environment, new[] { "Nova" }, remoteUrls);
             builder.Configuration.AddRemoteJsonConfig(remoteUrls);
 
             var app = builder.Build();
@@ -106,7 +105,7 @@ namespace BonusService.UnitTest
         public decimal GetRebateAmount()
         {
             var sqlScript = @$"SELECT RedeemAmount FROM Siebog.RebateMLog WHERE CustId = 250713 ORDER BY Id Desc limit 1;";
-            var rebateAmount = _mySqlClient.Query<decimal>(sqlScript, parameters: new { }, commandType: CommandType.Text).First();
+            var rebateAmount = _mySqlClient.Query<decimal>(sqlScript, parameters: new { }).First();
             return rebateAmount;
         }
     }

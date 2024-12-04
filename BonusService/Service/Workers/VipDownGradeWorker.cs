@@ -12,7 +12,7 @@ namespace BonusService.Service.Workers
 
         private Timer _timer;
         private readonly ILogger<VipDowngradeWorker> _logger;
-        private readonly IHostEnvironment _environment;
+        private readonly string _environmentConfig;
         private readonly VipBLL _vipBLL;
 
         private int execCount = 0;
@@ -21,9 +21,9 @@ namespace BonusService.Service.Workers
 
         #region Constructors
 
-        public VipDowngradeWorker(IServiceProvider provider)
+        public VipDowngradeWorker(IServiceProvider provider, IConfiguration configuration)
         {
-            _environment = provider.GetRequiredService<IHostEnvironment>();
+            _environmentConfig = configuration.GetSection("Environment").Get<string>();
             _vipBLL = provider.GetRequiredService<VipBLL>();
             _logger = provider.GetRequiredService<ILogger<VipDowngradeWorker>>();
         }
@@ -73,7 +73,7 @@ namespace BonusService.Service.Workers
                 finally
                 {
                     var dueTimeSpan = TimeSpan.FromMinutes(1);
-                    if (_environment.IsProduction())
+                    if (_environmentConfig.Equals("PROD"))
                     {
                         dueTimeSpan = TimeSpan.FromHours(4);
                     }

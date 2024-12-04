@@ -29,11 +29,12 @@ namespace BonusService.Service.DAL
         {
             _mainDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);
             _reportDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Report);
-            _tpServiceUrl = provider.GetRequiredService<ConfigBLL>().GetConfigValueByEnvironment<ServiceHostConfig>("ServiceHost").TpService;
+            _tpServiceUrl = provider.GetRequiredService<ConfigBLL>().GetServiceHostConfig().TpService;
             _courierAdapter = provider.GetRequiredService<CourierAdapter>();
             _allowIp = provider.GetRequiredService<IEnumerable<AllowIp>>();
             _custInfoService = provider.GetRequiredService<CustInfoService>();
         }
+
 
         public T GetPromotion<T>(int custId, int currencyId, int siteId, string bonusCode, int deviceType, bool getDetail)
         {

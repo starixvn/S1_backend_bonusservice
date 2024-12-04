@@ -1,51 +1,49 @@
 ﻿using BonusService.Service.Model;
-
 using Newtonsoft.Json;
 
-namespace BonusService.Service.BLL
+namespace BonusService.Service.BLL;
+
+public class ConfigBLL
 {
-    public class ConfigBLL
+    private readonly Dictionary<string, string> defaultSiteConfig;
+    private readonly Dictionary<int, SiteConfig> siteIdConfigs;
+    private readonly IConfiguration configuration;
+
+    public ConfigBLL(IServiceProvider provider, IConfiguration configuration)
     {
-        private readonly Dictionary<string, string> _defaultSiteConfig;
-        private readonly Dictionary<int, SiteConfig> _siteIdConfigs;
-        private readonly string _environment;
+        var siteConfigList = provider.GetServices<SiteConfig>();
+        defaultSiteConfig = siteConfigList.First(i => i.SiteId == 0).Config;
 
-        public ConfigBLL(IServiceProvider provider, IConfiguration config)
+        siteIdConfigs = siteConfigList.ToDictionary(i => i.SiteId, i => i);
+        this.configuration = configuration;
+    }
+
+    public string GetConfigValue(string configKey, int siteId = 0)
+    {
+        var defaultResult = defaultSiteConfig.TryGetValue(configKey, out var result) ? result : string.Empty;
+
+        if (siteId == 0)
         {
-            var siteConfigList = provider.GetServices<SiteConfig>();
-            _defaultSiteConfig = siteConfigList.First(i => i.SiteId == 0).Config;
-
-            _siteIdConfigs = siteConfigList.ToDictionary(i => i.SiteId, i => i);
-            _environment = config.GetValue<string>("Environment");
-        }
-
-        public string GetConfigValue(string configKey, int siteId = 0)
-        {
-            var defaultResult = _defaultSiteConfig.TryGetValue(configKey, out var result) ? result : string.Empty;
-
-            if (siteId == 0)
-            {
-                return defaultResult;
-            }
-
-            if (_siteIdConfigs.TryGetValue(siteId, out var siteConfig))
-            {
-                return siteConfig.Config.TryGetValue(configKey, out var configValue) ? configValue : defaultResult;
-            }
-
             return defaultResult;
         }
 
-        public TItem GetConfigValue<TItem>(string configKey, int siteId = 0)
+        if (siteIdConfigs.TryGetValue(siteId, out var siteConfig))
         {
-            var json = GetConfigValue(configKey, siteId);
-            return !string.IsNullOrEmpty(json) ? JsonConvert.DeserializeObject<TItem>(json) : default;
+            return siteConfig.Config.TryGetValue(configKey, out var configValue) ? configValue : defaultResult;
         }
 
-        public TItem GetConfigValueByEnvironment<TItem>(string configKey, int siteId = 0)
-        {
-            var json = GetConfigValue($"{configKey}.{_environment}.json", siteId);
-            return !string.IsNullOrEmpty(json) ? JsonConvert.DeserializeObject<TItem>(json) : default;
-        }        
+        return defaultResult;
     }
+
+    public TItem GetConfigValue<TItem>(string configKey, int siteId = 0)
+    {
+        var json = GetConfigValue(configKey, siteId);
+        return !string.IsNullOrEmpty(json) ? JsonConvert.DeserializeObject<TItem>(json) : default;
+    }
+
+    public ServiceHostConfig GetServiceHostConfig()
+    {
+        var serviceHostConfig = configuration.GetSection("serviceHosts").Get<ServiceHostConfig>();
+        return serviceHostConfig;
+    }       
 }

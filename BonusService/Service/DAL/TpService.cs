@@ -13,7 +13,7 @@ public class TpService
     public TpService(IServiceProvider provider)
     {
         var configBll = provider.GetRequiredService<ConfigBLL>();
-        _tpServiceUrl = configBll.GetConfigValueByEnvironment<ServiceHostConfig>("ServiceHost").TpService;
+        _tpServiceUrl = configBll.GetServiceHostConfig().TpService;
         _courierAdapter = provider.GetRequiredService<CourierAdapter>();
     }
     

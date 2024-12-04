@@ -9,15 +9,15 @@ namespace BonusService.Service.Workers
     public partial class VipUpgradeWorker : BackgroundService
     {
         private Timer _timer;
-        private readonly IHostEnvironment _environment;
+        private readonly string _environmentConfig;
         private readonly VipBLL _vipBll;
         private readonly ILogger<VipUpgradeWorker> _logger;
 
-        public VipUpgradeWorker(IServiceProvider provider)
+        public VipUpgradeWorker(IServiceProvider provider, IConfiguration configuration)
         {
-            _environment = provider.GetRequiredService<IHostEnvironment>();
             _vipBll = provider.GetRequiredService<VipBLL>();
             _logger = provider.GetRequiredService<ILogger<VipUpgradeWorker>>();
+            _environmentConfig = configuration.GetSection("Environment").Get<string>();
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -51,7 +51,7 @@ namespace BonusService.Service.Workers
             finally
             {
                 var dueTimeSpan = TimeSpan.FromMinutes(1);
-                if (_environment.IsProduction())
+                if (_environmentConfig.Equals("PROD"))
                 {
                     dueTimeSpan = TimeSpan.FromHours(4);
                 }

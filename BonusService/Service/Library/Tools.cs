@@ -2,10 +2,11 @@
 {
     public class Common
     {
-        private readonly IHostEnvironment environment;
-        public Common(IHostEnvironment environment)
+        private readonly string environmentConfig;
+
+        public Common(IConfiguration configuration)
         {
-            this.environment = environment;
+            environmentConfig = configuration.GetSection("Environment").Get<string>();
         }
         /// <summary>
         /// 保留两位小数的金额
@@ -18,25 +19,27 @@
             var value = (long)Math.Pow(10.0, decimals);
             return Convert.ToDecimal(Math.Floor(d * value) / value);
         }
+
         public string GetEnv()
         {
-            if (environment.IsDevelopment())
+            switch (environmentConfig)
             {
-                return "D";
+                case "Development":
+                case "LOCAL":
+                    return "D";
+
+                case "SIT":
+                    return "S";
+
+                case "UAT":
+                    return "U";
+
+                case "PROD":
+                    return "P";
+
+                default:
+                    return "D";
             }
-            else if (environment.IsStaging())
-            {
-                return "S";
-            }
-            else if (environment.IsProduction())
-            {
-                return "P";
-            }
-            else if (environment.IsEnvironment("QA"))
-            {
-                return "Q";
-            }
-            return "X";
         }
     }
 }

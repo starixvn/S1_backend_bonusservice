@@ -1,9 +1,7 @@
 ﻿using BonusService.Service.DAL;
 using BonusService.Service.DAL.Interface;
 using BonusService.Service.Model;
-
 using Newtonsoft.Json;
-
 namespace BonusService.Service.BLL;
 
 public class AngPaoEventBLL
@@ -11,16 +9,16 @@ public class AngPaoEventBLL
     private readonly AngPaoEventService _angPaoEventService;
     private readonly IWorkerPeriodService _workerPeriodService;
     private readonly ILogger<AngPaoEventBLL> _logger;
-    private readonly IHostEnvironment environment;
+    private readonly string _environmentConfig;
     private readonly Dictionary<string, decimal> CurrencyExchange = new Dictionary<string, decimal>()
     { { "1_2", 350 }, { "1_4", 2800 }, { "2_51", 2000000 },{ "3_51", 2000000 } }; //Key=SiteId_CurrencyId
 
-    public AngPaoEventBLL(IServiceProvider provider, IHostEnvironment environment)
+    public AngPaoEventBLL(IServiceProvider provider, IConfiguration configuration)
     {
         _logger = provider.GetRequiredService<ILogger<AngPaoEventBLL>>();
         _angPaoEventService = provider.GetRequiredService<AngPaoEventService>();
         _workerPeriodService = provider.GetRequiredService<IWorkerPeriodService>();
-        this.environment = environment;
+        _environmentConfig = configuration.GetSection("Environment").Get<string>();
     }
 
 
@@ -56,7 +54,7 @@ public class AngPaoEventBLL
                 }
             }
 
-            if (environment.IsProduction())
+            if (_environmentConfig.Equals("PROD"))
             {
                 //Step3：檢查幣別時間是否在活動期間
                 //第一次抽獎是1/22，最後一次抽獎是2/5，

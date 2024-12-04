@@ -9,7 +9,6 @@ using Serilog.Sinks.Network;
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseSentry();
 var remoteUrls = GetRemoteUrls();
-remoteUrls = builder.Configuration.CheckLocalConfig(builder.Environment, args, remoteUrls);
 builder.Configuration.AddRemoteJsonConfig(remoteUrls);
 
 var excludesMessage = builder.Configuration.GetSection("ExcludesMessage").Get<string[]>();

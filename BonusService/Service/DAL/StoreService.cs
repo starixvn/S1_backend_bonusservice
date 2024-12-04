@@ -13,7 +13,7 @@ public class StoreService
     public StoreService(IServiceProvider provider)
     {
         var configBll = provider.GetRequiredService<ConfigBLL>();
-        _storeSiteUrl = configBll.GetConfigValueByEnvironment<ServiceHostConfig>("ServiceHost").StoreService;
+        _storeSiteUrl = configBll.GetServiceHostConfig().StoreService;
         _courierAdapter = provider.GetRequiredService<CourierAdapter>();
     }
     
