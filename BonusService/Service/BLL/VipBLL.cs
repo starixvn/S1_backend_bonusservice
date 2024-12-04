@@ -50,12 +50,12 @@ namespace BonusService.Service.BLL
             {
                 foreach (var vipSetting in vipSettings)
                 {
-                    if (!VerifyUpgradeTask(vipSetting,
-                        currentTime,
-                        TaskType.UpgradeReview))
-                    {
-                        continue;
-                    }
+                    //if (!VerifyUpgradeTask(vipSetting,
+                    //    currentTime,
+                    //    TaskType.UpgradeReview))
+                    //{
+                    //    continue;
+                    //}
 
                     if (!CalculateUpgradeTime(vipSetting,
                         currentTime,

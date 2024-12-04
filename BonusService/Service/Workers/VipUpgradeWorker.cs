@@ -51,14 +51,14 @@ namespace BonusService.Service.Workers
             finally
             {
                 var dueTimeSpan = TimeSpan.FromMinutes(1);
-                if (_environment.IsProduction())
-                {
-                    dueTimeSpan = TimeSpan.FromHours(4);
-                }
+                //if (_environment.IsProduction())
+                //{
+                //    dueTimeSpan = TimeSpan.FromHours(4);
+                //}
 
                 if (!success)
                 {
-                    dueTimeSpan = TimeSpan.FromMinutes(10);
+                    dueTimeSpan = TimeSpan.FromMinutes(1);
                 }
 
                 _timer.Change(dueTimeSpan, TimeSpan.Zero);
