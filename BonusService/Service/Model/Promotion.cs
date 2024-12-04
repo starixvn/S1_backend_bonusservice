@@ -166,6 +166,7 @@ namespace BonusService.Service.Model
         /// </summary>
         public int SameRealNameRestrictAvailableCount { get; set; }
 
+
         public string BlockTagList { get; set; }
 
         public List<int> BlockTags
@@ -190,7 +191,6 @@ namespace BonusService.Service.Model
         public int TpCategoryId { get; set; }
         public int RollOver { get; set; }
         public int WinOver { get; set; }
-
         public CanJoinTierAmount CalculateTierAmount(PromotionType promotionType, BonusType bonusType, decimal applyDepositAmount)
         {
             decimal bonusAmount;
@@ -293,23 +293,7 @@ namespace BonusService.Service.Model
         }
 
         public bool IsPopUp { get; set; }
-
         public MissionBonusProgress MissionBonusProgress { get; set; }
-
-        public string TierAmount { get; set; }
-
-        public IEnumerable<TierAmount> TierAmountList
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(TierAmount))
-                {
-                    return new List<TierAmount>();
-                }
-
-                return JsonConvert.DeserializeObject<IEnumerable<TierAmount>>(TierAmount);
-            }
-        }
     }
 
     public class MissionBonusProgress
@@ -347,15 +331,12 @@ namespace BonusService.Service.Model
         public decimal TotalBonus { get; set; }
         public decimal MaxBonus { get; set; }
         public decimal TotalLossAmount => CashBackDetail.Any() ? CashBackDetail.Sum(i => i.LossAmount) : 0;
-
         // 改變顯示為負數
         public decimal MinLossAmount => CashBackDetail.Any()
             ? CashBackDetail.Max(i => i.MinLossAmount) * -1 : 0;
-
         // TotalLossAmount > 0 則不算 Bonus
         public decimal OriginalTotalBonus => CashBackDetail.Any() && TotalLossAmount < 0
             ? Math.Abs(CashBackDetail.Sum(i => i.BonusAmount)) : 0;
-
         public string Percentage => CashBackDetail.Select(i => i.PercentageName).FirstOrDefault();
         public IEnumerable<CashBackDetail> CashBackDetail { get; set; }
     }
@@ -378,7 +359,6 @@ namespace BonusService.Service.Model
         public string DepositId { get; set; }
         public decimal Amount { get; set; }
     }
-
     public class DepositBonus
     {
         public string TransId { set; get; }
@@ -393,26 +373,22 @@ namespace BonusService.Service.Model
         public int DepositStatus { set; get; }
         public string IP { set; get; }
     }
-
     public class DepositBonusCustList
     {
         public int CustId { set; get; }
         public int SiteId { set; get; }
         public string UserName { set; get; }
     }
-
     public enum TransferStatus
     {
         Success = 0, Fail = 1, Pending = 2, PendingD = 3
     }
-
     public class TransferResult
     {
         public TransferResult()
         {
             Status = TransferStatus.Pending;
         }
-
         public TransferStatus Status { get; set; }
         public string ThirdId { get; set; }
         public decimal Difference { get; set; }
@@ -421,7 +397,6 @@ namespace BonusService.Service.Model
         public decimal Turnover { get; set; }
         public int BonusStatus { get; set; }
     }
-
     public class TpBonusTransfer
     {
         public int TpId { set; get; }
@@ -433,7 +408,6 @@ namespace BonusService.Service.Model
         public long ExpiryTime { set; get; }
         public Dictionary<string, string> inputs { set; get; }
     }
-
     public class ErrorMessageMakerInput
     {
         public int Result { set; get; }
@@ -492,10 +466,12 @@ namespace BonusService.Service.Model
 
     public class GetRebateExcludeGameListRequest
     {
+
         public int SiteId { get; set; }
         public int CurrencyId { get; set; }
         public int VipLevel { get; set; }
         public string LangId { get; set; }
+
     }
 
     public class RebateExcludeGameDetail
@@ -510,8 +486,8 @@ namespace BonusService.Service.Model
 
         public RebateExcludeGameDetail()
         {
-        }
 
+        }
         public RebateExcludeGameDetail(string tpName, string tpCategoryName, int tpGameType, string tpGameTypeName, string gameName)
         {
             TpName = tpName;
@@ -529,7 +505,6 @@ namespace BonusService.Service.Model
         public string UserName { get; set; }
         public int Status { get; set; }
     }
-
     public class PopUpPromotion
     {
         public string BonusCode { get; set; }
@@ -544,7 +519,6 @@ namespace BonusService.Service.Model
         public decimal MaxBonus { get; set; }
         public int CurrencyId { get; set; }
         public string BlockTagList { get; set; }
-
         public List<int> BlockTags
         {
             get
@@ -557,7 +531,6 @@ namespace BonusService.Service.Model
             }
         }
     }
-
     public class TempPopUpPromotion
     {
         public string BonusCode { get; set; }
