@@ -543,4 +543,14 @@ namespace BonusService.Service.Model
     {
         public decimal TurnoverSum { get; set; }
     }
+    public class PromotionRuleDepositInfo
+    {
+        public decimal Amount { get; set; }
+        public string RefList { get; set; }
+        public string RefId { get; set; }
+    }
+    public class UploadCustPromotion : CustPromotion
+    {
+        public bool InPromotionUploadCustList { get; set; }
+    }
 }

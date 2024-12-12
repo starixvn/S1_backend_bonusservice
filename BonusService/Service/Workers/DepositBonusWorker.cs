@@ -55,7 +55,7 @@ namespace BonusService.Service.Workers
                             if (depositBonus.DepositStatus == (int)DepositStatusEnum.Approved)
                             {
                                 var result = await _promotionBll.SetClaimPromotionV2Async(depositBonus.CustId, depositBonus.BonusCode, depositBonus.IP,
-                                    depositBonus.LockedAmount, (int)PromotionDeviceType.All, BonusInfoAtPage.Deposit, depositBonus.TransId);
+                                    depositBonus.LockedAmount, (int)PromotionDeviceType.All, BonusInfoAtPage.Deposit, false, depositBonus.TransId);
                                 if (result.ErrorCode == 0)
                                 {
                                     logger.LogInformation($"CustId={depositBonusQueue.CustId} DoDepositBonus success TransId: {depositBonus.TransId}. SetClaimPromotion result={JsonConvert.SerializeObject(result)}");

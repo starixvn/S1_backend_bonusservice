@@ -78,7 +78,9 @@ namespace BonusService
             services.AddSingleton<AngPaoEventService>();
             services.AddSingleton<QueueJobBLL>();
             services.AddSingleton<QueueJobService>();
-
+            //services.AddSingleton<IPromotionService, FirstDepositService>();
+            //services.AddSingleton<IPromotionService, ReDepositService>();
+            //services.AddSingleton<IPromotionService, SpecialBonusService>();
             services.AddControllers();
             services.AddOptionListByDB<AllowIp>("Service_MemberAllowIP_Get");
 
