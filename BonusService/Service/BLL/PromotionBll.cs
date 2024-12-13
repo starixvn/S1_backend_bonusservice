@@ -37,10 +37,14 @@ namespace BonusService.Service.BLL
         private readonly CacheHelper _cacheHelper;
         private readonly Dictionary<int, IEnumerable<string>> _specialRebateDisplay;
         private readonly ICommonService _commonService;
-        private readonly Dictionary<PromotionType, Type> _promotionServiceMap;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IEnumerable<IPromotionService> _promotionListService;
+        //private readonly Dictionary<PromotionType, Type> _promotionServiceMap;
+        //private readonly IServiceProvider _serviceProvider;
+        //private readonly IPromotionService _iPromotionService;
+        private readonly Func<PromotionType, IPromotionService> _promotionServiceFactory;
 
-        public PromotionBll(IServiceProvider provider)
+
+        public PromotionBll(IServiceProvider provider, Func<PromotionType, IPromotionService> promotionServiceFactory)
         {
             _mainDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);
             _common = provider.GetRequiredService<Common>();
@@ -58,13 +62,15 @@ namespace BonusService.Service.BLL
             var configBll = provider.GetRequiredService<ConfigBLL>();
             _specialRebateDisplay = configBll.GetConfigValue<Dictionary<int, IEnumerable<string>>>("RebateExcludeGame");
             _commonService = provider.GetService<ICommonService>();
-            _promotionServiceMap = new Dictionary<PromotionType, Type>
-            {
-                { PromotionType.FstDeposit, typeof(FirstDepositService) },
-                { PromotionType.ReDeposit, typeof(ReDepositService) },
-                { PromotionType.SpecialBonus, typeof(SpecialBonusService) },
-            };
-            _serviceProvider = provider;
+            //_iPromotionService = provider.GetService<IPromotionService>();
+            //_promotionServiceMap = new Dictionary<PromotionType, Type>
+            //{
+            //    { PromotionType.FstDeposit, typeof(FirstDepositService) },
+            //    { PromotionType.ReDeposit, typeof(ReDepositService) },
+            //    { PromotionType.SpecialBonus, typeof(SpecialBonusService) },
+            //};
+            _promotionListService = provider.GetService<IEnumerable<IPromotionService>>();
+            _promotionServiceFactory = promotionServiceFactory;
         }
 
         /// <summary>
@@ -302,7 +308,7 @@ namespace BonusService.Service.BLL
             }
             else
             {
-                IPromotionService service = GetService(claimPromotion.PromotionType);
+                IPromotionService service = _promotionServiceFactory(claimPromotion.PromotionType);
                 var currencyUTC = GetCurrencyUTC(claimPromotion.CurrencyId);
                 custConditionInfo = service.GetCustConditionInfo(custId, custInfo.CurrencyId, custInfo.SiteId, deviceType, bonusCode, (int)claimPromotion.PeriodType, (int)claimPromotion.PromotionType, claimPromotion.RequiredAmount, currencyUTC, true);
             }
@@ -390,6 +396,17 @@ namespace BonusService.Service.BLL
                         _BonusCode = bonusRewardInput.BonusCode
                     });
                     result = _mainDbClient.Execute("Service_BonusCustUsingDetail_Set", trans, bonusCustUsingPara);
+                }
+
+                if (IsFromPromotionUploadCustList)
+                {
+                    var promotionUploadCustListPara = new DynamicParameters(new
+                    {
+                        BonusCode = bonusRewardInput.BonusCode,
+                        SiteId = bonusRewardInput.SiteId,
+                        CustId = bonusRewardInput.CustId
+                    });
+                    result = _mainDbClient.Execute("Service_PromotionUploadCustListStatus_Set", trans, promotionUploadCustListPara);
                 }
 
                 if (result > 0)
@@ -1674,7 +1691,7 @@ namespace BonusService.Service.BLL
         public List<CustPromotion> GetPromotionUploadCustList(CustPromotionRequest request)
         {
             var promotionList = _promotionService.GetPromotionUploadCustList(request).ToList();
-            var allUploadSpecialBonusList = _promotionService.AllUploadSpecialBonusList(request);
+            var allUploadSpecialBonusList = AllUploadSpecialBonusList(request);
             var notInCustList = allUploadSpecialBonusList.Where(b => !promotionList.Any(a => a.BonusCode == b.BonusCode)).ToList();
             promotionList.AddRange(notInCustList);
 
@@ -1688,15 +1705,9 @@ namespace BonusService.Service.BLL
 
             foreach (var promo in promotionList)
             {
-                IPromotionService service = GetService(promo.PromotionType);
+                IPromotionService service = _promotionServiceFactory(promo.PromotionType);
                 var custCondition = service.GetCustConditionInfo(request.CustId, request.CurrencyId, request.SiteId, request.DeviceType, promo.BonusCode, (int)promo.PeriodType, (int)promo.PromotionType, promo.RequiredAmount, currencyUTC, promo.InPromotionUploadCustList);
                 SetPromotion(request.SiteId, request.CustId, request.CurrencyId, false, promo, custCondition);
-
-                //if (promo.PromotionType == PromotionType.SpecialBonus && !promo.InPromotionUploadCustList)
-                //{
-                //    SetPromotionDetail(request.LangId, request.DefLang, true, promo);
-                //}
-
                 promotion.Add(promo);
             }
 
@@ -1987,15 +1998,6 @@ namespace BonusService.Service.BLL
         public PromotionRuleDepositInfo GetPromotionRuleDepositInfoByTime(DateTime currentTime, string timezone, int custId)
         {
             return _promotionService.GetPromotionRuleDepositInfoByTime(currentTime, timezone, custId);
-        }
-        private IPromotionService GetService(PromotionType promotionType)
-        {
-            if (_promotionServiceMap.TryGetValue(promotionType, out var serviceType))
-            {
-                return (IPromotionService)Activator.CreateInstance(serviceType, _serviceProvider);
-            }
-
-            throw new InvalidOperationException($"No service found for promotion type: {promotionType}");
         }
         private IEnumerable<UploadCustPromotion> AllUploadSpecialBonusList(CustPromotionRequest request)
         {

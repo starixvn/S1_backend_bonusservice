@@ -1,4 +1,5 @@
 ﻿using BonusService.Service.Model;
+using BonusService.Service.Model.enums;
 
 namespace BonusService.Service.DAL.Interface
 {
