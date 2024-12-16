@@ -479,5 +479,51 @@ namespace BonusService.Controllers
 
             return result;
         }
+
+        [HttpPost]
+        public ApiResult<List<CustPromotion>> GetPromotionUploadCustList(CustPromotionRequest request)
+        {
+            var result = new ApiResult<List<CustPromotion>>
+            {
+                ErrorCode = 0
+            };
+
+            try
+            {
+                result.Data = _promotionBll.GetPromotionUploadCustList(request);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, MethodExtension.GetCurrentMethod());
+                result.Data = new List<CustPromotion>();
+            }
+
+            return result;
+        }
+
+        [HttpPost]
+        public async Task<ApiResult> SetClaimPromotionForUploadCustListAsync(PromotionReq promotionReq)
+        {
+            var apiResult = new ApiResult();
+            try
+            {
+                var lockedAmount = promotionReq.LockedAmount ?? 0;
+                apiResult = await _promotionBll.SetClaimPromotionV2Async(promotionReq.CustId,
+                    promotionReq.BonusCode,
+                    promotionReq.custIP,
+                    lockedAmount,
+                    promotionReq.DeviceType,
+                    BonusInfoAtPage.Promotion,
+                    true);
+            }
+            catch (Exception ex)
+            {
+                apiResult.RawMessage = ex.Message;
+                apiResult.Message = ex.Message;
+                _logger.LogError(ex, MethodExtension.GetCurrentAsyncMethod());
+            }
+
+            return apiResult;
+        }
     }
 }

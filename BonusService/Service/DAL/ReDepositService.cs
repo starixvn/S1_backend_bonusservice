@@ -1,0 +1,58 @@
+﻿using BonusService.Service.BLL;
+using BonusService.Service.DAL.Interface;
+using BonusService.Service.Model;
+using BonusService.Service.Model.enums;
+
+namespace BonusService.Service.DAL
+{
+    public class ReDepositService : IPromotionService
+    {
+        private readonly PromotionBll _promotionBll;
+        public ReDepositService(IServiceProvider provider)
+        {
+            _promotionBll = provider.GetRequiredService<PromotionBll>();
+        }
+        public CustCondition GetCustConditionInfo(int custId, int currencyId, int siteId, int deviceType, string bonusCode , int periodType, int promotionType, decimal requiredAmount, CurrencyUTC currencyUTC, bool InPromotionUploadCustList)
+        {
+            var custCondition = new CustCondition()
+            {
+                RefList = "[]"
+            };
+
+            if (periodType == (int)VipPeriodType.EachTime)
+            {
+                if (_promotionBll.GetPromotionRuleBonusInfoByBonusCode(bonusCode))
+                {
+                    custCondition.Result = (int)BonusErrorCode.SpCustomerJoinThisPromotionBefore;
+                    return custCondition;
+                }
+            }
+            else
+            {
+                _promotionBll.CalculatePeriodRange(periodType, currencyUTC);
+                if (_promotionBll.CheckPromotionRuleBonusInfoByPeriodType((int)promotionType, periodType, currencyUTC.TodayUtcStart, currencyUTC.TodayUtcEnd, currencyUTC.UTC_StartTime, currencyUTC.UTC_EndTime))
+                {
+                    custCondition.Result = (int)BonusErrorCode.SpCustomerAddOtherBonusInPeriodTime;
+                    return custCondition;
+                }
+            }
+
+            var promotionRuleDepositInfo = _promotionBll.GetPromotionRuleDepositInfoByTime(currencyUTC.CurrentTime, currencyUTC.TimeZone, custId);
+
+            if (promotionRuleDepositInfo != null && promotionRuleDepositInfo.Amount >= requiredAmount)
+            {
+                custCondition.Result = (int)BonusErrorCode.Success;
+                custCondition.CanJoin = true;
+                custCondition.Amount = promotionRuleDepositInfo.Amount;
+                custCondition.RefList = promotionRuleDepositInfo.RefList;
+                custCondition.reference = new List<Ref>();
+            }
+            else
+            {
+                custCondition.Result = (int)BonusErrorCode.SpCustomerDepositNotExceedRequiredAmount;
+            }
+
+            return custCondition;
+        }
+    }
+}

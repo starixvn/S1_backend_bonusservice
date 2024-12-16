@@ -5,6 +5,7 @@ using BonusService.Service.DAL.Interface;
 using BonusService.Service.Extensions;
 using BonusService.Service.Library;
 using BonusService.Service.Model;
+using BonusService.Service.Model.enums;
 using Prometheus;
 using StackExchange.Redis;
  
@@ -76,6 +77,22 @@ namespace BonusService
             services.AddSingleton<AngPaoEventService>();
             services.AddSingleton<QueueJobBLL>();
             services.AddSingleton<QueueJobService>();
+            services.AddSingleton<FirstDepositService>();
+            services.AddSingleton<ReDepositService>();
+            services.AddSingleton<SpecialBonusService>();
+            services.AddSingleton<Func<PromotionType, IPromotionService>>(serviceProvider => 
+            {
+                return new Func<PromotionType, IPromotionService>(key =>
+                {
+                    return key switch
+                    {
+                        PromotionType.FstDeposit => serviceProvider.GetRequiredService<FirstDepositService>(),
+                        PromotionType.ReDeposit => serviceProvider.GetRequiredService<ReDepositService>(),
+                        PromotionType.SpecialBonus => serviceProvider.GetRequiredService<SpecialBonusService>(),
+                        _ => throw new KeyNotFoundException($"No IPromotionService registered for {key}")
+                    };
+                });
+            });
 
             services.AddControllers();
             services.AddOptionListByDB<AllowIp>("Service_MemberAllowIP_Get");
