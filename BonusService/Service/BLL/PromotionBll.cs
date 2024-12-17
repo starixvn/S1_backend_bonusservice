@@ -1023,16 +1023,19 @@ namespace BonusService.Service.BLL
                             }
                             var currencyUTC = GetCurrencyUTC(request.CurrencyId);
 
-                            if (promotionUploadCustList.Status == true || promotionUploadCustList.ExpiryDate < currencyUTC.CurrentTime)
+                            if (promotionUploadCustList.Status == true)
+                            {
+                                promo.isJoin = true;
+                            }
+
+                            if(promotionUploadCustList.ExpiryDate < currencyUTC.CurrentTime)
                             {
                                 promo.canJoin = false;
                             }
-                            else
-                            {
-                                IPromotionService service = _promotionServiceFactory(promo.PromotionType);
-                                var custCondition = service.GetCustConditionInfo(request.CustId, request.CurrencyId, request.SiteId, request.DeviceType, promo.BonusCode, (int)promo.PeriodType, (int)promo.PromotionType, promo.RequiredAmount, currencyUTC, true);
-                                SetPromotion(request.SiteId, request.CustId, request.CurrencyId, false, promo, custCondition);
-                            }
+
+                            IPromotionService service = _promotionServiceFactory(promo.PromotionType);
+                            var custCondition = service.GetCustConditionInfo(request.CustId, request.CurrencyId, request.SiteId, request.DeviceType, promo.BonusCode, (int)promo.PeriodType, (int)promo.PromotionType, promo.RequiredAmount, currencyUTC, true);
+                            SetPromotion(request.SiteId, request.CustId, request.CurrencyId, false, promo, custCondition);
                         }
                         else
                         {
