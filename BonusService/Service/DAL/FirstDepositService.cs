@@ -2,6 +2,7 @@
 using BonusService.Service.DAL.Interface;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
+using Newtonsoft.Json;
 
 namespace BonusService.Service.DAL
 {
@@ -42,6 +43,12 @@ namespace BonusService.Service.DAL
                 custCondition.RefList = promotionRuleDepositInfo.FirstOrDefault().RefList;
                 custCondition.RefId = promotionRuleDepositInfo.FirstOrDefault().RefId;
                 custCondition.reference = new List<Ref>();
+
+            if (custCondition.RefList != null && custCondition.RefList.Contains("DepositId", StringComparison.OrdinalIgnoreCase))
+            {
+                custCondition.reference = JsonConvert.DeserializeObject<IEnumerable<Ref>>(custCondition.RefList);
+            }
+
             return custCondition;
         }
     }

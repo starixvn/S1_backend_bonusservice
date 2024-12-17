@@ -2,6 +2,7 @@
 using BonusService.Service.DAL.Interface;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
+using Newtonsoft.Json;
 
 namespace BonusService.Service.DAL
 {
@@ -14,12 +15,20 @@ namespace BonusService.Service.DAL
         }
         public CustCondition GetCustConditionInfo(int custId, int currencyId, int siteId, int deviceType, string bonusCode, int periodType, int promotionType, decimal requiredAmount, CurrencyUTC currencyUTC, bool InPromotionUploadCustList)
         {
-            return new CustCondition()
+            var custCondition = new CustCondition()
             {
                 RefList = "[]",
                 CanJoin = InPromotionUploadCustList,
-                Result = (int)BonusErrorCode.Success
+                Result = (int)BonusErrorCode.Success,
+                reference = new List<Ref>()
             };
+
+            if (custCondition.RefList != null && custCondition.RefList.Contains("DepositId", StringComparison.OrdinalIgnoreCase))
+            {
+                custCondition.reference = JsonConvert.DeserializeObject<IEnumerable<Ref>>(custCondition.RefList);
+            }
+
+            return custCondition;
         }
     }
 }

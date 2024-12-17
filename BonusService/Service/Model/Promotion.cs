@@ -295,6 +295,7 @@ namespace BonusService.Service.Model
 
         public bool IsPopUp { get; set; }
         public MissionBonusProgress MissionBonusProgress { get; set; }
+        public bool IsPromotionUploadCustList { get; set; }
     }
 
     public class MissionBonusProgress
@@ -569,5 +570,12 @@ namespace BonusService.Service.Model
     public class UploadCustPromotion : CustPromotion
     {
         public bool InPromotionUploadCustList { get; set; }
+    }
+    public class PromotionUploadCustList
+    {
+        public int RollOver { get; set; }
+        public decimal Bonus { get; set; }
+        public bool Status { get; set; }
+        public DateTime ExpiryDate { get; set; }
     }
 }
