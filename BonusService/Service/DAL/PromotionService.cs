@@ -660,5 +660,10 @@ namespace BonusService.Service.DAL
             }));
         }
 
+        public PromotionUploadCustList GetPromotionUploadCustListByBonusCode(int siteId, int custId, string bonusCode)
+        {
+            return _reportDbClient.QueryFirst<PromotionUploadCustList>("Service_PromotionUploadCustListByBonusCode_Get",
+                new { BonusCode = bonusCode, SiteId = siteId, CustId = custId });
+        }
     }
 }

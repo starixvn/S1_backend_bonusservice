@@ -312,7 +312,7 @@ namespace BonusService.Service.BLL
                 var currencyUTC = GetCurrencyUTC(claimPromotion.CurrencyId);
                 custConditionInfo = service.GetCustConditionInfo(custId, custInfo.CurrencyId, custInfo.SiteId, deviceType, bonusCode, (int)claimPromotion.PeriodType, (int)claimPromotion.PromotionType, claimPromotion.RequiredAmount, currencyUTC, true);
             }
-            
+
             if (!custConditionInfo.CanJoin)
             {
                 errorInfo.Result = custConditionInfo.Result;
@@ -1011,9 +1011,44 @@ namespace BonusService.Service.BLL
 
                 if (request.IsLogin)
                 {
-                    var custCondition = _promotionService.GetCustConditionInfo(request.CustId, request.CurrencyId,
-                        request.SiteId, promo.BonusCode, request.DeviceType);
-                    SetPromotion(request.SiteId, request.CustId, request.CurrencyId, true, promo, custCondition);
+                    if (promo.IsPromotionUploadCustList)
+                    {
+                        var promotionUploadCustList = _promotionService.GetPromotionUploadCustListByBonusCode(request.SiteId, request.CustId, request.BonusCode);
+                        if(promotionUploadCustList != null)
+                        {
+                            if (promo.PromotionType == PromotionType.SpecialBonus)
+                            {
+                                promo.RollOver = promotionUploadCustList.RollOver;
+                                promo.MaxBonus = promotionUploadCustList.Bonus;
+                            }
+                            var currencyUTC = GetCurrencyUTC(request.CurrencyId);
+
+                            if (promotionUploadCustList.Status == true || promotionUploadCustList.ExpiryDate < currencyUTC.CurrentTime)
+                            {
+                                promo.canJoin = false;
+                            }
+                            else
+                            {
+                                IPromotionService service = _promotionServiceFactory(promo.PromotionType);
+                                var custCondition = service.GetCustConditionInfo(request.CustId, request.CurrencyId, request.SiteId, request.DeviceType, promo.BonusCode, (int)promo.PeriodType, (int)promo.PromotionType, promo.RequiredAmount, currencyUTC, true);
+                                SetPromotion(request.SiteId, request.CustId, request.CurrencyId, false, promo, custCondition);
+                            }
+                        }
+                        else
+                        {
+                            //沒有在領取名單內
+                            promo.canJoin = false;
+                            var custCondition = _promotionService.GetCustConditionInfo(request.CustId, request.CurrencyId,
+                            request.SiteId, promo.BonusCode, request.DeviceType);
+                            SetPromotion(request.SiteId, request.CustId, request.CurrencyId, true, promo, custCondition);
+                        }
+                    }
+                    else
+                    {
+                        var custCondition = _promotionService.GetCustConditionInfo(request.CustId, request.CurrencyId,
+                            request.SiteId, promo.BonusCode, request.DeviceType);
+                        SetPromotion(request.SiteId, request.CustId, request.CurrencyId, true, promo, custCondition);
+                    }
                 }
                 else
                 {
@@ -1707,6 +1742,7 @@ namespace BonusService.Service.BLL
             {
                 IPromotionService service = _promotionServiceFactory(promo.PromotionType);
                 var custCondition = service.GetCustConditionInfo(request.CustId, request.CurrencyId, request.SiteId, request.DeviceType, promo.BonusCode, (int)promo.PeriodType, (int)promo.PromotionType, promo.RequiredAmount, currencyUTC, promo.InPromotionUploadCustList);
+
                 SetPromotion(request.SiteId, request.CustId, request.CurrencyId, false, promo, custCondition);
                 promotion.Add(promo);
             }

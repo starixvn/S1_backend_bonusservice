@@ -2,6 +2,7 @@
 using BonusService.Service.DAL.Interface;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
+using Newtonsoft.Json;
 
 namespace BonusService.Service.DAL
 {
@@ -50,6 +51,11 @@ namespace BonusService.Service.DAL
             else
             {
                 custCondition.Result = (int)BonusErrorCode.SpCustomerDepositNotExceedRequiredAmount;
+            }
+
+            if (custCondition.RefList != null && custCondition.RefList.Contains("DepositId", StringComparison.OrdinalIgnoreCase))
+            {
+                custCondition.reference = JsonConvert.DeserializeObject<IEnumerable<Ref>>(custCondition.RefList);
             }
 
             return custCondition;
