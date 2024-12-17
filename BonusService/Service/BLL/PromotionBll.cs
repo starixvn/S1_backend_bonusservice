@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Data;
-using System.Reflection;
 using System.Text.RegularExpressions;
 
 using BonusService.Service.DAL;
@@ -282,7 +281,7 @@ namespace BonusService.Service.BLL
                     getDetail: false);
             }
 
-
+            var currencyUTC = GetCurrencyUTC(claimPromotion.CurrencyId);
             var errorInfo = new ErrorMessageMakerInput
             {
                 Result = (int)BonusErrorCode.PromotionNotFound,
@@ -292,6 +291,12 @@ namespace BonusService.Service.BLL
                 ClaimPromotion = claimPromotion,
                 CustomizeErrorMsg = string.Empty
             };
+
+            if (IsFromPromotionUploadCustList && claimPromotion.PromotionType == PromotionType.SpecialBonus)
+            {
+                var tempResult = await SetAdjustmentBonusProcessAsync(custId, bonusCode, null, claimPromotion.MaxBonus, (int)PromotionType.SpecialBonus, "", errorInfo, claimPromotion);
+                return tempResult;
+            }
 
             // 檢核是否可以領取
             var verifyResult = VerifyPromotion(custInfo, claimPromotion, custPromotionWhiteSetting);
@@ -309,7 +314,6 @@ namespace BonusService.Service.BLL
             else
             {
                 IPromotionService service = _promotionServiceFactory(claimPromotion.PromotionType);
-                var currencyUTC = GetCurrencyUTC(claimPromotion.CurrencyId);
                 custConditionInfo = service.GetCustConditionInfo(custId, custInfo.CurrencyId, custInfo.SiteId, deviceType, bonusCode, (int)claimPromotion.PeriodType, (int)claimPromotion.PromotionType, claimPromotion.RequiredAmount, currencyUTC, true);
             }
 
@@ -483,41 +487,13 @@ namespace BonusService.Service.BLL
             errorInfo.Result = result;
             return MakeErrorMessage(errorInfo);
         }
-
-        private void CheckCustInfo(int custId, string custIp, out Customer custInfo, out CustPromotionWhiteListSettingDto custPromotionWhiteSetting)
-        {
-            // 取玩家個人資訊、裝置、白名單設定
-            custInfo = _custInfoService.GetCustInfo(custId);
-            var custDeviceHistory = _custInfoService.GetCustDeviceId(new List<int>() { custInfo.CustId }, custInfo.SiteId).ToList();
-            custInfo.DeviceIds = custDeviceHistory.Select(r => r.DeviceId);
-            custInfo.CurrentUseDeviceId = custDeviceHistory.Any() ?
-                custDeviceHistory.OrderByDescending(x => x.UpdateTime).Select(x => x.DeviceId).First()
-                : string.Empty;
-            custInfo.CustIp = custIp;
-            custPromotionWhiteSetting = _custInfoService.GetCustPromotionWhiteSetting(custId);
-        }
-
-        public async Task<ApiResult> SetAdjustmentBonusV2Async(int custId, string bonusCode, string memo,
-            decimal amount, int promotionType, string depositId)
+        private async Task<ApiResult> SetAdjustmentBonusProcessAsync(int custId, string bonusCode, string memo,
+            decimal amount, int promotionType, string depositId, ErrorMessageMakerInput errorInfo, ClaimPromotion claimPromotion)
         {
             var apiResult = new ApiResult();
             var lockedAmount = (decimal)0;
             bonusCode = bonusCode.Trim();
             var custInfo = _custInfoService.GetCustInfo(custId);
-
-            var errorInfo = new ErrorMessageMakerInput
-            {
-                Result = (int)BonusErrorCode.PromotionNotFound,
-                InputBonusCode = bonusCode,
-                LockedAmount = lockedAmount,
-                InputPromotionType = promotionType,
-                InputAmount = amount,
-                CustInfo = custInfo,
-                ClaimPromotion = new ClaimPromotion { }
-            };
-
-            var claimPromotion = _promotionService.GetPromotion<ClaimPromotion>(custId, custInfo.CurrencyId,
-                custInfo.SiteId, bonusCode, (int)PromotionDeviceType.All, false);
             errorInfo.ClaimPromotion = claimPromotion;
 
             var result = VerifyAdjustmentBonus(custId, custInfo.SiteId, amount, promotionType, claimPromotion);
@@ -631,6 +607,46 @@ namespace BonusService.Service.BLL
 
             errorInfo.Result = result;
             return MakeErrorMessage(errorInfo, false);
+        }
+
+        private void CheckCustInfo(int custId, string custIp, out Customer custInfo, out CustPromotionWhiteListSettingDto custPromotionWhiteSetting)
+        {
+            // 取玩家個人資訊、裝置、白名單設定
+            custInfo = _custInfoService.GetCustInfo(custId);
+            var custDeviceHistory = _custInfoService.GetCustDeviceId(new List<int>() { custInfo.CustId }, custInfo.SiteId).ToList();
+            custInfo.DeviceIds = custDeviceHistory.Select(r => r.DeviceId);
+            custInfo.CurrentUseDeviceId = custDeviceHistory.Any() ?
+                custDeviceHistory.OrderByDescending(x => x.UpdateTime).Select(x => x.DeviceId).First()
+                : string.Empty;
+            custInfo.CustIp = custIp;
+            custPromotionWhiteSetting = _custInfoService.GetCustPromotionWhiteSetting(custId);
+        }
+
+        public async Task<ApiResult> SetAdjustmentBonusV2Async(int custId, string bonusCode, string memo,
+            decimal amount, int promotionType, string depositId)
+        {
+            var apiResult = new ApiResult();
+            var lockedAmount = (decimal)0;
+            bonusCode = bonusCode.Trim();
+            var custInfo = _custInfoService.GetCustInfo(custId);
+
+            var errorInfo = new ErrorMessageMakerInput
+            {
+                Result = (int)BonusErrorCode.PromotionNotFound,
+                InputBonusCode = bonusCode,
+                LockedAmount = lockedAmount,
+                InputPromotionType = promotionType,
+                InputAmount = amount,
+                CustInfo = custInfo,
+                ClaimPromotion = new ClaimPromotion { }
+            };
+
+            var claimPromotion = _promotionService.GetPromotion<ClaimPromotion>(custId, custInfo.CurrencyId,
+                custInfo.SiteId, bonusCode, (int)PromotionDeviceType.All, false);
+            errorInfo.ClaimPromotion = claimPromotion;
+
+            var tempResult = await SetAdjustmentBonusProcessAsync(custId, bonusCode, memo, amount, promotionType, depositId, errorInfo, claimPromotion);
+            return tempResult;
         }
 
         private CheckPromotionResultBaseDto VerifyPromotion(Customer custInfo, ClaimPromotion claimPromotion, CustPromotionWhiteListSettingDto custPromotionWhiteListListSetting)
