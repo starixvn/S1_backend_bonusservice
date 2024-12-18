@@ -1746,10 +1746,6 @@ namespace BonusService.Service.BLL
 
             var promotion = new List<CustPromotion>();
 
-            Customer custInfo = null;
-            if (request.IsLogin) custInfo = _custInfoService.GetCustInfo(request.CustId);
-            else return promotion;//要在名單內才可以看的到 所以沒登入就是看不到
-
             var currencyUTC = GetCurrencyUTC(request.CurrencyId);
 
             foreach (var promo in promotionList)
