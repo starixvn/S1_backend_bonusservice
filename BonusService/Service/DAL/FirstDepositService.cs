@@ -34,15 +34,20 @@ namespace BonusService.Service.DAL
                
             var promotionRuleDepositInfo = _promotionBll.GetPromotionRuleDepositInfo(custId);
 
-            if(promotionRuleDepositInfo == null)
+            if(promotionRuleDepositInfo.Count() == 0)
+            {
                 custCondition.Result = (int)BonusErrorCode.SpCustomerDontHaveFirstDeposit;
+            }
             else
+            {
                 custCondition.Result = (int)BonusErrorCode.Success;
                 custCondition.CanJoin = true;
                 custCondition.Amount = promotionRuleDepositInfo.FirstOrDefault().Amount;
                 custCondition.RefList = promotionRuleDepositInfo.FirstOrDefault().RefList;
                 custCondition.RefId = promotionRuleDepositInfo.FirstOrDefault().RefId;
                 custCondition.reference = new List<Ref>();
+            }
+
 
             if (custCondition.RefList != null && custCondition.RefList.Contains("DepositId", StringComparison.OrdinalIgnoreCase))
             {
