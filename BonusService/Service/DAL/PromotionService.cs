@@ -619,7 +619,7 @@ namespace BonusService.Service.DAL
                 new { BonusCode = bonusCode }) > 0;
         }
 
-        public bool CheckPromotionRuleBonusInfoByPeriodType(int promotionType, int periodType, DateTime todayUtcStart, DateTime todayUtcEnd, DateTime uTC_StartTime, DateTime uTC_EndTime)
+        public bool CheckPromotionRuleBonusInfoByPeriodType(int promotionType, int periodType, DateTime todayUtcStart, DateTime todayUtcEnd, DateTime uTC_StartTime, DateTime uTC_EndTime, int categoryId, int custId)
         {
             return _reportDbClient.QueryFirst<int>("Service_PromotionRuleBonusInfoByPeriodType_Get",
                 new
@@ -629,7 +629,9 @@ namespace BonusService.Service.DAL
                     _TodayUtcStart = todayUtcStart,
                     _TodayUtcEnd = todayUtcEnd,
                     _UTC_StartTime = uTC_StartTime,
-                    _UTC_EndTime = uTC_EndTime
+                    _UTC_EndTime = uTC_EndTime,
+                    _CategoryId = categoryId,
+                    _CustId = custId
                 }) > 0;
         }
 

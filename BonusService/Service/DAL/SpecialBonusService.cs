@@ -13,7 +13,7 @@ namespace BonusService.Service.DAL
         {
             _promotionBll = provider.GetRequiredService<PromotionBll>();
         }
-        public CustCondition GetCustConditionInfo(int custId, int currencyId, int siteId, int deviceType, string bonusCode, int periodType, int promotionType, decimal requiredAmount, CurrencyUTC currencyUTC, bool InPromotionUploadCustList)
+        public CustCondition GetCustConditionInfo(int custId, int currencyId, int siteId, int deviceType, string bonusCode, int periodType, int promotionType, decimal requiredAmount, CurrencyUTC currencyUTC, bool InPromotionUploadCustList, int categoryId)
         {
             var custCondition = new CustCondition()
             {

@@ -314,7 +314,7 @@ namespace BonusService.Service.BLL
             else
             {
                 IPromotionService service = _promotionServiceFactory(claimPromotion.PromotionType);
-                custConditionInfo = service.GetCustConditionInfo(custId, custInfo.CurrencyId, custInfo.SiteId, deviceType, bonusCode, (int)claimPromotion.PeriodType, (int)claimPromotion.PromotionType, claimPromotion.RequiredAmount, currencyUTC, true);
+                custConditionInfo = service.GetCustConditionInfo(custId, custInfo.CurrencyId, custInfo.SiteId, deviceType, bonusCode, (int)claimPromotion.PeriodType, (int)claimPromotion.PromotionType, claimPromotion.RequiredAmount, currencyUTC, true, claimPromotion.CategoryId);
             }
 
             if (!custConditionInfo.CanJoin)
@@ -1019,7 +1019,7 @@ namespace BonusService.Service.BLL
                             }
 
                             IPromotionService service = _promotionServiceFactory(promo.PromotionType);
-                            var custCondition = service.GetCustConditionInfo(request.CustId, request.CurrencyId, request.SiteId, request.DeviceType, promo.BonusCode, (int)promo.PeriodType, (int)promo.PromotionType, promo.RequiredAmount, currencyUTC, true);
+                            var custCondition = service.GetCustConditionInfo(request.CustId, request.CurrencyId, request.SiteId, request.DeviceType, promo.BonusCode, (int)promo.PeriodType, (int)promo.PromotionType, promo.RequiredAmount, currencyUTC, true, promo.CategoryId);
                             SetPromotion(request.SiteId, request.CustId, request.CurrencyId, false, promo, custCondition);
                         }
                         else
@@ -1755,7 +1755,7 @@ namespace BonusService.Service.BLL
             foreach (var promo in promotionList)
             {
                 IPromotionService service = _promotionServiceFactory(promo.PromotionType);
-                var custCondition = service.GetCustConditionInfo(request.CustId, request.CurrencyId, request.SiteId, request.DeviceType, promo.BonusCode, (int)promo.PeriodType, (int)promo.PromotionType, promo.RequiredAmount, currencyUTC, promo.InPromotionUploadCustList);
+                var custCondition = service.GetCustConditionInfo(request.CustId, request.CurrencyId, request.SiteId, request.DeviceType, promo.BonusCode, (int)promo.PeriodType, (int)promo.PromotionType, promo.RequiredAmount, currencyUTC, promo.InPromotionUploadCustList, promo.CategoryId);
 
                 SetPromotion(request.SiteId, request.CustId, request.CurrencyId, false, promo, custCondition);
                 promotion.Add(promo);
@@ -2031,9 +2031,6 @@ namespace BonusService.Service.BLL
                     range.UTC_StartTime = startDate;
                     range.UTC_EndTime = endDate.AddSeconds(-1);
                     break;
-
-                default:
-                    throw new ArgumentException("Invalid PeriodType");
             }
         }
         public bool GetPromotionRuleBonusInfoByBonusCode(string bonusCode)
@@ -2041,9 +2038,9 @@ namespace BonusService.Service.BLL
             return _promotionService.CheckPromotionRuleBonusInfoByBonusCode(bonusCode);
         }
 
-        public bool CheckPromotionRuleBonusInfoByPeriodType(int promotionType, int periodType, DateTime todayUtcStart, DateTime todayUtcEnd, DateTime uTC_StartTime, DateTime uTC_EndTime)
+        public bool CheckPromotionRuleBonusInfoByPeriodType(int promotionType, int periodType, DateTime todayUtcStart, DateTime todayUtcEnd, DateTime uTC_StartTime, DateTime uTC_EndTime, int categoryId, int custId)
         {
-            return _promotionService.CheckPromotionRuleBonusInfoByPeriodType(promotionType, periodType, todayUtcStart, todayUtcEnd, uTC_StartTime, uTC_EndTime);
+            return _promotionService.CheckPromotionRuleBonusInfoByPeriodType(promotionType, periodType, todayUtcStart, todayUtcEnd, uTC_StartTime, uTC_EndTime, categoryId, custId);
         }
         public PromotionRuleDepositInfo GetPromotionRuleDepositInfoByTime(DateTime currentTime, string timezone, int custId)
         {
