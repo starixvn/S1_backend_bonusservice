@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+
 using System.Text.RegularExpressions;
 
 using BonusService.Service.DAL;
@@ -294,7 +295,7 @@ namespace BonusService.Service.BLL
 
             if (IsFromPromotionUploadCustList && claimPromotion.PromotionType == PromotionType.SpecialBonus)
             {
-                var tempResult = await SetAdjustmentBonusProcessAsync(custId, bonusCode, null, claimPromotion.MaxBonus, (int)PromotionType.SpecialBonus, "", errorInfo, claimPromotion);
+                var tempResult = await SetAdjustmentBonusProcessAsync(custId, bonusCode, null, claimPromotion.MaxBonus, (int)PromotionType.SpecialBonus, "", errorInfo, claimPromotion, IsFromPromotionUploadCustList);
                 return tempResult;
             }
 
@@ -488,7 +489,7 @@ namespace BonusService.Service.BLL
             return MakeErrorMessage(errorInfo);
         }
         private async Task<ApiResult> SetAdjustmentBonusProcessAsync(int custId, string bonusCode, string memo,
-            decimal amount, int promotionType, string depositId, ErrorMessageMakerInput errorInfo, ClaimPromotion claimPromotion)
+            decimal amount, int promotionType, string depositId, ErrorMessageMakerInput errorInfo, ClaimPromotion claimPromotion, bool isFromPromotionUploadCustList)
         {
             var apiResult = new ApiResult();
             var lockedAmount = (decimal)0;
@@ -594,6 +595,17 @@ namespace BonusService.Service.BLL
                     apiResult.ErrorCode = 0;
                 }
 
+                if (isFromPromotionUploadCustList)
+                {
+                    var promotionUploadCustListPara = new DynamicParameters(new
+                    {
+                        BonusCode = bonusCode,
+                        SiteId = custInfo.SiteId,
+                        CustId = custId
+                    });
+                    result = _mainDbClient.Execute("Service_PromotionUploadCustListStatus_Set", trans, promotionUploadCustListPara);
+                }
+                
                 if (apiResult.ErrorCode != 0) return apiResult;
                 var input = new AfterRewardSuccessInput
                 {
@@ -645,7 +657,7 @@ namespace BonusService.Service.BLL
                 custInfo.SiteId, bonusCode, (int)PromotionDeviceType.All, false);
             errorInfo.ClaimPromotion = claimPromotion;
 
-            var tempResult = await SetAdjustmentBonusProcessAsync(custId, bonusCode, memo, amount, promotionType, depositId, errorInfo, claimPromotion);
+            var tempResult = await SetAdjustmentBonusProcessAsync(custId, bonusCode, memo, amount, promotionType, depositId, errorInfo, claimPromotion, false);
             return tempResult;
         }
 
