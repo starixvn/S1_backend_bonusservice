@@ -13,7 +13,7 @@ namespace BonusService.Service.DAL
         {
             _promotionBll = provider.GetRequiredService<PromotionBll>();
         }
-        public CustCondition GetCustConditionInfo(int custId, int currencyId, int siteId, int deviceType, string bonusCode , int periodType, int promotionType, decimal requiredAmount, CurrencyUTC currencyUTC, bool InPromotionUploadCustList)
+        public CustCondition GetCustConditionInfo(int custId, int currencyId, int siteId, int deviceType, string bonusCode , int periodType, int promotionType, decimal requiredAmount, CurrencyUTC currencyUTC, bool InPromotionUploadCustList, int categoryId)
         {
             var custCondition = new CustCondition()
             {
@@ -31,7 +31,7 @@ namespace BonusService.Service.DAL
             else
             {
                 _promotionBll.CalculatePeriodRange(periodType, currencyUTC);
-                if (_promotionBll.CheckPromotionRuleBonusInfoByPeriodType((int)promotionType, periodType, currencyUTC.TodayUtcStart, currencyUTC.TodayUtcEnd, currencyUTC.UTC_StartTime, currencyUTC.UTC_EndTime))
+                if (_promotionBll.CheckPromotionRuleBonusInfoByPeriodType((int)promotionType, periodType, currencyUTC.TodayUtcStart, currencyUTC.TodayUtcEnd, currencyUTC.UTC_StartTime, currencyUTC.UTC_EndTime, categoryId, custId))
                 {
                     custCondition.Result = (int)BonusErrorCode.SpCustomerAddOtherBonusInPeriodTime;
                     return custCondition;
