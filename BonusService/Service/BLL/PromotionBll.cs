@@ -282,7 +282,6 @@ namespace BonusService.Service.BLL
                     getDetail: false);
             }
 
-            var currencyUTC = GetCurrencyUTC(claimPromotion.CurrencyId);
             var errorInfo = new ErrorMessageMakerInput
             {
                 Result = (int)BonusErrorCode.PromotionNotFound,
@@ -314,6 +313,7 @@ namespace BonusService.Service.BLL
             }
             else
             {
+                var currencyUTC = GetCurrencyUTC(claimPromotion.CurrencyId);
                 IPromotionService service = _promotionServiceFactory(claimPromotion.PromotionType);
                 custConditionInfo = service.GetCustConditionInfo(custId, custInfo.CurrencyId, custInfo.SiteId, deviceType, bonusCode, (int)claimPromotion.PeriodType, (int)claimPromotion.PromotionType, claimPromotion.RequiredAmount, currencyUTC, true, claimPromotion.CategoryId);
             }
@@ -2021,6 +2021,11 @@ namespace BonusService.Service.BLL
         {
             return _promotionService.AllUploadSpecialBonusList(request);
         }
+        public bool CheckPromotionRuleRunningBonus(int custId)
+        {
+            return _promotionService.CheckPromotionRuleRunningBonus(custId);
+        }
+
         #endregion
     }
 }

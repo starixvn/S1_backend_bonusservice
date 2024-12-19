@@ -20,6 +20,12 @@ namespace BonusService.Service.DAL
                 RefList = "[]"
             };
 
+            if (_promotionBll.CheckPromotionRuleRunningBonus(custId))
+            {
+                custCondition.Result = (int)BonusErrorCode.SpCustomerBonusStillRunning;
+                return custCondition;
+            }
+
             if (_promotionBll.CheckPromotionRuleBonusInfo(custId, currencyUTC.TodayUtcStart, currencyUTC.TodayUtcEnd))
             {
                 custCondition.Result = (int)BonusErrorCode.SpCustomerFirstDepositRuleDontMatch;

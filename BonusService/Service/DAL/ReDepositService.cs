@@ -20,6 +20,12 @@ namespace BonusService.Service.DAL
                 RefList = "[]"
             };
 
+            if (_promotionBll.CheckPromotionRuleRunningBonus(custId))
+            {
+                custCondition.Result = (int)BonusErrorCode.SpCustomerBonusStillRunning;
+                return custCondition;
+            }
+
             if (periodType == (int)VipPeriodType.EachTime)
             {
                 if (_promotionBll.GetPromotionRuleBonusInfoByBonusCode(bonusCode))

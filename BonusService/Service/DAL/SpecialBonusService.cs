@@ -23,6 +23,12 @@ namespace BonusService.Service.DAL
                 reference = new List<Ref>()
             };
 
+            if (_promotionBll.CheckPromotionRuleRunningBonus(custId))
+            {
+                custCondition.Result = (int)BonusErrorCode.SpCustomerBonusStillRunning;
+                return custCondition;
+            }
+
             if (custCondition.RefList != null && custCondition.RefList.Contains("DepositId", StringComparison.OrdinalIgnoreCase))
             {
                 custCondition.reference = JsonConvert.DeserializeObject<IEnumerable<Ref>>(custCondition.RefList);

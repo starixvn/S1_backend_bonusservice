@@ -578,21 +578,6 @@ namespace BonusService.Service.DAL
                 new { request.CustId, request.SiteId, request.CurrencyId, request.DeviceType, request.LangId, request.PromotionType });
         }
 
-        public CurrencyUTC GetCurrencyTodayUTC(int currencyId)
-        {
-            var p = new DynamicParameters(new { CurrencyId = currencyId });
-            p.Add("TodayUtcStart", dbType: DbType.DateTime, direction: ParameterDirection.Output);
-            p.Add("TodayUtcEnd", dbType: DbType.DateTime, direction: ParameterDirection.Output);
-            _mainDbClient.Execute("Service_CurrencyTodayUTC_Get", p);
-
-            return new CurrencyUTC
-            {
-                TodayUtcEnd = p.Get<DateTime>("TodayUtcEnd"),
-                TodayUtcStart = p.Get<DateTime>("TodayUtcStart"),
-                CurrentTime = p.Get<DateTime>("CurrentTime"),
-            };
-        }
-
         public bool CheckPromotionRuleBonusInfo(int custId, DateTime todayUtcStart, DateTime todayUtcEnd)
         {
             return _reportDbClient.QueryFirst<int>("Service_PromotionRuleBonusInfo_Get",
@@ -666,6 +651,14 @@ namespace BonusService.Service.DAL
         {
             return _reportDbClient.QueryFirst<PromotionUploadCustList>("Service_PromotionUploadCustListByBonusCode_Get",
                 new { BonusCode = bonusCode, SiteId = siteId, CustId = custId });
+        }
+        public bool CheckPromotionRuleRunningBonus(int custId)
+        {
+            return _reportDbClient.QueryFirst<int>("Service_PromotionRuleRunningBonus_Get",
+                new
+                {
+                    CustId = custId
+                }) > 0;
         }
     }
 }
