@@ -6,6 +6,7 @@
         public int CurrencyId { get; set; }
         public int Level { get; set; }
         public decimal UpDeposit { get; set; }
+        public decimal UpTurnover { get; set; }
         public decimal UpBonus { get; set; }
         public decimal? DownDeposit { get; set; }
         public decimal? DownTurnover { get; set; }
@@ -17,8 +18,18 @@
         public int VipLevel { get; set; }
         public string UserName { get; set; }
         public decimal DepositAmount { get; set; }
+        public decimal? TurnoverAmount { get; set; }
     }
 
+    public class CustVipNotDefaultLevel
+    {
+        public int CustId { get; set; }
+        public int CurrencyId { get; set; }
+        public int DefaultLevel { get; set; }
+        public int VipLevel { get; set; }
+        public string UserName { get; set; }
+    }
+    
     public class CustVipForDowngrade
     {
         public int CustId { get; set; }
@@ -59,11 +70,12 @@
 
     public class CustomerUpgradeInfo
     {
-        public CustomerUpgradeInfo(int vipLevel, decimal upDeposit, int siteId, int currencyId, DateTime startTime,
+        public CustomerUpgradeInfo(int vipLevel, decimal upDeposit,decimal upTurnover, int siteId, int currencyId, DateTime startTime,
             DateTime endTime, string calculateMonth)
         {
             VipLevel = vipLevel;
             UpDeposit = upDeposit;
+            UpTurnover = upTurnover;
             SiteId = siteId;
             CurrencyId = currencyId;
             StartTime = startTime;
@@ -73,6 +85,7 @@
 
         public int VipLevel { get; }
         public decimal UpDeposit { get; }
+        public decimal UpTurnover { get; }
         public int SiteId { get; }
         public int CurrencyId { get; }
         public DateTime StartTime { get; }
@@ -145,7 +158,7 @@
         }
 
         public VipUpgradeInfo(int custId, string calculateMonth, string userName, int siteId, int currentVipLevel,
-            int upgradeVipLevel, int currencyId, decimal depositAmount, decimal upgradeAmount, int status)
+            int upgradeVipLevel, int currencyId, decimal depositAmount, decimal? turnoverAmount, decimal upgradeAmount, int status)
         {
             CustId = custId;
             CalculateMonth = calculateMonth;
@@ -155,6 +168,7 @@
             UpgradeVipLevel = upgradeVipLevel;
             CurrencyId = currencyId;
             DepositAmount = depositAmount;
+            TurnoverAmount = turnoverAmount;
             UpgradeAmount = upgradeAmount;
             Status = status;
         }
@@ -167,6 +181,7 @@
         public int UpgradeVipLevel { get; }
         public int CurrencyId { get; }
         public decimal DepositAmount { get; }
+        public decimal? TurnoverAmount { get; }
         public decimal UpgradeAmount { get; }
         public int Status { get; }
     }
