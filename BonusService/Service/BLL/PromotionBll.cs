@@ -1725,10 +1725,22 @@ namespace BonusService.Service.BLL
 
             foreach (var promo in promotionList)
             {
-                IPromotionService service = _promotionServiceFactory(promo.PromotionType);
-                var custCondition = service.GetCustConditionInfo(request.CustId, request.CurrencyId, request.SiteId, request.DeviceType, promo.BonusCode, (int)promo.PeriodType, (int)promo.PromotionType, promo.RequiredAmount, currencyUTC, promo.InPromotionUploadCustList, promo.CategoryId);
+                if (request.IsLogin)
+                {
+                    IPromotionService service = _promotionServiceFactory(promo.PromotionType);
+                    var custCondition = service.GetCustConditionInfo(request.CustId, request.CurrencyId, request.SiteId, request.DeviceType, promo.BonusCode, (int)promo.PeriodType, (int)promo.PromotionType, promo.RequiredAmount, currencyUTC, promo.InPromotionUploadCustList, promo.CategoryId);
 
-                SetPromotion(request.SiteId, request.CustId, request.CurrencyId, false, promo, custCondition);
+                    SetPromotion(request.SiteId, request.CustId, request.CurrencyId, false, promo, custCondition);
+
+                }
+                else
+                {
+                    if (promo.HideForUnlogin) // HideForUnlogin = Ture話未登入狀態不顯示
+                    {
+                        continue;
+                    }
+                }
+                
                 promotion.Add(promo);
             }
 
