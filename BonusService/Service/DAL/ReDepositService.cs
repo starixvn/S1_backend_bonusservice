@@ -26,23 +26,24 @@ namespace BonusService.Service.DAL
                 return custCondition;
             }
 
-            if (periodType == (int)VipPeriodType.EachTime)
-            {
-                if (_promotionBll.GetPromotionRuleBonusInfoByBonusCode(bonusCode))
-                {
-                    custCondition.Result = (int)BonusErrorCode.SpCustomerJoinThisPromotionBefore;
-                    return custCondition;
-                }
-            }
-            else
-            {
-                _promotionBll.CalculatePeriodRange(periodType, currencyUTC);
-                if (_promotionBll.CheckPromotionRuleBonusInfoByPeriodType((int)promotionType, periodType, currencyUTC.TodayUtcStart, currencyUTC.TodayUtcEnd, currencyUTC.UTC_StartTime, currencyUTC.UTC_EndTime, categoryId, custId))
-                {
-                    custCondition.Result = (int)BonusErrorCode.SpCustomerAddOtherBonusInPeriodTime;
-                    return custCondition;
-                }
-            }
+            //periodType的檢核先拿掉
+            //if (periodType == (int)VipPeriodType.EachTime)
+            //{
+            //    if (_promotionBll.GetPromotionRuleBonusInfoByBonusCode(bonusCode))
+            //    {
+            //        custCondition.Result = (int)BonusErrorCode.SpCustomerJoinThisPromotionBefore;
+            //        return custCondition;
+            //    }
+            //}
+            //else
+            //{
+            //    _promotionBll.CalculatePeriodRange(periodType, currencyUTC);
+            //    if (_promotionBll.CheckPromotionRuleBonusInfoByPeriodType((int)promotionType, periodType, currencyUTC.TodayUtcStart, currencyUTC.TodayUtcEnd, currencyUTC.UTC_StartTime, currencyUTC.UTC_EndTime, categoryId, custId))
+            //    {
+            //        custCondition.Result = (int)BonusErrorCode.SpCustomerAddOtherBonusInPeriodTime;
+            //        return custCondition;
+            //    }
+            //}
 
             var promotionRuleDepositInfo = _promotionBll.GetPromotionRuleDepositInfoByTime(currencyUTC.CurrentTime, currencyUTC.TimeZone, custId);
 

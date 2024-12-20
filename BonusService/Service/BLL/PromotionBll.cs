@@ -291,6 +291,11 @@ namespace BonusService.Service.BLL
                 CustomizeErrorMsg = string.Empty
             };
 
+            if (claimPromotion == null)
+            {
+                return MakeErrorMessage(errorInfo);
+            }
+
             if (IsFromPromotionUploadCustList && claimPromotion.PromotionType == PromotionType.SpecialBonus)
             {
                 var tempResult = await SetAdjustmentBonusProcessAsync(custId, bonusCode, null, claimPromotion.MaxBonus, (int)PromotionType.SpecialBonus, "", errorInfo, claimPromotion, IsFromPromotionUploadCustList);
