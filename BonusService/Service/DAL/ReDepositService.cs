@@ -26,7 +26,7 @@ namespace BonusService.Service.DAL
                 return custCondition;
             }
 
-            //periodType的檢核先拿掉
+            //periodType的檢核先拿掉 打開前再檢查一下邏輯
             //if (periodType == (int)VipPeriodType.EachTime)
             //{
             //    if (_promotionBll.GetPromotionRuleBonusInfoByBonusCode(bonusCode))
@@ -49,7 +49,6 @@ namespace BonusService.Service.DAL
 
             if (promotionRuleDepositInfo != null && promotionRuleDepositInfo.Amount >= requiredAmount)
             {
-                custCondition.Result = (int)BonusErrorCode.Success;
                 custCondition.CanJoin = true;
                 custCondition.Amount = promotionRuleDepositInfo.Amount;
                 custCondition.RefList = promotionRuleDepositInfo.RefList;

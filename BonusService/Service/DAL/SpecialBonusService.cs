@@ -19,7 +19,6 @@ namespace BonusService.Service.DAL
             {
                 RefList = "[]",
                 CanJoin = InPromotionUploadCustList,
-                Result = (int)BonusErrorCode.Success,
                 reference = new List<Ref>()
             };
 

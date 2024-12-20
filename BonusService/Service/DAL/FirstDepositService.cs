@@ -46,7 +46,6 @@ namespace BonusService.Service.DAL
             }
             else
             {
-                custCondition.Result = (int)BonusErrorCode.Success;
                 custCondition.CanJoin = true;
                 custCondition.Amount = promotionRuleDepositInfo.FirstOrDefault().Amount;
                 custCondition.RefList = promotionRuleDepositInfo.FirstOrDefault().RefList;
