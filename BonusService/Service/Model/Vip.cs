@@ -28,6 +28,8 @@
         public int DefaultLevel { get; set; }
         public int VipLevel { get; set; }
         public string UserName { get; set; }
+        public decimal DepositAmount { get; set; }
+        public decimal? TurnoverAmount { get; set; }
     }
     
     public class CustVipForDowngrade

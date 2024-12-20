@@ -104,14 +104,11 @@ namespace BonusService.Service.BLL
                     // set 12bet level 3 above , down to default 
                     if (vipSetting.SiteId == 101)
                     {
-                        var custVipDownList = GetCustVipDownToDefaultLevel(vipSetting.SiteId ,startTime ,calculateMonth).ToList();
+                        var custVipDownList = GetCustVipDownToDefaultLevel(vipSetting.SiteId ,startTime , endTime ,calculateMonth).ToList();
                         if (custVipDownList.Any())
                         {
-                            var processData = GetCustVipDownToDefaultLevelData(vipSetting.SiteId, JsonConvert.SerializeObject(custVipDownList.Select(x => x.CustId)), startTime, endTime).ToList();
-                            
                             foreach (var custVip in custVipDownList)
                             {
-                                var data = processData.FirstOrDefault(x=>x.CustId == custVip.CustId);
                                 success = SetVipUpgradeReview(new VipUpgradeInfo(
                                     custVip.CustId,
                                     calculateMonth, 
@@ -120,8 +117,8 @@ namespace BonusService.Service.BLL
                                     custVip.VipLevel,
                                     custVip.DefaultLevel,
                                     custVip.CurrencyId,
-                                    data?.DepositAmount ?? 0, 
-                                    data?.TurnoverAmount ?? 0,
+                                    custVip.DepositAmount, 
+                                    custVip.TurnoverAmount,
                                     0,
                                     (int)VipReviewStatus.Approved)
                                 );
@@ -407,14 +404,9 @@ namespace BonusService.Service.BLL
             return _vipService.SetCustVip(customerVipInfo);
         }
 
-        private IEnumerable<CustVipNotDefaultLevel> GetCustVipDownToDefaultLevel(int siteId ,DateTime startDate, string calculateMonth)
+        private IEnumerable<CustVipNotDefaultLevel> GetCustVipDownToDefaultLevel(int siteId ,DateTime startDate, DateTime endTime, string calculateMonth)
         {
-            return _vipService.GetCustVipDownToDefaultLevel( siteId,  startDate,  calculateMonth);
-        }
-        
-        private IEnumerable<CustVip> GetCustVipDownToDefaultLevelData(int siteId ,string custIdList, DateTime startDate, DateTime endTime)
-        {
-            return _vipService.GetCustVipDownToDefaultLevelData( siteId , custIdList, startDate, endTime);
+            return _vipService.GetCustVipDownToDefaultLevel( siteId,  startDate, endTime, calculateMonth);
         }
         
         private IEnumerable<CustVipForDowngrade> GetCustDowngrade(CustomerDowngradeInfo customerDowngradeInfo)

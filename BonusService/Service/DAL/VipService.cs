@@ -83,23 +83,14 @@ namespace BonusService.Service.DAL
             return _mainDbClient.Execute("Service_VipUpgradeReview_Ins_V3", parameter) >= 0;
         }
 
-        public IEnumerable<CustVipNotDefaultLevel> GetCustVipDownToDefaultLevel(int siteId , DateTime startDate, string calculateMonth)
-        {
-            var parameter = new DynamicParameters();
-            parameter.Add("_SiteId", siteId);
-            parameter.Add("_StartTime", startDate);
-            parameter.Add("_CalculateMonth", calculateMonth);
-            return _reportBackupDbClient.Query<CustVipNotDefaultLevel>("Service_CustVipDownToDefaultLevel_Get", parameter, 600);
-        }
-        
-        public IEnumerable<CustVip> GetCustVipDownToDefaultLevelData(int siteId ,string custIdList, DateTime startDate, DateTime endTime)
+        public IEnumerable<CustVipNotDefaultLevel> GetCustVipDownToDefaultLevel(int siteId , DateTime startDate, DateTime endTime ,string calculateMonth)
         {
             var parameter = new DynamicParameters();
             parameter.Add("_SiteId", siteId);
             parameter.Add("_StartTime", startDate);
             parameter.Add("_EndTime", endTime);
-            parameter.Add("_CustIdList", custIdList);
-            return _reportBackupDbClient.Query<CustVip>("Service_CustUpgradeByCustList_Get", parameter, 600);
+            parameter.Add("_CalculateMonth", calculateMonth);
+            return _reportBackupDbClient.Query<CustVipNotDefaultLevel>("Service_CustVipDownToDefaultLevel_Get", parameter, 600);
         }
         
         public bool SetCustVip(CustomerVipInfo customerVipInfo)
