@@ -294,6 +294,10 @@ namespace BonusService.Service.BLL
 
             if (claimPromotion == null)
             {
+                errorInfo.ClaimPromotion = new ClaimPromotion()
+                {
+                    BonusCode = bonusCode
+                };
                 return MakeErrorMessage(errorInfo);
             }
 
@@ -318,9 +322,10 @@ namespace BonusService.Service.BLL
             }
             else
             {
+                var promotionUploadCustList = GetPromotionUploadCustListByBonusCode(custInfo.SiteId, custId, bonusCode);
                 var currencyUTC = GetCurrencyUTC(claimPromotion.CurrencyId);
                 IPromotionService service = _promotionServiceFactory(claimPromotion.PromotionType);
-                custConditionInfo = service.GetCustConditionInfo(custId, custInfo.CurrencyId, custInfo.SiteId, deviceType, bonusCode, (int)claimPromotion.PeriodType, (int)claimPromotion.PromotionType, claimPromotion.RequiredAmount, currencyUTC, true, claimPromotion.CategoryId);
+                custConditionInfo = service.GetCustConditionInfo(custId, custInfo.CurrencyId, custInfo.SiteId, deviceType, bonusCode, (int)claimPromotion.PeriodType, (int)claimPromotion.PromotionType, claimPromotion.RequiredAmount, currencyUTC, true, claimPromotion.CategoryId, promotionUploadCustList);
             }
 
             if (!custConditionInfo.CanJoin)
@@ -608,7 +613,7 @@ namespace BonusService.Service.BLL
                         SiteId = custInfo.SiteId,
                         CustId = custId
                     });
-                    result = _mainDbClient.Execute("Service_PromotionUploadCustListStatus_Set", trans, promotionUploadCustListPara);
+                    _mainDbClient.Execute("Service_PromotionUploadCustListStatus_Set", trans, promotionUploadCustListPara);
                 }
                 
                 if (apiResult.ErrorCode != 0) return apiResult;
@@ -1004,7 +1009,7 @@ namespace BonusService.Service.BLL
                 {
                     if (promo.IsPromotionUploadCustList)
                     {
-                        var promotionUploadCustList = _promotionService.GetPromotionUploadCustListByBonusCode(request.SiteId, request.CustId, request.BonusCode);
+                        var promotionUploadCustList = GetPromotionUploadCustListByBonusCode(request.SiteId, request.CustId, request.BonusCode);
                         if(promotionUploadCustList != null)
                         {
                             if (promo.PromotionType == PromotionType.SpecialBonus)
@@ -1014,28 +1019,22 @@ namespace BonusService.Service.BLL
                             }
                             var currencyUTC = GetCurrencyUTC(request.CurrencyId);
 
-                            if (promotionUploadCustList.Status == true)
-                            {
-                                promo.isJoin = true;
-                            }
-
-                            if(promotionUploadCustList.ExpiryDate < currencyUTC.CurrentTime)
-                            {
-                                promo.canJoin = false;
-                            }
-
                             IPromotionService service = _promotionServiceFactory(promo.PromotionType);
-                            var custCondition = service.GetCustConditionInfo(request.CustId, request.CurrencyId, request.SiteId, request.DeviceType, promo.BonusCode, (int)promo.PeriodType, (int)promo.PromotionType, promo.RequiredAmount, currencyUTC, true, promo.CategoryId);
+                            var custCondition = service.GetCustConditionInfo(request.CustId, request.CurrencyId, request.SiteId, request.DeviceType, promo.BonusCode, (int)promo.PeriodType, (int)promo.PromotionType, promo.RequiredAmount, currencyUTC, true, promo.CategoryId, promotionUploadCustList);
                             SetPromotion(request.SiteId, request.CustId, request.CurrencyId, false, promo, custCondition);
                         }
                         else
                         {
-                            //沒有在領取名單內
                             promo.canJoin = false;
-                            var custCondition = _promotionService.GetCustConditionInfo(request.CustId, request.CurrencyId,
-                            request.SiteId, promo.BonusCode, request.DeviceType);
-                            SetPromotion(request.SiteId, request.CustId, request.CurrencyId, true, promo, custCondition);
                         }
+                        //else
+                        //{
+                        //    //沒有在領取名單內
+                        //    promo.canJoin = false;
+                        //    var custCondition = _promotionService.GetCustConditionInfo(request.CustId, request.CurrencyId,
+                        //    request.SiteId, promo.BonusCode, request.DeviceType);
+                        //    SetPromotion(request.SiteId, request.CustId, request.CurrencyId, true, promo, custCondition);
+                        //}
                     }
                     else
                     {
@@ -1733,7 +1732,8 @@ namespace BonusService.Service.BLL
                 if (request.IsLogin)
                 {
                     IPromotionService service = _promotionServiceFactory(promo.PromotionType);
-                    var custCondition = service.GetCustConditionInfo(request.CustId, request.CurrencyId, request.SiteId, request.DeviceType, promo.BonusCode, (int)promo.PeriodType, (int)promo.PromotionType, promo.RequiredAmount, currencyUTC, promo.InPromotionUploadCustList, promo.CategoryId);
+                    var promotionUploadCustList = GetPromotionUploadCustListByBonusCode(request.SiteId, request.CustId, promo.BonusCode);
+                    var custCondition = service.GetCustConditionInfo(request.CustId, request.CurrencyId, request.SiteId, request.DeviceType, promo.BonusCode, (int)promo.PeriodType, (int)promo.PromotionType, promo.RequiredAmount, currencyUTC, promo.InPromotionUploadCustList, promo.CategoryId, promotionUploadCustList);
 
                     SetPromotion(request.SiteId, request.CustId, request.CurrencyId, false, promo, custCondition);
 
@@ -1990,7 +1990,8 @@ namespace BonusService.Service.BLL
                 CurrentTime = currentTime,
                 TodayUtcStart = todayUtcStart,
                 TodayUtcEnd = todayUtcEnd,
-                TimeZone = timeZone
+                TimeZone = timeZone,
+                timeOffset = timeOffset
             };
         }
         public void CalculatePeriodRange(int periodType, CurrencyUTC range)
@@ -2043,6 +2044,10 @@ namespace BonusService.Service.BLL
             return _promotionService.CheckPromotionRuleRunningBonus(custId);
         }
 
+        public PromotionUploadCustList GetPromotionUploadCustListByBonusCode(int siteId, int custId, string bonusCode)
+        {
+            return _promotionService.GetPromotionUploadCustListByBonusCode(siteId, custId, bonusCode);
+        }
         #endregion
     }
 }
