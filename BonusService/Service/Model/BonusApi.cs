@@ -78,6 +78,7 @@ namespace BonusService.Service.Model
         public DateTime UTC_StartTime { get; set; }
         public DateTime UTC_EndTime { get; set; }
         public string TimeZone { get; set; }
+        public TimeSpan timeOffset { get; set; }
     }
 }
 

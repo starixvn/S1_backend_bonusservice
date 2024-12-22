@@ -13,7 +13,7 @@ namespace BonusService.Service.DAL
         {
             _promotionBll = provider.GetRequiredService<PromotionBll>();
         }
-        public CustCondition GetCustConditionInfo(int custId, int currencyId, int siteId, int deviceType, string bonusCode, int periodType, int promotionType, decimal requiredAmount, CurrencyUTC currencyUTC, bool InPromotionUploadCustList, int categoryId)
+        public CustCondition GetCustConditionInfo(int custId, int currencyId, int siteId, int deviceType, string bonusCode, int periodType, int promotionType, decimal requiredAmount, CurrencyUTC currencyUTC, bool InPromotionUploadCustList, int categoryId, PromotionUploadCustList promotionUploadCustList)
         {
             var custCondition = new CustCondition()
             {
@@ -23,6 +23,24 @@ namespace BonusService.Service.DAL
             if (_promotionBll.CheckPromotionRuleRunningBonus(custId))
             {
                 custCondition.Result = (int)BonusErrorCode.SpCustomerBonusStillRunning;
+                return custCondition;
+            }
+
+            if (promotionUploadCustList == null)
+            {
+                custCondition.Result = (int)BonusErrorCode.PromotionNotFound;
+                return custCondition;
+            }
+
+            if (promotionUploadCustList.Status)
+            {
+                custCondition.Result = (int)BonusErrorCode.DuplicateClaimBonus;
+                return custCondition;
+            }
+
+            if ((promotionUploadCustList.ExpiryDate + currencyUTC.timeOffset) < currencyUTC.CurrentTime)
+            {
+                custCondition.Result = (int)BonusErrorCode.PromotionNotFound;
                 return custCondition;
             }
 
