@@ -3,6 +3,7 @@ using BonusService.Service.Extensions;
 using BonusService.Service.Library;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
+using Newtonsoft.Json;
 
 namespace BonusService.Service.BLL
 {
@@ -13,7 +14,7 @@ namespace BonusService.Service.BLL
         private readonly VipService _vipService;
         private readonly MessageService _messageService;
         private readonly ILogger<VipBLL> _logger;
-        private readonly SelLangBLL _selLangBLL;
+        private readonly SelLangBLL _selLangBll;
         private readonly Currency _currency;
 
         #endregion
@@ -25,7 +26,7 @@ namespace BonusService.Service.BLL
             _logger = provider.GetRequiredService<ILogger<VipBLL>>();
             _vipService = provider.GetRequiredService<VipService>();
             _messageService = provider.GetRequiredService<MessageService>();
-            _selLangBLL = provider.GetRequiredService<SelLangBLL>();
+            _selLangBll = provider.GetRequiredService<SelLangBLL>();
             _currency = provider.GetRequiredService<Currency>();
         }
 
@@ -50,15 +51,14 @@ namespace BonusService.Service.BLL
             {
                 foreach (var vipSetting in vipSettings)
                 {
-                    if (!VerifyUpgradeTask(vipSetting,
-                        currentTime,
-                        TaskType.UpgradeReview))
+                    #region Verify
+                    
+                    if (!VerifyUpgradeTask(vipSetting, currentTime, TaskType.UpgradeReview))
                     {
                         continue;
                     }
 
-                    if (!CalculateUpgradeTime(vipSetting,
-                        currentTime,
+                    if (!CalculateUpgradeTime(vipSetting, currentTime,
                         out var startTime,
                         out var endTime,
                         out var reviewTime,
@@ -68,25 +68,64 @@ namespace BonusService.Service.BLL
                         continue;
                     }
 
+                    #endregion
+                    
                     var vipList = GetVipSystem(vipSetting.SiteId).ToList();
-
+                    
                     foreach (var vipSystem in vipList.OrderByDescending(x => x.Level))
                     {
-                        _logger.LogInformation(
-                            $@"GetCustUpgrade Start - Level:{vipSystem.Level} CurrencyId:{vipSystem.CurrencyId} UpDeposit:{vipSystem.UpDeposit} StartTime:{startTime} EndTime:{endTime}");
-                        foreach (var custVip in GetCustUpgrade(new CustomerUpgradeInfo(vipSystem.Level,
-                            vipSystem.UpDeposit, vipSystem.SiteId, vipSystem.CurrencyId, startTime, endTime,
-                            calculateMonth)))
+                        // 為了排除Vermilion Bird不要走自動
+                        if (vipSystem.UpDeposit == 0 && vipSystem.UpTurnover == 0)
                         {
-                            var upgradeAmount = vipSystem.UpBonus;
-
-                            success = SetVipUpgradeReview(new VipUpgradeInfo(custVip.CustId,
-                                calculateMonth, custVip.UserName, vipSystem.SiteId, custVip.VipLevel, vipSystem.Level,
-                                vipSystem.CurrencyId, custVip.DepositAmount, upgradeAmount,
-                                (int)VipReviewStatus.Pending));
+                            continue;
+                        }
+                        
+                        _logger.LogInformation($@"GetCustUpgrade Start - Level:{vipSystem.Level} CurrencyId:{vipSystem.CurrencyId} UpDeposit:{vipSystem.UpDeposit} UpTurnover:{vipSystem.UpTurnover} StartTime:{startTime} EndTime:{endTime}");
+                        
+                        var custUpgradeList = GetCustUpgrade(new CustomerUpgradeInfo(vipSystem.Level, vipSystem.UpDeposit, vipSystem.UpTurnover ,vipSystem.SiteId, vipSystem.CurrencyId, startTime, endTime, calculateMonth));
+                        foreach (var custVip in custUpgradeList)
+                        {
+                            success = SetVipUpgradeReview(new VipUpgradeInfo(
+                                custVip.CustId,
+                                calculateMonth, 
+                                custVip.UserName,
+                                vipSystem.SiteId, 
+                                custVip.VipLevel, 
+                                vipSystem.Level,
+                                vipSystem.CurrencyId,
+                                custVip.DepositAmount, 
+                                custVip.TurnoverAmount,
+                                vipSystem.UpBonus,
+                                (int)VipReviewStatus.Pending)
+                            );
                         }
                     }
-
+                    
+                    // set 12bet level 3 above , down to default 
+                    if (vipSetting.SiteId == 101)
+                    {
+                        var custVipDownList = GetCustVipDownToDefaultLevel(vipSetting.SiteId ,startTime , endTime ,calculateMonth).ToList();
+                        if (custVipDownList.Any())
+                        {
+                            foreach (var custVip in custVipDownList)
+                            {
+                                success = SetVipUpgradeReview(new VipUpgradeInfo(
+                                    custVip.CustId,
+                                    calculateMonth, 
+                                    custVip.UserName,
+                                    vipSetting.SiteId, 
+                                    custVip.VipLevel,
+                                    custVip.DefaultLevel,
+                                    custVip.CurrencyId,
+                                    custVip.DepositAmount, 
+                                    custVip.TurnoverAmount,
+                                    0,
+                                    (int)VipReviewStatus.Approved)
+                                );
+                            }
+                        }
+                    }
+                    
                     SetVipSetting(new VipSetting
                     {
                         SiteId = vipSetting.SiteId,
@@ -112,9 +151,9 @@ namespace BonusService.Service.BLL
             {
                 foreach (var vipSetting in vipSettings)
                 {
-                    if (!VerifyUpgradeTask(vipSetting,
-                        currentTime,
-                        TaskType.UpgradeCustomer))
+                    #region Verify
+
+                    if (!VerifyUpgradeTask(vipSetting, currentTime, TaskType.UpgradeCustomer))
                     {
                         continue;
                     }
@@ -129,21 +168,26 @@ namespace BonusService.Service.BLL
                     {
                         continue;
                     }
-
-                    var customers =
-                        GetVipUpgradeReview(new VipUpgradeInfo(calculateMonth, vipSetting.SiteId,
-                            (int)VipReviewStatus.Approved));
+                    
+                    #endregion
+                    
+                    var customers = GetVipUpgradeReview(new VipUpgradeInfo(calculateMonth, vipSetting.SiteId, (int)VipReviewStatus.Approved));
 
                     foreach (var customer in customers)
                     {
-                        var withdrawalLimitAmount =
-                            CalculateWithdrawalLimitAmount(customer.UpgradeBonus, vipSetting.WithdrawalLimitRatio);
+                        var withdrawalLimitAmount = CalculateWithdrawalLimitAmount(customer.UpgradeBonus, vipSetting.WithdrawalLimitRatio);
 
-                        var upgradeResult = SetCustVipForUpgrade(new CustomerVipInfo(customer.CurrentVipLevel,
+                        var upgradeResult = SetCustVipForUpgrade(new CustomerVipInfo(
+                            customer.CurrentVipLevel,
                             customer.UpgradeVipLevel,
-                            customer.CustId, customer.UserName, customer.SiteId, customer.UpgradeBonus,
-                            withdrawalLimitAmount, $"VIP Upgrade Reward: {customer.UpgradeBonus:#,##0.##}",
-                            $"VIP Upgrade Withdrawal Limit: {withdrawalLimitAmount:#,##0.##}", calculateMonth));
+                            customer.CustId, 
+                            customer.UserName,
+                            customer.SiteId, 
+                            customer.UpgradeBonus,
+                            withdrawalLimitAmount,
+                            $"VIP Upgrade Reward: {customer.UpgradeBonus:#,##0.##}",
+                            $"VIP Upgrade Withdrawal Limit: {withdrawalLimitAmount:#,##0.##}", calculateMonth)
+                        );
 
                         if (!upgradeResult)
                         {
@@ -173,9 +217,7 @@ namespace BonusService.Service.BLL
             }
         }
 
-        public void DowngradeReview(IEnumerable<VipSetting> vipSettings,
-            DateTime currentTime,
-            out bool success)
+        public void DowngradeReview(IEnumerable<VipSetting> vipSettings, DateTime currentTime, out bool success)
         {
             success = true;
             try
@@ -261,9 +303,7 @@ namespace BonusService.Service.BLL
             }
         }
 
-        public void DowngradeCustomer(IEnumerable<VipSetting> vipSettings,
-            DateTime currentTime,
-            out bool success)
+        public void DowngradeCustomer(IEnumerable<VipSetting> vipSettings, DateTime currentTime, out bool success)
         {
             success = true;
             try
@@ -364,6 +404,11 @@ namespace BonusService.Service.BLL
             return _vipService.SetCustVip(customerVipInfo);
         }
 
+        private IEnumerable<CustVipNotDefaultLevel> GetCustVipDownToDefaultLevel(int siteId ,DateTime startDate, DateTime endTime, string calculateMonth)
+        {
+            return _vipService.GetCustVipDownToDefaultLevel( siteId,  startDate, endTime, calculateMonth);
+        }
+        
         private IEnumerable<CustVipForDowngrade> GetCustDowngrade(CustomerDowngradeInfo customerDowngradeInfo)
         {
             return _vipService.GetCustDowngrade(customerDowngradeInfo);
@@ -391,9 +436,7 @@ namespace BonusService.Service.BLL
         /// <param name="currentTime">執行時間(UTC+8)</param>
         /// <param name="taskType">執行類型</param>
         /// <returns></returns>
-        private static bool VerifyUpgradeTask(VipSetting vipSetting,
-            DateTime currentTime,
-            TaskType taskType)
+        private static bool VerifyUpgradeTask(VipSetting vipSetting, DateTime currentTime, TaskType taskType)
         {
             switch (vipSetting.PeriodType)
             {
@@ -408,15 +451,11 @@ namespace BonusService.Service.BLL
 
                     var reviewDayOfMonth = new DateTime(currentTime.Year, currentTime.Month, vipSetting.AssignReviewDate);
                     var settledDayOfMonth = new DateTime(currentTime.Year, currentTime.Month, vipSetting.AssignSettleDate);
-                    // return vipSetting.LastUpdateTime > reviewDayOfMonth && 
-                    //        taskTime > vipSetting.SettleTime &&
-                    //        currentTime > settledDayOfMonth;
+                  
                     return vipSetting.LastReviewedTime >= reviewDayOfMonth && //上一次執行級別判定的時間 > 當月應執行級別判定日期時間 : 這個月已執行過級別判定
                            taskTime > vipSetting.LastSettledTime && // 這個月1號 > 上一次執行級別異動的時間 : 這個月還未執行過級別異動
                            currentTime > settledDayOfMonth; // 目前時間(GMT+8) > 當月應執行級別異動日期時間 : 目前時間可否執行級別異動 
 
-                case (int)VipPeriodType.Daily:
-                case (int)VipPeriodType.Weekly:
                 default:
                     return false;
             }
@@ -433,8 +472,7 @@ namespace BonusService.Service.BLL
         /// <param name="settleTime">級別異動時間</param>
         /// <param name="calculateMonth">計算年月期間</param>
         /// <returns></returns>
-        private static bool CalculateUpgradeTime(VipSetting vipSetting,
-            DateTime currentTime,
+        private static bool CalculateUpgradeTime(VipSetting vipSetting, DateTime currentTime,
             out DateTime startTime,
             out DateTime endTime,
             out DateTime reviewTime,
@@ -445,16 +483,15 @@ namespace BonusService.Service.BLL
             {
                 case (int)VipPreviousDateRangeType.LastMonth:
                     var previousDateTime = currentTime.AddMonths(-1);
-                    startTime = new DateTime(previousDateTime.Year, previousDateTime.Month, vipSetting.PeriodInterval)
-                        .Date;
+                    startTime = new DateTime(previousDateTime.Year, previousDateTime.Month, vipSetting.PeriodInterval).Date;
                     endTime = startTime.AddMonths(1).AddTicks(-1);
                     reviewTime = new DateTime(currentTime.Year, currentTime.Month, vipSetting.AssignReviewDate);
                     settleTime = new DateTime(currentTime.Year, currentTime.Month, vipSetting.AssignSettleDate);
                     calculateMonth = startTime.ToString("yyyyMM");
                     break;
 
+                //暫無使用，return false;
                 case (int)VipPreviousDateRangeType.LastThreeMonth:
-                    //暫無使用，return false;
                     startTime = endTime = reviewTime = settleTime = new DateTime();
                     calculateMonth = string.Empty;
                     return false;
@@ -468,8 +505,7 @@ namespace BonusService.Service.BLL
             return true;
         }
 
-        private static decimal CalculateWithdrawalLimitAmount(decimal upgradeAmount,
-            int withdrawalLimitRatio)
+        private static decimal CalculateWithdrawalLimitAmount(decimal upgradeAmount, int withdrawalLimitRatio)
         {
             return upgradeAmount * withdrawalLimitRatio;
         }
@@ -479,13 +515,12 @@ namespace BonusService.Service.BLL
         /// </summary>
         /// <param name="customer">客戶升級資料</param>
         /// <param name="vipSetting">VIP設定資料</param>
-        private async void SendMessageForUpgrade(VipUpgradeReview customer,
-            VipSetting vipSetting)
+        private async void SendMessageForUpgrade(VipUpgradeReview customer, VipSetting vipSetting)
         {
             _currency.GetCurrency().TryGetValue(customer.CurrencyId, out var currencyName);
-            var content = string.Format(_selLangBLL.GetResourceValue("lbl_VipUpgrade", customer.UserLang),
+            var content = string.Format(_selLangBll.GetResourceValue("lbl_VipUpgrade", customer.UserLang),
                 currencyName, customer.UpgradeBonus.ToString("#,##0.##"));
-            var title = _selLangBLL.GetResourceValue("lbl_VipUpgradeTitle", customer.UserLang);
+            var title = _selLangBll.GetResourceValue("lbl_VipUpgradeTitle", customer.UserLang);
 
             await _messageService.SendMessageAsync(new Message("System", customer.CustId, customer.UserLang, title, content));
         }
@@ -497,9 +532,7 @@ namespace BonusService.Service.BLL
         /// <param name="currentTime">執行時間(UTC+8)</param>
         /// <param name="taskType">執行類型</param>
         /// <returns></returns>
-        private static bool VerifyDowngradeTask(VipSetting vipSetting,
-            DateTime currentTime,
-            TaskType taskType)
+        private static bool VerifyDowngradeTask(VipSetting vipSetting, DateTime currentTime, TaskType taskType)
         {
             switch (vipSetting.PeriodType)
             {
@@ -599,12 +632,11 @@ namespace BonusService.Service.BLL
         /// </summary>
         /// <param name="customer">客戶降級資料</param>
         /// <param name="vipSetting">VIP設定資料</param>
-        private async void SendMessageForDowngrade(VipDowngradeReview customer,
-            VipSetting vipSetting)
+        private async void SendMessageForDowngrade(VipDowngradeReview customer, VipSetting vipSetting)
         {
             //_currency.GetCurrency().TryGetValue(customer.CurrencyId, out var currencyName);
-            var content = _selLangBLL.GetResourceValue("lbl_VipDowngradeContent", customer.UserLang);
-            var title = _selLangBLL.GetResourceValue("lbl_VipDowngradeTitle", customer.UserLang);
+            var content = _selLangBll.GetResourceValue("lbl_VipDowngradeContent", customer.UserLang);
+            var title = _selLangBll.GetResourceValue("lbl_VipDowngradeTitle", customer.UserLang);
 
             await _messageService.SendMessageAsync(new Message("System", customer.CustId, customer.UserLang, title, content));
         }

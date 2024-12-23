@@ -1,7 +1,6 @@
 ﻿using BonusService.Service.Library;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
-
 using Dapper;
 
 namespace BonusService.Service.DAL
@@ -9,26 +8,26 @@ namespace BonusService.Service.DAL
     public class VipService
     {
         private readonly MySqlClient _mainDbClient;
-        private readonly MySqlClient _reportbackupDbClient;
+        private readonly MySqlClient _reportBackupDbClient;
 
         public VipService(IServiceProvider provider)
         {
             _mainDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);
-            _reportbackupDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.ReportBackupDB);
+            _reportBackupDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.ReportBackupDB);
         }
 
         public IEnumerable<VipSetting> GetVipSettings(int vipType)
         {
             var parameter = new DynamicParameters();
             parameter.Add("_Status", vipType);
-            return _reportbackupDbClient.Query<VipSetting>("Service_VipSettingV3_Get", parameter);
+            return _reportBackupDbClient.Query<VipSetting>("Service_VipSettingV3_Get", parameter);
         }
 
         public IEnumerable<VipSystem> GetVipSystem(int siteId)
         {
             var parameter = new DynamicParameters();
             parameter.Add("SiteId", siteId);
-            return _reportbackupDbClient.Query<VipSystem>("Service_VipSystem_GetV2", parameter);
+            return _reportBackupDbClient.Query<VipSystem>("Service_VipSystem_GetV2", parameter);
         }
 
         public bool SetVipSetting(VipSetting vipSetting)
@@ -42,19 +41,19 @@ namespace BonusService.Service.DAL
             parameter.Add("_LastSettledTime", vipSetting.LastSettledTime);
             return _mainDbClient.Execute("Service_VipSettingV3_Set", parameter) >= 0;
         }
-
-
+        
         public IEnumerable<CustVip> GetCustUpgrade(CustomerUpgradeInfo customerUpgradeInfo)
         {
             var parameter = new DynamicParameters();
-            parameter.Add("VipLevel", customerUpgradeInfo.VipLevel);
-            parameter.Add("UpDeposit", customerUpgradeInfo.UpDeposit);
-            parameter.Add("SiteId", customerUpgradeInfo.SiteId);
-            parameter.Add("CurrencyId", customerUpgradeInfo.CurrencyId);
-            parameter.Add("StartTime", customerUpgradeInfo.StartTime);
-            parameter.Add("EndTime", customerUpgradeInfo.EndTime);
-            parameter.Add("CalculateMonth", customerUpgradeInfo.CalculateMonth);
-            return _reportbackupDbClient.Query<CustVip>("Service_CustUpgrade_GetV2", parameter, 600);
+            parameter.Add("_VipLevel", customerUpgradeInfo.VipLevel);
+            parameter.Add("_UpDeposit", customerUpgradeInfo.UpDeposit);
+            parameter.Add("_UpTurnover", customerUpgradeInfo.UpTurnover);
+            parameter.Add("_SiteId", customerUpgradeInfo.SiteId);
+            parameter.Add("_CurrencyId", customerUpgradeInfo.CurrencyId);
+            parameter.Add("_StartTime", customerUpgradeInfo.StartTime);
+            parameter.Add("_EndTime", customerUpgradeInfo.EndTime);
+            parameter.Add("_CalculateMonth", customerUpgradeInfo.CalculateMonth);
+            return _reportBackupDbClient.Query<CustVip>("Service_CustUpgrade_Get_V3", parameter, 600);
         }
 
         public IEnumerable<VipUpgradeReview> GetVipUpgradeReview(VipUpgradeInfo vipUpgradeInfo)
@@ -64,7 +63,7 @@ namespace BonusService.Service.DAL
             parameter.Add("_SiteId", vipUpgradeInfo.SiteId);
             parameter.Add("_Status", vipUpgradeInfo.Status);
 
-            return _reportbackupDbClient.Query<VipUpgradeReview>("Service_VipUpgradeReviewV4_Get", parameter);
+            return _reportBackupDbClient.Query<VipUpgradeReview>("Service_VipUpgradeReviewV4_Get", parameter);
         }
 
         public bool SetVipUpgradeReview(VipUpgradeInfo vipUpgradeInfo)
@@ -78,11 +77,22 @@ namespace BonusService.Service.DAL
             parameter.Add("_UpgradeVipLevel", vipUpgradeInfo.UpgradeVipLevel);
             parameter.Add("_CurrencyId", vipUpgradeInfo.CurrencyId);
             parameter.Add("_DepositAmount", vipUpgradeInfo.DepositAmount);
+            parameter.Add("_TurnoverAmount", vipUpgradeInfo.TurnoverAmount);
             parameter.Add("_UpgradeAmount", vipUpgradeInfo.UpgradeAmount);
             parameter.Add("_Status", vipUpgradeInfo.Status);
-            return _mainDbClient.Execute("Service_VipUpgradeReviewV2_Ins", parameter) >= 0;
+            return _mainDbClient.Execute("Service_VipUpgradeReview_Ins_V3", parameter) >= 0;
         }
 
+        public IEnumerable<CustVipNotDefaultLevel> GetCustVipDownToDefaultLevel(int siteId , DateTime startDate, DateTime endTime ,string calculateMonth)
+        {
+            var parameter = new DynamicParameters();
+            parameter.Add("_SiteId", siteId);
+            parameter.Add("_StartTime", startDate);
+            parameter.Add("_EndTime", endTime);
+            parameter.Add("_CalculateMonth", calculateMonth);
+            return _reportBackupDbClient.Query<CustVipNotDefaultLevel>("Service_CustVipDownToDefaultLevel_Get", parameter, 600);
+        }
+        
         public bool SetCustVip(CustomerVipInfo customerVipInfo)
         {
             var parameter = new DynamicParameters();
@@ -96,7 +106,7 @@ namespace BonusService.Service.DAL
             parameter.Add("_FinancialMemo", customerVipInfo.FinancialMemo);
             parameter.Add("_WithdrawalLimitMemo", customerVipInfo.WithdrawalLimitMemo);
             parameter.Add("_CalculateMonth", customerVipInfo.CalculateMonth);
-            return _mainDbClient.Execute("Service_CustVipV3_Set", parameter) >= 0;
+            return _mainDbClient.Execute("Service_CustVip_Set_V4", parameter) >= 0;
         }
 
         public IEnumerable<CustVipForDowngrade> GetCustDowngrade(CustomerDowngradeInfo customerDowngradeInfo)
@@ -111,7 +121,7 @@ namespace BonusService.Service.DAL
             parameter.Add("_EndTime", customerDowngradeInfo.EndTime);
             parameter.Add("_QualifiedTime", customerDowngradeInfo.QualifiedTime);
             parameter.Add("_CalculateMonth", customerDowngradeInfo.CalculateMonth);
-            return _reportbackupDbClient.Query<CustVipForDowngrade>("Service_VIP_CustDowngrade_Get_V4", parameter, commandTimeout: 600);
+            return _reportBackupDbClient.Query<CustVipForDowngrade>("Service_VIP_CustDowngrade_Get_V4", parameter, commandTimeout: 600);
         }
 
         public bool SetVipDowngradeReview(VipDowngradeInfo vipDowngradeInfo)
@@ -138,7 +148,7 @@ namespace BonusService.Service.DAL
             parameter.Add("_SiteId", vipDowngradeInfo.SiteId);
             parameter.Add("_Status", vipDowngradeInfo.Status);
 
-            return _reportbackupDbClient.Query<VipDowngradeReview>("Service_VipDowngradeReviewV2_Get", parameter);
+            return _reportBackupDbClient.Query<VipDowngradeReview>("Service_VipDowngradeReviewV2_Get", parameter);
         }
 
         public bool SetCustVipForDowngrade(CustomerVipInfo customerVipInfo)
