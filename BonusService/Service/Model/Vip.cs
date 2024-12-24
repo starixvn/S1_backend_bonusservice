@@ -72,12 +72,35 @@
 
     public class CustomerUpgradeInfo
     {
-        public CustomerUpgradeInfo(int vipLevel, decimal upDeposit,decimal upTurnover, int siteId, int currencyId, DateTime startTime,
-            DateTime endTime, string calculateMonth)
+        public CustomerUpgradeInfo(int vipLevel, decimal upDeposit, int siteId, int currencyId, DateTime startTime, DateTime endTime, string calculateMonth)
+        {
+            VipLevel = vipLevel;
+            UpDeposit = upDeposit;
+            SiteId = siteId;
+            CurrencyId = currencyId;
+            StartTime = startTime;
+            EndTime = endTime;
+            CalculateMonth = calculateMonth;
+        }
+
+        public int VipLevel { get; }
+        public decimal UpDeposit { get; }
+        public int SiteId { get; }
+        public int CurrencyId { get; }
+        public DateTime StartTime { get; }
+        public DateTime EndTime { get; }
+        public string CalculateMonth { get; }
+    }
+
+    public class CustomerUpDowngradeInfo
+    {
+        public CustomerUpDowngradeInfo(int vipLevel, decimal upDeposit,decimal upTurnover, decimal? downDeposit, decimal? downTurnover, int siteId, int currencyId, DateTime startTime, DateTime endTime, string calculateMonth)
         {
             VipLevel = vipLevel;
             UpDeposit = upDeposit;
             UpTurnover = upTurnover;
+            DownDeposit = downDeposit;
+            DownTurnover = downTurnover;
             SiteId = siteId;
             CurrencyId = currencyId;
             StartTime = startTime;
@@ -88,6 +111,8 @@
         public int VipLevel { get; }
         public decimal UpDeposit { get; }
         public decimal UpTurnover { get; }
+        public decimal? DownDeposit { get; }
+        public decimal? DownTurnover { get; }
         public int SiteId { get; }
         public int CurrencyId { get; }
         public DateTime StartTime { get; }

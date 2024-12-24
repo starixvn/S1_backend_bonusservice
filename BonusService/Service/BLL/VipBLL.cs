@@ -74,15 +74,23 @@ namespace BonusService.Service.BLL
                     
                     foreach (var vipSystem in vipList.OrderByDescending(x => x.Level))
                     {
-                        // 為了排除Vermilion Bird不要走自動
-                        if (vipSystem.UpDeposit == 0 && vipSystem.UpTurnover == 0)
-                        {
-                            continue;
-                        }
-                        
                         _logger.LogInformation($@"GetCustUpgrade Start - Level:{vipSystem.Level} CurrencyId:{vipSystem.CurrencyId} UpDeposit:{vipSystem.UpDeposit} UpTurnover:{vipSystem.UpTurnover} StartTime:{startTime} EndTime:{endTime}");
-                        
-                        var custUpgradeList = GetCustUpgrade(new CustomerUpgradeInfo(vipSystem.Level, vipSystem.UpDeposit, vipSystem.UpTurnover ,vipSystem.SiteId, vipSystem.CurrencyId, startTime, endTime, calculateMonth));
+
+                        List<CustVip> custUpgradeList;
+                        if (vipSetting.SiteId == 101)
+                        {
+                            // 為了排除Vermilion Bird不要走自動
+                            if (vipSystem.UpDeposit == 0 && vipSystem.UpTurnover == 0)
+                            {
+                                continue;
+                            }
+                            custUpgradeList = GetCustUpgradeDownGrade(new CustomerUpDowngradeInfo(vipSystem.Level, vipSystem.UpDeposit, vipSystem.UpTurnover, vipSystem.DownDeposit, vipSystem.DownTurnover ,vipSystem.SiteId, vipSystem.CurrencyId, startTime, endTime, calculateMonth));
+                        }
+                        else
+                        {
+                            custUpgradeList = GetCustUpgrade(new CustomerUpgradeInfo(vipSystem.Level, vipSystem.UpDeposit,vipSystem.SiteId, vipSystem.CurrencyId, startTime, endTime, calculateMonth));
+                        }
+                      
                         foreach (var custVip in custUpgradeList)
                         {
                             success = SetVipUpgradeReview(new VipUpgradeInfo(
@@ -384,11 +392,16 @@ namespace BonusService.Service.BLL
             return _vipService.GetVipSystem(siteId);
         }
 
-        private IEnumerable<CustVip> GetCustUpgrade(CustomerUpgradeInfo customerUpgradeInfo)
+        private List<CustVip> GetCustUpgrade(CustomerUpgradeInfo customerUpgradeInfo)
         {
-            return _vipService.GetCustUpgrade(customerUpgradeInfo);
+            return _vipService.GetCustUpgrade(customerUpgradeInfo).ToList();
         }
 
+        private List<CustVip> GetCustUpgradeDownGrade(CustomerUpDowngradeInfo customerUpgradeInfo)
+        {
+            return _vipService.GetCustUpgradeDownGrade(customerUpgradeInfo).ToList();
+        }
+        
         private bool SetVipUpgradeReview(VipUpgradeInfo vipUpgradeInfo)
         {
             return _vipService.SetVipUpgradeReview(vipUpgradeInfo);

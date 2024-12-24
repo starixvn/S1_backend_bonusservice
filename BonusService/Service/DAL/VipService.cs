@@ -45,6 +45,19 @@ namespace BonusService.Service.DAL
         public IEnumerable<CustVip> GetCustUpgrade(CustomerUpgradeInfo customerUpgradeInfo)
         {
             var parameter = new DynamicParameters();
+            parameter.Add("VipLevel", customerUpgradeInfo.VipLevel);
+            parameter.Add("UpDeposit", customerUpgradeInfo.UpDeposit);
+            parameter.Add("SiteId", customerUpgradeInfo.SiteId);
+            parameter.Add("CurrencyId", customerUpgradeInfo.CurrencyId);
+            parameter.Add("StartTime", customerUpgradeInfo.StartTime);
+            parameter.Add("EndTime", customerUpgradeInfo.EndTime);
+            parameter.Add("CalculateMonth", customerUpgradeInfo.CalculateMonth);
+            return _reportBackupDbClient.Query<CustVip>("Service_CustUpgrade_GetV2", parameter, 600);
+        }
+        
+        public IEnumerable<CustVip> GetCustUpgradeDownGrade(CustomerUpDowngradeInfo customerUpgradeInfo)
+        {
+            var parameter = new DynamicParameters();
             parameter.Add("_VipLevel", customerUpgradeInfo.VipLevel);
             parameter.Add("_UpDeposit", customerUpgradeInfo.UpDeposit);
             parameter.Add("_UpTurnover", customerUpgradeInfo.UpTurnover);
