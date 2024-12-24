@@ -75,7 +75,7 @@ namespace BonusService.Service.DAL
                     (int)promotionType, RelId, trans);
 
                 //四捨五入
-                rebateTpBetRecord.RedeemAmount = _common.Floor(rebateTpBetRecord.RedeemAmount, 2);
+                rebateTpBetRecord.RedeemAmount = Math.Round(rebateTpBetRecord.RedeemAmount, 2);
 
                 //匯總Gametype金額
                 if (rebateGametypeLogList.ContainsKey(rebateTpBetRecord.GameType))
