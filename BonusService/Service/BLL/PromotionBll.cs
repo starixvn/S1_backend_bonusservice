@@ -1,7 +1,10 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
+
 using System.Text.RegularExpressions;
 
 using BonusService.Service.DAL;
+using BonusService.Service.DAL.Interface;
 using BonusService.Service.Library;
 using BonusService.Service.Model;
 using BonusService.Service.Model.enums;
@@ -9,13 +12,10 @@ using BonusService.Service.Model.enums;
 using Dapper;
 
 using MemberSite.Service.Model;
-
 using Microsoft.Extensions.Caching.Memory;
-
 using MySql.Data.MySqlClient;
 
 using Newtonsoft.Json;
-
 using Enum = System.Enum;
 
 namespace BonusService.Service.BLL
@@ -36,8 +36,15 @@ namespace BonusService.Service.BLL
         private readonly ICacheHelper _redisHelper;
         private readonly CacheHelper _cacheHelper;
         private readonly Dictionary<int, IEnumerable<string>> _specialRebateDisplay;
+        private readonly ICommonService _commonService;
+        private readonly IEnumerable<IPromotionService> _promotionListService;
+        //private readonly Dictionary<PromotionType, Type> _promotionServiceMap;
+        //private readonly IServiceProvider _serviceProvider;
+        //private readonly IPromotionService _iPromotionService;
+        private readonly Func<PromotionType, IPromotionService> _promotionServiceFactory;
 
-        public PromotionBll(IServiceProvider provider)
+
+        public PromotionBll(IServiceProvider provider, Func<PromotionType, IPromotionService> promotionServiceFactory)
         {
             _mainDbClient = provider.GetServices<MySqlClient>().First(p => p.DataBase == DataBase.Main);
             _common = provider.GetRequiredService<Common>();
@@ -54,6 +61,16 @@ namespace BonusService.Service.BLL
             _cacheHelper = provider.GetRequiredService<CacheHelper>();
             var configBll = provider.GetRequiredService<ConfigBLL>();
             _specialRebateDisplay = configBll.GetConfigValue<Dictionary<int, IEnumerable<string>>>("RebateExcludeGame");
+            _commonService = provider.GetService<ICommonService>();
+            //_iPromotionService = provider.GetService<IPromotionService>();
+            //_promotionServiceMap = new Dictionary<PromotionType, Type>
+            //{
+            //    { PromotionType.FstDeposit, typeof(FirstDepositService) },
+            //    { PromotionType.ReDeposit, typeof(ReDepositService) },
+            //    { PromotionType.SpecialBonus, typeof(SpecialBonusService) },
+            //};
+            _promotionListService = provider.GetService<IEnumerable<IPromotionService>>();
+            _promotionServiceFactory = promotionServiceFactory;
         }
 
         /// <summary>
@@ -237,27 +254,33 @@ namespace BonusService.Service.BLL
         }
 
         public async Task<ApiResult> SetClaimPromotionV2Async(int custId, string bonusCode, string custIp,
-            decimal lockedAmount, int deviceType, BonusInfoAtPage atPage, string depositTransId = null)
+            decimal lockedAmount, int deviceType, BonusInfoAtPage atPage, bool IsFromPromotionUploadCustList = false, string depositTransId = null)
         {
             bonusCode = bonusCode.Trim();
-
-            // 取玩家個人資訊、裝置、白名單設定
-            var custInfo = _custInfoService.GetCustInfo(custId);
-            var custDeviceHistory = _custInfoService.GetCustDeviceId(new List<int>() { custInfo.CustId }, custInfo.SiteId).ToList();
-            custInfo.DeviceIds = custDeviceHistory.Select(r => r.DeviceId);
-            custInfo.CurrentUseDeviceId = custDeviceHistory.Any() ?
-                custDeviceHistory.OrderByDescending(x => x.UpdateTime).Select(x => x.DeviceId).First()
-                : string.Empty;
-            custInfo.CustIp = custIp;
-            var custPromotionWhiteSetting = _custInfoService.GetCustPromotionWhiteSetting(custId);
-
+            Customer custInfo;
+            CustPromotionWhiteListSettingDto custPromotionWhiteSetting;
+            CheckCustInfo(custId, custIp, out custInfo, out custPromotionWhiteSetting);
+            ClaimPromotion claimPromotion;
+            CustCondition custConditionInfo;
             // 取 Promotion 資料
-            var claimPromotion = _promotionService.GetPromotion<ClaimPromotion>(custId,
-                custInfo.CurrencyId,
-                custInfo.SiteId,
-                bonusCode,
-                deviceType,
-                getDetail: false);
+            if (!IsFromPromotionUploadCustList)
+            {
+                claimPromotion = _promotionService.GetPromotion<ClaimPromotion>(custId,
+                    custInfo.CurrencyId,
+                    custInfo.SiteId,
+                    bonusCode,
+                    deviceType,
+                    getDetail: false);
+            }
+            else
+            {
+                claimPromotion = _promotionService.GetPromotionForUploadCustList<ClaimPromotion>(custId,
+                    custInfo.CurrencyId,
+                    custInfo.SiteId,
+                    bonusCode,
+                    deviceType,
+                    getDetail: false);
+            }
 
             var errorInfo = new ErrorMessageMakerInput
             {
@@ -269,6 +292,21 @@ namespace BonusService.Service.BLL
                 CustomizeErrorMsg = string.Empty
             };
 
+            if (claimPromotion == null)
+            {
+                errorInfo.ClaimPromotion = new ClaimPromotion()
+                {
+                    BonusCode = bonusCode
+                };
+                return MakeErrorMessage(errorInfo);
+            }
+
+            if (IsFromPromotionUploadCustList && claimPromotion.PromotionType == PromotionType.SpecialBonus)
+            {
+                var tempResult = await SetAdjustmentBonusProcessAsync(custId, bonusCode, null, claimPromotion.MaxBonus, (int)PromotionType.SpecialBonus, "", errorInfo, claimPromotion, IsFromPromotionUploadCustList);
+                return tempResult;
+            }
+
             // 檢核是否可以領取
             var verifyResult = VerifyPromotion(custInfo, claimPromotion, custPromotionWhiteSetting);
             if (verifyResult.BonusErrorCode != BonusErrorCode.Success)
@@ -278,7 +316,18 @@ namespace BonusService.Service.BLL
                 return MakeErrorMessage(errorInfo);
             }
 
-            var custConditionInfo = _promotionService.GetCustConditionInfo(custId, custInfo.CurrencyId, custInfo.SiteId, bonusCode, deviceType);
+            if (!IsFromPromotionUploadCustList)
+            {
+                custConditionInfo = _promotionService.GetCustConditionInfo(custId, custInfo.CurrencyId, custInfo.SiteId, bonusCode, deviceType);
+            }
+            else
+            {
+                var promotionUploadCustList = GetPromotionUploadCustListByBonusCode(custInfo.SiteId, custId, bonusCode);
+                var currencyUTC = GetCurrencyUTC(claimPromotion.CurrencyId);
+                IPromotionService service = _promotionServiceFactory(claimPromotion.PromotionType);
+                custConditionInfo = service.GetCustConditionInfo(custId, custInfo.CurrencyId, custInfo.SiteId, deviceType, bonusCode, (int)claimPromotion.PeriodType, (int)claimPromotion.PromotionType, claimPromotion.RequiredAmount, currencyUTC, true, claimPromotion.CategoryId, promotionUploadCustList);
+            }
+
             if (!custConditionInfo.CanJoin)
             {
                 errorInfo.Result = custConditionInfo.Result;
@@ -364,6 +413,17 @@ namespace BonusService.Service.BLL
                     result = _mainDbClient.Execute("Service_BonusCustUsingDetail_Set", trans, bonusCustUsingPara);
                 }
 
+                if (IsFromPromotionUploadCustList)
+                {
+                    var promotionUploadCustListPara = new DynamicParameters(new
+                    {
+                        BonusCode = bonusRewardInput.BonusCode,
+                        SiteId = bonusRewardInput.SiteId,
+                        CustId = bonusRewardInput.CustId
+                    });
+                    result = _mainDbClient.Execute("Service_PromotionUploadCustListStatus_Set", trans, promotionUploadCustListPara);
+                }
+
                 if (result > 0)
                 {
                     result = _promotionService.AfterReward(claimPromotion, custInfo.SiteId, bonusCode, custInfo.CurrencyId,
@@ -438,28 +498,13 @@ namespace BonusService.Service.BLL
             errorInfo.Result = result;
             return MakeErrorMessage(errorInfo);
         }
-
-        public async Task<ApiResult> SetAdjustmentBonusV2Async(int custId, string bonusCode, string memo,
-            decimal amount, int promotionType, string depositId)
+        private async Task<ApiResult> SetAdjustmentBonusProcessAsync(int custId, string bonusCode, string memo,
+            decimal amount, int promotionType, string depositId, ErrorMessageMakerInput errorInfo, ClaimPromotion claimPromotion, bool isFromPromotionUploadCustList)
         {
             var apiResult = new ApiResult();
             var lockedAmount = (decimal)0;
             bonusCode = bonusCode.Trim();
             var custInfo = _custInfoService.GetCustInfo(custId);
-
-            var errorInfo = new ErrorMessageMakerInput
-            {
-                Result = (int)BonusErrorCode.PromotionNotFound,
-                InputBonusCode = bonusCode,
-                LockedAmount = lockedAmount,
-                InputPromotionType = promotionType,
-                InputAmount = amount,
-                CustInfo = custInfo,
-                ClaimPromotion = new ClaimPromotion { }
-            };
-
-            var claimPromotion = _promotionService.GetPromotion<ClaimPromotion>(custId, custInfo.CurrencyId,
-                custInfo.SiteId, bonusCode, (int)PromotionDeviceType.All, false);
             errorInfo.ClaimPromotion = claimPromotion;
 
             var result = VerifyAdjustmentBonus(custId, custInfo.SiteId, amount, promotionType, claimPromotion);
@@ -560,6 +605,17 @@ namespace BonusService.Service.BLL
                     apiResult.ErrorCode = 0;
                 }
 
+                if (isFromPromotionUploadCustList)
+                {
+                    var promotionUploadCustListPara = new DynamicParameters(new
+                    {
+                        BonusCode = bonusCode,
+                        SiteId = custInfo.SiteId,
+                        CustId = custId
+                    });
+                    _mainDbClient.Execute("Service_PromotionUploadCustListStatus_Set", trans, promotionUploadCustListPara);
+                }
+                
                 if (apiResult.ErrorCode != 0) return apiResult;
                 var input = new AfterRewardSuccessInput
                 {
@@ -573,6 +629,46 @@ namespace BonusService.Service.BLL
 
             errorInfo.Result = result;
             return MakeErrorMessage(errorInfo, false);
+        }
+
+        private void CheckCustInfo(int custId, string custIp, out Customer custInfo, out CustPromotionWhiteListSettingDto custPromotionWhiteSetting)
+        {
+            // 取玩家個人資訊、裝置、白名單設定
+            custInfo = _custInfoService.GetCustInfo(custId);
+            var custDeviceHistory = _custInfoService.GetCustDeviceId(new List<int>() { custInfo.CustId }, custInfo.SiteId).ToList();
+            custInfo.DeviceIds = custDeviceHistory.Select(r => r.DeviceId);
+            custInfo.CurrentUseDeviceId = custDeviceHistory.Any() ?
+                custDeviceHistory.OrderByDescending(x => x.UpdateTime).Select(x => x.DeviceId).First()
+                : string.Empty;
+            custInfo.CustIp = custIp;
+            custPromotionWhiteSetting = _custInfoService.GetCustPromotionWhiteSetting(custId);
+        }
+
+        public async Task<ApiResult> SetAdjustmentBonusV2Async(int custId, string bonusCode, string memo,
+            decimal amount, int promotionType, string depositId)
+        {
+            var apiResult = new ApiResult();
+            var lockedAmount = (decimal)0;
+            bonusCode = bonusCode.Trim();
+            var custInfo = _custInfoService.GetCustInfo(custId);
+
+            var errorInfo = new ErrorMessageMakerInput
+            {
+                Result = (int)BonusErrorCode.PromotionNotFound,
+                InputBonusCode = bonusCode,
+                LockedAmount = lockedAmount,
+                InputPromotionType = promotionType,
+                InputAmount = amount,
+                CustInfo = custInfo,
+                ClaimPromotion = new ClaimPromotion { }
+            };
+
+            var claimPromotion = _promotionService.GetPromotion<ClaimPromotion>(custId, custInfo.CurrencyId,
+                custInfo.SiteId, bonusCode, (int)PromotionDeviceType.All, false);
+            errorInfo.ClaimPromotion = claimPromotion;
+
+            var tempResult = await SetAdjustmentBonusProcessAsync(custId, bonusCode, memo, amount, promotionType, depositId, errorInfo, claimPromotion, false);
+            return tempResult;
         }
 
         private CheckPromotionResultBaseDto VerifyPromotion(Customer custInfo, ClaimPromotion claimPromotion, CustPromotionWhiteListSettingDto custPromotionWhiteListListSetting)
@@ -669,11 +765,11 @@ namespace BonusService.Service.BLL
             return siteId switch
             {
                 7 => !string.IsNullOrEmpty(custInfoProfile.AccountName),
-                
-                _ => custInfoProfile.PhoneVerified 
-                     && !string.IsNullOrEmpty(custInfoProfile.AccountName) 
-                     && !string.IsNullOrEmpty(custInfoProfile.Birth_y) 
-                     && !string.IsNullOrEmpty(custInfoProfile.Birth_m) 
+
+                _ => custInfoProfile.PhoneVerified
+                     && !string.IsNullOrEmpty(custInfoProfile.AccountName)
+                     && !string.IsNullOrEmpty(custInfoProfile.Birth_y)
+                     && !string.IsNullOrEmpty(custInfoProfile.Birth_m)
                      && !string.IsNullOrEmpty(custInfoProfile.Birth_d)
             };
         }
@@ -911,9 +1007,41 @@ namespace BonusService.Service.BLL
 
                 if (request.IsLogin)
                 {
-                    var custCondition = _promotionService.GetCustConditionInfo(request.CustId, request.CurrencyId,
-                        request.SiteId, promo.BonusCode, request.DeviceType);
-                    SetPromotion(request.SiteId, request.CustId, request.CurrencyId, true, promo, custCondition);
+                    if (promo.IsPromotionUploadCustList)
+                    {
+                        var promotionUploadCustList = GetPromotionUploadCustListByBonusCode(request.SiteId, request.CustId, request.BonusCode);
+                        if(promotionUploadCustList != null)
+                        {
+                            if (promo.PromotionType == PromotionType.SpecialBonus)
+                            {
+                                promo.RollOver = promotionUploadCustList.RollOver;
+                                promo.MaxBonus = promotionUploadCustList.Bonus;
+                            }
+                            var currencyUTC = GetCurrencyUTC(request.CurrencyId);
+
+                            IPromotionService service = _promotionServiceFactory(promo.PromotionType);
+                            var custCondition = service.GetCustConditionInfo(request.CustId, request.CurrencyId, request.SiteId, request.DeviceType, promo.BonusCode, (int)promo.PeriodType, (int)promo.PromotionType, promo.RequiredAmount, currencyUTC, true, promo.CategoryId, promotionUploadCustList);
+                            SetPromotion(request.SiteId, request.CustId, request.CurrencyId, false, promo, custCondition);
+                        }
+                        else
+                        {
+                            promo.canJoin = false;
+                        }
+                        //else
+                        //{
+                        //    //沒有在領取名單內
+                        //    promo.canJoin = false;
+                        //    var custCondition = _promotionService.GetCustConditionInfo(request.CustId, request.CurrencyId,
+                        //    request.SiteId, promo.BonusCode, request.DeviceType);
+                        //    SetPromotion(request.SiteId, request.CustId, request.CurrencyId, true, promo, custCondition);
+                        //}
+                    }
+                    else
+                    {
+                        var custCondition = _promotionService.GetCustConditionInfo(request.CustId, request.CurrencyId,
+                            request.SiteId, promo.BonusCode, request.DeviceType);
+                        SetPromotion(request.SiteId, request.CustId, request.CurrencyId, true, promo, custCondition);
+                    }
                 }
                 else
                 {
@@ -1544,7 +1672,7 @@ namespace BonusService.Service.BLL
 
         public PopUpPromotion GetRetentionPromotion(CustPromotionRequest request)
         {
-            var result = new PopUpPromotion();                       
+            var result = new PopUpPromotion();
             var promotionList = _promotionService.GetPromotionList(request)
                 .Where(x => x.IsPopUp && x.PromotionType == PromotionType.RetentionFreeBet);
 
@@ -1586,6 +1714,42 @@ namespace BonusService.Service.BLL
             }
 
             return result;
+        }
+
+        public List<CustPromotion> GetPromotionUploadCustList(CustPromotionRequest request)
+        {
+            var promotionList = _promotionService.GetPromotionUploadCustList(request).ToList();
+            var allUploadSpecialBonusList = AllUploadSpecialBonusList(request);
+            var notInCustList = allUploadSpecialBonusList.Where(b => !promotionList.Any(a => a.BonusCode == b.BonusCode)).ToList();
+            promotionList.AddRange(notInCustList);
+
+            var promotion = new List<CustPromotion>();
+
+            var currencyUTC = GetCurrencyUTC(request.CurrencyId);
+
+            foreach (var promo in promotionList)
+            {
+                if (request.IsLogin)
+                {
+                    IPromotionService service = _promotionServiceFactory(promo.PromotionType);
+                    var promotionUploadCustList = GetPromotionUploadCustListByBonusCode(request.SiteId, request.CustId, promo.BonusCode);
+                    var custCondition = service.GetCustConditionInfo(request.CustId, request.CurrencyId, request.SiteId, request.DeviceType, promo.BonusCode, (int)promo.PeriodType, (int)promo.PromotionType, promo.RequiredAmount, currencyUTC, promo.InPromotionUploadCustList, promo.CategoryId, promotionUploadCustList);
+
+                    SetPromotion(request.SiteId, request.CustId, request.CurrencyId, false, promo, custCondition);
+
+                }
+                else
+                {
+                    if (promo.HideForUnlogin) // HideForUnlogin = Ture話未登入狀態不顯示
+                    {
+                        continue;
+                    }
+                }
+                
+                promotion.Add(promo);
+            }
+
+            return promotion;
         }
 
         #region PrivateMethod
@@ -1767,6 +1931,123 @@ namespace BonusService.Service.BLL
             custCondition.RefList = JsonConvert.SerializeObject(refList);
         }
 
+        public bool CheckPromotionRuleBonusInfo(int custId, DateTime todayUtcStart, DateTime todayUtcEnd)
+        {
+            return _promotionService.CheckPromotionRuleBonusInfo(custId, todayUtcStart, todayUtcEnd);
+        }
+        public bool CheckPromotionRuleWithdrawalInfo(int custId)
+        {
+            return _promotionService.CheckPromotionRuleWithdrawalInfo(custId);
+        }
+        public IEnumerable<PromotionRuleDepositInfo> GetPromotionRuleDepositInfo(int custId)
+        {
+            return _promotionService.GetPromotionRuleDepositInfo(custId);
+        }
+
+        private CurrencyUTC GetCurrencyUTC(int currencyId)
+        {
+            var timeZone = _commonService.GetCurrencyTimeZones().FirstOrDefault(x => x.CurrencyId == currencyId).TimeZone;
+
+            int hoursOffset = 0;
+            int minutesOffset = 0;
+
+            if ((timeZone.StartsWith("+") || timeZone.StartsWith("-")) && timeZone.Length == 6)
+            {
+                // 提取小时和分钟部分（跳过符号部分）
+                string numericPart = timeZone.Substring(1);
+
+                // 使用冒号分割小时和分钟
+                string[] parts = numericPart.Split(':');
+                if (parts.Length == 2 && int.TryParse(parts[0], out hoursOffset) && int.TryParse(parts[1], out minutesOffset))
+                {
+                    // 处理正负符号
+                    if (timeZone.StartsWith("-"))
+                    {
+                        hoursOffset = -hoursOffset;
+                    }
+                }
+            }
+
+            TimeSpan timeOffset = new TimeSpan(hoursOffset, minutesOffset, 0);
+
+            // 获取当前 UTC 时间
+            DateTime utcNow = DateTime.UtcNow;
+
+            // 将 UTC 时间根据偏移量转换为目标时区时间
+            DateTime currentTime = utcNow + timeOffset;  // 当前时区的时间
+            DateTime todayStart = currentTime.Date;      // 当地日期（忽略时间部分）
+            DateTime nextDayStart = todayStart.AddDays(1); // 第二天的开始时间
+
+            // 将当地时间转换回 UTC 时间
+            DateTime todayUtcStart = todayStart - timeOffset;  // 将当地时间转换为 UTC 时间
+            DateTime todayUtcEnd = nextDayStart - timeOffset;  // 将第二天的开始时间转换为 UTC 时间
+
+            // 将 UTC 时间加上 1 秒，表示当天的最后一刻
+            todayUtcEnd = todayUtcEnd.AddSeconds(-1);
+
+            return new CurrencyUTC
+            {
+                CurrentTime = currentTime,
+                TodayUtcStart = todayUtcStart,
+                TodayUtcEnd = todayUtcEnd,
+                TimeZone = timeZone,
+                timeOffset = timeOffset
+            };
+        }
+        public void CalculatePeriodRange(int periodType, CurrencyUTC range)
+        {
+            DateTime currentTime = range.CurrentTime;
+            DateTime startDate, endDate;
+
+            switch (periodType)
+            {
+                case 0: // PeriodType = 0 or 1
+                case 1:
+                    range.UTC_StartTime = range.TodayUtcStart;
+                    range.UTC_EndTime = range.TodayUtcEnd;
+                    break;
+
+                case 2: // PeriodType = 2
+                    startDate = currentTime.Date.AddDays(-((int)currentTime.DayOfWeek));
+                    endDate = startDate.AddDays(7);
+                    range.UTC_StartTime = startDate;
+                    range.UTC_EndTime = endDate.AddSeconds(-1);
+                    break;
+
+                case 3: // PeriodType = 3
+                    startDate = new DateTime(currentTime.Year, currentTime.Month, 1);
+                    endDate = startDate.AddMonths(1);
+                    range.UTC_StartTime = startDate;
+                    range.UTC_EndTime = endDate.AddSeconds(-1);
+                    break;
+            }
+        }
+        public bool GetPromotionRuleBonusInfoByBonusCode(string bonusCode)
+        {
+            return _promotionService.CheckPromotionRuleBonusInfoByBonusCode(bonusCode);
+        }
+
+        public bool CheckPromotionRuleBonusInfoByPeriodType(int promotionType, int periodType, DateTime todayUtcStart, DateTime todayUtcEnd, DateTime uTC_StartTime, DateTime uTC_EndTime, int categoryId, int custId)
+        {
+            return _promotionService.CheckPromotionRuleBonusInfoByPeriodType(promotionType, periodType, todayUtcStart, todayUtcEnd, uTC_StartTime, uTC_EndTime, categoryId, custId);
+        }
+        public PromotionRuleDepositInfo GetPromotionRuleDepositInfoByTime(DateTime currentTime, string timezone, int custId)
+        {
+            return _promotionService.GetPromotionRuleDepositInfoByTime(currentTime, timezone, custId);
+        }
+        private IEnumerable<UploadCustPromotion> AllUploadSpecialBonusList(CustPromotionRequest request)
+        {
+            return _promotionService.AllUploadSpecialBonusList(request);
+        }
+        public bool CheckPromotionRuleRunningBonus(int custId)
+        {
+            return _promotionService.CheckPromotionRuleRunningBonus(custId);
+        }
+
+        public PromotionUploadCustList GetPromotionUploadCustListByBonusCode(int siteId, int custId, string bonusCode)
+        {
+            return _promotionService.GetPromotionUploadCustListByBonusCode(siteId, custId, bonusCode);
+        }
         #endregion
     }
 }

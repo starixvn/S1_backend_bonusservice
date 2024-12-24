@@ -532,7 +532,7 @@ namespace BonusService.Service.DAL
 
             return result;
         }
-        
+
         /// <summary>
         /// 取得 PromotionMission 的進度金額
         /// </summary>
@@ -548,7 +548,7 @@ namespace BonusService.Service.DAL
             });
             p.Add("_TurnoverSum", dbType: DbType.Decimal, direction: ParameterDirection.Output);
             _reportDbClient.Query<PromotionMissionProgress>("Service_MissionBonusProgressCheck_Get", p);
-            
+
             var turnoverSum = p.Get<decimal>("_TurnoverSum");
 
             var resultModel = new PromotionMissionProgress
@@ -570,6 +570,95 @@ namespace BonusService.Service.DAL
                 {
                     CustId = custId
                 }));
+        }
+
+        public IEnumerable<UploadCustPromotion> GetPromotionUploadCustList(CustPromotionRequest request)
+        {
+            return _reportDbClient.Query<UploadCustPromotion>("Service_PromotionUploadCustList_Get",
+                new { request.CustId, request.SiteId, request.CurrencyId, request.DeviceType, request.LangId, request.PromotionType });
+        }
+
+        public bool CheckPromotionRuleBonusInfo(int custId, DateTime todayUtcStart, DateTime todayUtcEnd)
+        {
+            return _reportDbClient.QueryFirst<int>("Service_PromotionRuleBonusInfo_Get",
+                new { CustId = custId, TodayUtcStart = todayUtcStart, TodayUtcEnd = todayUtcEnd }) > 0;
+        }
+
+        public bool CheckPromotionRuleWithdrawalInfo(int custId)
+        {
+            return _reportDbClient.QueryFirst<int>("Service_PromotionRuleWithdrawalInfo_Get",
+                new { CustId = custId }) > 0;
+        }
+
+        public IEnumerable<PromotionRuleDepositInfo> GetPromotionRuleDepositInfo(int custId)
+        {
+            return _reportDbClient.Query<PromotionRuleDepositInfo>("Service_PromotionRuleDepositInfo_Get",
+                new { CustId = custId });
+        }
+        public bool CheckPromotionRuleBonusInfoByBonusCode(string bonusCode)
+        {
+            return _reportDbClient.QueryFirst<int>("Service_PromotionRuleBonusInfoByBonusCode_Get",
+                new { BonusCode = bonusCode }) > 0;
+        }
+
+        public bool CheckPromotionRuleBonusInfoByPeriodType(int promotionType, int periodType, DateTime todayUtcStart, DateTime todayUtcEnd, DateTime uTC_StartTime, DateTime uTC_EndTime, int categoryId, int custId)
+        {
+            return _reportDbClient.QueryFirst<int>("Service_PromotionRuleBonusInfoByPeriodType_Get",
+                new
+                {
+                    _PromotionType = promotionType,
+                    _PeriodType = periodType,
+                    _TodayUtcStart = todayUtcStart,
+                    _TodayUtcEnd = todayUtcEnd,
+                    _UTC_StartTime = uTC_StartTime,
+                    _UTC_EndTime = uTC_EndTime,
+                    _CategoryId = categoryId,
+                    _CustId = custId
+                }) > 0;
+        }
+
+        public PromotionRuleDepositInfo GetPromotionRuleDepositInfoByTime(DateTime currentTime, string timezone, int custId)
+        {
+            return _reportDbClient.QueryFirst<PromotionRuleDepositInfo>("Service_PromotionRuleDepositInfoByTime_Get",
+                new
+                {
+                    _CurrentTime = currentTime,
+                    _Timezone = timezone,
+                    _CustId = custId
+                });
+        }
+
+        public IEnumerable<UploadCustPromotion> AllUploadSpecialBonusList(CustPromotionRequest request)
+        {
+            return _reportDbClient.Query<UploadCustPromotion>("Service_AllUploadSpecialBonusList_Get",
+                new { request.SiteId, request.CurrencyId, request.DeviceType, request.LangId });
+        }
+
+        public T GetPromotionForUploadCustList<T>(int custId, int currencyId, int siteId, string bonusCode, int deviceType, bool getDetail)
+        {
+            return _reportDbClient.QueryFirst<T>("Service_PromotionForUploadCustList_Get", new DynamicParameters(new
+            {
+                CustId = custId,
+                CurrencyId = currencyId,
+                SiteId = siteId,
+                BonusCode = bonusCode,
+                DeviceType = deviceType,
+                GetDetail = getDetail
+            }));
+        }
+
+        public PromotionUploadCustList GetPromotionUploadCustListByBonusCode(int siteId, int custId, string bonusCode)
+        {
+            return _reportDbClient.QueryFirst<PromotionUploadCustList>("Service_PromotionUploadCustListByBonusCode_Get",
+                new { BonusCode = bonusCode, SiteId = siteId, CustId = custId });
+        }
+        public bool CheckPromotionRuleRunningBonus(int custId)
+        {
+            return _reportDbClient.QueryFirst<int>("Service_PromotionRuleRunningBonus_Get",
+                new
+                {
+                    CustId = custId
+                }) > 0;
         }
     }
 }
