@@ -54,7 +54,8 @@ namespace BonusService.Service.BLL
             switch (tpId)
             {
                 case 5: 
-                   inputs.Add("bonusCode", "PPNYFreeSpin16012024");
+                    var ppBonusCode = _redisHelper.StringGetAsync<PPBonusCode>("NewYear2025:PP").Result;
+                    inputs.Add("bonusCode", ppBonusCode.bonusCode);
                     request = new AddPrize
                     {
                         // PP
@@ -141,6 +142,11 @@ namespace BonusService.Service.BLL
         }
 
         #region Model
+
+        private class PPBonusCode
+        {
+            public string bonusCode { get; set; }
+        }
         
         private class APCampaign
         {
