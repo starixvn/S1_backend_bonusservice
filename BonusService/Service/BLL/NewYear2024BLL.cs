@@ -80,48 +80,22 @@ namespace BonusService.Service.BLL
         {
             try
             {
-                var key = $"NewYear2024:AP:CustId:{customer.CustId}";
                 var currencyId = (CurrencyEnum)customer.CurrencyId;
-                var getCustAPCount = new CustGetCount();
             
-                var getCustPrizeList = _memberService.GetCustDrawPrizeList(customer.SiteId,customer.CustId,0);
-                var custAPCount = getCustPrizeList.Where(x => x.PrizeName.Contains("Advant Play Free Bet"));
-                if (custAPCount.Count() + 1 >= 31)
-                {
-                    //超過30次了 88
-                    return new ApiResult(){ ErrorCode = -1 , Message = "Exceeded the number of times allowed for collection."};
-                }
-
-                var checkCustGetAPCount = _redisHelper.KeyExists(key);
-                if (checkCustGetAPCount == false)
-                {
-                    getCustAPCount = new CustGetCount()
-                    {
-                        count = 1
-                    };
-                    _redisHelper.StringSet(key,JsonConvert.SerializeObject(getCustAPCount) , TimeSpan.FromDays(30));
-                }
-                else
-                {
-                    getCustAPCount = _redisHelper.StringGetAsync<CustGetCount>(key).Result;
-                }
-            
-                var champaignList = _redisHelper.StringGetAsync<APCampaign>("NewYear2024:AP").Result;
+                var champaignList = _redisHelper.StringGetAsync<APCampaign>("NewYear2025:AP").Result;
                 var campaignList = champaignList.Sites
                     .FirstOrDefault(s => s.SiteId == customer.SiteId)?
-                    .Currency.FirstOrDefault(c => c.CurrencyId == currencyId.ToString())?
-                    .CampaignList;
+                    .Currency.FirstOrDefault(c => c.CurrencyId == currencyId.ToString());
             
                 if(campaignList == null)
                 {
                     return new ApiResult(){ ErrorCode = -1 , Message = "ChampaignList is null"}; 
                 }
-
-                var cpId = campaignList[getCustAPCount.count - 1];
+                
                 var inputs = new Dictionary<string, string>
                 {
-                    { "CampaignId", cpId },
-                    { "operatorUser", "NewYear2024Job" }
+                    { "CampaignId", campaignList.CampaignId },
+                    { "operatorUser", "NewYear2025Job" }
                 };
                 
                 var request = new AddPrize
@@ -137,12 +111,6 @@ namespace BonusService.Service.BLL
                 
                 if (result.ErrorCode == 0)
                 {
-                    var insert = new CustGetCount()
-                    {
-                        count = getCustAPCount.count + 1
-                    };
-                    _redisHelper.StringSet(key,JsonConvert.SerializeObject(insert) , TimeSpan.FromDays(30));
-                    
                     return new ApiResult()
                     {
                         ErrorCode = 0
@@ -158,12 +126,6 @@ namespace BonusService.Service.BLL
                         RawMessage = result.RawMessage
                     };
                 {
-                    var insert = new CustGetCount()
-                    {
-                        count = getCustAPCount.count + 1
-                    };
-                    _redisHelper.StringSet(key,JsonConvert.SerializeObject(insert) , TimeSpan.FromDays(30));
-                    
                     return new ApiResult()
                     {
                         ErrorCode = -1
@@ -179,11 +141,6 @@ namespace BonusService.Service.BLL
         }
 
         #region Model
-
-        private class CustGetCount
-        {
-            public int count { get; set; }
-        }
         
         private class APCampaign
         {
@@ -209,7 +166,7 @@ namespace BonusService.Service.BLL
                 }
                 
             }
-            public List<string> CampaignList { get; set; }
+            public string CampaignId { get; set; }
             
             [JsonIgnore]
             public int CurrencyEnumValue { get; private set; }
