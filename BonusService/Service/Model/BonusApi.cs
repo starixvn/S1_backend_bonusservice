@@ -70,6 +70,15 @@ namespace BonusService.Service.Model
         public int CustId { set; get; }
         public BonusInfoAtPage atPage { set; get; }
     }
-
+    public class CurrencyUTC
+    {
+        public DateTime CurrentTime { set; get; }
+        public DateTime TodayUtcStart { set; get; }
+        public DateTime TodayUtcEnd { set; get; }
+        public DateTime UTC_StartTime { get; set; }
+        public DateTime UTC_EndTime { get; set; }
+        public string TimeZone { get; set; }
+        public TimeSpan timeOffset { get; set; }
+    }
 }
 

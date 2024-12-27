@@ -50,7 +50,7 @@ namespace BonusService.Controllers
         public async Task<ApiResult> SetAdjustBonusAsync(SetAdjustBonusAsyncReq setAdjustBonusReq)
         {
             var result = new ApiResult();
-            
+
             //檢核PhoneVerified,AccountName,Birth
             var custInfoProfile = _bonusAPIBLL.GetCustInfoProfile(setAdjustBonusReq.CustId);
             if (!custInfoProfile.PhoneVerified
@@ -63,13 +63,13 @@ namespace BonusService.Controllers
                 result.Message = "Please complete your profile and verify your phone number to enjoy our promotions.";
                 return result;
             }
-            
+
             try
             {
                 var lockKey = $"SetAdjustBonusLock:{setAdjustBonusReq.CustId}:{setAdjustBonusReq.BonusCode}";
                 var lockValue = Guid.NewGuid().ToString(); // 每次取鎖使用唯一值，確保為同一個執行序所執行
                 var lockExpiry = TimeSpan.FromSeconds(30); //lock 30 sec        
-                        
+
                 if (await _redisHelper.TryCreateLockAsync(lockKey, lockValue, lockExpiry))
                 {
                     var memo = JsonConvert.SerializeObject(new { setAdjustBonusReq.Operator });
@@ -236,13 +236,13 @@ namespace BonusService.Controllers
                     result.ErrorCode = (int)SpecialCode.SpecialCodeErrorForCheck;
                     return result;
                 }
-                
+
                 if (!_promotionBll.CheckVipLevelWithBlockTags(request.CustId, request.SpecialCode))
                 {
                     result.ErrorCode = (int)SpecialCode.SpecialCodeVipLevelsOrBlockTagInvalid;
                     return result;
                 }
-                
+
                 // 240215考古:
                 // * 如果符合ScratchCard格式走SetScratchCardCode，其餘走SetSpecialCode
                 // * SetSpecialCode這段是輸入後台設定的ScratchCode(也就是DB的Promotion.SpecialCode)會過，詢問市場說這個ScratchCode不會對外開放所以實際上沒用，但PM說可先保留
@@ -455,6 +455,52 @@ namespace BonusService.Controllers
             }
 
             return result;
+        }
+
+        [HttpPost]
+        public ApiResult<List<CustPromotion>> GetPromotionUploadCustList(CustPromotionRequest request)
+        {
+            var result = new ApiResult<List<CustPromotion>>
+            {
+                ErrorCode = 0
+            };
+
+            try
+            {
+                result.Data = _promotionBll.GetPromotionUploadCustList(request);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, MethodExtension.GetCurrentMethod());
+                result.Data = new List<CustPromotion>();
+            }
+
+            return result;
+        }
+
+        [HttpPost]
+        public async Task<ApiResult> SetClaimPromotionForUploadCustListAsync(PromotionReq promotionReq)
+        {
+            var apiResult = new ApiResult();
+            try
+            {
+                var lockedAmount = promotionReq.LockedAmount ?? 0;
+                apiResult = await _promotionBll.SetClaimPromotionV2Async(promotionReq.CustId,
+                    promotionReq.BonusCode,
+                    promotionReq.custIP,
+                    lockedAmount,
+                    promotionReq.DeviceType,
+                    BonusInfoAtPage.Promotion,
+                    true);
+            }
+            catch (Exception ex)
+            {
+                apiResult.RawMessage = ex.Message;
+                apiResult.Message = ex.Message;
+                _logger.LogError(ex, MethodExtension.GetCurrentAsyncMethod());
+            }
+
+            return apiResult;
         }
     }
 }

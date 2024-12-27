@@ -59,9 +59,9 @@ namespace BonusService.Service.Workers
                             result = _newYear2024Bll.AddPrizeToPlayer(custInfo,5);
                             break;
 
-                        case "88Reward x 200pts":
-                            result = _newYear2024Bll.DrawPrizeRewardPoints(custInfo);
-                            break;
+                        // case "88Reward x 200pts":
+                        //     result = _newYear2024Bll.DrawPrizeRewardPoints(custInfo);
+                        //     break;
     
                         case "Advant Play Free Bet":
                             result = _newYear2024Bll.AddPrizeToPlayer(custInfo,39);
